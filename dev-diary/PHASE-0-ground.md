@@ -247,11 +247,24 @@ requires:   [T0.1, T0.3]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/hosting.md
-status:     claimed:t09-hosting
+status:     in-review
 ```
 Lambo needs a persistent disk, and the service needs a public HTTPS endpoint for PayPal webhooks. Work out what Render costs for both until winners are announced, against the $50 credit. **User decision:** everything on Render, or Lambo on the user's own server with Render serving the public demo and webhooks. Recommend one.
 
 **Done when:** `research/hosting.md` has the costs and the user's decision.
+
+**Notes.** PASS on the confirmed everything-on-Render decision: one paid
+web service (`0.5c-512mb`, $7.00 / month) plus the minimum 1 GB
+persistent disk ($0.25 / month) is $7.25 / month on a $0 Hobby workspace,
+so the $50 credit buys about 6.9 months of runway, several times over the
+retention rule in product.md. Free tier excluded with evidence (15-minute
+spin-down, ephemeral filesystem, no disks). Endpoint is
+`https://<service>.onrender.com` with managed TLS, custom domain
+optional; PayPal delivery is plausible on the T0.4 webhook proofs plus an
+always-on instance. Two read-only API listings confirmed the key works
+(1 owner) and the slate is clean (0 services); nothing billable created.
+Exact create-service / `render.yaml` calls and the P6 pre-flight list are
+in `research/hosting.md`.
 
 ---
 
