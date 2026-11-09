@@ -141,7 +141,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
 | P2 | 4 / 10 | In progress |
-| P3 | 0 / 6 | Not started |
+| P3 | 1 / 6 | In progress |
 | P4 | 1 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
 | P6 | 0 / 7 | Not started |
@@ -173,6 +173,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `internal/memory/` applying the write rule through its own `Graph` seam (production stays fakes-free; test adapter in `story_test.go`): story arc None→Candidate→Venerable/Earned, correction → Out-of-true with standing Venerable and 3 dependents kept, dispute leaves sizing struct-equal, reasonless/unmatched refunds write nothing. Cross-kind writes refused with `ErrKindMismatch` — rule 2 is load-bearing in the writer.
 
 **What surprised.** `Insight` carries `DistinctInteractions`/`Coverage` (unasserted, available for `explain_belief`); T2.5 needs its own ~15-line adapter for the real client.
+
+### T3.1: The agent on Astropods (done) ★
+
+**What exists.** `agent/runtime/` Mastra agent (`memento-agent`, web adapter, `messaging: true`), model `claude-sonnet-4-6` via gateway (deploy-time `MODEL_DEFAULT`, same string all three arms). Fake-backed memory tools matching the frozen contract; offline check 19/19. Deployed turn: `Brand X oxford, what size?` → M from the correction, citing the Out-of-true belief (standing Venerable), 3 fit returns, seeded marks, pending refund asked about, approval requested, no purchase claimed. Trace `b51715f4…`: generation → `recall_for_purchase` 187ms → generation → `pending_questions` → generation. Cost: $0.0367 good turn; billing $0.02 → $0.07 ($9.93 credit left). Re-verify spend independently with `ast billing get`.
+
+**What surprised.** Mastra `createTool` takes `execute: (inputData, context)` — the wrong signature passed spec validation and only failed on live turns (model asked the user for a shopper id instead of retrying). Fixed + defaulted demo shopper + retry-once instruction. urllib's default UA gets Cloudflare 1010 on astropods.com (browser UA fixes the proxy drive). No purchase tool on purpose — orders live in T3.3.
+
+**The next agent should know.** Standing config: fake-backed tools until T2.5 serves the layer. Redeploy after edits: `ast agent redeploy --name memento-agent --latest --wait`. `probe-gw` left Running.
 
 ### T4.1: The ledger's data layer (done)
 

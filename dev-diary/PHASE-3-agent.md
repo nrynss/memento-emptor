@@ -12,7 +12,7 @@ requires:   [T1.2, T0.8]
 fixture-ok: no
 size:       M · frontier
 owns:       agent/runtime/
-status:     in-review
+status:     done
 ```
 The agent as a deployed service, with PayPal's Agent Toolkit and the layer's interface as tools. It calls `recall_for_purchase` before every recommendation and cites what it relied on. Keys stay in the vault.
 
