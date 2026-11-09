@@ -139,7 +139,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 10 / 10 | Done |
-| P1 | 0 / 5 | Not started |
+| P1 | 1 / 5 | In progress |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
 | P4 | 0 / 4 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T1.1: The domain model and architecture (done) ★
+
+**What exists.** `internal/domain/` (evidence, 7 reason categories, 3-code dispute table with `ErrUnknownDisputeCode`, belief + status/graph round trip, 5-signal write rule with `record_action`/`derive`/`observe`, swappable `EmbedderContract` with no model constants, zero vendor names) plus `docs/architecture.md` tracing webhook to belief with research citations. Table tests cover every signal, category, and dispute code.
+
+**What surprised.** Two judgment calls, both recorded for successors, neither blocking: `UNAUTHORIZED_TRANSACTION` maps to count-toward-nothing (fraud-as-seller-signal would be a deliberate product decision, not a quiet edit — contracts freeze now); `kept-past-window` maps to a third op `observe`, weaker than `derive`, to stay honest to "observation only". Design note for T1.2: contradicted is an overlay (Venerable stays Venerable with warnings), but the model maps it flat to Out-of-true — the recall representation must carry both the underlying standing and the warning.
+
+**The next agent should know.** T1.2's contract and T1.4's fakes build on `WriteFor`, `CategoryForDispute`, and the status round trip; T1.3's generator fills `Evidence.Seeded` + `SeedMark`. All covered by tests, no hidden behavior.
 
 ### T0.9: Hosting (done)
 
