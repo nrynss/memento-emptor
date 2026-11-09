@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/explain_belief.request.schema.json",
+  "title": "explain_belief request",
+  "description": "Why the layer believes something, for one shopper and belief.",
+  "type": "object",
+  "required": ["shopper_id", "belief_id"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "belief_id": {"type": "string", "minLength": 1}
+  }
+}

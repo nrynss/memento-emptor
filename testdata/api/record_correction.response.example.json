@@ -1,0 +1,20 @@
+{
+  "correction": {
+    "correction_id": "corr_3b7e52",
+    "text": "I've lost weight, use M",
+    "contradicts_belief_id": "blf_8f2c41",
+    "recorded_at": "2026-11-05T14:02:11Z",
+    "takes_precedence": true
+  },
+  "belief_id": "blf_8f2c41",
+  "status": "Out of true",
+  "standing": "Venerable",
+  "contradicted": true,
+  "guidance": {
+    "text": "Take size M for Brand X",
+    "basis": "correction",
+    "correction_id": "corr_3b7e52",
+    "belief_id": "blf_8f2c41"
+  },
+  "trace_id": "trace_3f8a02"
+}

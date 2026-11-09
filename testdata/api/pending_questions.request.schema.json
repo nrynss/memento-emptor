@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/pending_questions.request.schema.json",
+  "title": "pending_questions request",
+  "description": "The refunds still missing a reason for one shopper.",
+  "type": "object",
+  "required": ["shopper_id"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "limit": {"type": "integer", "minimum": 1}
+  }
+}

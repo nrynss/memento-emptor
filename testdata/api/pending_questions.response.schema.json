@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/pending_questions.response.schema.json",
+  "title": "pending_questions response",
+  "description": "The open questions, oldest first. An unanswered refund counts toward nothing.",
+  "type": "object",
+  "required": ["shopper_id", "questions"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "questions": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Question"}}
+  }
+}

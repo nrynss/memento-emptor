@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/ledger_belief.response.schema.json",
+  "title": "ledger_belief response",
+  "description": "The row with its corrections and its seeded notice. The notice carries the seeded mark in words when the belief is seeded and is null otherwise.",
+  "type": "object",
+  "required": ["belief", "corrections", "seeded_notice"],
+  "additionalProperties": false,
+  "properties": {
+    "belief": {"$ref": "common.schema.json#/$defs/Belief"},
+    "corrections": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Correction"}},
+    "seeded_notice": {"type": ["string", "null"]}
+  }
+}

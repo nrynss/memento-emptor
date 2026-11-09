@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/record_feedback.request.schema.json",
+  "title": "record_feedback request",
+  "description": "Explicit fit feedback tied to a specific purchase, joined on the transaction's custom id.",
+  "type": "object",
+  "required": ["shopper_id", "custom_id", "sku", "size", "feedback_text"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "custom_id": {"type": "string", "minLength": 1},
+    "sku": {"type": "string", "minLength": 1},
+    "size": {"type": "string", "minLength": 1},
+    "feedback_text": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1}
+  }
+}

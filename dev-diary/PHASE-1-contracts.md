@@ -42,8 +42,18 @@ requires:   [T1.1, T0.8]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/contract/, docs/interface.md
-status:     claimed:t12-iface
+status:     in-review
 ```
+
+Notes (T1.2, in-review): `internal/api/contract/` holds the frozen wire
+types, the nine MCP tool descriptors, and the gate test: a focused schema
+checker proving every example in `testdata/api/` validates, every example
+matches its Go type with unknown fields rejected, and every validating
+block in `docs/interface.md` equals its fixture. Nineteen schemas and
+twenty examples cover the six layer calls and three ledger reads on one
+consistent shopper state. Recall carries both the ledger status and the
+underlying standing with the warning inline, plus the correction twice.
+Full gate result in the report.
 Final names and schemas for the proposed surface in product.md: `recall_for_purchase`, `record_correction`, `pending_questions`, `record_reason`, `record_feedback`, `explain_belief`. Served over MCP, so that any agent on PayPal's toolkit can call them, and shaped so that T0.8's findings on Astropods work.
 
 The contract `recall_for_purchase` must honour: beliefs that apply, each with its status and evidence, and any correction that overrides them, marked so that an agent cannot read the belief without seeing the override. The ledger's read endpoints are defined here too.

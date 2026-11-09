@@ -1,0 +1,75 @@
+{
+  "shopper_id": "shopper_01",
+  "evidence": [
+    {
+      "evidence": {
+        "evidence_id": "ev_51c2d8",
+        "outcome": {"kind": "capture", "status": "COMPLETED", "amount_minor": 19500, "currency": "USD"},
+        "item": {"brand_id": "brand-x-001", "brand_name": "Brand X", "line_name": "oxford shirt", "sku": "PSW8GeK", "size": "M", "category": "shirts"},
+        "reason": {"category": "none", "text": "the M fits well across the shoulders", "confidence": 1.0},
+        "counts_toward": "fit",
+        "write_op": "record_action",
+        "link": {"order_id": "ORD-7XK-06", "capture_id": "CAP-7XK-06", "custom_id": "memento-shopper01-06", "event_id": "WH-2EV-06"},
+        "seeded": false,
+        "occurred_at": "2026-11-08T20:10:00Z"
+      },
+      "belief_ids": ["blf_2b9d60"]
+    },
+    {
+      "evidence": {
+        "evidence_id": "ev_9d4c22",
+        "outcome": {"kind": "dispute", "status": "OPEN", "amount_minor": 8900, "currency": "USD"},
+        "item": {"brand_id": "brand-x-001", "brand_name": "Brand X", "line_name": "chino", "sku": "chino-khaki-32", "size": "32", "category": "pants"},
+        "reason": {"category": "not_arrived", "text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED", "confidence": 1.0},
+        "counts_toward": "seller_reliability",
+        "write_op": "record_action",
+        "link": {"order_id": "ORD-7XK-04", "capture_id": "CAP-7XK-04", "dispute_id": "PP-D-51713", "custom_id": "memento-shopper01-04", "event_id": "WH-2EV-04"},
+        "seeded": false,
+        "occurred_at": "2026-11-06T11:30:00Z"
+      },
+      "belief_ids": ["blf_1a5e09"]
+    },
+    {
+      "evidence": {
+        "evidence_id": "ev_6d1a11",
+        "outcome": {"kind": "refund", "status": "COMPLETED", "amount_minor": 19500, "currency": "USD"},
+        "item": {"brand_id": "brand-x-001", "brand_name": "Brand X", "line_name": "oxford shirt", "sku": "tbnrl46", "size": "M", "category": "shirts"},
+        "reason": {"category": "fit_too_small", "text": "sleeves too short in M", "confidence": 1.0},
+        "counts_toward": "fit",
+        "write_op": "record_action",
+        "link": {"order_id": "ORD-7XK-03", "capture_id": "CAP-7XK-03", "refund_id": "RFD-7XK-03", "custom_id": "memento-shopper01-03", "event_id": "WH-2EV-03"},
+        "seeded": true,
+        "occurred_at": "2026-10-26T10:00:00Z"
+      },
+      "belief_ids": ["blf_8f2c41"]
+    },
+    {
+      "evidence": {
+        "evidence_id": "ev_6d1a10",
+        "outcome": {"kind": "refund", "status": "COMPLETED", "amount_minor": 19500, "currency": "USD"},
+        "item": {"brand_id": "brand-x-001", "brand_name": "Brand X", "line_name": "oxford shirt", "sku": "tbnrl46", "size": "M", "category": "shirts"},
+        "reason": {"category": "fit_too_small", "text": "too tight across the chest", "confidence": 1.0},
+        "counts_toward": "fit",
+        "write_op": "record_action",
+        "link": {"order_id": "ORD-7XK-02", "capture_id": "CAP-7XK-02", "refund_id": "RFD-7XK-02", "custom_id": "memento-shopper01-02", "event_id": "WH-2EV-02"},
+        "seeded": true,
+        "occurred_at": "2026-10-20T10:00:00Z"
+      },
+      "belief_ids": ["blf_8f2c41"]
+    },
+    {
+      "evidence": {
+        "evidence_id": "ev_6d1a09",
+        "outcome": {"kind": "refund", "status": "COMPLETED", "amount_minor": 19500, "currency": "USD"},
+        "item": {"brand_id": "brand-x-001", "brand_name": "Brand X", "line_name": "oxford shirt", "sku": "tbnrl46", "size": "M", "category": "shirts"},
+        "reason": {"category": "fit_too_small", "text": "too tight in the shoulders", "confidence": 1.0},
+        "counts_toward": "fit",
+        "write_op": "record_action",
+        "link": {"order_id": "ORD-7XK-01", "capture_id": "CAP-7XK-01", "refund_id": "RFD-7XK-01", "custom_id": "memento-shopper01-01", "event_id": "WH-2EV-01"},
+        "seeded": true,
+        "occurred_at": "2026-10-14T10:00:00Z"
+      },
+      "belief_ids": ["blf_8f2c41"]
+    }
+  ]
+}

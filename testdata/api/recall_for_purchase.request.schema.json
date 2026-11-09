@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/recall_for_purchase.request.schema.json",
+  "title": "recall_for_purchase request",
+  "description": "What applies before the agent recommends. Brand scopes the recall; line, SKU and leaned-toward size narrow it when known.",
+  "type": "object",
+  "required": ["shopper_id", "brand_id"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "brand_id": {"type": "string", "minLength": 1},
+    "line_name": {"type": "string", "minLength": 1},
+    "sku": {"type": "string", "minLength": 1},
+    "size_considered": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1}
+  }
+}

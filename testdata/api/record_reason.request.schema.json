@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/record_reason.request.schema.json",
+  "title": "record_reason request",
+  "description": "The shopper's verbatim answer to one pending question. Classification happens on the layer's side.",
+  "type": "object",
+  "required": ["shopper_id", "question_id", "answer_text"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "question_id": {"type": "string", "minLength": 1},
+    "answer_text": {"type": "string", "minLength": 1},
+    "trace_id": {"type": "string", "minLength": 1}
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "reason_id": "rsn_77aa10",
+  "question_id": "q_9f04ab",
+  "category": "fit_too_small",
+  "confidence": 1.0,
+  "counts_toward": "fit",
+  "accepted": true,
+  "ask_again": false,
+  "belief_id": "blf_8f2c41",
+  "trace_id": "trace_3f8a03"
+}

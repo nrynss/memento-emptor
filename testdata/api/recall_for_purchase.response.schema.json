@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/recall_for_purchase.response.schema.json",
+  "title": "recall_for_purchase response",
+  "description": "The beliefs that apply, each with status and evidence, plus any correction that overrides them. When overriding_correction is present the agent recommends from it first.",
+  "type": "object",
+  "required": ["shopper_id", "beliefs", "overriding_correction", "guidance", "pending_count", "trace_id"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "beliefs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Belief"}},
+    "overriding_correction": {"type": ["object", "null"], "$ref": "common.schema.json#/$defs/Correction"},
+    "guidance": {"$ref": "common.schema.json#/$defs/Guidance"},
+    "pending_count": {"type": "integer", "minimum": 0},
+    "trace_id": {"type": ["string", "null"]}
+  }
+}

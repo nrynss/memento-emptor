@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/ledger_evidence.response.schema.json",
+  "title": "ledger_evidence response",
+  "description": "The rows, newest first: outcomes with their reasons, what each counts toward, seeded marks and belief links.",
+  "type": "object",
+  "required": ["shopper_id", "evidence"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "evidence": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/LedgerEvidenceRow"}}
+  }
+}

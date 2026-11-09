@@ -1,0 +1,11 @@
+{
+  "reason_id": "rsn_77aa11",
+  "question_id": "q_9f04ab",
+  "category": "unclear",
+  "confidence": 0.94,
+  "counts_toward": null,
+  "accepted": false,
+  "ask_again": true,
+  "belief_id": null,
+  "trace_id": "trace_3f8a03"
+}

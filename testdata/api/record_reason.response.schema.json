@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/record_reason.response.schema.json",
+  "title": "record_reason response",
+  "description": "The classification. When accepted is false the answer counted toward nothing, ask_again is true, and the question stays open.",
+  "type": "object",
+  "required": ["reason_id", "question_id", "category", "confidence", "counts_toward", "accepted", "ask_again", "belief_id", "trace_id"],
+  "additionalProperties": false,
+  "properties": {
+    "reason_id": {"type": "string", "minLength": 1},
+    "question_id": {"type": "string", "minLength": 1},
+    "category": {"type": "string", "enum": ["fit_too_small", "fit_too_large", "damaged_or_defective", "not_arrived", "changed_mind", "unclear", "none"]},
+    "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+    "counts_toward": {"type": ["string", "null"], "enum": ["fit", "seller_reliability", null]},
+    "accepted": {"type": "boolean"},
+    "ask_again": {"type": "boolean"},
+    "belief_id": {"type": ["string", "null"]},
+    "trace_id": {"type": ["string", "null"]}
+  }
+}

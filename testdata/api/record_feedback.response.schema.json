@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/record_feedback.response.schema.json",
+  "title": "record_feedback response",
+  "description": "The verdict. A fits-well verdict counts toward fit as supporting evidence for the worn size; an unclear verdict counts toward nothing.",
+  "type": "object",
+  "required": ["feedback_id", "verdict", "counts_toward", "belief_id", "accepted", "trace_id"],
+  "additionalProperties": false,
+  "properties": {
+    "feedback_id": {"type": "string", "minLength": 1},
+    "verdict": {"type": "string", "enum": ["fits_well", "too_small", "too_large", "damaged_or_defective", "not_arrived", "changed_mind", "unclear"]},
+    "counts_toward": {"type": ["string", "null"], "enum": ["fit", "seller_reliability", null]},
+    "belief_id": {"type": ["string", "null"]},
+    "accepted": {"type": "boolean"},
+    "trace_id": {"type": ["string", "null"]}
+  }
+}

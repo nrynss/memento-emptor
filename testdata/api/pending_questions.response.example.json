@@ -1,0 +1,15 @@
+{
+  "shopper_id": "shopper_01",
+  "questions": [
+    {
+      "question_id": "q_9f04ab",
+      "outcome": {"kind": "refund", "status": "COMPLETED", "amount_minor": 19500, "currency": "USD"},
+      "item": {"brand_id": "brand-x-001", "brand_name": "Brand X", "line_name": "oxford shirt", "sku": "tbnrl46", "size": "M", "category": "shirts"},
+      "link": {"order_id": "ORD-7XK-05", "capture_id": "CAP-7XK-05", "refund_id": "RFD-7XK-05", "custom_id": "memento-shopper01-05", "event_id": "WH-2EV-05"},
+      "seeded": false,
+      "asked_count": 1,
+      "last_asked_at": "2026-11-08T18:40:00Z",
+      "awaiting_since": "2026-11-07T09:15:00Z"
+    }
+  ]
+}

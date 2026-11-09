@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/ledger_beliefs.request.schema.json",
+  "title": "ledger_beliefs request",
+  "description": "The ledger's belief rows for one shopper. The status filter is omitted for all rows.",
+  "type": "object",
+  "required": ["shopper_id", "include_seeded"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "status_filter": {"type": "string", "enum": ["Claimed", "Building", "Earned", "Out of true"]},
+    "include_seeded": {"type": "boolean"}
+  }
+}

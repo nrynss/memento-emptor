@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/common.schema.json",
+  "title": "Shared shapes for the memory layer interface",
+  "description": "Reusable definitions. Per-call request and response schemas reference these with a local-file $ref.",
+  "type": "object",
+  "$defs": {
+    "Subject": {
+      "type": "object",
+      "required": ["kind", "id", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"type": "string", "enum": ["brand", "seller"]},
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1}
+      }
+    },
+    "Outcome": {
+      "type": "object",
+      "required": ["kind", "status", "amount_minor", "currency"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"type": "string", "enum": ["refund", "dispute", "capture", "kept"]},
+        "status": {"type": "string", "minLength": 1},
+        "amount_minor": {"type": "integer", "minimum": 0},
+        "currency": {"type": "string", "minLength": 3, "maxLength": 3}
+      }
+    },
+    "Item": {
+      "type": "object",
+      "required": ["brand_id", "brand_name", "line_name", "sku", "size", "category"],
+      "additionalProperties": false,
+      "properties": {
+        "brand_id": {"type": "string", "minLength": 1},
+        "brand_name": {"type": "string", "minLength": 1},
+        "line_name": {"type": "string", "minLength": 1},
+        "sku": {"type": "string", "minLength": 1},
+        "size": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1}
+      }
+    },
+    "Reason": {
+      "type": "object",
+      "required": ["category", "text", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "category": {"type": "string", "enum": ["fit_too_small", "fit_too_large", "damaged_or_defective", "not_arrived", "changed_mind", "unclear", "none"]},
+        "text": {"type": "string", "minLength": 1},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "TransactionLink": {
+      "type": "object",
+      "required": ["custom_id", "event_id"],
+      "additionalProperties": false,
+      "properties": {
+        "order_id": {"type": "string", "minLength": 1},
+        "capture_id": {"type": "string", "minLength": 1},
+        "refund_id": {"type": "string", "minLength": 1},
+        "dispute_id": {"type": "string", "minLength": 1},
+        "custom_id": {"type": "string", "minLength": 1},
+        "event_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "required": ["evidence_id", "outcome", "item", "reason", "counts_toward", "write_op", "link", "seeded", "occurred_at"],
+      "additionalProperties": false,
+      "properties": {
+        "evidence_id": {"type": "string", "minLength": 1},
+        "outcome": {"$ref": "common.schema.json#/$defs/Outcome"},
+        "item": {"$ref": "common.schema.json#/$defs/Item"},
+        "reason": {"type": ["object", "null"], "$ref": "common.schema.json#/$defs/Reason"},
+        "counts_toward": {"type": ["string", "null"], "enum": ["fit", "seller_reliability", null]},
+        "write_op": {"type": "string", "enum": ["record_action", "derive", "observe"]},
+        "link": {"$ref": "common.schema.json#/$defs/TransactionLink"},
+        "seeded": {"type": "boolean"},
+        "occurred_at": {"type": "string", "minLength": 1}
+      }
+    },
+    "Correction": {
+      "type": "object",
+      "required": ["correction_id", "text", "contradicts_belief_id", "recorded_at", "takes_precedence"],
+      "additionalProperties": false,
+      "properties": {
+        "correction_id": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "contradicts_belief_id": {"type": "string", "minLength": 1},
+        "recorded_at": {"type": "string", "minLength": 1},
+        "takes_precedence": {"type": "boolean", "const": true}
+      }
+    },
+    "Belief": {
+      "type": "object",
+      "required": ["belief_id", "kind", "subject", "value", "status", "standing", "contradicted", "contradicted_by", "evidence", "seeded", "updated_at"],
+      "additionalProperties": false,
+      "properties": {
+        "belief_id": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "enum": ["fit", "seller_reliability"]},
+        "subject": {"$ref": "common.schema.json#/$defs/Subject"},
+        "value": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["Claimed", "Building", "Earned", "Out of true"]},
+        "standing": {"type": "string", "enum": ["None", "Candidate", "Venerable"]},
+        "contradicted": {"type": "boolean"},
+        "contradicted_by": {"type": ["object", "null"], "$ref": "common.schema.json#/$defs/Correction"},
+        "evidence": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Evidence"}},
+        "seeded": {"type": "boolean"},
+        "updated_at": {"type": "string", "minLength": 1}
+      }
+    },
+    "Guidance": {
+      "type": "object",
+      "required": ["text", "basis", "correction_id", "belief_id"],
+      "additionalProperties": false,
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "basis": {"type": "string", "enum": ["correction", "belief", "none"]},
+        "correction_id": {"type": ["string", "null"]},
+        "belief_id": {"type": ["string", "null"]}
+      }
+    },
+    "Question": {
+      "type": "object",
+      "required": ["question_id", "outcome", "item", "link", "seeded", "asked_count", "last_asked_at", "awaiting_since"],
+      "additionalProperties": false,
+      "properties": {
+        "question_id": {"type": "string", "minLength": 1},
+        "outcome": {"$ref": "common.schema.json#/$defs/Outcome"},
+        "item": {"$ref": "common.schema.json#/$defs/Item"},
+        "link": {"$ref": "common.schema.json#/$defs/TransactionLink"},
+        "seeded": {"type": "boolean"},
+        "asked_count": {"type": "integer", "minimum": 0},
+        "last_asked_at": {"type": ["string", "null"]},
+        "awaiting_since": {"type": "string", "minLength": 1}
+      }
+    },
+    "TimelineEvent": {
+      "type": "object",
+      "required": ["at", "kind", "summary", "ref_id"],
+      "additionalProperties": false,
+      "properties": {
+        "at": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "enum": ["evidence", "correction", "feedback", "status"]},
+        "summary": {"type": "string", "minLength": 1},
+        "ref_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "LedgerBeliefRow": {
+      "type": "object",
+      "required": ["belief", "evidence_count", "last_change_at"],
+      "additionalProperties": false,
+      "properties": {
+        "belief": {"$ref": "common.schema.json#/$defs/Belief"},
+        "evidence_count": {"type": "integer", "minimum": 0},
+        "last_change_at": {"type": "string", "minLength": 1}
+      }
+    },
+    "LedgerEvidenceRow": {
+      "type": "object",
+      "required": ["evidence", "belief_ids"],
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {"$ref": "common.schema.json#/$defs/Evidence"},
+        "belief_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

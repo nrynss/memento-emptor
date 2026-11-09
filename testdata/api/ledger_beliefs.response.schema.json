@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/ledger_beliefs.response.schema.json",
+  "title": "ledger_beliefs response",
+  "description": "The rows, strongest first: every belief with its ledger status, underlying standing, contradiction warning, seeded mark and evidence count.",
+  "type": "object",
+  "required": ["shopper_id", "beliefs"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "beliefs": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/LedgerBeliefRow"}}
+  }
+}
