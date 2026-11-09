@@ -51,7 +51,7 @@
 				{view.belief.status}
 			</strong>
 			{#if view.belief.contradicted}
-				<span class="why-standing">— earned before the correction; the correction decides now.</span>
+				<span class="why-superseded">— earned before the correction; the correction decides now.</span>
 			{/if}
 		</p>
 		{#if view.seeded_notice !== null}
@@ -263,7 +263,7 @@
 		margin: 0;
 	}
 
-	.why-standing {
+	.why-superseded {
 		color: var(--dim);
 	}
 
