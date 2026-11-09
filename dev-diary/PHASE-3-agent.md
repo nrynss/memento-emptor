@@ -12,9 +12,17 @@ requires:   [T1.2, T0.8]
 fixture-ok: no
 size:       M · frontier
 owns:       agent/runtime/
-status:     claimed:t31-runtime
+status:     in-review
 ```
 The agent as a deployed service, with PayPal's Agent Toolkit and the layer's interface as tools. It calls `recall_for_purchase` before every recommendation and cites what it relied on. Keys stay in the vault.
+
+**Notes (worker).** Deployed `memento-agent` on the web adapter, model
+`claude-sonnet-4-6` via gateway. Offline check passes (19/19 against the
+fakes). Live: one shopping turn answered M from the correction, citing the
+sizing belief, its 3 seeded fit returns and the pending refund; trace shows
+`recall_for_purchase` between the first and second generations. Per-turn
+costs and the trace id are in the worker's report. Standing configuration:
+tools are fake-backed until the layer is served; no purchase tool (T3.3).
 
 **User decision:** which model the agent runs on, used in all three arms of the comparison. Recommend one with its cost.
 
