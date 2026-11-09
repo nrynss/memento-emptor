@@ -15,7 +15,7 @@ Each phase document gives an engineer starting cold the complete context for its
 
 **This diary is public.** The repository goes public for submission. Nothing private goes in here: no key, no account detail, no IP address, no personal path beyond `~`, no private repository's name.
 
-**Current status:** T0.1 is done. T0.2 to T0.8 are ready.
+**Current status:** T0.1 and T0.2 are done. T0.3 to T0.8 and T0.10 are ready. T0.9 waits on T0.3.
 
 ---
 
@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 1 / 10 | In progress |
+| P0 | 2 / 10 | In progress |
 | P1 | 0 / 5 | Not started |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T0.2: Scaffold (done)
+
+**What exists.** An Apache-2.0 licence, a Go module on Keel `v0.9.0` with `internal/version`, and a Svelte 5 SvelteKit app under `web/` on Chaaya `0.6.0`. `tools/check.sh` runs gofmt, `go vet`, `go test -race`, a two-way lockfile check, svelte-check, eslint, vitest and the web build. CI runs the same gate. `tools/env.sh` exports the seven code-read variables from the keyring, leaves a preset variable alone, and names a missing key without printing a value. `AGENTS.md` carries the developer rules, the gate, and every key's `secret-tool lookup` command. `dev-diary/research/README.md` sets the evidence and recording rules.
+
+**What surprised.** The licence is Apache-2.0, by the user's decision, not MIT. The task's `owns` line named only `web/package.json`, so it was widened to `web/` to cover the app the task writes. An independent review found the web test step vacuous and the Go filter too broad. The web app now carries a real test, the gate checks the lockfile in both directions, and the Go filter drops only `web/node_modules`. `go mod tidy` keeps the Keel requirement because `internal/version/pin.go` carries a `tools`-tagged blank import.
+
+**The next agent should know.** The web app builds static with a `200.html` fallback, and T1.1 can change the adapter. CI has not been observed on a push yet, because the branch has not been pushed. The workflow runs the same gate.
 
 ### T0.1: Accounts and keys (done, by the user)
 

@@ -34,7 +34,7 @@ requires:   []
 fixture-ok: yes
 size:       S · mid
 owns:       LICENSE, .gitignore, .env.example, AGENTS.md, go.mod, go.sum, internal/version/, web/, tools/check.sh, tools/env.sh, .github/, dev-diary/research/README.md
-status:     in-review
+status:     done
 ```
 Apache-2.0 licence. A Go module on the current Keel release, and a Svelte 5 app on the current Chaaya release under `web/`. `tools/check.sh`, the gate: formatting, vet, tests, and the web build. CI runs it. `AGENTS.md`: the rules every agent follows, drawn from README's Developer Guidelines, plus how to run the gate and where keys come from, with each variable's `secret-tool lookup` command.
 
@@ -44,7 +44,7 @@ If Keel's layout changes the `owns` paths in the phase documents, update them in
 
 **Done when:** the gate passes on a clean clone; CI is green; `.env.example` names every key T0.1 creates, with no values; sourcing `tools/env.sh` sets each stored key, names each missing one, and prints no value.
 
-**Notes.** Built against Keel `v0.9.0` and Chaaya `0.6.0`, with Go `1.27.1` and Node `26`. The licence is Apache-2.0, by the user's decision. The task text above was corrected from MIT. `owns` widened from `web/package.json` to `web/`, because the scaffold writes the whole Svelte app, not one file. The gate runs gofmt, `go vet`, `go test -race`, a lockfile sync check, svelte-check, eslint, vitest and the web build. `tools/env.sh` was sourced under bash and zsh: a preset variable is left alone, an absent one is filled from the keyring, and a missing key is named without a value. CI has not been observed on a push yet. The workflow runs the same gate. An independent review found the web test step vacuous and the Go filter too broad. The web app now carries a real test, the gate checks the lockfile against `package.json`, and the Go filter drops only `web/node_modules`.
+**Notes.** Built against Keel `v0.9.0` and Chaaya `0.6.0`, with Go `1.27.1` and Node `26`. The licence is Apache-2.0, by the user's decision. The task text above was corrected from MIT. `owns` widened from `web/package.json` to `web/`, because the scaffold writes the whole Svelte app, not one file. The gate runs gofmt, `go vet`, `go test -race`, a lockfile check, svelte-check, eslint, vitest and the web build. `tools/env.sh` was sourced under bash and zsh: a preset variable is left alone, an absent one is filled from the keyring, and a missing key is named without a value. CI has not been observed on a push yet. The workflow runs the same gate. An independent review found the web test step vacuous and the Go filter too broad. The web app now carries a real test, the gate checks the lockfile against `package.json`, and the Go filter drops only `web/node_modules`. Landed on `main` at `a34def3` after the review returned APPROVE. CI is the only clause not observed, because the branch has not been pushed.
 
 ---
 
@@ -187,7 +187,7 @@ Mount AG Grid through its plain JavaScript API inside a Svelte 5 component on Ch
 ## Exit Criteria
 
 - [x] Accounts and keys in place (T0.1).
-- [ ] Scaffold and gate passing (T0.2).
+- [x] Scaffold and gate passing (T0.2).
 - [ ] A seeded belief reaches Venerable, shows the contradiction warning, and ignores a non-fit dispute (T0.3).
 - [ ] PayPal refund, dispute and webhook behaviour recorded (T0.4).
 - [ ] Channel3, Elastic, Jev and Astropods each measured and recorded (T0.5 to T0.8).
