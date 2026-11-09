@@ -100,7 +100,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/channel3.md, testdata/channel3/
-status:     in-review
+status:     done
 ```
 Search and fetch real products with variants through the API or MCP server. The question that matters: **does the data say enough about a product's cut** to match a new SKU to returned ones? If not, record what the match can use instead (title, description text, brand line). Choose a brand and product line with enough variants for the demo.
 
@@ -134,7 +134,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · frontier
 owns:       dev-diary/research/jev.md, testdata/jev/
-status:     in-review
+status:     done
 ```
 Jev is called through OpenRouter's decisions API (`https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.14`) with `OPENROUTER_API_KEY`. Don't use a `latest` alias: the classifier's confidence floor is measured on this version. Classify shopper answers ("too tight in the shoulders", "arrived broken", "changed my mind", an unclear one) into the reason categories, with probabilities. Set a confidence floor below which the agent asks again, and show on a small labelled set that the floor separates clear answers from unclear ones. Record the cost per call against the balance.
 

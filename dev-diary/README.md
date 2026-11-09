@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 2 / 10 | In progress |
+| P0 | 4 / 10 | In progress |
 | P1 | 0 / 5 | Not started |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
@@ -151,6 +151,22 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T0.5: Channel3 product data (done)
+
+**What exists.** `dev-diary/research/channel3.md` plus 10 scrubbed recordings in `testdata/channel3/` (2 searches, 8 product details). Answer: no size chart or measurement field exists, but `structured_attributes` carries a per-category fit handle (`top-fit` on shirts, `footwear-cut` on shoes) and descriptions state fit in words. The match can use brand id + category + equal fit handle, backed by title/description text. Demo line chosen: Sunspel Button Down Oxford Shirt (SKUs `tbnrl46`, `VyAkjCA`, `PSW8GeK`, all brand `SMwk`, `top-fit: Regular`, InStock at USD 195). Bonobos Everyday Oxford is the negative control (same line name, `Slim` vs `Slim`+`Tailored` — line name alone proves nothing).
+
+**What surprised.** `variants` is `null` on all apparel fetched: each colorway is its own product and sizes live only at the retailer, so Channel3 cannot supply the demo's M/L sizes. Verified from the fixtures: size selection happens on the retailer offer URL, and the `option_Size=` selection shape was confirmed on a shoe SKU with real variants. Spend: 2 searches (2 credits) + 9 free calls, well inside the free allowance.
+
+**The next agent should know.** Replay `testdata/channel3/` offline; one live call suffices to re-verify. Record the retailer's size availability out-of-band if the demo needs it — it is not in Channel3's data.
+
+### T0.7: Jev reason classifier (done)
+
+**What exists.** `dev-diary/research/jev.md` plus 11 recorded Decisions replies in `testdata/jev/`, one per labelled phrase. Six exclusive categories (`fit_too_small`, `fit_too_large`, `damaged_or_defective`, `not_arrived`, `changed_mind`, `unclear`), question and confidences recorded. Floor rule for `record_reason`: ask again when `choice == "unclear"` or `confidence < 0.98`. All 8 clear phrases returned 1.00 with the right category; the 3 vague/ambiguous ones came back at 0.94, 0.96, 0.68. Cost: $0.000235284 total (~$0.021 per 1,000 at this shape), negligible against the $50 key limit.
+
+**What surprised.** Jev's probabilities are extremely sharp — nearly all mass on one category — so the `unclear` category does more separation work than the numeric floor. No `refusal` answers observed, but the schema allows them: T2.2 treats a refusal as ask-again. Model resolved to build `typesafe/jev-1.14-20261014`; a version change re-opens the floor measurement.
+
+**The next agent should know.** The categories map directly onto developer rule 2: fit direction feeds sizing, `damaged_or_defective`/`not_arrived` count only against the seller, `changed_mind` counts toward nothing. Re-measure the floor on real shopper answers before it gates any belief.
 
 ### T0.2: Scaffold (done)
 
