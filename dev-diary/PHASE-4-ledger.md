@@ -12,7 +12,7 @@ requires:   [T1.2, T1.4, T0.10]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/lib/api/
-status:     not-started
+status:     claimed:t41-apiclient
 ```
 A typed client for the ledger's read endpoints, with a fixture mode that serves the demo story at any step.
 

@@ -12,7 +12,7 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/ingest/
-status:     not-started
+status:     claimed:t21-ingest
 ```
 The webhook endpoint, with signature verification. Refunds, disputes and captures become durable evidence rows, idempotent on PayPal's event ID. Line items come from the transaction. A dispute's reason code goes through T1.1's table. A refund with no reason becomes a pending question.
 
@@ -40,7 +40,7 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       S · frontier
 owns:       internal/reasons/
-status:     not-started
+status:     claimed:t22-reasons
 ```
 The Jev client behind the interface: the shopper's answer becomes a reason category with a confidence. Below T0.7's floor, the refund stays a pending question and the agent asks again. A refund the shopper never explains stays an outcome with no reason and counts toward nothing. Elastic's nearest labelled reasons are passed in if T0.7 showed that it helps.
 
@@ -66,7 +66,7 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/evidence/
-status:     not-started
+status:     claimed:t23-evidence
 ```
 Raw documents in Elastic: shopper messages, classified reasons and product text. Each Lambo evidence concept carries its Elastic document ID, so prose stays out of the graph. Hybrid search answers whether a new product matches the items behind a belief, using what T0.5 found the data can support. Ledger search over the evidence.
 
@@ -92,7 +92,7 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/memory/
-status:     not-started
+status:     claimed:t24-memory
 ```
 Applies T1.1's write rule. Each reasoned outcome is its own interaction and cites its belief in `depends_on`. Corrections are declared with `against`. General statements go through `derive`. Evidence counts only toward the belief its reason matches. Reads a belief's Lambo state and maps it to the ledger's four statuses.
 
