@@ -12,11 +12,13 @@ requires:   [T1.3, T3.1]
 fixture-ok: yes
 size:       M · frontier
 owns:       bench/harness/
-status:     claimed:t51-harness
+status:     in-review
 ```
 Runs a set of shoppers through one arm, with a per-run token and spend cap, recording every prompt, tool call, reply and token count. The arms differ only in what the agent is given. Arm 2 gets the shopper's PayPal transactions and past messages directly. No arm can read the hidden answers.
 
 **Done when:** a dry run on fixtures produces a complete record for each arm; a test proves the arms' prompts differ only in the memory they carry.
+
+Worker report: `bench/harness/` runs all six fixture shoppers through each arm offline on scripted replies. Caps are 4000 tokens and $0.05 per run at $5/1M blended (token cap binds first; spend is the backstop); a run over cap stops before any model call. Prompts are base-plus-memory by construction; the answer key is never loaded (static source check plus prompt-vs-Why check). Gate passes; handoff with cap rationale is in the task report.
 
 ---
 
