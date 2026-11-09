@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 4 / 10 | In progress |
+| P2 | 5 / 10 | In progress |
 | P3 | 3 / 6 | In progress |
 | P4 | 1 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
@@ -167,6 +167,12 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `internal/evidence/` implementing `fakes.EvidenceStore` as-is: documents (message/reason/product + brand/category/fit-handle line), graph stubs (`evidence[<id>] <key>`, prose never enters), brand+category+fit matching, deterministic RRF fusion, contract-gated store with `ReEmbed`. Tests replay T0.6's legs; stub test proves doc-ID-only writes. Embedder stays behind `domain.EmbedderContract` — native switch changes only the kind.
 
 **What surprised.** The store assigns `doc-0001…` ids while recordings use `p1…r2` — T2.5 must persist assigned ids into stubs, never assume recording ids.
+
+### T2.2b: Reason classification, live (done)
+
+**What exists.** `tests/live/reasons/` driver (no `*_test.go`, `out/` ignored): all 11 phrases through the live endpoint via the frozen client — 11/11 categories and verdicts match T0.7, model string identical (`typesafe/jev-1.14-20261014`), floor margin unchanged (1.00 vs 0.96), $0.000235284 total. Key env-only, header-only.
+
+**What surprised.** Vague-item confidences wobbled (0.94→0.93, 0.68→0.51) — verdicts unchanged, floor intact. Fail criterion is category + verdict; drift prints loud DRIFT lines. Calibration-sample caveat stands.
 
 ### T2.4: The Lambo writer (done) ★
 

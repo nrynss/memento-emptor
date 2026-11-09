@@ -66,7 +66,7 @@ requires:   [T2.2]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/reasons/
-status:     in-review
+status:     done
 ```
 **Done when:** the labelled set gives T0.7's results on the live service, within the brief's budget; the transcript is in the handoff log.
 
