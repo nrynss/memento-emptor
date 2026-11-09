@@ -150,6 +150,20 @@ Product.md's six demo steps, end to end, live on the real stack, starting from t
 
 ---
 
+### T3.7: Public reachability probe
+```yaml
+requires:   [T0.8]
+fixture-ok: no
+size:       S · mid
+owns:       dev-diary/research/astropods.md, testdata/astropods/
+status:     claimed:t37-public
+```
+Prove whether an Astropods agent can be reached with no login, on `probe-gw` only (never `memento-agent`). Deploy a minimal page with one chat endpoint on port 80 declaring `agent.interfaces: {frontend: true, messaging: true}` (both: `messaging` defaults to false once `interfaces` is declared; production filesystem is read-only). Report the exact Configure screen and Public setting for the user to switch. With no cookies, confirm 200 from our container with no login redirect. Send one short model turn through the page; confirm gateway, trace and tool spans. Budget $0.25 with billing re-checks. Record with evidence in `research/astropods.md`.
+
+**Done when:** the no-login reachability question is answered with evidence in `research/astropods.md`; if reachable, a follow-up dev-diary task for the public shopper page exists (orchestrator decides when).
+
+---
+
 ## Exit Criteria
 
 - [ ] The agent runs on Astropods, recalling first (T3.1).
