@@ -33,16 +33,18 @@ Values go in the system keyring, as `service <name> account memento-emptor`, wit
 requires:   []
 fixture-ok: yes
 size:       S · mid
-owns:       LICENSE, .gitignore, .env.example, AGENTS.md, go.mod, go.sum, internal/version/, web/package.json, tools/check.sh, tools/env.sh, .github/, dev-diary/research/README.md
-status:     not-started
+owns:       LICENSE, .gitignore, .env.example, AGENTS.md, go.mod, go.sum, internal/version/, web/, tools/check.sh, tools/env.sh, .github/, dev-diary/research/README.md
+status:     in-review
 ```
-MIT licence. A Go module on the current Keel release, and a Svelte 5 app on the current Chaaya release under `web/`. `tools/check.sh`, the gate: formatting, vet, tests, and the web build. CI runs it. `AGENTS.md`: the rules every agent follows, drawn from README's Developer Guidelines, plus how to run the gate and where keys come from, with each variable's `secret-tool lookup` command.
+Apache-2.0 licence. A Go module on the current Keel release, and a Svelte 5 app on the current Chaaya release under `web/`. `tools/check.sh`, the gate: formatting, vet, tests, and the web build. CI runs it. `AGENTS.md`: the rules every agent follows, drawn from README's Developer Guidelines, plus how to run the gate and where keys come from, with each variable's `secret-tool lookup` command.
 
 `tools/env.sh`, sourced before any live run: it exports each key from the keyring under the variable name the code reads (`PAYPAL_CLIENT_ID`, and so on). A variable already set in the environment is left alone. A missing key is reported by variable name. The script holds no values, never prints one, and works from any worktree. The code reads only environment variables, and `.env` is gitignored as a precaution, though the project doesn't use one.
 
 If Keel's layout changes the `owns` paths in the phase documents, update them in this commit.
 
 **Done when:** the gate passes on a clean clone; CI is green; `.env.example` names every key T0.1 creates, with no values; sourcing `tools/env.sh` sets each stored key, names each missing one, and prints no value.
+
+**Notes.** Built against Keel `v0.9.0` and Chaaya `0.6.0`, with Go `1.27.1` and Node `26`. The licence is Apache-2.0, by the user's decision on the day this task ran; the task text above was corrected from MIT. `owns` widened from `web/package.json` to `web/`, because the scaffold writes the whole Svelte app, not one file. The gate runs gofmt, `go vet`, `go test -race`, svelte-check, eslint, vitest and the web build. `tools/env.sh` was sourced under bash and zsh: a preset variable is left alone, an absent one is filled from the keyring, and a missing key is named without a value. CI has not been observed on a push yet; the workflow runs the same gate.
 
 ---
 

@@ -1,0 +1,35 @@
+# The plan travels with the code. product.md and dev-diary/ are tracked, so a
+# clone carries what the product is and how the work runs.
+
+# Secrets never land here. The project reads keys from the system keyring,
+# through tools/env.sh. This file is a precaution, not the mechanism.
+.env
+.env.*
+!.env.example
+
+# Editor swap and backup files. A swap file mirrors the contents of the file it
+# belongs to, so an unignored one beside .env carries a secret past the rules
+# above.
+*~
+*.kate-swp
+.*.kate-swp
+.*.sw[a-p]
+*.sw[a-p]
+
+# Dependency and build output.
+node_modules/
+web/build/
+web/.svelte-kit/
+.vite/
+*.tsbuildinfo
+
+# Test artifacts.
+web/test-results/
+web/playwright-report/
+web/blob-report/
+web/.cache/
+
+# Local databases and captured evidence that has not been scrubbed.
+*.db
+*.db-shm
+*.db-wal
