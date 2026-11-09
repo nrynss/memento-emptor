@@ -107,9 +107,27 @@ requires:   [T2.3]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/evidence/
-status:     claimed:t23b-live
+status:     in-review
 ```
+
 **Done when:** a new SKU matches the demo's returned items on the real deployment; the transcript is in the handoff log.
+
+note: worker branch task/t23b-live. Elastic-native run (user direction):
+direct-Elastic legs in `tests/live/evidence/live.py` plus a Lambo leg in
+`lambo.sh`, entry `run.sh`, README how-to; no `*_test.go` so CI never runs
+it. Direct legs: BM25 for a new-SKU text ranks all four same-line shirts
+above both distractors; engine kNN reproduces the recorded native shape
+(r2 0.74 > p1 0.65 > r1 0.64, roomier cut last); retriever RRF keeps the
+reason phrases top-3 with distractors last; paraphrase cosine 0.674 vs
+0.677 native / 0.68 settled. Lambo leg: 0.10.1 binary built with
+store-sqlite,embed-fixture,embed-bge,embed-elastic,recall-elastic (build
+only, nothing committed); `connect_timeout_ms` knob present and read
+(zero refused naming the key); DNS stall from T0.6b gone (0.01s), so the
+default-5s failure no longer reproduces here; two derives + backfill +
+recall through `.jina-embeddings-v3` with session `calibration=calibrated`
+and the 0.86 merge row flagging a 0.88 pair. Every throwaway index deleted,
+empty listing verified; spend ~15 short native inference calls, no
+in-band cost fields, console billing still a user step.
 
 ---
 
