@@ -139,7 +139,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 10 / 10 | Done |
-| P1 | 2 / 5 | In progress |
+| P1 | 3 / 5 | In progress |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
 | P4 | 0 / 4 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T1.2: The interface (done) ★
+
+**What exists.** `internal/api/contract/` (wire types reusing domain enums, 9 frozen tools: 6 layer calls + 3 ledger reads), `docs/interface.md` (builder doc with 19 injected `validate=` examples), `testdata/api/` (schemas + examples per call, one consistent shopper story, plus an unclear ask-again variant). Gate test proves doc↔fixture equality, schema validity, full mutual coverage, and non-vacuity (break-and-restore). Recall carries both sides: status Out-of-true + standing Venerable + inline `contradicted_by` + top-level `overriding_correction`. Writes accept optional `trace_id` for P3's per-trace review; doc mandates recall-first ordering.
+
+**What surprised.** The feedback row needed a judgment call: fits-well verdicts wire `{category: none, words, 1.0}` with `counts_toward: fit` — P2's writer must apply verdict→kind, not reason→kind, for feedback. `record_reason`'s accepted answer would add a fourth fit row the snapshots predate; T1.4's replay author decides whether to answer it. Scope note: `testdata/api/` was committed under this task's Done-when though the owns line names only the contract and doc — accepted, recorded here.
+
+**The next agent should know.** Standing enum deliberately excludes `contradicted`. T1.4 builds fakes against these schemas; P2/P3 code to the wire types.
 
 ### T1.3: Seeded shoppers (done) ★
 

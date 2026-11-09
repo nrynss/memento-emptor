@@ -42,7 +42,7 @@ requires:   [T1.1, T0.8]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/contract/, docs/interface.md
-status:     in-review
+status:     done
 ```
 
 Notes (T1.2, in-review): `internal/api/contract/` holds the frozen wire
