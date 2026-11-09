@@ -1,0 +1,459 @@
+{
+  "shopper_id": "shopper_01",
+  "provenance": "turns inline testdata/api examples; the record_reason turn answers q_9f04ab with the recorded vague phrase 'not great', so its request is story-specific while its response is the frozen ask-again example verbatim",
+  "turns": [
+    {
+      "n": 1,
+      "trace_id": "trace_3f8a01",
+      "tool": "recall_for_purchase",
+      "request": {
+        "shopper_id": "shopper_01",
+        "brand_id": "brand-x-001",
+        "line_name": "oxford shirt",
+        "sku": "PSW8GeK",
+        "size_considered": "L",
+        "trace_id": "trace_3f8a01"
+      },
+      "response": {
+        "shopper_id": "shopper_01",
+        "beliefs": [
+          {
+            "belief_id": "blf_8f2c41",
+            "kind": "fit",
+            "subject": {
+              "kind": "brand",
+              "id": "brand-x-001",
+              "name": "Brand X"
+            },
+            "value": "runs small, take size L",
+            "status": "Out of true",
+            "standing": "Venerable",
+            "contradicted": true,
+            "contradicted_by": {
+              "correction_id": "corr_3b7e52",
+              "text": "I've lost weight, use M",
+              "contradicts_belief_id": "blf_8f2c41",
+              "recorded_at": "2026-11-05T14:02:11Z",
+              "takes_precedence": true
+            },
+            "evidence": [
+              {
+                "evidence_id": "ev_6d1a09",
+                "outcome": {
+                  "kind": "refund",
+                  "status": "COMPLETED",
+                  "amount_minor": 19500,
+                  "currency": "USD"
+                },
+                "item": {
+                  "brand_id": "brand-x-001",
+                  "brand_name": "Brand X",
+                  "line_name": "oxford shirt",
+                  "sku": "tbnrl46",
+                  "size": "M",
+                  "category": "shirts"
+                },
+                "reason": {
+                  "category": "fit_too_small",
+                  "text": "too tight in the shoulders",
+                  "confidence": 1.0
+                },
+                "counts_toward": "fit",
+                "write_op": "record_action",
+                "link": {
+                  "order_id": "ORD-7XK-01",
+                  "capture_id": "CAP-7XK-01",
+                  "refund_id": "RFD-7XK-01",
+                  "custom_id": "memento-shopper01-01",
+                  "event_id": "WH-2EV-01"
+                },
+                "seeded": true,
+                "occurred_at": "2026-10-14T10:00:00Z"
+              },
+              {
+                "evidence_id": "ev_6d1a10",
+                "outcome": {
+                  "kind": "refund",
+                  "status": "COMPLETED",
+                  "amount_minor": 19500,
+                  "currency": "USD"
+                },
+                "item": {
+                  "brand_id": "brand-x-001",
+                  "brand_name": "Brand X",
+                  "line_name": "oxford shirt",
+                  "sku": "tbnrl46",
+                  "size": "M",
+                  "category": "shirts"
+                },
+                "reason": {
+                  "category": "fit_too_small",
+                  "text": "too tight across the chest",
+                  "confidence": 1.0
+                },
+                "counts_toward": "fit",
+                "write_op": "record_action",
+                "link": {
+                  "order_id": "ORD-7XK-02",
+                  "capture_id": "CAP-7XK-02",
+                  "refund_id": "RFD-7XK-02",
+                  "custom_id": "memento-shopper01-02",
+                  "event_id": "WH-2EV-02"
+                },
+                "seeded": true,
+                "occurred_at": "2026-10-20T10:00:00Z"
+              },
+              {
+                "evidence_id": "ev_6d1a11",
+                "outcome": {
+                  "kind": "refund",
+                  "status": "COMPLETED",
+                  "amount_minor": 19500,
+                  "currency": "USD"
+                },
+                "item": {
+                  "brand_id": "brand-x-001",
+                  "brand_name": "Brand X",
+                  "line_name": "oxford shirt",
+                  "sku": "tbnrl46",
+                  "size": "M",
+                  "category": "shirts"
+                },
+                "reason": {
+                  "category": "fit_too_small",
+                  "text": "sleeves too short in M",
+                  "confidence": 1.0
+                },
+                "counts_toward": "fit",
+                "write_op": "record_action",
+                "link": {
+                  "order_id": "ORD-7XK-03",
+                  "capture_id": "CAP-7XK-03",
+                  "refund_id": "RFD-7XK-03",
+                  "custom_id": "memento-shopper01-03",
+                  "event_id": "WH-2EV-03"
+                },
+                "seeded": true,
+                "occurred_at": "2026-10-26T10:00:00Z"
+              }
+            ],
+            "seeded": true,
+            "updated_at": "2026-11-05T14:02:11Z"
+          }
+        ],
+        "overriding_correction": {
+          "correction_id": "corr_3b7e52",
+          "text": "I've lost weight, use M",
+          "contradicts_belief_id": "blf_8f2c41",
+          "recorded_at": "2026-11-05T14:02:11Z",
+          "takes_precedence": true
+        },
+        "guidance": {
+          "text": "Take size M for Brand X",
+          "basis": "correction",
+          "correction_id": "corr_3b7e52",
+          "belief_id": "blf_8f2c41"
+        },
+        "pending_count": 1,
+        "trace_id": "trace_3f8a01"
+      }
+    },
+    {
+      "n": 2,
+      "trace_id": "trace_3f8a02",
+      "tool": "record_correction",
+      "request": {
+        "shopper_id": "shopper_01",
+        "text": "I've lost weight, use M",
+        "contradicts_belief_id": "blf_8f2c41",
+        "trace_id": "trace_3f8a02"
+      },
+      "response": {
+        "correction": {
+          "correction_id": "corr_3b7e52",
+          "text": "I've lost weight, use M",
+          "contradicts_belief_id": "blf_8f2c41",
+          "recorded_at": "2026-11-05T14:02:11Z",
+          "takes_precedence": true
+        },
+        "belief_id": "blf_8f2c41",
+        "status": "Out of true",
+        "standing": "Venerable",
+        "contradicted": true,
+        "guidance": {
+          "text": "Take size M for Brand X",
+          "basis": "correction",
+          "correction_id": "corr_3b7e52",
+          "belief_id": "blf_8f2c41"
+        },
+        "trace_id": "trace_3f8a02"
+      }
+    },
+    {
+      "n": 3,
+      "trace_id": null,
+      "tool": "pending_questions",
+      "request": {
+        "shopper_id": "shopper_01",
+        "limit": 10
+      },
+      "response": {
+        "shopper_id": "shopper_01",
+        "questions": [
+          {
+            "question_id": "q_9f04ab",
+            "outcome": {
+              "kind": "refund",
+              "status": "COMPLETED",
+              "amount_minor": 19500,
+              "currency": "USD"
+            },
+            "item": {
+              "brand_id": "brand-x-001",
+              "brand_name": "Brand X",
+              "line_name": "oxford shirt",
+              "sku": "tbnrl46",
+              "size": "M",
+              "category": "shirts"
+            },
+            "link": {
+              "order_id": "ORD-7XK-05",
+              "capture_id": "CAP-7XK-05",
+              "refund_id": "RFD-7XK-05",
+              "custom_id": "memento-shopper01-05",
+              "event_id": "WH-2EV-05"
+            },
+            "seeded": false,
+            "asked_count": 1,
+            "last_asked_at": "2026-11-08T18:40:00Z",
+            "awaiting_since": "2026-11-07T09:15:00Z"
+          }
+        ]
+      }
+    },
+    {
+      "n": 4,
+      "trace_id": "trace_3f8a03",
+      "tool": "record_reason",
+      "request": {
+        "shopper_id": "shopper_01",
+        "question_id": "q_9f04ab",
+        "answer_text": "not great",
+        "trace_id": "trace_3f8a03"
+      },
+      "response": {
+        "reason_id": "rsn_77aa11",
+        "question_id": "q_9f04ab",
+        "category": "unclear",
+        "confidence": 0.94,
+        "counts_toward": null,
+        "accepted": false,
+        "ask_again": true,
+        "belief_id": null,
+        "trace_id": "trace_3f8a03"
+      }
+    },
+    {
+      "n": 5,
+      "trace_id": "trace_3f8a04",
+      "tool": "record_feedback",
+      "request": {
+        "shopper_id": "shopper_01",
+        "custom_id": "memento-shopper01-06",
+        "sku": "PSW8GeK",
+        "size": "M",
+        "feedback_text": "The M fits well across the shoulders.",
+        "trace_id": "trace_3f8a04"
+      },
+      "response": {
+        "feedback_id": "fb_51c2d8",
+        "verdict": "fits_well",
+        "counts_toward": "fit",
+        "belief_id": "blf_2b9d60",
+        "accepted": true,
+        "trace_id": "trace_3f8a04"
+      }
+    },
+    {
+      "n": 6,
+      "trace_id": null,
+      "tool": "explain_belief",
+      "request": {
+        "shopper_id": "shopper_01",
+        "belief_id": "blf_8f2c41"
+      },
+      "response": {
+        "belief": {
+          "belief_id": "blf_8f2c41",
+          "kind": "fit",
+          "subject": {
+            "kind": "brand",
+            "id": "brand-x-001",
+            "name": "Brand X"
+          },
+          "value": "runs small, take size L",
+          "status": "Out of true",
+          "standing": "Venerable",
+          "contradicted": true,
+          "contradicted_by": {
+            "correction_id": "corr_3b7e52",
+            "text": "I've lost weight, use M",
+            "contradicts_belief_id": "blf_8f2c41",
+            "recorded_at": "2026-11-05T14:02:11Z",
+            "takes_precedence": true
+          },
+          "evidence": [
+            {
+              "evidence_id": "ev_6d1a09",
+              "outcome": {
+                "kind": "refund",
+                "status": "COMPLETED",
+                "amount_minor": 19500,
+                "currency": "USD"
+              },
+              "item": {
+                "brand_id": "brand-x-001",
+                "brand_name": "Brand X",
+                "line_name": "oxford shirt",
+                "sku": "tbnrl46",
+                "size": "M",
+                "category": "shirts"
+              },
+              "reason": {
+                "category": "fit_too_small",
+                "text": "too tight in the shoulders",
+                "confidence": 1.0
+              },
+              "counts_toward": "fit",
+              "write_op": "record_action",
+              "link": {
+                "order_id": "ORD-7XK-01",
+                "capture_id": "CAP-7XK-01",
+                "refund_id": "RFD-7XK-01",
+                "custom_id": "memento-shopper01-01",
+                "event_id": "WH-2EV-01"
+              },
+              "seeded": true,
+              "occurred_at": "2026-10-14T10:00:00Z"
+            },
+            {
+              "evidence_id": "ev_6d1a10",
+              "outcome": {
+                "kind": "refund",
+                "status": "COMPLETED",
+                "amount_minor": 19500,
+                "currency": "USD"
+              },
+              "item": {
+                "brand_id": "brand-x-001",
+                "brand_name": "Brand X",
+                "line_name": "oxford shirt",
+                "sku": "tbnrl46",
+                "size": "M",
+                "category": "shirts"
+              },
+              "reason": {
+                "category": "fit_too_small",
+                "text": "too tight across the chest",
+                "confidence": 1.0
+              },
+              "counts_toward": "fit",
+              "write_op": "record_action",
+              "link": {
+                "order_id": "ORD-7XK-02",
+                "capture_id": "CAP-7XK-02",
+                "refund_id": "RFD-7XK-02",
+                "custom_id": "memento-shopper01-02",
+                "event_id": "WH-2EV-02"
+              },
+              "seeded": true,
+              "occurred_at": "2026-10-20T10:00:00Z"
+            },
+            {
+              "evidence_id": "ev_6d1a11",
+              "outcome": {
+                "kind": "refund",
+                "status": "COMPLETED",
+                "amount_minor": 19500,
+                "currency": "USD"
+              },
+              "item": {
+                "brand_id": "brand-x-001",
+                "brand_name": "Brand X",
+                "line_name": "oxford shirt",
+                "sku": "tbnrl46",
+                "size": "M",
+                "category": "shirts"
+              },
+              "reason": {
+                "category": "fit_too_small",
+                "text": "sleeves too short in M",
+                "confidence": 1.0
+              },
+              "counts_toward": "fit",
+              "write_op": "record_action",
+              "link": {
+                "order_id": "ORD-7XK-03",
+                "capture_id": "CAP-7XK-03",
+                "refund_id": "RFD-7XK-03",
+                "custom_id": "memento-shopper01-03",
+                "event_id": "WH-2EV-03"
+              },
+              "seeded": true,
+              "occurred_at": "2026-10-26T10:00:00Z"
+            }
+          ],
+          "seeded": true,
+          "updated_at": "2026-11-05T14:02:11Z"
+        },
+        "corrections": [
+          {
+            "correction_id": "corr_3b7e52",
+            "text": "I've lost weight, use M",
+            "contradicts_belief_id": "blf_8f2c41",
+            "recorded_at": "2026-11-05T14:02:11Z",
+            "takes_precedence": true
+          }
+        ],
+        "timeline": [
+          {
+            "at": "2026-10-14T10:00:00Z",
+            "kind": "evidence",
+            "summary": "Fit return 1: oxford shirt size M refunded; too tight in the shoulders.",
+            "ref_id": "ev_6d1a09"
+          },
+          {
+            "at": "2026-10-20T10:00:00Z",
+            "kind": "evidence",
+            "summary": "Fit return 2: oxford shirt size M refunded; too tight across the chest.",
+            "ref_id": "ev_6d1a10"
+          },
+          {
+            "at": "2026-10-26T10:00:00Z",
+            "kind": "evidence",
+            "summary": "Fit return 3: oxford shirt size M refunded; sleeves too short in M.",
+            "ref_id": "ev_6d1a11"
+          },
+          {
+            "at": "2026-10-26T10:00:05Z",
+            "kind": "status",
+            "summary": "Belief reached Earned: three documented fit returns over twelve days.",
+            "ref_id": "blf_8f2c41"
+          },
+          {
+            "at": "2026-11-05T14:02:11Z",
+            "kind": "correction",
+            "summary": "Shopper correction: lost weight, take size M for Brand X.",
+            "ref_id": "corr_3b7e52"
+          },
+          {
+            "at": "2026-11-08T20:10:00Z",
+            "kind": "feedback",
+            "summary": "Fit feedback: oxford shirt size M fits well.",
+            "ref_id": "fb_51c2d8"
+          }
+        ]
+      }
+    }
+  ]
+}

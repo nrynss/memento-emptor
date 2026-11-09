@@ -1,0 +1,49 @@
+{
+  "steps": [
+    {
+      "n": 1,
+      "at": "2026-10-14T10:00:00Z",
+      "summary": "Seeded past: general statement recorded as an assertion; sizing belief derived."
+    },
+    {
+      "n": 2,
+      "at": "2026-10-14T10:00:00Z",
+      "summary": "Fit return RFD-7XK-01 arrives by webhook; documented answer becomes structural evidence."
+    },
+    {
+      "n": 3,
+      "at": "2026-10-20T10:00:00Z",
+      "summary": "Fit return RFD-7XK-02 arrives by webhook; documented answer becomes structural evidence."
+    },
+    {
+      "n": 4,
+      "at": "2026-10-26T10:00:00Z",
+      "summary": "Fit return RFD-7XK-03 arrives by webhook; documented answer becomes structural evidence."
+    },
+    {
+      "n": 5,
+      "at": "2026-11-05T14:02:11Z",
+      "summary": "Shopper correction: lost weight, take M. The very next recommendation is M; the L belief stands beside the warning."
+    },
+    {
+      "n": 6,
+      "at": "2026-11-06T11:30:00Z",
+      "summary": "Candidate matches the returned line; dispute for a parcel that never arrived counts toward the seller only."
+    },
+    {
+      "n": 7,
+      "at": "2026-11-07T09:15:00Z",
+      "summary": "New refund arrives with no reason; it becomes a pending question and counts toward nothing."
+    },
+    {
+      "n": 8,
+      "at": "2026-11-08T18:40:00Z",
+      "summary": "Shopper answers vaguely; classification stays below the floor, so the question stays open."
+    },
+    {
+      "n": 9,
+      "at": "2026-11-08T20:10:00Z",
+      "summary": "Approved purchase of the M; fit feedback arrives tied to that purchase."
+    }
+  ]
+}

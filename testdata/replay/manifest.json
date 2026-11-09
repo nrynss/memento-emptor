@@ -1,0 +1,43 @@
+{
+  "story": "demo shopper, first webhook to final ledger: three fit returns earn the sizing belief, a correction overrides it, a non-arrival dispute counts toward the seller, a vague answer leaves the pending refund pending, and the M purchase's fits-well feedback supports the emerging belief",
+  "p0_sources": {
+    "testdata/paypal/": [
+      "testdata/paypal/webhook-delivery-refunded.json",
+      "testdata/paypal/webhook-delivery-dispute.json",
+      "testdata/paypal/webhook-verify-refunded-success.json",
+      "testdata/paypal/webhook-verify-dispute-success.json",
+      "testdata/paypal/order-get-approved-line-items.json",
+      "testdata/paypal/refund-record.json",
+      "testdata/paypal/dispute-get.json",
+      "testdata/paypal/capture-completed.json"
+    ],
+    "testdata/jev/": [
+      "testdata/jev/"
+    ],
+    "testdata/elastic/": [
+      "testdata/elastic/hybrid-documents.json",
+      "testdata/elastic/hybrid-search-results.json"
+    ],
+    "testdata/lambo/": [
+      "testdata/lambo/01-seed.jsonl",
+      "testdata/lambo/02-correction-dispute.jsonl",
+      "testdata/lambo/api-inspect-belief.json",
+      "testdata/lambo/api-inspect-seller.json",
+      "testdata/lambo/api-inspect-rival.json",
+      "testdata/lambo/api-inspect-assertion.json",
+      "testdata/lambo/lambo.toml"
+    ]
+  },
+  "key_variables": [
+    "PAYPAL_CLIENT_ID",
+    "PAYPAL_CLIENT_SECRET",
+    "CHANNEL3_API_KEY",
+    "OPENROUTER_API_KEY",
+    "LAMBO_ES_API_KEY",
+    "ELASTIC_URL",
+    "RENDER_API_KEY"
+  ],
+  "seam": "internal/fakes owns the PaymentSource, ReasonClassifier, EvidenceStore and EvidenceGraph interfaces; P2's real clients implement them, and callers swap without touching call sites",
+  "unknown_request_rule": "every fake fails a request no recording or the committed story covers with ErrNoRecording; a fake never invents an answer",
+  "record_reason_decision": "the replay answers the pending refund with the recorded vague phrase 'not great' (unclear, 0.94, ask again) and leaves it pending; answering it with a clear fit phrase would add a fourth fit row the frozen contract snapshots predate, and contracts freeze at the end of P1"
+}

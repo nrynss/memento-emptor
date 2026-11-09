@@ -1,0 +1,409 @@
+{
+  "events": [
+    {
+      "event_id": "WH-2EV-01",
+      "event_type": "PAYMENT.CAPTURE.REFUNDED",
+      "verified": true,
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "item": {
+        "BrandID": "",
+        "BrandName": "",
+        "LineName": "",
+        "SKU": "",
+        "Size": "",
+        "Category": ""
+      },
+      "link": {
+        "OrderID": "ORD-7XK-01",
+        "CaptureID": "CAP-7XK-01",
+        "RefundID": "RFD-7XK-01",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-01",
+        "EventID": "WH-2EV-01"
+      },
+      "provenance": "testdata/paypal/webhook-delivery-refunded.json"
+    },
+    {
+      "event_id": "WH-2EV-02",
+      "event_type": "PAYMENT.CAPTURE.REFUNDED",
+      "verified": true,
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "item": {
+        "BrandID": "",
+        "BrandName": "",
+        "LineName": "",
+        "SKU": "",
+        "Size": "",
+        "Category": ""
+      },
+      "link": {
+        "OrderID": "ORD-7XK-02",
+        "CaptureID": "CAP-7XK-02",
+        "RefundID": "RFD-7XK-02",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-02",
+        "EventID": "WH-2EV-02"
+      },
+      "provenance": "testdata/paypal/webhook-delivery-refunded.json"
+    },
+    {
+      "event_id": "WH-2EV-03",
+      "event_type": "PAYMENT.CAPTURE.REFUNDED",
+      "verified": true,
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "item": {
+        "BrandID": "",
+        "BrandName": "",
+        "LineName": "",
+        "SKU": "",
+        "Size": "",
+        "Category": ""
+      },
+      "link": {
+        "OrderID": "ORD-7XK-03",
+        "CaptureID": "CAP-7XK-03",
+        "RefundID": "RFD-7XK-03",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-03",
+        "EventID": "WH-2EV-03"
+      },
+      "provenance": "testdata/paypal/webhook-delivery-refunded.json"
+    },
+    {
+      "event_id": "WH-2EV-04",
+      "event_type": "CUSTOMER.DISPUTE.CREATED",
+      "verified": true,
+      "outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 8900,
+        "Currency": "USD"
+      },
+      "item": {
+        "BrandID": "",
+        "BrandName": "",
+        "LineName": "",
+        "SKU": "",
+        "Size": "",
+        "Category": ""
+      },
+      "link": {
+        "OrderID": "ORD-7XK-04",
+        "CaptureID": "CAP-7XK-04",
+        "RefundID": "",
+        "DisputeID": "PP-D-51713",
+        "CustomID": "memento-shopper01-04",
+        "EventID": "WH-2EV-04"
+      },
+      "dispute_code": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+      "provenance": "testdata/paypal/webhook-delivery-dispute.json"
+    },
+    {
+      "event_id": "WH-2EV-05",
+      "event_type": "PAYMENT.CAPTURE.REFUNDED",
+      "verified": true,
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "item": {
+        "BrandID": "",
+        "BrandName": "",
+        "LineName": "",
+        "SKU": "",
+        "Size": "",
+        "Category": ""
+      },
+      "link": {
+        "OrderID": "ORD-7XK-05",
+        "CaptureID": "CAP-7XK-05",
+        "RefundID": "RFD-7XK-05",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-05",
+        "EventID": "WH-2EV-05"
+      },
+      "provenance": "testdata/paypal/webhook-delivery-refunded.json"
+    },
+    {
+      "event_id": "WH-2EV-06",
+      "event_type": "PAYMENT.CAPTURE.COMPLETED",
+      "verified": true,
+      "outcome": {
+        "Kind": "capture",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "item": {
+        "BrandID": "",
+        "BrandName": "",
+        "LineName": "",
+        "SKU": "",
+        "Size": "",
+        "Category": ""
+      },
+      "link": {
+        "OrderID": "ORD-7XK-06",
+        "CaptureID": "CAP-7XK-06",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-06",
+        "EventID": "WH-2EV-06"
+      },
+      "provenance": "testdata/paypal/capture-completed.json"
+    }
+  ],
+  "orders": [
+    {
+      "order_id": "ORD-7XK-01",
+      "items": [
+        {
+          "BrandID": "brand-x-001",
+          "BrandName": "Brand X",
+          "LineName": "oxford shirt",
+          "SKU": "tbnrl46",
+          "Size": "M",
+          "Category": "shirts"
+        }
+      ],
+      "link": {
+        "OrderID": "ORD-7XK-01",
+        "CaptureID": "CAP-7XK-01",
+        "RefundID": "RFD-7XK-01",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-01",
+        "EventID": "WH-2EV-01"
+      },
+      "provenance": "testdata/paypal/order-get-approved-line-items.json"
+    },
+    {
+      "order_id": "ORD-7XK-02",
+      "items": [
+        {
+          "BrandID": "brand-x-001",
+          "BrandName": "Brand X",
+          "LineName": "oxford shirt",
+          "SKU": "tbnrl46",
+          "Size": "M",
+          "Category": "shirts"
+        }
+      ],
+      "link": {
+        "OrderID": "ORD-7XK-02",
+        "CaptureID": "CAP-7XK-02",
+        "RefundID": "RFD-7XK-02",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-02",
+        "EventID": "WH-2EV-02"
+      },
+      "provenance": "testdata/paypal/order-get-approved-line-items.json"
+    },
+    {
+      "order_id": "ORD-7XK-03",
+      "items": [
+        {
+          "BrandID": "brand-x-001",
+          "BrandName": "Brand X",
+          "LineName": "oxford shirt",
+          "SKU": "tbnrl46",
+          "Size": "M",
+          "Category": "shirts"
+        }
+      ],
+      "link": {
+        "OrderID": "ORD-7XK-03",
+        "CaptureID": "CAP-7XK-03",
+        "RefundID": "RFD-7XK-03",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-03",
+        "EventID": "WH-2EV-03"
+      },
+      "provenance": "testdata/paypal/order-get-approved-line-items.json"
+    },
+    {
+      "order_id": "ORD-7XK-04",
+      "items": [
+        {
+          "BrandID": "brand-x-001",
+          "BrandName": "Brand X",
+          "LineName": "chino",
+          "SKU": "chino-khaki-32",
+          "Size": "32",
+          "Category": "pants"
+        }
+      ],
+      "link": {
+        "OrderID": "ORD-7XK-04",
+        "CaptureID": "CAP-7XK-04",
+        "RefundID": "",
+        "DisputeID": "PP-D-51713",
+        "CustomID": "memento-shopper01-04",
+        "EventID": "WH-2EV-04"
+      },
+      "provenance": "testdata/paypal/order-get-approved-line-items.json"
+    },
+    {
+      "order_id": "ORD-7XK-05",
+      "items": [
+        {
+          "BrandID": "brand-x-001",
+          "BrandName": "Brand X",
+          "LineName": "oxford shirt",
+          "SKU": "tbnrl46",
+          "Size": "M",
+          "Category": "shirts"
+        }
+      ],
+      "link": {
+        "OrderID": "ORD-7XK-05",
+        "CaptureID": "CAP-7XK-05",
+        "RefundID": "RFD-7XK-05",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-05",
+        "EventID": "WH-2EV-05"
+      },
+      "provenance": "testdata/paypal/order-get-approved-line-items.json"
+    },
+    {
+      "order_id": "ORD-7XK-06",
+      "items": [
+        {
+          "BrandID": "brand-x-001",
+          "BrandName": "Brand X",
+          "LineName": "oxford shirt",
+          "SKU": "PSW8GeK",
+          "Size": "M",
+          "Category": "shirts"
+        }
+      ],
+      "link": {
+        "OrderID": "ORD-7XK-06",
+        "CaptureID": "CAP-7XK-06",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-06",
+        "EventID": "WH-2EV-06"
+      },
+      "provenance": "testdata/paypal/order-get-approved-line-items.json"
+    }
+  ],
+  "refunds": [
+    {
+      "refund_id": "RFD-7XK-01",
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "link": {
+        "OrderID": "ORD-7XK-01",
+        "CaptureID": "CAP-7XK-01",
+        "RefundID": "RFD-7XK-01",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-01",
+        "EventID": "WH-2EV-01"
+      },
+      "has_reason": false,
+      "provenance": "testdata/paypal/refund-record.json"
+    },
+    {
+      "refund_id": "RFD-7XK-02",
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "link": {
+        "OrderID": "ORD-7XK-02",
+        "CaptureID": "CAP-7XK-02",
+        "RefundID": "RFD-7XK-02",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-02",
+        "EventID": "WH-2EV-02"
+      },
+      "has_reason": false,
+      "provenance": "testdata/paypal/refund-record.json"
+    },
+    {
+      "refund_id": "RFD-7XK-03",
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "link": {
+        "OrderID": "ORD-7XK-03",
+        "CaptureID": "CAP-7XK-03",
+        "RefundID": "RFD-7XK-03",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-03",
+        "EventID": "WH-2EV-03"
+      },
+      "has_reason": false,
+      "provenance": "testdata/paypal/refund-record.json"
+    },
+    {
+      "refund_id": "RFD-7XK-05",
+      "outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "link": {
+        "OrderID": "ORD-7XK-05",
+        "CaptureID": "CAP-7XK-05",
+        "RefundID": "RFD-7XK-05",
+        "DisputeID": "",
+        "CustomID": "memento-shopper01-05",
+        "EventID": "WH-2EV-05"
+      },
+      "has_reason": false,
+      "provenance": "testdata/paypal/refund-record.json"
+    }
+  ],
+  "disputes": [
+    {
+      "dispute_id": "PP-D-51713",
+      "code": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+      "category": "not_arrived",
+      "item": {
+        "BrandID": "brand-x-001",
+        "BrandName": "Brand X",
+        "LineName": "chino",
+        "SKU": "chino-khaki-32",
+        "Size": "32",
+        "Category": "pants"
+      },
+      "link": {
+        "OrderID": "ORD-7XK-04",
+        "CaptureID": "CAP-7XK-04",
+        "RefundID": "",
+        "DisputeID": "PP-D-51713",
+        "CustomID": "memento-shopper01-04",
+        "EventID": "WH-2EV-04"
+      },
+      "provenance": "testdata/paypal/dispute-get.json"
+    }
+  ]
+}

@@ -116,11 +116,13 @@ requires:   [T1.1, T1.2]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/fakes/, testdata/replay/
-status:     claimed:t14-fakes
+status:     in-review
 ```
 Fake clients for PayPal, Jev, Elastic and Lambo that replay P0's recordings, behind the same interfaces the real clients will implement. A replay of the demo shopper's whole story, from first webhook to final ledger state, as fixtures that P2, P3 and P4 can each use alone.
 
 **Done when:** the gate replays the story with no key and no network; a test fails if a recording contains a key pattern.
+
+Notes (T1.4, in-review): `internal/fakes/` holds the seam (four interfaces the real P2 clients implement) plus recording-backed fakes and the story runner; `testdata/replay/` holds the manifest, the nine-step log, and the per-phase fixtures (`p2-inputs`, `p3-turns`, `p4-ledger`), with `p4-ledger` copied verbatim from the frozen contract snapshots. The replay leaves the pending refund pending: it answers `q_9f04ab` with the recorded vague phrase ("not great", unclear 0.94, ask again), since a clear fit answer would add a fourth fit row the frozen snapshots predate. Full gate result in the report.
 
 ---
 
