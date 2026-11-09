@@ -78,7 +78,7 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/evidence/
-status:     claimed:t23-evidence
+status:     in-review
 ```
 Raw documents in Elastic: shopper messages, classified reasons and product text. Each Lambo evidence concept carries its Elastic document ID, so prose stays out of the graph. Hybrid search answers whether a new product matches the items behind a belief, using what T0.5 found the data can support. Ledger search over the evidence.
 
