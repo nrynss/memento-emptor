@@ -1,0 +1,196 @@
+{
+  "queries": [
+    "Brand X oxford shirt",
+    "snug across the chest, pulls at the buttons"
+  ],
+  "legs": {
+    "bm25:Brand X oxford shirt": {
+      "http": 200,
+      "hits": [
+        [
+          "p3",
+          2.0897
+        ],
+        [
+          "p6",
+          1.8219
+        ],
+        [
+          "p2",
+          1.767
+        ],
+        [
+          "p1",
+          1.6205
+        ],
+        [
+          "p5",
+          0.4515
+        ],
+        [
+          "p4",
+          0.2934
+        ]
+      ]
+    },
+    "knn:Brand X oxford shirt": {
+      "http": 200,
+      "hits": [
+        [
+          "p6",
+          0.8666
+        ],
+        [
+          "p2",
+          0.8408
+        ],
+        [
+          "p1",
+          0.8307
+        ],
+        [
+          "p3",
+          0.7918
+        ],
+        [
+          "p5",
+          0.7525
+        ],
+        [
+          "p4",
+          0.7445
+        ],
+        [
+          "r2",
+          0.7111
+        ],
+        [
+          "r1",
+          0.709
+        ]
+      ]
+    },
+    "rrf:Brand X oxford shirt": {
+      "http": 400,
+      "hits": [
+        [
+          "ERROR",
+          "{\"error\": {\"root_cause\": [{\"type\": \"parsing_exception\", \"reason\": \"Unknown key for a START_OBJECT in [rank].\", \"line\": 1, \"col\": 22880}], \"type\": \"parsing_exception\", \"reason\": \"Unknown key for a START_OBJECT in [rank].\", \"line\": 1, \"col\": 22880}, \"status\": 400}"
+        ]
+      ]
+    },
+    "bm25:snug across the chest, pulls at the buttons": {
+      "http": 200,
+      "hits": [
+        [
+          "r2",
+          5.1508
+        ],
+        [
+          "p2",
+          2.1581
+        ],
+        [
+          "p3",
+          1.6507
+        ],
+        [
+          "r1",
+          1.1817
+        ],
+        [
+          "p6",
+          0.5503
+        ],
+        [
+          "p1",
+          0.4895
+        ]
+      ]
+    },
+    "knn:snug across the chest, pulls at the buttons": {
+      "http": 200,
+      "hits": [
+        [
+          "r2",
+          0.9307
+        ],
+        [
+          "r1",
+          0.8424
+        ],
+        [
+          "p3",
+          0.7973
+        ],
+        [
+          "p4",
+          0.7684
+        ],
+        [
+          "p2",
+          0.7619
+        ],
+        [
+          "p1",
+          0.7595
+        ],
+        [
+          "p5",
+          0.758
+        ],
+        [
+          "p6",
+          0.7277
+        ]
+      ]
+    },
+    "rrf:snug across the chest, pulls at the buttons": {
+      "http": 400,
+      "hits": [
+        [
+          "ERROR",
+          "{\"error\": {\"root_cause\": [{\"type\": \"parsing_exception\", \"reason\": \"Unknown key for a START_OBJECT in [rank].\", \"line\": 1, \"col\": 22900}], \"type\": \"parsing_exception\", \"reason\": \"Unknown key for a START_OBJECT in [rank].\", \"line\": 1, \"col\": 22900}, \"status\": 400}"
+        ]
+      ]
+    }
+  },
+  "retriever_rrf:snug across the chest": {
+    "http": 200,
+    "hits": [
+      [
+        "r2",
+        0.0328
+      ],
+      [
+        "r1",
+        0.0318
+      ],
+      [
+        "p2",
+        0.0318
+      ],
+      [
+        "p3",
+        0.0317
+      ],
+      [
+        "p6",
+        0.0305
+      ],
+      [
+        "p1",
+        0.0299
+      ],
+      [
+        "p4",
+        0.0154
+      ],
+      [
+        "p5",
+        0.0149
+      ]
+    ]
+  },
+  "note": "top-level rank:{rrf:{}} is rejected on this deployment (400 parsing_exception); retriever:{rrf:{...}} works. Lambo does not use server-side RRF; it re-scores neighbours itself."
+}

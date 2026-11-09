@@ -116,8 +116,22 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/elastic.md, testdata/elastic/
-status:     claimed:t06-elastic
+status:     in-review
 ```
+
+Notes (worker, T0.6). Live against the existing deployment only: no trial
+started, no billable resources created, all test indices deleted afterwards.
+Hybrid search passes on both legs (BM25 finds the returned shirts; `snug
+across the chest` lands next to `too tight in the shoulders` at cosine 0.68).
+Settled embedder: BGE-M3 through OpenRouter (`baai/bge-m3`, native 1024 dims),
+proved end to end through Lambo; Elastic-native creation stays blocked on
+Lambo issue 233 (open, unassigned). Recall tier mechanics all pass on this
+Serverless deployment with `timeout_ms = 20000` (default 5 s trips on the
+~6.8 s cold TLS handshake; proposed Lambo issue text in the task report).
+Hosting recommendation: keep the existing Serverless project, start nothing,
+self-host nothing; the trial-clock framing does not apply (no trial on this
+deployment) and the user confirms billing in the console. Evidence in
+`dev-diary/research/elastic.md`, recordings in `testdata/elastic/`.
 Hybrid search (BM25 plus vector) over a handful of product and return-reason documents: does a new SKU's text find the returned items, and does "snug across the chest" land near "too tight in the shoulders"? Choose the embedding model.
 
 Lambo also uses this deployment as its recall tier: a `[recall]` section with `kind = "elastic"`, on a binary built with `--features recall-elastic`, and the key read from `LAMBO_ES_API_KEY`. The tier only indexes and searches vectors, so Lambo also needs an `[embedder]`. Creating embeddings through Elastic is [Lambo issue 233](https://github.com/nrynss/lambo/issues/233); this project moves to it once a release includes it. Changing the embedder later means re-embedding, so settle it before seeding the demo shopper. Confirm the tier's index creation, external-version writes, kNN search and `_delete_by_query` all work on the chosen deployment, and that recall falls back to the store when the index is down.

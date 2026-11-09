@@ -1,0 +1,57 @@
+{
+  "index_mapping": {
+    "text": "text",
+    "vec": "dense_vector(dims=1024, index=true, similarity=cosine)",
+    "note": "created then deleted on the existing deployment; no billable resources"
+  },
+  "documents": [
+    {
+      "doc_id": "p1",
+      "text": "Brand X classic oxford shirt, size M, regular fit, button-down collar, returned: too tight in the shoulders"
+    },
+    {
+      "doc_id": "p2",
+      "text": "Brand X slim oxford shirt, size M, tailored cut, returned: too tight across the chest"
+    },
+    {
+      "doc_id": "p3",
+      "text": "Brand X poplin dress shirt, size M, narrow shoulders, returned: snug in the shoulders"
+    },
+    {
+      "doc_id": "p4",
+      "text": "Brand Y relaxed chore coat, size L, loose fit, kept by shopper"
+    },
+    {
+      "doc_id": "p5",
+      "text": "Brand Z linen trousers, size 32, straight leg, kept by shopper"
+    },
+    {
+      "doc_id": "r1",
+      "text": "too tight in the shoulders"
+    },
+    {
+      "doc_id": "r2",
+      "text": "snug across the chest"
+    },
+    {
+      "doc_id": "p6",
+      "text": "Brand X heritage oxford shirt, size L, classic cut with room through the shoulders"
+    }
+  ],
+  "embedder": {
+    "model": "baai/bge-m3",
+    "dim": 1024,
+    "via": "POST {openrouter}/v1/embeddings",
+    "batch_usage": {
+      "prompt_tokens": 166,
+      "total_tokens": 166,
+      "cost": 1.66e-06,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": 1.66e-06,
+        "upstream_inference_prompt_cost": 1.66e-06,
+        "upstream_inference_completions_cost": 0
+      }
+    }
+  }
+}
