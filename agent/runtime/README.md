@@ -1,0 +1,44 @@
+# memento-agent (T3.1)
+
+The Memento Emptor reference shopping agent as a deployed Astropods service.
+
+- Stack: TypeScript/Bun + Mastra. Chosen over LangChain because the adapter
+  auto-wires OpenTelemetry through `serve()`, so "the agent recalled first"
+  is evidenced by ordered tool spans on the platform collector, and the T0.8
+  probe already proved this stack's trace shape live.
+- Model: `claude-sonnet-4-6` via the gateway provider (no personal key; the
+  platform injects `ASTRO_GATEWAY_URL`/`KEY`, deploy picks `MODEL_DEFAULT`).
+  The same model runs in all three comparison arms.
+- Tools: the layer's nine frozen interface calls plus one PayPal-flavoured
+  order read. All fake-backed (see `agent/memory.ts`): tool names and shapes
+  match the frozen contract, so the live swap changes no tool the agent
+  reads.
+- Money: this task owns no purchase-execution tool on purpose. Orders and
+  double-buy protection belong to T3.3 (`agent/orders/`). The agent asks for
+  an explicit "yes" before any purchase and says plainly the purchase step
+  is not wired yet instead of claiming it happened.
+
+## Standing configuration
+
+The deployed agent initially talks to the fake-backed tools because the
+layer is not served yet (T2.5 is later). This is the recorded standing
+configuration, not a gap. The fake serves the frozen demo-shopper state
+(`shopper_01`): the Out-of-true L belief with three seeded fit returns, the
+live correction to M, one pending refund, the fits-well feedback row, and
+the seller-side non-arrival dispute.
+
+## Run
+
+```sh
+cd agent/runtime
+bun agent/offline-check.ts   # fake-first proof, no model, no network
+ast spec validate            # spec check, local
+ast push -V private -y       # build + register the blueprint
+ast deploy --adapter web --wait
+```
+
+Shopping turns are driven through the platform messaging proxy with the
+CLI's own login (the chat host sits behind SSO and cannot be driven
+anonymously). Keep turns to single short messages and re-check
+`ast billing get` after each. The Done-when trace must show the
+`recall_for_purchase` tool span before the recommendation generation.
