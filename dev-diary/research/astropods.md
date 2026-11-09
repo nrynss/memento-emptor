@@ -273,9 +273,67 @@ still 404s, the fallback is the console Agent Details page
 (`astropods.com/<account>/<blueprint>`, 200 anonymously, chat tab when signed
 in), not another path on the chat host.
 
+## Public reachability probe (frontend + messaging on probe-gw)
+
+Question: can a judge reach an Astropods agent with no login? Answer: not
+with the defaults — anonymous requests get a 302 to the platform SSO login,
+and only the console **Public** switch on the deployment's Configure screen
+removes sign-in. The switch is untested here (it needs the user's click);
+everything below is the evidence for both halves.
+
+- Built a minimal probe on `probe-gw` only (`memento-agent` untouched, same
+  build and `Running` throughout). One container serves a static page plus
+  `/health` on the injected `PORT` (80 in production) with **no auth guard**,
+  and registers the messaging interface, with
+  `agent.interfaces: {frontend: true, messaging: true}` nested under
+  `agent:` (`messaging` defaults to false once `interfaces` is declared).
+  The Dockerfile stays root with `EXPOSE 80` (binding :80 needs root); the
+  production filesystem is read-only, so state is memory-only; the gateway
+  model is unchanged. Transcript: `testdata/astropods/15-public-probe.txt`.
+  Two builds: the page plus a `lookupReturn` demo tool, then a fix to the
+  tool's `execute` input shape (the input arrives unwrapped, not as
+  `{context}`); redeployed with `--latest --adapter web`.
+- Anonymous (fresh session, no cookies, no auth): `GET /` and `GET /health`
+  on the deployment host both answer **302 to the platform SSO login**.
+  That is the documented failure mode: a frontend agent keeps OIDC sign-in
+  at the front door by default, before any traffic reaches the container.
+- Why the switch matters: the web list (built-in chat) and the custom list
+  (own app) live on the agent's **Configure** screen. CLI
+  `ast agent access set` offers `anyone` — any *signed-in* Astropods user —
+  but no public option (`access get` on the probe shows web restricted to
+  one user, custom defaulting to account members). **Public removes
+  sign-in** (documented only in the Node/Python adapter auth warning), and
+  with it on no request carries an identity — so a public surface must
+  either add an `anyone` entry or, as here, mount no guard at all (a guard
+  would answer 401 to anonymous callers).
+- Model turn through the messaging proxy (CLI login token in process
+  memory, never printed; a browser UA is required because the default
+  scripting UA trips the edge bot check): create 201, send 200, trace
+  `<trace-id>` at $0.0057 with 17 observations in order, including a
+  successful `[tool] lookupReturn` span between the two generations and
+  the correct return details in the reply. Gateway, traces and tool spans
+  all still work on the frontend+messaging build.
+- The exact step for the user: open the console at
+  `astropods.com`, the agents list, the `probe-gw` deployment,
+  **Configure**, the custom-app (own-app/frontend) access section, and
+  switch **Public** on. That is distinct from granting `anyone`, which
+  keeps sign-in. After the flip, the check to re-run is the anonymous
+  `GET /`: expect 200 serving the page with no SSO redirect.
+- Billing for the probe: usage $0.29 before the deploy, $0.35 after
+  (two model turns $0.0056 + $0.0057, the rest platform compute), inside
+  the $0.25 task budget. Scrub rule for every recording: hosts, deployment
+  and build ids, conversation/message/session/user ids, and the SSO URLs
+  are placeholders; spend amounts are kept.
+
+Meaning for the build: judges can reach a no-login page only after Public
+is switched on the shopper deployment; the shopper page itself must stay
+guard-free. The follow-up shopper-page task is for the orchestrator to
+schedule once Public is verified on the probe.
+
 ## Credits used
 
-`$0.00` of the `$10.00` signup credit across push, deploy, pause/resume,
-eval activation, and the vault round-trip. Model and judge spend are still
-zero because no chat turn has run; the first turns should be single short
-messages with billing re-checked after each.
+Usage spend `$0.35` of the `$10.00` signup credit at the T3.7 close-out
+($0.27 after the T3.4 demo arc, then the probe's two builds, two redeploys
+and two model turns at $0.0056 + $0.0057). Billed spend `$0.00`, credit
+left `$9.65`. The T3.7 probe-period delta was $0.06, inside its $0.25
+budget. Every live step re-checked billing; nothing spent past its guard.
