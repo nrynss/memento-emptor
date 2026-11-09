@@ -140,9 +140,9 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 0 / 10 | Not started |
+| P2 | 4 / 10 | In progress |
 | P3 | 0 / 6 | Not started |
-| P4 | 0 / 4 | Not started |
+| P4 | 1 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
 | P6 | 0 / 7 | Not started |
 
@@ -151,6 +151,34 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T2.1: PayPal ingest (done)
+
+**What exists.** `internal/ingest/` over the fakes' `PaymentSource` as-is: signature-checked webhook handling, event-id idempotency (redelivery returns `Duplicate`), order-GET line items joined on `custom_id`, disputes via the frozen table (unknown codes store nothing), reasonless refunds filed pending. Tests cover redelivery, bad signature, refund-before-capture (via stub — fixtures stage no same-transaction pair), and all three mapped codes.
+
+**What surprised.** Dispute rows take the outcome from the verified delivery (the record carries none); items prefer the order read. Design (each delivery self-sufficient) is what makes order irrelevant — worth keeping in T2.1b.
+
+### T2.2: Reason classification (done)
+
+**What exists.** `internal/reasons/` Jev client behind the classifier seam: 11/11 labelled phrases agree with the fake, floor pinned at 0.98 (no drift), never-explained and below-floor both settle to nil-reason pending. Elastic neighbour context deliberately omitted — `TestNeighbourContextOmitted` re-opens the decision if a future recording needs it.
+
+### T2.3: The evidence store (done)
+
+**What exists.** `internal/evidence/` implementing `fakes.EvidenceStore` as-is: documents (message/reason/product + brand/category/fit-handle line), graph stubs (`evidence[<id>] <key>`, prose never enters), brand+category+fit matching, deterministic RRF fusion, contract-gated store with `ReEmbed`. Tests replay T0.6's legs; stub test proves doc-ID-only writes. Embedder stays behind `domain.EmbedderContract` — native switch changes only the kind.
+
+**What surprised.** The store assigns `doc-0001…` ids while recordings use `p1…r2` — T2.5 must persist assigned ids into stubs, never assume recording ids.
+
+### T2.4: The Lambo writer (done) ★
+
+**What exists.** `internal/memory/` applying the write rule through its own `Graph` seam (production stays fakes-free; test adapter in `story_test.go`): story arc None→Candidate→Venerable/Earned, correction → Out-of-true with standing Venerable and 3 dependents kept, dispute leaves sizing struct-equal, reasonless/unmatched refunds write nothing. Cross-kind writes refused with `ErrKindMismatch` — rule 2 is load-bearing in the writer.
+
+**What surprised.** `Insight` carries `DistinctInteractions`/`Coverage` (unasserted, available for `explain_belief`); T2.5 needs its own ~15-line adapter for the real client.
+
+### T4.1: The ledger's data layer (done)
+
+**What exists.** `web/src/lib/api/` typed client over injectable transport plus stepwise fixture mode (steps 1–9): decoders fail loudly on misshapen responses, step-9 snapshots `toEqual` frozen files, Earned at step 4, Out-of-true with kept standing from step 5, pending held open, seller dispute seller-only.
+
+**The next agent should know.** `createFixtureState('shopper_01', step)` + `reactive(state)` + `refresh()`; JSON imports widen so decoders are the type check; grid lazy-loading still T4.2's per the spike note.
 
 ### T1.3b: The demo shopper in the sandbox (done)
 
