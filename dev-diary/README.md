@@ -296,7 +296,7 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **What surprised.** Disk-backed services lose zero-downtime deploys (seconds dark per redeploy) — PayPal retries plus event-id idempotency cover it, but don't deploy during judging. Suspension (not deletion) is the credit-exhaustion path, with disk + 7-day snapshots retaining the store.
 
-**The next agent should know.** P6 provisions this. Credit confirmed by the user: $50.00 balance, $0 used, no pending charges (750 free hours / 5 GB / 500 pipeline minutes untouched). One pre-flight item remains user-side: whether a payment method must be on file before paid compute spins up.
+**The next agent should know.** P6 provisions this, nothing else needed from the user: no payment method required (confirmed in the dashboard).
 
 ### Lambo 0.10.1 closes 236-238 (unblocked)
 
