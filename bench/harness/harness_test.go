@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/nrynss/memento-emptor/internal/domain"
 	"github.com/nrynss/memento-emptor/seed"
 )
 
@@ -208,6 +209,25 @@ func TestCapsStopTheRunBeforeAnyModelCall(t *testing.T) {
 	}
 	if calls != 0 {
 		t.Errorf("capped runs issued %d model calls, want none", calls)
+	}
+}
+
+// TestSeedHistoriesCarryNoCorrections pins the premise behind
+// LayerContext's hard-coded corrections line: no fixture history holds a
+// correction, so "none recorded" is a checked fact, not an assumption.
+// The first arm-3 run with live correction plumbing must revisit it.
+func TestSeedHistoriesCarryNoCorrections(t *testing.T) {
+	histories := loadFixtureHistories(t)
+	for _, history := range histories {
+		for _, row := range history.Rows {
+			if row.Signal == domain.SignalCorrection {
+				t.Errorf("shopper %s: seed history carries a correction row", history.ShopperID)
+			}
+		}
+		layer := LayerContext(history)
+		if !strings.Contains(layer, "Corrections: none recorded.") {
+			t.Errorf("shopper %s: layer context drops its no-corrections line", history.ShopperID)
+		}
 	}
 }
 

@@ -393,6 +393,17 @@ func RawHistoryContext(history seed.History) string {
 // from the rows the layer ingested. It states what the evidence is and
 // what each row counts toward; it never states a right size, which lives
 // only in the answer key no arm may read.
+//
+// This is a dry-run stand-in, not the recall_for_purchase wire shape: it
+// carries no belief ids, values, guidance or pending count. Two further
+// simplifications the freeze must revisit: tallies derive from
+// reason-to-kind only, so fit-feedback rows (which the layer counts
+// toward fit by verdict, not by reason) fall outside every bucket and
+// read counts-toward-empty; and "pending" here means counts-toward-none,
+// which sweeps in classified no-fault rows the real pending_questions
+// would never list. The per-row notes still carry the underlying facts,
+// so no evidence is dropped, but no later stage may mistake these lines
+// for layer output.
 func LayerContext(history seed.History) string {
 	type brandRows struct {
 		name string
