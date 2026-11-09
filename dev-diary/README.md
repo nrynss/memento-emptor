@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 4 / 10 | In progress |
+| P0 | 5 / 10 | In progress |
 | P1 | 0 / 5 | Not started |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T0.10: AG Grid inside Chaaya (done)
+
+**What exists.** `dev-diary/research/ag-grid.md` plus a self-contained spike in `spikes/ag-grid/` (own `package.json`, tests, demo; `web/` untouched). The spike renders the four ledger statuses with pill renderers and a seeded mark, edits status via select editor and notes as text, themes from live Chaaya tokens with dark mode, and survives theme toggles without losing edits. Suite: 15/15 pass; `svelte-check` clean; builds. Licence: Community 36.3.0, MIT, no Enterprise import — P4 inherits that decision.
+
+**What surprised.** v36 requires `ModuleRegistry.registerModules([AllCommunityModule])` or row-API calls fail with error #200. Theme param names moved (`dataBackgroundColor`, `headerBackgroundColor`); jsdom reports zero width so the spike sets `suppressColumnVirtualisation` (justified for a 5-column ledger); theme CSS is unobservable in jsdom, so theming proof is structural plus visual via `npm run dev`. No Chaaya gap found — `reactive(theme)` + `$effect` covers everything, `attach()` correctly unused.
+
+**The next agent should know.** View with `cd spikes/ag-grid && npm ci && npm run dev`. Bundle is 1.2 MB minified (340 KB gzip), all AG Grid: the real ledger page must lazy-load the grid. Confirming exact Devpost sponsor-prize wording is submission work (T6.6).
 
 ### T0.5: Channel3 product data (done)
 

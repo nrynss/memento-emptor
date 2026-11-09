@@ -178,7 +178,7 @@ requires:   [T0.2]
 fixture-ok: yes
 size:       S · mid
 owns:       dev-diary/research/ag-grid.md, spikes/ag-grid/
-status:     in-review
+status:     done
 ```
 Mount AG Grid through its plain JavaScript API inside a Svelte 5 component on Chaaya: custom cell renderers, theming from Chaaya's tokens, row editing, dark mode. Choose the licence tier and confirm it meets the sponsor prize's terms.
 
