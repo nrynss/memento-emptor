@@ -12,7 +12,7 @@ requires:   [T1.3, T3.1]
 fixture-ok: yes
 size:       M · frontier
 owns:       bench/harness/
-status:     not-started
+status:     claimed:t51-harness
 ```
 Runs a set of shoppers through one arm, with a per-run token and spend cap, recording every prompt, tool call, reply and token count. The arms differ only in what the agent is given. Arm 2 gets the shopper's PayPal transactions and past messages directly. No arm can read the hidden answers.
 

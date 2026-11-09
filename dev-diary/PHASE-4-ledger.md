@@ -42,7 +42,7 @@ requires:   [T4.2]
 fixture-ok: yes
 size:       M · mid
 owns:       web/src/lib/why/, web/src/routes/belief/
-status:     not-started
+status:     claimed:t43-why
 ```
 For one belief: each piece of evidence with its outcome, item and reason side by side; the correction beside the belief it contradicts ("you said M; three returns said L"); and evidence that was deliberately not counted, such as the dispute that went against the seller. Links to the Astropods trace for each recommendation. Search across the evidence.
 
@@ -56,7 +56,7 @@ requires:   [T4.2, T1.2]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/lib/contest/
-status:     not-started
+status:     claimed:t44-contest
 ```
 Editable rows: a shopper's edit goes through `record_correction`, so it follows the same rule as anything else the shopper says: it wins the decision at once and doesn't rewrite the belief.
 
