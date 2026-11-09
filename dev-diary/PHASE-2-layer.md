@@ -155,7 +155,7 @@ requires:   [T2.4, T1.3]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/memory/
-status:     in-review
+status:     done
 ```
 The demo shopper's history against a real Lambo with T0.3's settings.
 

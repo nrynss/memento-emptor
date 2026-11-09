@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 7 / 10 | In progress |
+| P2 | 8 / 10 | In progress |
 | P3 | 4 / 6 | In progress |
 | P4 | 2 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
@@ -173,6 +173,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `tests/live/ingest/` driver (reads only — zero new sandbox records): token, webhook config, 20-entry ledger, two deliveries re-fetched and re-verified (`SUCCESS`, SHA256withRSA), refund→capture→order and dispute→capture→order chains. Refund row nil-reason → pending; dispute `not_arrived` 1.0 → seller; redeliveries duplicate-safe. A T0.4-recorded body against the current webhook id correctly returns FAILURE — the crypto is really checked.
 
 **What surprised.** Verify API field is `webhook_event`, not `request_body` (the latter 400s) — noted for whoever next touches `research/paypal.md`. Capture GET's `up` link yields the order id, so the existing T1.3b records sufficed with nothing created; driver catalogs the SKUs and fails on unknown ones.
+
+### T2.4b: The Lambo writer, live (done) ★
+
+**What exists.** `tests/live/memory/` driver (no CI tests, `out/` ignored): demo shopper seeded against live Lambo 0.10.1 with NATIVE embeddings (`.jina-embeddings-v3`, `connect_timeout_ms = 30000` — the #236 knob working; 0.10.0's hardcoded 5s could not connect on this network). Belief Venerable on inspect (3.0/3.0, coverage 0.545, gc 17/3, Swarm), warning on recall, seller/assertion at None, dispute-adds-nothing. Sessions erased; no indices created (store ranking serves recall).
+
+**What surprised.** Promotion is eventual — assert to convergence, not right after the receipt (span join needs interaction rows). Runner env collision (`AGENT=1` in the operator shell) — scripts now use their own var names.
+
+**The next agent should know.** The native path is proven end to end on 0.10.1; the remaining switch work is the demo-shopper calibration confirmation + console billing.
 
 ### T2.3b: The evidence store, live (done)
 
