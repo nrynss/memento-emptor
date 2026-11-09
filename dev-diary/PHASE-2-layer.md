@@ -211,8 +211,34 @@ requires:   [T2.5, T2.1b, T2.2b, T2.3b, T2.4b]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/layer/
-status:     claimed:t26-live
+status:     in-review
 ```
+
+Notes (worker t26-live). `tests/live/layer/` holds the live driver
+(main-program `main.go`, no `*_test.go`, so CI builds it but never
+runs it), `run.sh` orchestrating all three legs, `README.md`, and a
+git-ignored `out/`. Leg 1 re-runs the T2.1b ingest driver (read-only,
+nothing created): refund `t13b-demo-005` verifies SUCCESS and files
+one nil-reason row plus a pending question; dispute `t13b-demo-006`
+verifies SUCCESS and writes one `not_arrived` row toward the seller;
+both redeliveries duplicate. Leg 2 re-runs the T2.3b evidence driver:
+BM25 + native-kNN + RRF legs pass on the real deployment, paraphrase
+0.674 in band, throwaway indices deleted. Leg 3 walks the demo story
+through the T2.5 service with recording payments (DemoStoryInputs,
+whose shapes leg 1 proves identical to live), a live Jev classifier,
+and a live Lambo 0.10.1 graph client (`lamboGraph` over MCP stdio,
+native `.jina-embeddings-v3`, session `t26-layer` erased afterward):
+three refunds in, three live classifications (small/small/large at
+1.00), Earned/Venerable with `Take size L` guidance, vague "not
+great" ask-again, dispute leaves sizing recall byte-identical while
+the seller reads Claimed, correction overrides to M at once with
+standing Venerable, fits-well feedback accepted, trace-R orders
+recall before correction. Spend: Jev $0.000085638 (4 calls, pinned
+build, 10x-cost guard armed); PayPal/Elastic/Lambo $0 billable.
+Surprises: an erased Lambo session id is tombstoned and can never be
+served again, so the driver never pre-erases (re-runs need fresh OUT
+or SESSION); `grep --exclude-dir` must precede the path or it is
+taken as a file.
 With no agent: real sandbox events in, a scripted client calling the interface, real Lambo, Elastic and Jev. Refund, pending question, reason, Earned, correction, override, dispute against the seller.
 
 **Done when:** each step's result matches product.md's demo; the transcript is in the handoff log.
