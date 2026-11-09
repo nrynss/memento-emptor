@@ -128,7 +128,7 @@ requires:   [T3.1, T3.4]
 fixture-ok: no
 size:       S · mid
 owns:       agent/evals/
-status:     not-started
+status:     claimed:t35-evals
 ```
 Astropods evaluators over real traces. Did the agent recall before recommending? Did a correction change the very next recommendation? Did any purchase skip approval?
 
