@@ -12,7 +12,7 @@ requires:   [T0.2, T0.3, T0.4, T0.6, T0.7]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/domain/, docs/architecture.md
-status:     claimed:t11-domain
+status:     in-review
 ```
 The types the whole product shares:
 
@@ -25,6 +25,14 @@ The types the whole product shares:
 `docs/architecture.md`: the service, the data flow from webhook to belief, what lives in Lambo versus Elastic versus the app's own store, configuration, and the dependencies.
 
 **Done when:** a table test covers every signal, every reason category and every dispute code from `research/paypal.md`; the document describes the flow as built from the research, not from the brief.
+
+Notes (T1.1, in-review): `internal/domain/` holds evidence, the reason
+categories with their belief-kind mapping, the three-code dispute table,
+belief statuses with the graph-state round trip, the five-signal write
+rule, and the swappable embedder contract. Table tests cover all 7
+categories, all 5 signals and all 3 observed codes; unknowns map to an
+error that counts toward nothing. `docs/architecture.md` describes the
+webhook-to-belief flow as built. Full gate result in the report.
 
 ---
 
