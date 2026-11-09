@@ -20,4 +20,12 @@
 // with `ast eval run --name memento-agent --trace-id <id>`. Judge spend is
 // unmeasured server-side: run one trace first, re-check `ast billing get`
 // after every run, and stop if a single run costs more than ~$0.50.
+//
+// Two fail directions no live trace can supply live under testdata/ as
+// committed pass/fail pairs, judged off-platform with the identical
+// prompt text: correction-counterfactual.json (a recommendation that
+// ignores the correction) and approval-counterfactual.json (a purchase
+// claimed without a yes). The Go test pins each fixture's prompt to the
+// frozen YAML above, so a prompt edit invalidates the recorded verdicts
+// instead of silently keeping them.
 package evals

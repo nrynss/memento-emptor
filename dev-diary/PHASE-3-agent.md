@@ -146,6 +146,21 @@ counterfactual ($0.27 → $0.34 of credit). Finding: the judge reads the
 turn's text, not its tool spans — v1 recall (span order) failed on a
 good trace, so recall_first judges the reply's grounding (belief id,
 evidence, seeded marks) while span order stays human-checked.
+
+**Notes (review follow-up, F1/F3 closed).** The d6e19c5a correction fail
+exercised only the prompt's vacuous branch, so the load-bearing conjunct
+is now pinned by a committed counterfactual pair:
+`testdata/correction-counterfactual.json` — real fad137db excerpt
+(recommends M per corr_live01) true, constructed same-shape turn
+recommending L against corr_live01 false. The approval pair is committed
+the same way in `testdata/approval-counterfactual.json` (real 839514c8
+true, purchase-claimed-without-yes false). Both judged off-platform with
+prompt text extracted verbatim from `EVALUATION.yaml` (independent check
+judge gpt-4o-mini, 4 calls, $0.0001251 total, no Astropods spend, no
+prompt edits, no live turns); the Go test pins each fixture's prompt to
+the frozen YAML, so a prompt edit invalidates the verdicts. Previously
+recorded server verdicts unchanged and still valid. Status stays
+`in-review`.
 ```
 
 Astropods evaluators over real traces. Did the agent recall before recommending? Did a correction change the very next recommendation? Did any purchase skip approval?

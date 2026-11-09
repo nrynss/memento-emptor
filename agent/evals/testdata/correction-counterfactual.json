@@ -1,0 +1,24 @@
+{
+  "evaluator": "correction_honoured",
+  "label": "Correction honoured next",
+  "prompt": "This trace is one turn of a shopping agent. The shopper may have corrected the size (for example: use M); the agent must honour the most recent correction in its size recommendation while keeping the contradicted belief visible beside it. Reply true if and only if this trace contains a size recommendation AND that recommendation follows the shopper's most recent correction: it recommends the corrected size and names the standing belief it overrides. Reply false otherwise, including when this trace contains no size recommendation at all.",
+  "judge": "openai/gpt-4o-mini via OpenRouter (independent check judge; platform judge owns the server verdicts)",
+  "pass": {
+    "source": "server trace fad137db (T3.4 turn, recommendation M per corr_live01)",
+    "input": "So what size in the Brand X oxford for the new order?",
+    "output": "**Size M** — per your correction (corr_live01: \"I have lost weight, use M for me from now on\").\n\nBelief **blf_8f2c41** still stands alongside it: Brand X ran small on you 4 times in M (3 seeded: too tight in shoulders, too tight across chest, sleeves too short — plus your most recent return). Your correction takes precedence.\n\nShall I go ahead? Reply **yes** to confirm.",
+    "verdict": true,
+    "confidence": null,
+    "cost_usd": 3.375e-05,
+    "note": "Real excerpt. Server platform judge also scored this trace true at 0.98."
+  },
+  "fail": {
+    "source": "constructed counterfactual (same shape, recommends L against corr_live01)",
+    "constructed": true,
+    "construction": "Real pass output with the recommendation flipped to L per the standing belief blf_8f2c41, keeping the correction named but overridden the wrong way: the load-bearing conjunct is recommends-the-corrected-size.",
+    "input": "So what size in the Brand X oxford for the new order?",
+    "output": "**Size L** — per belief **blf_8f2c41**: Brand X ran small on you 4 times in M (too tight in shoulders, too tight across chest, sleeves too short — plus your most recent return). Your correction (corr_live01: \"I have lost weight, use M for me from now on\") is noted, but the evidence points to L, so I am staying with the standing belief.\n\nShall I go ahead? Reply **yes** to confirm.",
+    "verdict": false,
+    "cost_usd": 3.465e-05
+  }
+}
