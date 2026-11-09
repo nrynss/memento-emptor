@@ -236,7 +236,9 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **The next agent should know.** P6 provisions this. Two pre-flight items are user-side: confirm remaining credit on the dashboard billing page, and whether a payment method must be on file for paid compute.
 
-### Lambo issues 236-238 (filed by the orchestrator, user sends agents to fix)
+### Lambo 0.10.1 closes 236-238 (unblocked)
+
+Lambo v0.10.1 ships the fix (`fix(embed,recall): elastic timeouts, transport diagnostics, jina-v3 calibration`, PR #239): configurable elastic timeouts, error sources, and a calibration row for jina-v3. The Elastic-native direction is unblocked code-wise. Remaining on our side, in order: adopt the native contract (shape + `re-embed` path already documented in T0.6b), verify the shipped calibration against our paraphrase set (T2.3b/T2.4b live twins are the natural home — brief them to build 0.10.1 with `embed-elastic` + `recall-elastic`), and confirm Elastic console billing (still a user step).
 
 User direction: the demo uses Elastic-native embeddings, not BGE-M3 via OpenRouter — reversing T0.6b's stay verdict. The switch is blocked on Lambo until these land:
 
