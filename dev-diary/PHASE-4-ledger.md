@@ -42,7 +42,8 @@ requires:   [T4.2]
 fixture-ok: yes
 size:       M · mid
 owns:       web/src/lib/why/, web/src/routes/belief/
-status:     claimed:t43-why
+status:     in-review
+notes:      Why view in web/src/lib/why/ + web/src/routes/belief/: step and belief pickers, counted evidence with outcome/item/reason side by side, frozen correction beside the contradicted belief, not-counted rows each with its reason, pending questions, fixture trace placeholders, client-side search. Plain ledger language on screen (no graph standing). Gate green. Branch task/t43-why.
 ```
 For one belief: each piece of evidence with its outcome, item and reason side by side; the correction beside the belief it contradicts ("you said M; three returns said L"); and evidence that was deliberately not counted, such as the dispute that went against the seller. Links to the Astropods trace for each recommendation. Search across the evidence.
 
