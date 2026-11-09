@@ -1,0 +1,7 @@
+$ ast secrets list   (after the close-out turns, evals, and review)
+No secrets found in account <account>
+
+The probe secret from the earlier round-trip was deleted then; nothing was
+created since. No key or token entered any file in this task: the CLI's
+login token was read from its own store into process memory for the
+messaging-proxy calls and never printed.

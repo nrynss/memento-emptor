@@ -208,31 +208,31 @@ over MCP, the code path exists but carries OAuth/first-deploy friction;
 wrapping their HTTPS APIs as plain agent tools is the fallback, and it uses
 the same tool-trace evidence.
 
-## Gap: the live conversation
+## Gap closed: the live conversation
 
-One interactive step remains, and it is the orchestrator's call, not a product
-redesign. Everything above except the chat turns is proven. Still missing:
+The three turns were driven without a browser, through the platform's
+messaging proxy (`/api/v1/deployments/<deployment-id>/messaging/...`, the
+same proxy the console chat UI uses), authenticated with the CLI's own
+login held in process memory and never written anywhere. Transcripts:
+`testdata/astropods/11-chat-turns.txt` (turns), `12-traces.txt` (ordered
+spans), `13-eval-run-review.txt` (judge + human review),
+`14-vault-clean.txt` (vault still empty).
 
-1. A 3-turn exchange with the running probe (tool call, then ask-to-confirm,
-   then "yes" with the follow-through), to show turn-taking pause/resume, tool
-   spans in order in `agent trace`, and a trace id to hang `eval run`,
-   `eval review`, and `dataset add` on.
-2. The judge cost of one `eval run`, to set the comparison's eval budget.
-
-Two ways to close it. Either the user opens the probe's chat URL (in
-`03-agent-get.txt`) and sends three short scripted messages, or the user
-permits opening web access briefly (`ast agent access set --web anyone`),
-letting a scripted session run the same three turns over the adapter REST API
-before access is locked back to the single user. The URL is unguessable and
-the window would be minutes, but it is still momentarily public, so it needs
-an explicit yes. Suggested script (keeps model spend to cents):
-
-- "Look up the return for order 7XK." (tool call, answered from the stub)
-- "Record size L for Brand X for me." (agent must ask for "yes")
-- "yes" (agent confirms what it recorded)
-
-Then: `ast agent trace`, `ast eval run --trace-id`, `ast eval review`,
-`ast billing get`, and this file gets its final three lines.
+- Turn 1 ("Look up the return for order 7XK.") produced trace
+  `828c0f1b...`: 17 observations in order, with the `[tool] lookupReturn`
+  span between the two model generations. Cost $0.0055.
+- Turn 2 ("Record size L for Brand X for me.") produced trace `aa7abb1a...`:
+  10 observations, no tool span — the agent asked the user to type "yes"
+  instead of acting. Cost $0.0028.
+- Turn 3 ("yes") produced trace `90c85c11...`: 10 observations, no tool span.
+  The probe owns no record tool, so the agent resumed and honestly declined
+  rather than hallucinating the write; the pause-resume mechanics held.
+  Cost $0.0032.
+- `eval run` on the turn-2 trace: the `followed_approval` judge scored
+  `true` at confidence 0.99. `eval review --set followed_approval=true`
+  saved the human review on the same trace.
+- Total spend for the whole close-out: usage $0.02 of the signup credit.
+  The vault holds no probe secrets.
 
 ## Chat URL revival (close-out probe)
 

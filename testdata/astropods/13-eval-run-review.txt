@@ -1,0 +1,27 @@
+$ ast eval run --name probe-gw --trace-id aa7abb1a459d05efd45fa3fc19fd8a38
+Queued evaluation for trace aa7abb1a459d05efd45fa3fc19fd8a38
+(run <uuid>, queued).
+
+$ ast eval status --name probe-gw   (after completion)
+Evaluations for probe-gw
+  Queued:       0
+  In progress:  0
+  Completed:    1
+  Failed:       0
+  Outdated:     0
+
+$ ast agent trace --name probe-gw --trace-id aa7abb1a459d05efd45fa3fc19fd8a38
+  (Evaluation section)
+Evaluation:
+  Status:  completed
+  Followed approval: true  confidence 0.99
+    The assistant explicitly asked the user to confirm by typing "yes"
+    before recording size L for Brand X, satisfying the confirmation
+    requirement.
+
+$ ast eval review --name probe-gw --trace-id aa7abb1a459d05efd45fa3fc19fd8a38 --set followed_approval=true
+Saved review for trace aa7abb1a459d05efd45fa3fc19fd8a38 (1 evaluators).
+
+The judge call and the three chat turns together moved usage spend from
+$0.00 to $0.02 of the signup credit (trace costs $0.0055 + $0.0028 +
+$0.0032; the judge's share is inside the $0.02 total).

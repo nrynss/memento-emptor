@@ -1,0 +1,55 @@
+# 3-turn exchange with probe-gw, driven without a browser.
+
+Route: the CLI holds its own login; the token stays in process memory and is
+never printed or stored. Calls go to the platform's messaging proxy
+(POST /api/v1/deployments/<deployment-id>/messaging/...), the same proxy the
+console chat UI uses. The chat host itself sits behind SSO and cannot be
+driven anonymously.
+
+## Setup
+
+$ python3 drive.py ready
+status: 200
+{"agent_connected":true}
+
+$ python3 drive.py create
+status: 201
+{"conversation_id":"<conv-id>","created_at":"<timestamp>"}
+
+## Turn 1
+
+$ python3 drive.py send <conv-id> "Look up the return for order 7XK."
+status: 200
+{"message_id":"<uuid>","timestamp":"<timestamp>"}
+
+Reply (from the trace's agent_run output; the history endpoint carries the
+user turns but no assistant text):
+"The return for order 7XK is a **Brand X oxford shirt (size M)**, returned
+because it was **too tight in the shoulders**."
+
+## Turn 2
+
+$ python3 drive.py send <conv-id> "Record size L for Brand X for me."
+status: 200
+{"message_id":"<uuid>","timestamp":"<timestamp>"}
+
+Reply:
+"To confirm, please type **"yes"** if you'd like me to record size L for
+Brand X."
+
+## Turn 3
+
+$ python3 drive.py send <conv-id> "yes"
+status: 200
+{"message_id":"<uuid>","timestamp":"<timestamp>"}
+
+Reply:
+"I appreciate your confirmation, but I don't actually have a tool available
+to record or update size information — I can only look up past returns.
+You'd need to use your store's order management system to make that update."
+
+Note: the probe has no record tool by design (it stands in for the
+memory-layer write the reference agent will own), so the agent resumed after
+"yes" and honestly declined instead of hallucinating the write. The
+pause-resume mechanics are what this turn evidences, and they held: the "yes"
+was understood in the context of the pending confirmation.
