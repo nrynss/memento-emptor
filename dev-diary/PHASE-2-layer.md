@@ -29,7 +29,7 @@ requires:   [T2.1]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/ingest/
-status:     in-review
+status:     done
 ```
 A real sandbox refund and dispute reach the running service and produce the right rows.
 
