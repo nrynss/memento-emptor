@@ -1,0 +1,107 @@
+{
+  "focus": "Brand X oxford runs small for this shopper: take size L",
+  "found": true,
+  "status": "Venerable",
+  "blast_radius": 3,
+  "dependents": [
+    {
+      "content": "Fit return 3: Brand X oxford size M refunded; sleeves too short in M",
+      "concept_type": "Resource",
+      "edge": "Dependency"
+    },
+    {
+      "content": "Fit return 1: Brand X oxford size M refunded; too tight in the shoulders",
+      "concept_type": "Resource",
+      "edge": "Dependency"
+    },
+    {
+      "content": "Fit return 2: Brand X oxford size M refunded; too tight across the chest",
+      "concept_type": "Resource",
+      "edge": "Dependency"
+    }
+  ],
+  "truncated": false,
+  "promotion_policy": "Swarm",
+  "gate_progress": {
+    "policy": "Swarm",
+    "gc_survived": {
+      "current": 17.0,
+      "bar": 3.0,
+      "met": true,
+      "strictly_above": false
+    },
+    "blast_radius": {
+      "current": 3.0,
+      "bar": 5.0,
+      "met": false,
+      "strictly_above": true
+    },
+    "distinct_interactions": {
+      "current": 3.0,
+      "bar": 3.0,
+      "met": true,
+      "strictly_above": false
+    },
+    "coverage": {
+      "current": 0.5454477296535802,
+      "bar": 0.3,
+      "met": true,
+      "strictly_above": false
+    },
+    "in_cooldown": false
+  },
+  "admission": {
+    "policy": "Swarm",
+    "status": "Venerable",
+    "next": "Canonical",
+    "eligible": false,
+    "checks": [
+      {
+        "gate": "distinct_interactions",
+        "stage": 2,
+        "current": 3.0,
+        "bar": 3.0,
+        "comparison": "at_least",
+        "met": true
+      },
+      {
+        "gate": "coverage",
+        "stage": 2,
+        "current": 0.5454477296535802,
+        "bar": 0.3,
+        "comparison": "at_least",
+        "met": true
+      },
+      {
+        "gate": "blast_radius",
+        "stage": 3,
+        "current": 3.0,
+        "bar": 5.0,
+        "comparison": "above",
+        "met": false
+      },
+      {
+        "gate": "cooldown",
+        "stage": 3,
+        "current": 0.0,
+        "bar": 0.0,
+        "comparison": "at_most",
+        "met": true
+      },
+      {
+        "gate": "canonical_budget",
+        "stage": 3,
+        "current": 0.0,
+        "bar": 1000.0,
+        "comparison": "below",
+        "met": true
+      }
+    ],
+    "reasons": [
+      "stage 3: 3 dependents, needs more than 5"
+    ]
+  },
+  "warnings": [
+    "\u26a0 Contradicted at 2026-11-09T20:07:12Z by memento-t24b: \"Shopper correction: lost weight, take size M for Brand X\" (id c90ab401)"
+  ]
+}

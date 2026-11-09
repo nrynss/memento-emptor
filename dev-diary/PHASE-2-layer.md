@@ -155,11 +155,33 @@ requires:   [T2.4, T1.3]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/memory/
-status:     claimed:t24b-live
+status:     in-review
 ```
 The demo shopper's history against a real Lambo with T0.3's settings.
 
 **Done when:** the belief really reaches Venerable, and the contradiction shows on recall; the transcript is in the handoff log.
+
+Notes (worker t24b-live). `tests/live/memory/` holds the live driver
+(`drive.py` MCP-stdio seeder with receipt waits and convergence polling,
+`run.sh` which generates the config into gitignored `out/` so the
+deployment URL never enters the repo, `README.md`), the scrubbed
+32-exchange `transcript.jsonl`, and the web `api-inspect-*.json` shapes.
+Two full native runs, both exit 0. Seeded on the 0.10.1 binary
+(`store-sqlite,embed-elastic,recall-elastic`; build only) with
+`[embedder] kind = "elastic"` on `.jina-embeddings-v3` plus 0.10.1's
+`connect_timeout_ms`/`timeout_ms`: the probe reported up first try, so
+the BGE-M3 fallback never ran and no `[recall]` tier was configured
+(Elastic touch was `_inference` embeds only; no indices, nothing to
+delete). Inspect reads `[Logic, venerable]`, blast radius 3, three
+`Dependency` dependents; web gate bars met (distinct 3/3, coverage
+0.5454/0.3); recall renders the `Contradicted ... by` warning naming the
+correction with the belief kept beside it; the dispute leaves sizing
+untouched and the seller belief below Venerable. Spend $0. Surprises for
+the next live run: promotion is eventual (the driver polls inspect to
+convergence; the first attempt asserted on the immediate inspect and
+caught the span mid-flush), and the runner's `AGENT` var collided with
+an exported `AGENT=1` in the operator shell (the script uses
+`T24B_AGENT`). Full gate result in the report.
 
 ---
 
