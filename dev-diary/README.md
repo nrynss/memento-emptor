@@ -152,6 +152,16 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### Lambo issues 236-238 (filed by the orchestrator, user sends agents to fix)
+
+User direction: the demo uses Elastic-native embeddings, not BGE-M3 via OpenRouter — reversing T0.6b's stay verdict. The switch is blocked on Lambo until these land:
+
+- [#236](https://github.com/nrynss/lambo/issues/236) `[embed] connect timeout is hardcoded at 5s; elastic derive fails under slow DNS`. Load-bearing: `DEFAULT_CONNECT_TIMEOUT` (`src/embed/bge_m3.rs`) vs ~6.2s DNS AAAA stall; fix is `connect_timeout_ms` in `[embedder]` mirroring `[recall] timeout_ms`.
+- [#237](https://github.com/nrynss/lambo/issues/237) `[embed] no calibration row for kind = "elastic"`. Measured constants (merge threshold, 0.50 layer floor, supersession trigger) do not transfer across spaces (native floor 0.16-0.44 vs settled 0.45-0.60); needs a measured row or a documented operator path.
+- [#238](https://github.com/nrynss/lambo/issues/238) `[recall] tier error drops the timeout source`. Diagnosis aid; workaround (`timeout_ms = 20000`) already recorded in T0.6.
+
+Full issue text lives on GitHub. When the fixes release, the follow-up here is: adopt the native contract (T0.6b documents the `lambo.toml` shape and `re-embed` path), re-measure calibration on jina-v3, and confirm Elastic console billing.
+
 ### T0.6b: Elastic native embedder probe (done)
 
 **What exists.** `dev-diary/research/elastic-native.md` plus 4 recordings in `testdata/elastic-native/`. Head-to-head of Lambo 0.10.0 native embeddings (`.jina-embeddings-v3`, 1024 dims) vs the settled BGE-M3-via-OpenRouter contract on T0.6's paraphrase set: pair cosine 0.677 vs 0.68 (wash), same kNN ranking shape, no quality gain. Verdict: stay. The settled contract in `research/elastic.md` is untouched.
