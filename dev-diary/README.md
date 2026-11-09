@@ -141,7 +141,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
 | P2 | 4 / 10 | In progress |
-| P3 | 1 / 6 | In progress |
+| P3 | 3 / 6 | In progress |
 | P4 | 1 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
 | P6 | 0 / 7 | Not started |
@@ -173,6 +173,18 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `internal/memory/` applying the write rule through its own `Graph` seam (production stays fakes-free; test adapter in `story_test.go`): story arc None→Candidate→Venerable/Earned, correction → Out-of-true with standing Venerable and 3 dependents kept, dispute leaves sizing struct-equal, reasonless/unmatched refunds write nothing. Cross-kind writes refused with `ErrKindMismatch` — rule 2 is load-bearing in the writer.
 
 **What surprised.** `Insight` carries `DistinctInteractions`/`Coverage` (unasserted, available for `explain_belief`); T2.5 needs its own ~15-line adapter for the real client.
+
+### T3.2: Catalog through Channel3 (done)
+
+**What exists.** `agent/catalog/` matching on brand id + category + equal fit-handle sets with shared cut signals as evidence; Bonobos negative control (line name alone never matches); `ExcludeIDs` skips returned SKUs; `FulfilmentSimulated` on every candidate; apparel size gap pointed out-of-band at the retailer URL; shoe InStock sizes with narrowing echoed. Tests replay all fixtures; one live detail call re-verified the demo SKU (0 credits — detail calls are free).
+
+**What surprised.** Search and detail share one wire shape, so one decoder covers both. No dependency gaps.
+
+### T3.3: Orders and double-buy protection (done) ★
+
+**What exists.** `agent/orders/` durable state (proposed → approved → captured/failed/refunded), uniqueness on open (shopper, need) with `ErrNeedBusy`, `PayPal-Request-Id` on create and capture, webhook idempotency on event id, approve-first enforced on BOTH the capture path and the webhook path (transport never called without an approval record, order never moves). Sandbox-only construction. 9 offline tests: retried create, duplicate webhook, second-order-while-open, capture-without-approval, source mismatch, refund flow, fixture shapes, key-absence.
+
+**What surprised.** Capture-API-then-webhook means a COMPLETED delivery for an already-captured order is a confirming no-op while a conflicting capture id is refused. Concurrent proposes can strand a never-approved order server-side — harmless (uniqueness still blocks money), but the production row store needs the same keys as unique constraints. T3.4's approve loop must mirror real approval into the transport or capture correctly fails.
 
 ### T3.1: The agent on Astropods (done) ★
 

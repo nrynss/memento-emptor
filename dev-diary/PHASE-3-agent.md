@@ -36,7 +36,7 @@ requires:   [T3.1, T0.5]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/catalog/
-status:     in-review
+status:     done
 
 **Notes (worker).** `agent/catalog/` parses Channel3 products, matches on
 brand id + category slug + equal fit-handle values with the shared signals
@@ -59,7 +59,7 @@ requires:   [T3.1, T0.4]
 fixture-ok: yes
 size:       M · frontier
 owns:       agent/orders/
-status:     in-review
+status:     done
 ```
 Durable order state (proposed → approved → captured, or failed and refunded), a uniqueness rule on open orders per shopper and need, `PayPal-Request-Id` on every create and capture, and webhook handling idempotent on the event ID. A purchase cannot be made without an approval record. Purchases run through our own sandbox merchant.
 
