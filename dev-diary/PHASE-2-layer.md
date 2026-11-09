@@ -12,11 +12,14 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/ingest/
-status:     claimed:t21-ingest
+status:     in-review
 ```
+
 The webhook endpoint, with signature verification. Refunds, disputes and captures become durable evidence rows, idempotent on PayPal's event ID. Line items come from the transaction. A dispute's reason code goes through T1.1's table. A refund with no reason becomes a pending question.
 
 **Done when:** tests cover a redelivered event, a bad signature, an out-of-order refund and capture, and a dispute for each mapped code.
+
+note: worker branch task/t21-ingest; `internal/ingest/` (Service over the fakes.PaymentSource interface, rows keyed by event id, items from the order GET, disputes classified via CategoryForDispute, refunds filed pending with nil reason). All four Done-when cases have tests; `./tools/check.sh` passes in the worktree.
 
 ---
 
