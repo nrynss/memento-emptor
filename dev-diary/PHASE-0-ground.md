@@ -54,7 +54,7 @@ requires:   []
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/lambo.md, testdata/lambo/
-status:     claimed:t03-lambo
+status:     in-review
 ```
 **The gate on the whole product.** On Lambo v0.9.1 (or the current release), build a small seeded session by hand and show every condition product.md lists:
 
@@ -70,6 +70,21 @@ Also read how newer structural evidence affects a Venerable belief (the demotion
 If any of 1 to 4 fails, this task is `blocked`, and the orchestrator asks the user with options. Nothing builds on promotion until it passes.
 
 **Done when:** `research/lambo.md` holds each check's command and result; the transcripts are in `testdata/lambo/` with no key.
+
+**Notes.** PASS, on Lambo v0.10.0 (local-only: SQLite plus fixture
+embedder, no Elastic touch). Three fit returns with backdated event times
+spanning 0.3 of the session extent took the belief to Venerable
+(`distinct` 3, coverage 0.667); GC ran from `lambo.toml`
+(`gc_interval = 1`, mutation trigger) under the default Swarm policy.
+Correction with `against` shows the contradiction warning on the
+Venerable belief (`warnings` on recall, inspect and `/api/inspect`) and
+the belief stays. The non-fit dispute cites only a seller belief and the
+sizing belief does not move. Ledger states read back as `None` (Claimed),
+`Venerable` plus `gate_progress` (Earned), and `warnings` (Out of true);
+one session id per shopper, verified by an empty second session. Newer
+rival support leaves the Venerable belief standing (demotion is written
+for Canonical only). Full evidence in `research/lambo.md`; transcripts in
+`testdata/lambo/`.
 
 ---
 

@@ -1,0 +1,17 @@
+# T0.3 seeded-promotion run: local-only (SQLite + fixture embedder, no network).
+[store]
+kind = "sqlite"
+path = "/tmp/opencode/t03/lambo.db"
+
+[embedder]
+kind = "fixture"
+dim = 1024
+calibration = "off"
+
+# Cadence only: Swarm bars live in code and are not settable.
+[daemon]
+gc_interval = 1
+gc_idle_floor = 1
+gc_max_interval_secs = 3600
+canonization_eval_interval_secs = 5
+
