@@ -116,7 +116,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/elastic.md, testdata/elastic/
-status:     in-review
+status:     done
 ```
 
 Notes (worker, T0.6). Live against the existing deployment only: no trial
@@ -162,7 +162,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/astropods.md, testdata/astropods/
-status:     in-review
+status:     done
 ```
 
 **Notes.** Research in `research/astropods.md`, recordings in

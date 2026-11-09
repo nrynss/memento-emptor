@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 5 / 10 | In progress |
+| P0 | 7 / 10 | In progress |
 | P1 | 0 / 5 | Not started |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
@@ -151,6 +151,22 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T0.8: Astropods (done)
+
+**What exists.** `dev-diary/research/astropods.md` plus 11 recordings in `testdata/astropods/`. Proven live on the free tier at $0.00 spend: TS/Bun+Mastra and Python/LangChain scaffolds, `push`/`deploy --adapter web` with web chat URL and collector sidecar, gateway model access with no personal key, secrets vault round-trip (create/list/get-masked/delete, vault left empty), deployment pause/resume, evaluator schema discovery (`EVALUATION.yaml`) plus a custom `followed_approval` set activated server-side, OTel collector wiring with empty trace/usage states, and the external-MCP pattern with a plain-agent-tools fallback.
+
+**What surprised.** The live 3-turn chat is still open: deployed web chat needs user-scoped SSO, so turn-taking resume, ordered tool spans, and the first `eval run` cost are unevidenced. The gap section names both closes (user sends 3 scripted messages from the chat URL in `03-agent-get.txt`, or a brief `--web anyone` window). Free compute is small ("Slowed by CPU limit" — keep demo turns concise). Two CLI quirks recorded: nested help needs `ast help <cmd> <sub>` form; enum evaluator options use field `options`, not `values`.
+
+**The next agent should know.** Approval/correction forms are agent-built chat turns, not a platform primitive; feedback lands per trace via `eval review`, traces of interest via `dataset add`. The probe deployment was left `Running` for the chat close-out.
+
+### T0.6: Elastic evidence store (done)
+
+**What exists.** `dev-diary/research/elastic.md` plus 5 scrubbed recordings in `testdata/elastic/` (vectors omitted, rankings kept). Hybrid search verified on a throwaway index (created, queried, deleted): BM25 finds the returned shirts for a new-SKU text, kNN over BGE-M3 puts `too tight in the shoulders` at 0.84 for a fresh `snug across the chest` query, and the combined shape needs `retriever:{rrf:...}` on this deployment. Embedder settled: BGE-M3 through OpenRouter (`baai/bge-m3`, native 1024 dims), proved end to end through Lambo derive+recall. Recall tier confirmed on a locally built 0.9.1 binary (index creation, external-version 409s, kNN, backfill, `_delete_by_query` erase, store fallback with tier down). Hosting: keep the existing Serverless project, start nothing.
+
+**What surprised.** The deployment is Elastic Serverless (9.7.0), not a trial — the brief's trial-vs-self-host framing did not apply. Installed Lambo 0.8.0 lacks `recall-elastic`, and cold rustls handshakes (~6.8 s) trip the default 5 s timeout: every `lambo.toml` needs `timeout_ms = 20000` in `[recall]` (proposed Lambo issue text in the worker's report; the user files it). Serverless excludes vectors from `_source`, so Lambo's exact re-scoring keeps engine HNSW scores — an accepted, slightly widened difference. Spend bounded under $0.00001; test indices deleted.
+
+**The next agent should know.** The embedder contract is fixed (`kind=bge_m3`, `url=https://openrouter.ai/api`, `model=baai/bge-m3`, `dim=1024`, `api_key_env=OPENROUTER_API_KEY`); every later session must match or re-embed (`lambo re-embed`). T0.9 no longer needs an Elasticsearch trial decision — only Lambo persistence plus public HTTPS. The user should confirm the Serverless project's billing in the Elastic console.
 
 ### T0.10: AG Grid inside Chaaya (done)
 
