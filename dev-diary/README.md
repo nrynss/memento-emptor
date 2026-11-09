@@ -139,7 +139,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 10 / 10 | Done |
-| P1 | 4 / 5 | In progress |
+| P1 | 5 / 5 | Done |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
 | P4 | 0 / 4 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T1.3b: The demo shopper in the sandbox (done)
+
+**What exists.** `tests/live/seed/` live driver (run/approve/dispute scripts + README, no `*_test.go` so CI never executes it, `out/` gitignored): all six demo-shopper cycles created and read back via REST — 2 kept captures, 3 refunded captures with reason-in-words notes, 1 capture under an OPEN non-arrival dispute. Seeded-day mapping via `custom_id` join + anchor rule; day-0 statement has no PayPal counterpart by design.
+
+**What surprised.** Order create with items needs `amount.breakdown.item_total`; approval needs two clicks (extras land benignly on `PAYMENT_ALREADY_DONE` — polling is truth); no throttling across 6 logins; resolution-center filing quirks recorded (curly apostrophes, native selects, required documents text, keyboard-Enter submit). Webhook deliveries not captured — REST read-back is the ledger's path anyway.
+
+**The next agent should know.** Credentials travel only in env/browser sessions; `out/` holds real ids and stays ignored. Re-running creates a second shopper history — P5's arm runs use the recorded transcripts, not a live re-run.
 
 ### T1.4: Fixtures and fakes (done)
 

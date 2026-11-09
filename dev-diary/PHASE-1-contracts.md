@@ -102,7 +102,7 @@ requires:   [T1.3, T0.4]
 fixture-ok: no
 size:       S · mid
 owns:       tests/live/seed/
-status:     in-review
+status:     done
 ```
 Create the demo shopper's history as real sandbox orders, captures and refunds. Purchases and refunds exist in PayPal, so the evidence comes from PayPal. Where the sandbox can't backdate, record how seeded event times are applied on the layer's side, and mark them.
 
