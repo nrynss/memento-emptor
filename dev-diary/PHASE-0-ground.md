@@ -54,7 +54,7 @@ requires:   []
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/lambo.md, testdata/lambo/
-status:     in-review
+status:     done
 ```
 **The gate on the whole product.** On Lambo v0.9.1 (or the current release), build a small seeded session by hand and show every condition product.md lists:
 

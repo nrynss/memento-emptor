@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 8 / 10 | In progress |
+| P0 | 9 / 10 | In progress |
 | P1 | 0 / 5 | Not started |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T0.3: Lambo promotion on a seeded session (done) ★
+
+**What exists.** `dev-diary/research/lambo.md` plus 8 recordings in `testdata/lambo/` (three MCP transcripts, four `/api/inspect` responses, the exact `lambo.toml`). Proved on Lambo v0.10.0, local-only, $0: three fit returns citing the belief take it to Venerable (`distinct_interactions` 3.0≥3.0, coverage 0.667≥0.3, one hop per eval cycle); GC sweeps run from file cadence, Swarm is the policy; the `against` correction renders the contradiction warning on recall, inspect, and `/api/inspect` `warnings[]` while the belief stays Venerable; a non-fit dispute leaves sizing untouched (seller belief refused Candidate); ledger mapping is one shape per state; sessions isolate shoppers on a shared store file. Demotion targets Canonical only — a Venerable belief is held, never demoted.
+
+**What surprised.** Every 0.9.1 threshold in product.md holds identically on 0.10.0; the only delta is the predicted one (`/api/inspect` carries the warning). Seeded edges date by `event_time`, so promotion runs in ~10 s while the 60 s floor binds only live edges — the honest-seeding mechanism, confirmed in code. Operational: the 0.10.0 default build omits the SQLite store (needs `--features store-sqlite`); `match_strategy` and the coverage cap are library settings, not file knobs. The worker's cleanup kill caught this machine's shared Lambo dogfood writer; its supervisor restarted it healthy and the task never opened its database — later runs kill by exact PID only.
+
+**The next agent should know.** Replay needs only the v0.10.0 binary and the committed toml; concept ids are content-addressed, so `depends_on`/`against` by exact content resolve identically. P2 builds on these transcripts and the inspect shapes.
 
 ### T0.4: PayPal sandbox events (done)
 
