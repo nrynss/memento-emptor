@@ -100,11 +100,13 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/channel3.md, testdata/channel3/
-status:     claimed:t05-channel3
+status:     in-review
 ```
 Search and fetch real products with variants through the API or MCP server. The question that matters: **does the data say enough about a product's cut** to match a new SKU to returned ones? If not, record what the match can use instead (title, description text, brand line). Choose a brand and product line with enough variants for the demo.
 
 **Done when:** `research/channel3.md` answers the question with examples; recordings are in `testdata/channel3/`; credits used are recorded.
+
+**Notes.** Answered over the REST API (no MCP server needed). There is no size chart or measurement field, but `structured_attributes` carries a per-category fit handle (`top-fit: Regular/Slim` on shirts, `footwear-cut` on shoes) and descriptions state the fit in words, so the match can use brand id + category + equal fit handle backed by title/description text. `variants` is null on all apparel fetched (each colorway is its own product; sizes live at the retailer), while one shoe SKU shows the documented Size-selector shape with `exists`/`available` and `option_Size=` selection. Demo line: Sunspel Button Down Oxford Shirt (3 SKUs sharing `top-fit: Regular`); Bonobos Everyday Oxford is the negative control (same line name, divergent `top-fit`). Spend: 2 searches (2 credits), 9 free calls.
 
 ---
 

@@ -1,0 +1,141 @@
+{
+  "age": "adult",
+  "brands": [
+    {
+      "id": "SMwk",
+      "name": "Sunspel"
+    }
+  ],
+  "category": {
+    "has_children": false,
+    "path": [
+      {
+        "slug": "apparel-accessories",
+        "title": "Apparel & Accessories"
+      },
+      {
+        "slug": "clothing",
+        "title": "Clothing"
+      },
+      {
+        "slug": "shirts-tops",
+        "title": "Shirts & Tops"
+      },
+      {
+        "slug": "shirts-2",
+        "title": "Shirts"
+      },
+      {
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      }
+    ],
+    "slug": "dress-shirts",
+    "title": "Dress Shirts"
+  },
+  "colors": [
+    {
+      "hex": "#e4eaf0",
+      "percentage": 1.0
+    }
+  ],
+  "description": "This men's button-down Oxford shirt in light blue is crafted from heavyweight 100% cotton with a full-textured Oxford weave that provides structure. It features a regular fit, a traditional button-down collar, and a wide front placket finished with trocas shell buttons. This timeless piece is versatile enough to be worn with denim or chinos, or layered under knitwear and jackets.",
+  "gender": "male",
+  "id": "VyAkjCA",
+  "images": [
+    {
+      "alt_text": "Light blue button-down oxford shirt laid flat on a light background.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/29a4bf9c-a226-40ae-a893-9747930cb433?aid=REDACTED&mid=m1d3",
+      "is_main_image": true,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/29a4bf9c-a226-40ae-a893-9747930cb433?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Man wearing a light blue oxford shirt and navy pants.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/f32b950b-e156-4aa0-880a-5fa28cd134ea?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/f32b950b-e156-4aa0-880a-5fa28cd134ea?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Man wearing a light blue shirt, navy cardigan, and navy pants.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "lifestyle",
+      "url": "https://cdn.trychannel3.com/a28d3c50-a88f-400e-9fa4-95127814918a?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up detail of the collar and button placket of a light blue shirt.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "detail",
+      "url": "https://cdn.trychannel3.com/8e22a6fc-7a79-4f67-a07c-93da2ca75138?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Man viewed from the back wearing a light blue oxford shirt.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/2b050c96-f532-4102-a512-446c53ed7061?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/2b050c96-f532-4102-a512-446c53ed7061?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up detail of the collar and placket of a light blue shirt.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/532cdb9b-115a-4db1-b915-6bbcf8dc71a7?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up texture of the light blue oxford shirt fabric.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "detail",
+      "url": "https://cdn.trychannel3.com/f43c4611-b968-44c2-9094-6edfccabed12?aid=REDACTED&mid=m1d3"
+    }
+  ],
+  "key_features": [
+    "Regular fit",
+    "Traditional button-down collar",
+    "Wide front placket",
+    "Trocas shell buttons",
+    "Heavyweight cotton Oxford weave"
+  ],
+  "materials": [
+    "100% Cotton"
+  ],
+  "offers": [
+    {
+      "availability": "InStock",
+      "condition": "new",
+      "dimensions": null,
+      "domain": "us.sunspel.com",
+      "max_commission_rate": 0.056,
+      "price": {
+        "compare_at_price": null,
+        "currency": "USD",
+        "price": 195.0
+      },
+      "url": "https://buy.trychannel3.com/VyAkjCA-m1d3-8aUHo5?o=REDACTED&aid=REDACTED"
+    }
+  ],
+  "ratings": null,
+  "structured_attributes": {
+    "fabric": [
+      "Cotton"
+    ],
+    "neckline": [
+      "Collared"
+    ],
+    "pattern": [
+      "Solid"
+    ],
+    "sleeve-length-type": [
+      "Long"
+    ],
+    "top-fit": [
+      "Regular"
+    ]
+  },
+  "title": "Button Down Oxford Shirt",
+  "variants": null
+}

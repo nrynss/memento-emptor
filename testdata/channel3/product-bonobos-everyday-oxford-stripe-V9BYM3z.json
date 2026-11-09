@@ -1,0 +1,137 @@
+{
+  "age": null,
+  "brands": [
+    {
+      "id": "ISZ8",
+      "name": "bonobos"
+    }
+  ],
+  "category": {
+    "has_children": false,
+    "path": [
+      {
+        "slug": "apparel-accessories",
+        "title": "Apparel & Accessories"
+      },
+      {
+        "slug": "clothing",
+        "title": "Clothing"
+      },
+      {
+        "slug": "shirts-tops",
+        "title": "Shirts & Tops"
+      },
+      {
+        "slug": "shirts-2",
+        "title": "Shirts"
+      },
+      {
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      }
+    ],
+    "slug": "dress-shirts",
+    "title": "Dress Shirts"
+  },
+  "colors": [
+    {
+      "hex": "#745443",
+      "percentage": 0.2435
+    },
+    {
+      "hex": "#d1bc9e",
+      "percentage": 0.164
+    },
+    {
+      "hex": "#967b61",
+      "percentage": 0.1431
+    },
+    {
+      "hex": "#503526",
+      "percentage": 0.1307
+    },
+    {
+      "hex": "#2f1b10",
+      "percentage": 0.1129
+    },
+    {
+      "hex": "#e7dcc9",
+      "percentage": 0.1088
+    },
+    {
+      "hex": "#b69e81",
+      "percentage": 0.097
+    }
+  ],
+  "description": "A slim-fit everyday Oxford shirt for men, featuring a brown and lavender stripe pattern. It is designed with a classic button-down collar and is crafted from a comfort stretch fabric consisting of 98% cotton and 2% spandex.",
+  "gender": "male",
+  "id": "V9BYM3z",
+  "images": [
+    {
+      "alt_text": "Man wearing a brown lavender striped oxford shirt and khaki pants.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/9fd2a2af-b611-4688-822d-7b01ebbfd556?aid=REDACTED&mid=Dd4D",
+      "is_main_image": true,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/9fd2a2af-b611-4688-822d-7b01ebbfd556?aid=REDACTED&mid=Dd4D"
+    }
+  ],
+  "key_features": [
+    "Button-down collar",
+    "Comfort stretch fabric",
+    "Slim fit"
+  ],
+  "materials": [
+    "98% Cotton",
+    "2% Spandex"
+  ],
+  "offers": [
+    {
+      "availability": "InStock",
+      "condition": "new",
+      "dimensions": null,
+      "domain": "bonobos.com",
+      "max_commission_rate": 0.1428,
+      "price": {
+        "compare_at_price": 89.0,
+        "currency": "USD",
+        "price": 49.0
+      },
+      "url": "https://buy.trychannel3.com/V9BYM3z-Dd4D-8aUHo5?o=REDACTED&aid=REDACTED"
+    }
+  ],
+  "ratings": null,
+  "structured_attributes": {
+    "care-instructions": [
+      "Machine washable",
+      "Tumble dry",
+      "Ironing instructions"
+    ],
+    "clothing-features": [
+      "Stretchable"
+    ],
+    "fabric": [
+      "Cotton",
+      "Spandex"
+    ],
+    "neckline": [
+      "Collared"
+    ],
+    "pattern": [
+      "Striped"
+    ],
+    "sleeve-length-type": [
+      "Long"
+    ],
+    "stretch-level": [
+      "Moderate stretch"
+    ],
+    "top-fit": [
+      "Slim"
+    ],
+    "top-length-type": [
+      "Medium"
+    ]
+  },
+  "title": "Everyday Oxford Shirt",
+  "variants": null
+}

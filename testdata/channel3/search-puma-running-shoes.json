@@ -1,0 +1,1667 @@
+{
+  "next_page_token": "eyJjYWNoZV9rZXkiOiAic2VhcmNoOmJlM2I4NjFkOGZjYTU0YzgiLCAib2Zmc2V0IjogMTB9",
+  "products": [
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#d1b5b1",
+          "percentage": 0.5539
+        },
+        {
+          "hex": "#d4d1d5",
+          "percentage": 0.3838
+        },
+        {
+          "hex": "#ae9490",
+          "percentage": 0.0623
+        }
+      ],
+      "description": "These PUMA Running Shoes in 'Pink White' (style 395235-07) feature a light pink knit upper for breathability and a clean, athletic look. The shoes are designed for lifestyle and running, complemented by a chunky white midsole and classic PUMA branding on the side and tongue.",
+      "gender": "female",
+      "id": "X9bu1cW",
+      "images": [
+        {
+          "alt_text": "Single pink and white PUMA running shoe, side view, on white background.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c5380899-3b47-44d3-ae5d-2a353047f856?aid=REDACTED&mid=hHvi",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/c5380899-3b47-44d3-ae5d-2a353047f856?aid=REDACTED&mid=hHvi"
+        },
+        {
+          "alt_text": "Two light pink and white PUMA running shoes side by side.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/f06b909a-b2a4-466d-9f8d-c4ac80a8a0fa?aid=REDACTED&mid=hHvi",
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/f06b909a-b2a4-466d-9f8d-c4ac80a8a0fa?aid=REDACTED&mid=hHvi"
+        },
+        {
+          "alt_text": "Rear and sole detail of a single pink and white PUMA running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/052fa407-0264-4894-b5ae-ef5292e12ad1?aid=REDACTED&mid=hHvi",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/052fa407-0264-4894-b5ae-ef5292e12ad1?aid=REDACTED&mid=hHvi"
+        },
+        {
+          "alt_text": "Close-up of the outsole tread pattern of a pink and white running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/0ae2f487-dc2a-4e60-91f7-644957e6eae9?aid=REDACTED&mid=hHvi",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/0ae2f487-dc2a-4e60-91f7-644957e6eae9?aid=REDACTED&mid=hHvi"
+        }
+      ],
+      "key_features": [
+        "Knit upper",
+        "Athletic running design",
+        "Lifestyle occasion"
+      ],
+      "materials": [
+        "knit"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "kickscrew.com",
+          "max_commission_rate": 0.04,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 73.71
+          },
+          "url": "https://buy.trychannel3.com/X9bu1cW-hHvi-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "activity": [
+          "Running"
+        ],
+        "closure-type": [
+          "Lace-up"
+        ],
+        "footwear-material": [
+          "Textile"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "toe-style": [
+          "Round"
+        ]
+      },
+      "title": "PUMA Running Shoes 'Pink White' 395235-07",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#c9cacc",
+          "percentage": 0.4203
+        },
+        {
+          "hex": "#1b1b1b",
+          "percentage": 0.3815
+        },
+        {
+          "hex": "#323333",
+          "percentage": 0.1582
+        }
+      ],
+      "description": "The Puma Maxima Pro is a high\u2011performance running shoe designed for long runs. It features a mesh upper for breathability, a thick ProFoam EVA midsole with high rebound, and a ProTread rubber outsole for multi\u2011surface traction. The heel\u2011to\u2011toe drop is 6\u202fmm and it comes in a solid black colour.",
+      "gender": "male",
+      "id": "nSdWUYS",
+      "images": [
+        {
+          "alt_text": "Black and white Maxima Pro Men's Sneakers side view",
+          "cleaned_url": "https://cdn.trychannel3.com/adf16322-db62-48cf-9bac-666ef90a8fc9?aid=REDACTED&mid=cvfe",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/d3881d9e-e277-492d-958d-db216c0ca002?aid=REDACTED&mid=cvfe"
+        }
+      ],
+      "key_features": [
+        "Mesh upper",
+        "High triple stack ProFoam EVA midsole for recoil",
+        "ProTread rubber outsole for multi\u2011surface traction",
+        "Heel\u2011to\u2011toe drop 6\u202fmm",
+        "Cool engineered upper"
+      ],
+      "materials": [],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "nordstromrack.com",
+          "max_commission_rate": 0.07,
+          "price": {
+            "compare_at_price": 90.0,
+            "currency": "USD",
+            "price": 71.97
+          },
+          "url": "https://buy.trychannel3.com/nSdWUYS-cvfe-8aUHo5?o=REDACTED&aid=REDACTED"
+        },
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "jcpenney.com",
+          "max_commission_rate": 0.042,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 90.0
+          },
+          "url": "https://buy.trychannel3.com/nSdWUYS-Qoqa-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": {
+        "count": 2,
+        "source_count": 2,
+        "value": 3.88
+      },
+      "structured_attributes": {
+        "activity": [
+          "Running",
+          "Training",
+          "Walking"
+        ],
+        "care-instructions": [
+          "Spot clean only"
+        ],
+        "closure-type": [
+          "Lace-up"
+        ],
+        "footwear-material": [
+          "Mesh",
+          "Rubber",
+          "Textile",
+          "Synthetic",
+          "Nylon",
+          "Polyester"
+        ],
+        "footwear-support-type": [
+          "Neutral"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "insole-material": [
+          "Memory foam"
+        ],
+        "lining-material": [
+          "Textile"
+        ],
+        "occasion-style": [
+          "Casual"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "pronation-support": [
+          "Neutral"
+        ],
+        "shoe-features": [
+          "Breathable design",
+          "Cushioned",
+          "Lightweight",
+          "Recycled materials"
+        ],
+        "shoe-fit": [
+          "Regular"
+        ],
+        "sneaker-style": [
+          "Athletic"
+        ],
+        "toe-style": [
+          "Round"
+        ],
+        "upper-material": [
+          "Mesh",
+          "Knit",
+          "Synthetic"
+        ]
+      },
+      "title": "Maxima Pro Running Shoes",
+      "variants": {
+        "options": [
+          {
+            "name": "Color",
+            "values": [
+              {
+                "available": null,
+                "exists": true,
+                "label": "Alpine Snow-Warm White",
+                "product_id": "GMkCmkv",
+                "thumbnail_url": "https://cdn.trychannel3.com/13d098df-0752-45b7-a5f6-0b7e164614b8"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "Gray Echo-Warm White-Gum",
+                "product_id": "NB3BVEz",
+                "thumbnail_url": "https://cdn.trychannel3.com/b16c5155-b616-49d7-9dd3-fe5294656ff8"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "Loden Green-Apple Spritz",
+                "product_id": "aw4D5YX",
+                "thumbnail_url": "https://cdn.trychannel3.com/34d1f2d1-5bab-47b4-83b9-7037487ba9c4"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "PUMA Black-PUMA White",
+                "product_id": "nSdWUYS",
+                "thumbnail_url": "https://cdn.trychannel3.com/d3881d9e-e277-492d-958d-db216c0ca002"
+              }
+            ]
+          }
+        ],
+        "selected": [
+          {
+            "label": "PUMA Black-PUMA White",
+            "name": "Color"
+          }
+        ]
+      }
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#373833",
+          "percentage": 0.3976
+        },
+        {
+          "hex": "#dae3bf",
+          "percentage": 0.22
+        },
+        {
+          "hex": "#e6e9db",
+          "percentage": 0.1891
+        },
+        {
+          "hex": "#4f5047",
+          "percentage": 0.1118
+        },
+        {
+          "hex": "#a7a591",
+          "percentage": 0.0813
+        }
+      ],
+      "description": "The PUMA ForeverRun NITRO is a high-performance running shoe designed for support and stability. It features a black engineered mesh upper and a lime green NITRO foam midsole with dual densities\u2014a softer core and a firmer rim\u2014to provide cushioning without compromising stability. The shoe is detailed with a bronze accent on the heel, a lime green pull tab, and a white outsole with a wider medial rubber segment to help stabilize late-stage pronation.",
+      "gender": "male",
+      "id": "0UYslvs",
+      "images": [
+        {
+          "alt_text": "Side profile view of a black Puma ForeverRun NITRO running shoe with a lime green sole.",
+          "cleaned_url": null,
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/04450e0a-a4d4-4200-8276-227d8aba84f0?aid=REDACTED&mid=lGBj"
+        }
+      ],
+      "key_features": [
+        "Engineered mesh upper",
+        "Dual-density NITRO midsole (softer core, firmer rim)",
+        "Asymmetrical heel counter",
+        "Flared rubber outsole for stability",
+        "Max cushioning level",
+        "10mm heel-to-toe drop"
+      ],
+      "materials": [
+        "Synthetic"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "shoebacca.com",
+          "max_commission_rate": 0.05,
+          "price": {
+            "compare_at_price": 150.0,
+            "currency": "USD",
+            "price": 67.95
+          },
+          "url": "https://buy.trychannel3.com/0UYslvs-lGBj-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "activity": [
+          "Running"
+        ],
+        "closure-type": [
+          "Lace-up"
+        ],
+        "footwear-material": [
+          "Synthetic"
+        ],
+        "footwear-support-type": [
+          "Stability"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "shoe-features": [
+          "Breathable design",
+          "Cushioned"
+        ],
+        "shoe-fit": [
+          "Regular"
+        ]
+      },
+      "title": "Puma ForeverRun NITRO Running Shoes",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#45474b",
+          "percentage": 0.3853
+        },
+        {
+          "hex": "#65676a",
+          "percentage": 0.3067
+        },
+        {
+          "hex": "#272829",
+          "percentage": 0.2396
+        },
+        {
+          "hex": "#979799",
+          "percentage": 0.0684
+        }
+      ],
+      "description": "The PUMA Men's Voltaic Evo Running Shoes are designed for long-distance performance. They feature textured synthetic uppers for enhanced durability, SOFTFOAM+ sockliners for superior comfort, and 10 Cell midsoles with TPU shanks for critical support. The pair is finished with full-length rubber outsoles to ensure reliable traction.",
+      "gender": "male",
+      "id": "YAlcl62",
+      "images": [
+        {
+          "alt_text": "Grey and black PUMA running shoe viewed from the side.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/425a9709-df4e-4d79-97c2-072508431587?aid=REDACTED&mid=DEoc",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/425a9709-df4e-4d79-97c2-072508431587?aid=REDACTED&mid=DEoc"
+        },
+        {
+          "alt_text": "Close-up of the sole and upper section of a running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/cf628206-9c80-41d6-a045-d4037fae66a2?aid=REDACTED&mid=DEoc",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/cf628206-9c80-41d6-a045-d4037fae66a2?aid=REDACTED&mid=DEoc"
+        },
+        {
+          "alt_text": "A pair of grey and black PUMA running shoes displayed.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c86532cf-7421-47fd-8490-573437ee7357?aid=REDACTED&mid=DEoc",
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/c86532cf-7421-47fd-8490-573437ee7357?aid=REDACTED&mid=DEoc"
+        },
+        {
+          "alt_text": "Grey and black PUMA running shoe viewed from the side.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/fd0c4315-83fb-4b27-8fc7-8ef5c9e7eadd?aid=REDACTED&mid=DEoc",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/fd0c4315-83fb-4b27-8fc7-8ef5c9e7eadd?aid=REDACTED&mid=DEoc"
+        },
+        {
+          "alt_text": "Person wearing a grey and black running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/7b561cf3-b084-4769-9ce2-384658c334e1?aid=REDACTED&mid=DEoc",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/7b561cf3-b084-4769-9ce2-384658c334e1?aid=REDACTED&mid=DEoc"
+        },
+        {
+          "alt_text": "Person wearing grey and black running shoes while running.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/f2439550-4268-48f9-af7b-96ef453ebfad?aid=REDACTED&mid=DEoc"
+        }
+      ],
+      "key_features": [
+        "Textured synthetic uppers offer durability",
+        "SOFTFOAM+ sockliners provide comfort",
+        "10 Cell midsoles with TPU shanks ensure support",
+        "Full length rubber outsoles afford traction",
+        "Secure lace closures",
+        "100% textile linings",
+        "TPU toe caps provide style and additional durability"
+      ],
+      "materials": [
+        "Synthetic",
+        "Textile"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "academy.com",
+          "max_commission_rate": 0.014,
+          "price": {
+            "compare_at_price": 84.99,
+            "currency": "USD",
+            "price": 59.491000000000014
+          },
+          "url": "https://buy.trychannel3.com/YAlcl62-DEoc-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": {
+        "count": 123,
+        "source_count": 1,
+        "value": 4.5
+      },
+      "structured_attributes": {
+        "activity": [
+          "Running"
+        ],
+        "footwear-material": [
+          "Synthetic"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "lining-material": [
+          "Textile"
+        ],
+        "occasion-style": [
+          "Casual"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "shoe-collar-height": [
+          "Low-top"
+        ],
+        "shoe-features": [
+          "Cushioned"
+        ],
+        "shoe-fit": [
+          "Wide"
+        ],
+        "sneaker-style": [
+          "Athletic"
+        ],
+        "toe-style": [
+          "Round"
+        ],
+        "upper-material": [
+          "Synthetic"
+        ],
+        "waterproof-level": [
+          "Not water resistant"
+        ]
+      },
+      "title": "Voltaic Evo Running Shoes",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#262525",
+          "percentage": 0.5257
+        },
+        {
+          "hex": "#d5d4cc",
+          "percentage": 0.279
+        },
+        {
+          "hex": "#4f4d48",
+          "percentage": 0.1046
+        },
+        {
+          "hex": "#9a9894",
+          "percentage": 0.0906
+        }
+      ],
+      "description": "The PUMA MagMax NITRO is a high-performance men's running shoe designed for neutral pronators. It features advanced NITROFOAM technology for an exhilarating bounce and efficient energy return, combined with a comfortable engineered mesh upper and a deluxe knitted tongue. The PUMAGRIP outsole ensures superior traction and protects the foam midsole, making it an ideal choice for road running and athletic activities.",
+      "gender": "male",
+      "id": "aifae1z",
+      "images": [
+        {
+          "alt_text": "Black and white PUMA MagMax Nitro running shoe side view.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/a54175a4-fad5-494d-bcd6-b44b5767dd7d?aid=REDACTED&mid=lGBj",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/a54175a4-fad5-494d-bcd6-b44b5767dd7d?aid=REDACTED&mid=lGBj"
+        },
+        {
+          "alt_text": "PUMA MagMax Nitro running shoe in black and white, side view.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/e87286f8-217a-4383-b21e-fe08c0de8a53?aid=REDACTED&mid=lGBj",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/e87286f8-217a-4383-b21e-fe08c0de8a53?aid=REDACTED&mid=lGBj"
+        },
+        {
+          "alt_text": "Pair of black and white PUMA MagMax Nitro running shoes side view.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/3d92ab6b-a7f8-432c-9fdc-942ab10c7adf?aid=REDACTED&mid=lGBj",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/3d92ab6b-a7f8-432c-9fdc-942ab10c7adf?aid=REDACTED&mid=lGBj"
+        },
+        {
+          "alt_text": "Close-up of the sole and outsole of a running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/11fb4dc1-04be-4d48-9135-3d7949de8fd7?aid=REDACTED&mid=lGBj",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/11fb4dc1-04be-4d48-9135-3d7949de8fd7?aid=REDACTED&mid=lGBj"
+        },
+        {
+          "alt_text": "Black PUMA MagMax Nitro running shoe profile view.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/a0e8cd8b-78ad-4969-851b-3f2a4f368e3b?aid=REDACTED&mid=lGBj",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/a0e8cd8b-78ad-4969-851b-3f2a4f368e3b?aid=REDACTED&mid=lGBj"
+        }
+      ],
+      "key_features": [
+        "Cutting edge NITROFOAM technology for energy return",
+        "Engineered mesh upper for breathability",
+        "PUMAGRIP outsole for top notch traction",
+        "Cushioned heel and deluxe knitted tongue",
+        "Stack height: 46mm and 38mm",
+        "Heel to toe drop: 8mm",
+        "Weight: 290g",
+        "Recommended for neutral pronators",
+        "High-cushioning midsole"
+      ],
+      "materials": [
+        "mesh"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": {
+            "height": null,
+            "length": null,
+            "weight": {
+              "number": 290.0,
+              "unit": "g"
+            },
+            "width": null
+          },
+          "domain": "shoebacca.com",
+          "max_commission_rate": 0.05,
+          "price": {
+            "compare_at_price": 180.0,
+            "currency": "USD",
+            "price": 134.95
+          },
+          "url": "https://buy.trychannel3.com/aifae1z-lGBj-8aUHo5?o=REDACTED&aid=REDACTED"
+        },
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "kickscrew.com",
+          "max_commission_rate": 0.04,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 149.76
+          },
+          "url": "https://buy.trychannel3.com/aifae1z-hHvi-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "activity": [
+          "Running"
+        ],
+        "closure-type": [
+          "Lace-up"
+        ],
+        "footwear-material": [
+          "Mesh",
+          "Synthetic"
+        ],
+        "footwear-support-type": [
+          "Neutral"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "shoe-features": [
+          "Cushioned",
+          "Breathable design"
+        ],
+        "shoe-fit": [
+          "Regular"
+        ],
+        "toe-style": [
+          "Round"
+        ]
+      },
+      "title": "Puma MagMax NITRO Running Shoes",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#121213",
+          "percentage": 0.4893
+        },
+        {
+          "hex": "#282829",
+          "percentage": 0.4232
+        },
+        {
+          "hex": "#7c8166",
+          "percentage": 0.0874
+        }
+      ],
+      "description": "The PUMA Softride One4all is a sleek, all-black running shoe designed for performance and style. It features a breathable knit upper for a snug fit and a cushioned Softride sole to provide comfort and support during physical activities. The design is completed with tonal black laces and a streamlined silhouette, making it suitable for both athletic use and casual wear.",
+      "gender": "male",
+      "id": "2LJmSMg",
+      "images": [
+        {
+          "alt_text": "Black Puma Softride One4all running shoe from the side.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/68bb7dee-1218-4c72-98bd-ce97e2489ebc?aid=REDACTED&mid=hHvi",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/68bb7dee-1218-4c72-98bd-ce97e2489ebc?aid=REDACTED&mid=hHvi"
+        },
+        {
+          "alt_text": "Black Puma Softride running shoe profile view.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/4aac6dee-e485-425e-b9ec-a2ddec43cbe3?aid=REDACTED&mid=hHvi",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/4aac6dee-e485-425e-b9ec-a2ddec43cbe3?aid=REDACTED&mid=hHvi"
+        },
+        {
+          "alt_text": "Multiple black Puma Softride running shoes together.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/8797f3e0-aa72-44f6-ac88-8b9c38d78187?aid=REDACTED&mid=hHvi",
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/8797f3e0-aa72-44f6-ac88-8b9c38d78187?aid=REDACTED&mid=hHvi"
+        },
+        {
+          "alt_text": "Close-up detail of the heel and sole of the running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/757e102a-4093-44e1-8be0-8577fedf0d94?aid=REDACTED&mid=hHvi",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/757e102a-4093-44e1-8be0-8577fedf0d94?aid=REDACTED&mid=hHvi"
+        },
+        {
+          "alt_text": "Top-down view of a pair of black Puma running shoes.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/ecac9735-e65a-4f3b-8402-43f56c7cad9e?aid=REDACTED&mid=hHvi",
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/ecac9735-e65a-4f3b-8402-43f56c7cad9e?aid=REDACTED&mid=hHvi"
+        }
+      ],
+      "key_features": [
+        "Knit upper",
+        "Cushioned Softride sole",
+        "Designed for running"
+      ],
+      "materials": [
+        "Knit"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "kickscrew.com",
+          "max_commission_rate": 0.04,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 52.65
+          },
+          "url": "https://buy.trychannel3.com/2LJmSMg-hHvi-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "activity": [
+          "Running"
+        ],
+        "closure-type": [
+          "Lace-up"
+        ],
+        "footwear-material": [
+          "Textile"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "shoe-features": [
+          "Cushioned"
+        ],
+        "toe-style": [
+          "Round"
+        ]
+      },
+      "title": "PUMA Softride One4all Running Shoes",
+      "variants": null
+    },
+    {
+      "age": null,
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#2c2c2a",
+          "percentage": 0.4905
+        },
+        {
+          "hex": "#424240",
+          "percentage": 0.2641
+        },
+        {
+          "hex": "#656361",
+          "percentage": 0.1368
+        },
+        {
+          "hex": "#a7a4a0",
+          "percentage": 0.1085
+        }
+      ],
+      "description": "A sculpted cage and textured mesh upper give the Women's Voltra Running Shoe an effortlessly cool athletic look. Designed for performance and style, these running shoes feature a round toe, lace-up closure, and convenient pull tabs on the tongue and heel for easy on-and-off. The interior is designed for comfort with a padded collar, tongue, and smooth lining with a cushioned insole. For enhanced support and shock absorption, they are equipped with a SOFTFOAM+ midsole and a durable rubber outsole for reliable traction.",
+      "gender": null,
+      "id": "4d8UHzT",
+      "images": [
+        {
+          "alt_text": "Black Voltra running shoe viewed from the side.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/b74a8833-89f2-4c81-ae97-c28b8cf6123c?aid=REDACTED&mid=toLT",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/b74a8833-89f2-4c81-ae97-c28b8cf6123c?aid=REDACTED&mid=toLT"
+        },
+        {
+          "alt_text": "Black Voltra running shoe viewed from the side.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/8ca825c4-fa8d-4952-a69e-d430f4149f21?aid=REDACTED&mid=toLT"
+        },
+        {
+          "alt_text": "Black Voltra running shoe viewed from the side.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/5556cf12-a11e-4a36-b624-17db303939fa?aid=REDACTED&mid=toLT",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/5556cf12-a11e-4a36-b624-17db303939fa?aid=REDACTED&mid=toLT"
+        },
+        {
+          "alt_text": "Flat lay view of the sole and insole of the running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/5fcf1222-76af-4575-8947-7cbcb768d224?aid=REDACTED&mid=toLT",
+          "is_main_image": false,
+          "shot_type": "flat_lay",
+          "url": "https://cdn.trychannel3.com/5fcf1222-76af-4575-8947-7cbcb768d224?aid=REDACTED&mid=toLT"
+        },
+        {
+          "alt_text": "Close-up of the outsole tread of the running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/1aadf68d-b3d1-4482-9e23-5a33253b8c5c?aid=REDACTED&mid=toLT",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/1aadf68d-b3d1-4482-9e23-5a33253b8c5c?aid=REDACTED&mid=toLT"
+        }
+      ],
+      "key_features": [
+        "Sleek low-cut lifestyle sneakers with a dynamic design",
+        "Textured mesh upper with a sculpted cage for breathability and structure",
+        "Puma Formstrip on the upper delivers signature style",
+        "Lace closure with heel and tongue loops for easy on and off and a secure fit",
+        "Puma branded detailing on the toe bumper, tongue loop and heel",
+        "Visible X-CELL bubble near the heel for extra cushioning and support",
+        "SOFTFOAM+ step-in sockliner for soft cushioning and heel padding",
+        "Rubber outsole softens impact and improves grip across surfaces",
+        "The Puma Voltra Casual Shoes are imported.",
+        "Mesh/Synthetic upper with breathable ventilation"
+      ],
+      "materials": [
+        "Mesh",
+        "Rubber"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "famousfootwear.com",
+          "max_commission_rate": 0.008,
+          "price": {
+            "compare_at_price": 89.99,
+            "currency": "USD",
+            "price": 69.98
+          },
+          "url": "https://buy.trychannel3.com/4d8UHzT-toLT-8aUHo5?o=REDACTED&aid=REDACTED"
+        },
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": {
+            "height": null,
+            "length": null,
+            "weight": {
+              "number": 2.43,
+              "unit": "lb"
+            },
+            "width": null
+          },
+          "domain": "shoebacca.com",
+          "max_commission_rate": 0.05,
+          "price": {
+            "compare_at_price": 90.0,
+            "currency": "USD",
+            "price": 74.95
+          },
+          "url": "https://buy.trychannel3.com/4d8UHzT-lGBj-8aUHo5?o=REDACTED&aid=REDACTED"
+        },
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "jdsports.com",
+          "max_commission_rate": 0.05,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 90.0
+          },
+          "url": "https://buy.trychannel3.com/4d8UHzT-NlEl-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "activity": [
+          "Running",
+          "Walking",
+          "Training"
+        ],
+        "closure-type": [
+          "Lace-up"
+        ],
+        "footwear-cut": [
+          "Low cut"
+        ],
+        "footwear-material": [
+          "Mesh",
+          "Synthetic",
+          "Rubber",
+          "Polyester",
+          "Textile"
+        ],
+        "footwear-support-type": [
+          "Neutral"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "insole-material": [
+          "Memory foam"
+        ],
+        "occasion-style": [
+          "Casual"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "pattern": [
+          "Geometric",
+          "Graphic",
+          "Texture",
+          "Solid",
+          "Striped",
+          "Swirl"
+        ],
+        "shoe-collar-height": [
+          "Low-top"
+        ],
+        "shoe-features": [
+          "Cushioned",
+          "Breathable design",
+          "Lightweight",
+          "Slip resistant"
+        ],
+        "shoe-fit": [
+          "Wide",
+          "Regular"
+        ],
+        "sneaker-style": [
+          "Athletic",
+          "Fashion"
+        ],
+        "toe-style": [
+          "Round"
+        ],
+        "upper-material": [
+          "Mesh",
+          "Knit"
+        ],
+        "visibility-features": [
+          "Reflective elements"
+        ]
+      },
+      "title": "Voltra Running Shoes",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#232322",
+          "percentage": 0.5994
+        },
+        {
+          "hex": "#3a393a",
+          "percentage": 0.3259
+        },
+        {
+          "hex": "#737274",
+          "percentage": 0.0747
+        }
+      ],
+      "description": "Experience speed and power with the Puma Voltaic Evo Fast Running Shoes. These lightweight, streamlined shoes feature a fast foam midsole and a grippy outsole designed to propel you forward, helping you achieve new personal bests. Perfect for pounding the pavement, they offer a thrilling ride with every stride.",
+      "gender": "male",
+      "id": "YcXkXuB",
+      "images": [
+        {
+          "alt_text": "Black Voltaic Evo Fast Running Shoe shown from the side.",
+          "cleaned_url": "https://cdn.trychannel3.com/6fd0bacf-b4d4-4ae2-8135-d960233fbfa0?aid=REDACTED&mid=lGBj",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/b4581054-6fbf-4e90-b151-1bd96610f90b?aid=REDACTED&mid=lGBj"
+        }
+      ],
+      "key_features": [
+        "Lace closure",
+        "Rounded toe",
+        "Surface type: Road running",
+        "Recommended for: neutral pronators",
+        "Synthetic upper",
+        "PUMA branding details",
+        "Lightweight"
+      ],
+      "materials": [
+        "Synthetic"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "shoebacca.com",
+          "max_commission_rate": 0.05,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 57.95
+          },
+          "url": "https://buy.trychannel3.com/YcXkXuB-lGBj-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "activity": [
+          "Running"
+        ],
+        "closure-type": [
+          "Ties"
+        ],
+        "footwear-material": [
+          "Synthetic"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "occasion-style": [
+          "Casual"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "shoe-features": [
+          "Lightweight"
+        ],
+        "shoe-fit": [
+          "Regular"
+        ],
+        "sneaker-style": [
+          "Athletic"
+        ],
+        "toe-style": [
+          "Round"
+        ]
+      },
+      "title": "Voltaic Evo Fast Running Shoes",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#2b2b2f",
+          "percentage": 0.6578
+        },
+        {
+          "hex": "#9da3a5",
+          "percentage": 0.2745
+        },
+        {
+          "hex": "#5f6163",
+          "percentage": 0.0676
+        }
+      ],
+      "description": "Experience enhanced performance and bold style with the Men's Puma Amplifier Running Shoes. Designed for both the track and the streets, these shoes offer responsive cushioning and a lightweight, supportive feel. Featuring a breathable mesh upper with synthetic and rubber overlays, a sleek white stripe detail, and a durable rubber sole with a reinforced toe cap, these sneakers provide comfort and swagger. The SOFTFOAM+ sockliner ensures soft cushioning, while the flexible midsole allows for smooth transitions. Pull tabs on the heel and tongue make for easy on and off.",
+      "gender": "male",
+      "id": "s1PSqts",
+      "images": [
+        {
+          "alt_text": "Black Puma Amplifier running shoe on a white background.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/b9424a9d-5865-4662-957b-60451c093668?aid=REDACTED&mid=pgo6",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/b9424a9d-5865-4662-957b-60451c093668?aid=REDACTED&mid=pgo6"
+        },
+        {
+          "alt_text": "Person wearing black Puma Amplifier running shoes.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c02a4ba0-fe30-4ee1-b607-104947031be9?aid=REDACTED&mid=pgo6",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/c02a4ba0-fe30-4ee1-b607-104947031be9?aid=REDACTED&mid=pgo6"
+        },
+        {
+          "alt_text": "Black Puma Amplifier running shoe side view.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/fdefb514-4919-4b60-9032-ffbeb002c957?aid=REDACTED&mid=pgo6",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/fdefb514-4919-4b60-9032-ffbeb002c957?aid=REDACTED&mid=pgo6"
+        },
+        {
+          "alt_text": "Close-up of the mesh upper and sole of a black running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/92fd89c8-1648-45e5-bea4-78345b0315bb?aid=REDACTED&mid=pgo6",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/92fd89c8-1648-45e5-bea4-78345b0315bb?aid=REDACTED&mid=pgo6"
+        },
+        {
+          "alt_text": "Close-up of the sole and Puma logo on the running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/d8e42304-93a3-4ef5-b66c-f1b2a24c20e4?aid=REDACTED&mid=pgo6",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/d8e42304-93a3-4ef5-b66c-f1b2a24c20e4?aid=REDACTED&mid=pgo6"
+        },
+        {
+          "alt_text": "Close-up of the sole and midsole of the running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/95ca7c09-789c-4c61-9d07-80a423803bbf?aid=REDACTED&mid=pgo6",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/95ca7c09-789c-4c61-9d07-80a423803bbf?aid=REDACTED&mid=pgo6"
+        },
+        {
+          "alt_text": "Close-up of the outsole tread pattern of the running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/7e5643c2-1e97-4248-92f1-fa1509d233f4?aid=REDACTED&mid=pgo6",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/7e5643c2-1e97-4248-92f1-fa1509d233f4?aid=REDACTED&mid=pgo6"
+        }
+      ],
+      "key_features": [
+        "SOFTFOAM+: Step-in comfort sockliner designed to provide soft cushioning thanks to its extra thick heel",
+        "Mesh upper with synthetic and rubber overlays",
+        "Visible tech outsole",
+        "Rubber sole",
+        "Reinforced toe cap for extra durability",
+        "Lace-up closure, or keep the laces tied for easy slip-on wear",
+        "Responsive cushioning",
+        "Flexible midsole for smooth transitions during runs",
+        "Rear and tongue pull tabs"
+      ],
+      "materials": [
+        "mesh",
+        "rubber",
+        "synthetic"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "shoecarnival.com",
+          "max_commission_rate": 0.0,
+          "price": {
+            "compare_at_price": 74.99,
+            "currency": "USD",
+            "price": 59.98
+          },
+          "url": "https://buy.trychannel3.com/s1PSqts-pgo6-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": {
+        "count": 3,
+        "source_count": 1,
+        "value": 4.0
+      },
+      "structured_attributes": {
+        "activity": [
+          "Running",
+          "Training"
+        ],
+        "closure-type": [
+          "Hook & loop",
+          "Slip-on"
+        ],
+        "footwear-material": [
+          "Mesh"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "occasion-style": [
+          "Casual"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "shoe-features": [
+          "Cushioned",
+          "Lightweight"
+        ],
+        "sneaker-style": [
+          "Athletic"
+        ],
+        "toe-style": [
+          "Round"
+        ]
+      },
+      "title": "Amplifier Running Shoes",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "T0QO",
+          "name": "Puma"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "shoes",
+            "title": "Shoes"
+          },
+          {
+            "slug": "athletic-shoes",
+            "title": "Athletic Shoes"
+          }
+        ],
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      },
+      "colors": [
+        {
+          "hex": "#28292c",
+          "percentage": 0.4164
+        },
+        {
+          "hex": "#e0e3e9",
+          "percentage": 0.2627
+        },
+        {
+          "hex": "#43474c",
+          "percentage": 0.1284
+        },
+        {
+          "hex": "#131315",
+          "percentage": 0.0968
+        },
+        {
+          "hex": "#6a8798",
+          "percentage": 0.0956
+        }
+      ],
+      "description": "The PUMA Darter Pro 2 Running Shoes for men combine style and athletic performance. They feature an engineered mesh upper for breathability and are constructed with at least 30% recycled material. For cushioning and responsiveness, the shoes utilize PUMA's PROFOAM technology, while the PROTREAD outsole provides multi-surface traction. Design details include a lace-up closure, convenient pull tabs, and the signature PUMA CAT logo.",
+      "gender": "male",
+      "id": "VWvTIPF",
+      "images": [
+        {
+          "alt_text": "PUMA Darter Pro 2 running shoe in black, white, and blue on a white background.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/e1b822bb-b4be-427a-adac-930eeb461427?aid=REDACTED&mid=fsxO",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/e1b822bb-b4be-427a-adac-930eeb461427?aid=REDACTED&mid=fsxO"
+        },
+        {
+          "alt_text": "Front and back view of a pair of black running shoes.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/f8ac3a35-f171-4211-90a1-2df86f1b438f?aid=REDACTED&mid=fsxO",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/f8ac3a35-f171-4211-90a1-2df86f1b438f?aid=REDACTED&mid=fsxO"
+        },
+        {
+          "alt_text": "Side view of a black running shoe with white and blue accents.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/0a0094e9-c967-4ec3-8a2d-f0441d09a719?aid=REDACTED&mid=fsxO",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/0a0094e9-c967-4ec3-8a2d-f0441d09a719?aid=REDACTED&mid=fsxO"
+        },
+        {
+          "alt_text": "Three-quarter view of the PUMA Darter Pro 2 running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/9db2f7d3-fbdf-4fd9-9f2d-e1b2168fea71?aid=REDACTED&mid=fsxO",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/9db2f7d3-fbdf-4fd9-9f2d-e1b2168fea71?aid=REDACTED&mid=fsxO"
+        },
+        {
+          "alt_text": "Close-up of the black and white outsole tread pattern of the running shoe.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/8520295c-02ca-4675-9668-90c0b00e8148?aid=REDACTED&mid=fsxO",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/8520295c-02ca-4675-9668-90c0b00e8148?aid=REDACTED&mid=fsxO"
+        },
+        {
+          "alt_text": "Two black running shoes shown side by side.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/73dcfb6f-ed74-449b-a044-4fcc7badfb0d?aid=REDACTED&mid=fsxO"
+        },
+        {
+          "alt_text": "Pair of black running shoes shown from the back view.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/98bd1339-68f9-4bb0-b91a-5b28b7e871bb?aid=REDACTED&mid=fsxO",
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/98bd1339-68f9-4bb0-b91a-5b28b7e871bb?aid=REDACTED&mid=fsxO"
+        },
+        {
+          "alt_text": "Side view of a black PUMA running shoe with white and blue accents.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/a296cb76-e483-42ae-b519-28b5cab42ae9?aid=REDACTED&mid=fsxO",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/a296cb76-e483-42ae-b519-28b5cab42ae9?aid=REDACTED&mid=fsxO"
+        }
+      ],
+      "key_features": [
+        "PROFOAM technology for immediate cushioning",
+        "PROTREAD outsole for multi-surface traction",
+        "Engineered mesh upper for breathability",
+        "Run PUMA Last for performance fit",
+        "Contains a minimum of 20 percent recycled content"
+      ],
+      "materials": [
+        "synthetic",
+        "polyester",
+        "rubber"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "zappos.com",
+          "max_commission_rate": 0.05,
+          "price": {
+            "compare_at_price": 73.0,
+            "currency": "USD",
+            "price": 54.98
+          },
+          "url": "https://buy.trychannel3.com/VWvTIPF-fsxO-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "activity": [
+          "Running"
+        ],
+        "ankle-collar-style": [
+          "Low cut"
+        ],
+        "closure-type": [
+          "Lace-up"
+        ],
+        "compatible-playing-surface": [
+          "Multi-surface"
+        ],
+        "footwear-cut": [
+          "Low cut"
+        ],
+        "footwear-material": [
+          "Synthetic",
+          "Polyester",
+          "Rubber"
+        ],
+        "heel-height-type": [
+          "Flat"
+        ],
+        "occasion-style": [
+          "Casual"
+        ],
+        "outsole-material": [
+          "Rubber"
+        ],
+        "pattern": [
+          "Logo"
+        ],
+        "shoe-collar-height": [
+          "Low-top"
+        ],
+        "shoe-features": [
+          "Breathable design",
+          "Cushioned",
+          "Recycled materials"
+        ],
+        "sneaker-style": [
+          "Athletic"
+        ],
+        "toe-style": [
+          "Round"
+        ],
+        "upper-material": [
+          "Mesh",
+          "Synthetic"
+        ]
+      },
+      "title": "Men's Puma Darter Pro 2 Running Shoes",
+      "variants": {
+        "options": [
+          {
+            "name": "Size",
+            "values": [
+              {
+                "available": null,
+                "exists": true,
+                "label": "7.5",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "9",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "9.5",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "10",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "10.5",
+                "product_id": null,
+                "thumbnail_url": null
+              }
+            ]
+          }
+        ],
+        "selected": []
+      }
+    }
+  ]
+}

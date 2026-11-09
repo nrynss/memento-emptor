@@ -1,0 +1,126 @@
+{
+  "age": "adult",
+  "brands": [
+    {
+      "id": "ISZ8",
+      "name": "bonobos"
+    }
+  ],
+  "category": {
+    "has_children": false,
+    "path": [
+      {
+        "slug": "apparel-accessories",
+        "title": "Apparel & Accessories"
+      },
+      {
+        "slug": "clothing",
+        "title": "Clothing"
+      },
+      {
+        "slug": "shirts-tops",
+        "title": "Shirts & Tops"
+      },
+      {
+        "slug": "shirts-2",
+        "title": "Shirts"
+      },
+      {
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      }
+    ],
+    "slug": "dress-shirts",
+    "title": "Dress Shirts"
+  },
+  "colors": [
+    {
+      "hex": "#2d3547",
+      "percentage": 0.3666
+    },
+    {
+      "hex": "#59504e",
+      "percentage": 0.2968
+    },
+    {
+      "hex": "#312b2a",
+      "percentage": 0.127
+    },
+    {
+      "hex": "#b89d8b",
+      "percentage": 0.1071
+    },
+    {
+      "hex": "#131823",
+      "percentage": 0.1025
+    }
+  ],
+  "description": "A classic Oxford button-down shirt for men, designed with added stretch for enhanced comfort. This slim-fit shirt features a button-down collar and is presented in a deep indigo color.",
+  "gender": "male",
+  "id": "m4iRrEM",
+  "images": [
+    {
+      "alt_text": "Man wearing a dark indigo oxford shirt and grey trousers.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/38ce2afc-bcc9-4b41-94e1-61632bf4578d?aid=REDACTED&mid=Dd4D",
+      "is_main_image": true,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/38ce2afc-bcc9-4b41-94e1-61632bf4578d?aid=REDACTED&mid=Dd4D"
+    }
+  ],
+  "key_features": [
+    "Button-down collar",
+    "Comfort stretch fabric"
+  ],
+  "materials": [
+    "Cotton",
+    "Spandex"
+  ],
+  "offers": [
+    {
+      "availability": "InStock",
+      "condition": "new",
+      "dimensions": null,
+      "domain": "bonobos.com",
+      "max_commission_rate": 0.1428,
+      "price": {
+        "compare_at_price": 89.0,
+        "currency": "USD",
+        "price": 49.0
+      },
+      "url": "https://buy.trychannel3.com/m4iRrEM-Dd4D-8aUHo5?o=REDACTED&aid=REDACTED"
+    }
+  ],
+  "ratings": null,
+  "structured_attributes": {
+    "care-instructions": [
+      "Machine washable",
+      "Tumble dry",
+      "Ironing instructions"
+    ],
+    "clothing-features": [
+      "Stretchable"
+    ],
+    "fabric": [
+      "Cotton",
+      "Spandex"
+    ],
+    "neckline": [
+      "Collared"
+    ],
+    "pattern": [
+      "Solid"
+    ],
+    "sleeve-length-type": [
+      "Long"
+    ],
+    "top-fit": [
+      "Slim",
+      "Tailored"
+    ],
+    "top-length-type": [
+      "Long"
+    ]
+  },
+  "title": "Everyday Oxford Shirt",
+  "variants": null
+}

@@ -1,0 +1,142 @@
+{
+  "age": null,
+  "brands": [
+    {
+      "id": "SMwk",
+      "name": "Sunspel"
+    }
+  ],
+  "category": {
+    "has_children": false,
+    "path": [
+      {
+        "slug": "apparel-accessories",
+        "title": "Apparel & Accessories"
+      },
+      {
+        "slug": "clothing",
+        "title": "Clothing"
+      },
+      {
+        "slug": "shirts-tops",
+        "title": "Shirts & Tops"
+      },
+      {
+        "slug": "shirts-2",
+        "title": "Shirts"
+      },
+      {
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      }
+    ],
+    "slug": "dress-shirts",
+    "title": "Dress Shirts"
+  },
+  "colors": [
+    {
+      "hex": "#f1f1ef",
+      "percentage": 1.0
+    }
+  ],
+  "description": "This Men's Button Down Oxford Shirt is crafted from heavyweight 100% cotton with a full-textured Oxford weave that provides structured shape. It features a regular fit, a traditional button-down collar, and a wide front placket finished with authentic trocas shell buttons. Designed for versatility, it can be worn with denim or chinos or layered under knitwear and jackets.",
+  "gender": "male",
+  "id": "tbnrl46",
+  "images": [
+    {
+      "alt_text": "White men's button-down oxford shirt laid flat.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/6f0f3b5d-2cb2-4a00-929e-20363b2c9b4a?aid=REDACTED&mid=m1d3",
+      "is_main_image": true,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/6f0f3b5d-2cb2-4a00-929e-20363b2c9b4a?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Male model wearing a white button-down shirt and dark jeans.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/02747856-77f6-4de9-9456-b892aa552506?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/02747856-77f6-4de9-9456-b892aa552506?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Male model wearing a white button-down shirt and dark jeans.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/dc3245bb-4923-4567-95a7-098b49a31ca6?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/dc3245bb-4923-4567-95a7-098b49a31ca6?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Detail of the collar, buttons, and Sunspel label on a white shirt fabric.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/6a5c6617-8f0f-4929-b205-d703de4c885b?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "detail",
+      "url": "https://cdn.trychannel3.com/6a5c6617-8f0f-4929-b205-d703de4c885b?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Back view of a white men's button-down shirt.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c919b981-44b3-4d57-9851-0730c0a0b5b8?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/c919b981-44b3-4d57-9851-0730c0a0b5b8?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up of the collar and placket of a white button-down shirt.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/943ffd2a-2d2b-4724-9b4e-56e004d48ea1?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up texture of white shirting fabric.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/36586f3a-9dd8-4a1f-88ed-0c9c9858286e?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "detail",
+      "url": "https://cdn.trychannel3.com/36586f3a-9dd8-4a1f-88ed-0c9c9858286e?aid=REDACTED&mid=m1d3"
+    }
+  ],
+  "key_features": [
+    "Heavyweight cotton fabric",
+    "Oxford weave for full texture and structure",
+    "Regular fit",
+    "Traditional button-down collar",
+    "Wide front placket",
+    "Trocas shell buttons"
+  ],
+  "materials": [
+    "100% Cotton"
+  ],
+  "offers": [
+    {
+      "availability": "InStock",
+      "condition": "new",
+      "dimensions": null,
+      "domain": "us.sunspel.com",
+      "max_commission_rate": 0.056,
+      "price": {
+        "compare_at_price": null,
+        "currency": "USD",
+        "price": 195.0
+      },
+      "url": "https://buy.trychannel3.com/tbnrl46-m1d3-8aUHo5?o=REDACTED&aid=REDACTED"
+    }
+  ],
+  "ratings": null,
+  "structured_attributes": {
+    "fabric": [
+      "Cotton"
+    ],
+    "neckline": [
+      "Collared"
+    ],
+    "pattern": [
+      "Solid"
+    ],
+    "sleeve-length-type": [
+      "Long"
+    ],
+    "top-fit": [
+      "Regular"
+    ]
+  },
+  "title": "Men's Button Down Oxford Shirt",
+  "variants": null
+}

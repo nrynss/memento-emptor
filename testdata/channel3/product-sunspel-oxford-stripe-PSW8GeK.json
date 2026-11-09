@@ -1,0 +1,146 @@
+{
+  "age": null,
+  "brands": [
+    {
+      "id": "SMwk",
+      "name": "Sunspel"
+    }
+  ],
+  "category": {
+    "has_children": false,
+    "path": [
+      {
+        "slug": "apparel-accessories",
+        "title": "Apparel & Accessories"
+      },
+      {
+        "slug": "clothing",
+        "title": "Clothing"
+      },
+      {
+        "slug": "shirts-tops",
+        "title": "Shirts & Tops"
+      },
+      {
+        "slug": "shirts-2",
+        "title": "Shirts"
+      },
+      {
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      }
+    ],
+    "slug": "dress-shirts",
+    "title": "Dress Shirts"
+  },
+  "colors": [
+    {
+      "hex": "#c6ccda",
+      "percentage": 0.9248
+    },
+    {
+      "hex": "#929bac",
+      "percentage": 0.0752
+    }
+  ],
+  "description": "This regular-fit button-down shirt is crafted from heavyweight cotton with a full-textured Oxford weave for added structure. It features a traditional button-down collar, a wide front placket with trocas shell buttons, and is made in Portugal. A versatile wardrobe staple, it can be paired with denim or chinos, or layered under knitwear and jackets.",
+  "gender": "male",
+  "id": "PSW8GeK",
+  "images": [
+    {
+      "alt_text": "Light blue men's button-down oxford shirt displayed against a plain background.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c6caae06-7b77-41ca-9b51-ccf8581a896d?aid=REDACTED&mid=m1d3",
+      "is_main_image": true,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/c6caae06-7b77-41ca-9b51-ccf8581a896d?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Man wearing a light blue oxford shirt and dark pants.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/8560fd3f-4689-4a8e-9746-ae92acb5146d?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/8560fd3f-4689-4a8e-9746-ae92acb5146d?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Man wearing a light blue button-down shirt and dark trousers.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c2d3f560-21ca-4192-ae69-122a0020ec8e?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/c2d3f560-21ca-4192-ae69-122a0020ec8e?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up detail of the collar and cuff of a light blue shirt.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "detail",
+      "url": "https://cdn.trychannel3.com/05668fc5-6cec-44b6-a314-285a8bb4f782?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Man viewed from the back wearing a light blue oxford shirt.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/e331637a-94ab-4ce2-bbc9-bc71f4b7662b?aid=REDACTED&mid=m1d3",
+      "is_main_image": false,
+      "shot_type": "on_model",
+      "url": "https://cdn.trychannel3.com/e331637a-94ab-4ce2-bbc9-bc71f4b7662b?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up of the collar and placket of a light blue oxford shirt.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/5cbcfd84-c868-4f7a-8eeb-4035010b771a?aid=REDACTED&mid=m1d3"
+    },
+    {
+      "alt_text": "Close-up of the blue and white checked fabric texture of the shirt.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": null,
+      "url": "https://cdn.trychannel3.com/c30f2932-ff0d-45a1-a545-400dd60529cb?aid=REDACTED&mid=m1d3"
+    }
+  ],
+  "key_features": [
+    "Regular fit",
+    "Traditional button-down collar",
+    "Wide front placket",
+    "Trocas shell buttons",
+    "Heavyweight cotton",
+    "Oxford weave"
+  ],
+  "materials": [
+    "100% Cotton"
+  ],
+  "offers": [
+    {
+      "availability": "InStock",
+      "condition": "new",
+      "dimensions": null,
+      "domain": "us.sunspel.com",
+      "max_commission_rate": 0.056,
+      "price": {
+        "compare_at_price": null,
+        "currency": "USD",
+        "price": 195.0
+      },
+      "url": "https://buy.trychannel3.com/PSW8GeK-m1d3-8aUHo5?o=REDACTED&aid=REDACTED"
+    }
+  ],
+  "ratings": null,
+  "structured_attributes": {
+    "fabric": [
+      "Cotton"
+    ],
+    "neckline": [
+      "Collared"
+    ],
+    "pattern": [
+      "Solid"
+    ],
+    "sleeve-length-type": [
+      "Long"
+    ],
+    "top-fit": [
+      "Regular"
+    ]
+  },
+  "title": "Button Down Oxford Shirt",
+  "variants": null
+}

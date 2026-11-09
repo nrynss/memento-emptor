@@ -1,0 +1,1722 @@
+{
+  "next_page_token": "eyJjYWNoZV9rZXkiOiAic2VhcmNoOjQwNDFjNjI1YmU0NWVjYTUiLCAib2Zmc2V0IjogMTB9",
+  "products": [
+    {
+      "age": null,
+      "brands": [
+        {
+          "id": "SMwk",
+          "name": "Sunspel"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#f1f1ef",
+          "percentage": 1.0
+        }
+      ],
+      "description": "This Men's Button Down Oxford Shirt is crafted from heavyweight 100% cotton with a full-textured Oxford weave that provides structured shape. It features a regular fit, a traditional button-down collar, and a wide front placket finished with authentic trocas shell buttons. Designed for versatility, it can be worn with denim or chinos or layered under knitwear and jackets.",
+      "gender": "male",
+      "id": "tbnrl46",
+      "images": [
+        {
+          "alt_text": "White men's button-down oxford shirt laid flat.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/6f0f3b5d-2cb2-4a00-929e-20363b2c9b4a?aid=REDACTED&mid=m1d3",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/6f0f3b5d-2cb2-4a00-929e-20363b2c9b4a?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Male model wearing a white button-down shirt and dark jeans.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/02747856-77f6-4de9-9456-b892aa552506?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/02747856-77f6-4de9-9456-b892aa552506?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Male model wearing a white button-down shirt and dark jeans.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/dc3245bb-4923-4567-95a7-098b49a31ca6?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/dc3245bb-4923-4567-95a7-098b49a31ca6?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Detail of the collar, buttons, and Sunspel label on a white shirt fabric.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/6a5c6617-8f0f-4929-b205-d703de4c885b?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/6a5c6617-8f0f-4929-b205-d703de4c885b?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Back view of a white men's button-down shirt.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c919b981-44b3-4d57-9851-0730c0a0b5b8?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/c919b981-44b3-4d57-9851-0730c0a0b5b8?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up of the collar and placket of a white button-down shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/943ffd2a-2d2b-4724-9b4e-56e004d48ea1?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up texture of white shirting fabric.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/36586f3a-9dd8-4a1f-88ed-0c9c9858286e?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/36586f3a-9dd8-4a1f-88ed-0c9c9858286e?aid=REDACTED&mid=m1d3"
+        }
+      ],
+      "key_features": [
+        "Heavyweight cotton fabric",
+        "Oxford weave for full texture and structure",
+        "Regular fit",
+        "Traditional button-down collar",
+        "Wide front placket",
+        "Trocas shell buttons"
+      ],
+      "materials": [
+        "100% Cotton"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "us.sunspel.com",
+          "max_commission_rate": 0.035,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 195.0
+          },
+          "url": "https://buy.trychannel3.com/tbnrl46-m1d3-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "top-fit": [
+          "Regular"
+        ]
+      },
+      "title": "Men's Button Down Oxford Shirt",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "SMwk",
+          "name": "Sunspel"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#e4eaf0",
+          "percentage": 1.0
+        }
+      ],
+      "description": "This men's button-down Oxford shirt in light blue is crafted from heavyweight 100% cotton with a full-textured Oxford weave that provides structure. It features a regular fit, a traditional button-down collar, and a wide front placket finished with trocas shell buttons. This timeless piece is versatile enough to be worn with denim or chinos, or layered under knitwear and jackets.",
+      "gender": "male",
+      "id": "VyAkjCA",
+      "images": [
+        {
+          "alt_text": "Light blue button-down oxford shirt laid flat on a light background.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/29a4bf9c-a226-40ae-a893-9747930cb433?aid=REDACTED&mid=m1d3",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/29a4bf9c-a226-40ae-a893-9747930cb433?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Man wearing a light blue oxford shirt and navy pants.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/f32b950b-e156-4aa0-880a-5fa28cd134ea?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/f32b950b-e156-4aa0-880a-5fa28cd134ea?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Man wearing a light blue shirt, navy cardigan, and navy pants.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "lifestyle",
+          "url": "https://cdn.trychannel3.com/a28d3c50-a88f-400e-9fa4-95127814918a?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up detail of the collar and button placket of a light blue shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/8e22a6fc-7a79-4f67-a07c-93da2ca75138?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Man viewed from the back wearing a light blue oxford shirt.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/2b050c96-f532-4102-a512-446c53ed7061?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/2b050c96-f532-4102-a512-446c53ed7061?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up detail of the collar and placket of a light blue shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/532cdb9b-115a-4db1-b915-6bbcf8dc71a7?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up texture of the light blue oxford shirt fabric.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/f43c4611-b968-44c2-9094-6edfccabed12?aid=REDACTED&mid=m1d3"
+        }
+      ],
+      "key_features": [
+        "Regular fit",
+        "Traditional button-down collar",
+        "Wide front placket",
+        "Trocas shell buttons",
+        "Heavyweight cotton Oxford weave"
+      ],
+      "materials": [
+        "100% Cotton"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "us.sunspel.com",
+          "max_commission_rate": 0.035,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 195.0
+          },
+          "url": "https://buy.trychannel3.com/VyAkjCA-m1d3-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "top-fit": [
+          "Regular"
+        ]
+      },
+      "title": "Button Down Oxford Shirt",
+      "variants": null
+    },
+    {
+      "age": null,
+      "brands": [
+        {
+          "id": "SMwk",
+          "name": "Sunspel"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#c6ccda",
+          "percentage": 0.9248
+        },
+        {
+          "hex": "#929bac",
+          "percentage": 0.0752
+        }
+      ],
+      "description": "This regular-fit button-down shirt is crafted from heavyweight cotton with a full-textured Oxford weave for added structure. It features a traditional button-down collar, a wide front placket with trocas shell buttons, and is made in Portugal. A versatile wardrobe staple, it can be paired with denim or chinos, or layered under knitwear and jackets.",
+      "gender": "male",
+      "id": "PSW8GeK",
+      "images": [
+        {
+          "alt_text": "Light blue men's button-down oxford shirt displayed against a plain background.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c6caae06-7b77-41ca-9b51-ccf8581a896d?aid=REDACTED&mid=m1d3",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/c6caae06-7b77-41ca-9b51-ccf8581a896d?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Man wearing a light blue oxford shirt and dark pants.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/8560fd3f-4689-4a8e-9746-ae92acb5146d?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/8560fd3f-4689-4a8e-9746-ae92acb5146d?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Man wearing a light blue button-down shirt and dark trousers.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/c2d3f560-21ca-4192-ae69-122a0020ec8e?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/c2d3f560-21ca-4192-ae69-122a0020ec8e?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up detail of the collar and cuff of a light blue shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/05668fc5-6cec-44b6-a314-285a8bb4f782?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Man viewed from the back wearing a light blue oxford shirt.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/e331637a-94ab-4ce2-bbc9-bc71f4b7662b?aid=REDACTED&mid=m1d3",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/e331637a-94ab-4ce2-bbc9-bc71f4b7662b?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up of the collar and placket of a light blue oxford shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/5cbcfd84-c868-4f7a-8eeb-4035010b771a?aid=REDACTED&mid=m1d3"
+        },
+        {
+          "alt_text": "Close-up of the blue and white checked fabric texture of the shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": null,
+          "url": "https://cdn.trychannel3.com/c30f2932-ff0d-45a1-a545-400dd60529cb?aid=REDACTED&mid=m1d3"
+        }
+      ],
+      "key_features": [
+        "Regular fit",
+        "Traditional button-down collar",
+        "Wide front placket",
+        "Trocas shell buttons",
+        "Heavyweight cotton",
+        "Oxford weave"
+      ],
+      "materials": [
+        "100% Cotton"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "us.sunspel.com",
+          "max_commission_rate": 0.035,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 195.0
+          },
+          "url": "https://buy.trychannel3.com/PSW8GeK-m1d3-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "top-fit": [
+          "Regular"
+        ]
+      },
+      "title": "Button Down Oxford Shirt",
+      "variants": null
+    },
+    {
+      "age": null,
+      "brands": [
+        {
+          "id": "ISZ8",
+          "name": "bonobos"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#745443",
+          "percentage": 0.2435
+        },
+        {
+          "hex": "#d1bc9e",
+          "percentage": 0.164
+        },
+        {
+          "hex": "#967b61",
+          "percentage": 0.1431
+        },
+        {
+          "hex": "#503526",
+          "percentage": 0.1307
+        },
+        {
+          "hex": "#2f1b10",
+          "percentage": 0.1129
+        },
+        {
+          "hex": "#e7dcc9",
+          "percentage": 0.1088
+        },
+        {
+          "hex": "#b69e81",
+          "percentage": 0.097
+        }
+      ],
+      "description": "A slim-fit everyday Oxford shirt for men, featuring a brown and lavender stripe pattern. It is designed with a classic button-down collar and is crafted from a comfort stretch fabric consisting of 98% cotton and 2% spandex.",
+      "gender": "male",
+      "id": "V9BYM3z",
+      "images": [
+        {
+          "alt_text": "Man wearing a brown lavender striped oxford shirt and khaki pants.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/9fd2a2af-b611-4688-822d-7b01ebbfd556?aid=REDACTED&mid=Dd4D",
+          "is_main_image": true,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/9fd2a2af-b611-4688-822d-7b01ebbfd556?aid=REDACTED&mid=Dd4D"
+        }
+      ],
+      "key_features": [
+        "Button-down collar",
+        "Comfort stretch fabric",
+        "Slim fit"
+      ],
+      "materials": [
+        "98% Cotton",
+        "2% Spandex"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "bonobos.com",
+          "max_commission_rate": 0.143,
+          "price": {
+            "compare_at_price": 89.0,
+            "currency": "USD",
+            "price": 49.0
+          },
+          "url": "https://buy.trychannel3.com/V9BYM3z-Dd4D-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "care-instructions": [
+          "Machine washable",
+          "Tumble dry",
+          "Ironing instructions"
+        ],
+        "clothing-features": [
+          "Stretchable"
+        ],
+        "fabric": [
+          "Cotton",
+          "Spandex"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Striped"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "stretch-level": [
+          "Moderate stretch"
+        ],
+        "top-fit": [
+          "Slim"
+        ],
+        "top-length-type": [
+          "Medium"
+        ]
+      },
+      "title": "Everyday Oxford Shirt",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "ISZ8",
+          "name": "bonobos"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#2d3547",
+          "percentage": 0.3666
+        },
+        {
+          "hex": "#59504e",
+          "percentage": 0.2968
+        },
+        {
+          "hex": "#312b2a",
+          "percentage": 0.127
+        },
+        {
+          "hex": "#b89d8b",
+          "percentage": 0.1071
+        },
+        {
+          "hex": "#131823",
+          "percentage": 0.1025
+        }
+      ],
+      "description": "A classic Oxford button-down shirt for men, designed with added stretch for enhanced comfort. This slim-fit shirt features a button-down collar and is presented in a deep indigo color.",
+      "gender": "male",
+      "id": "m4iRrEM",
+      "images": [
+        {
+          "alt_text": "Man wearing a dark indigo oxford shirt and grey trousers.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/38ce2afc-bcc9-4b41-94e1-61632bf4578d?aid=REDACTED&mid=Dd4D",
+          "is_main_image": true,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/38ce2afc-bcc9-4b41-94e1-61632bf4578d?aid=REDACTED&mid=Dd4D"
+        }
+      ],
+      "key_features": [
+        "Button-down collar",
+        "Comfort stretch fabric"
+      ],
+      "materials": [
+        "Cotton",
+        "Spandex"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "bonobos.com",
+          "max_commission_rate": 0.143,
+          "price": {
+            "compare_at_price": 89.0,
+            "currency": "USD",
+            "price": 49.0
+          },
+          "url": "https://buy.trychannel3.com/m4iRrEM-Dd4D-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "care-instructions": [
+          "Machine washable",
+          "Tumble dry",
+          "Ironing instructions"
+        ],
+        "clothing-features": [
+          "Stretchable"
+        ],
+        "fabric": [
+          "Cotton",
+          "Spandex"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "top-fit": [
+          "Slim",
+          "Tailored"
+        ],
+        "top-length-type": [
+          "Long"
+        ]
+      },
+      "title": "Everyday Oxford Shirt",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "2LjP",
+          "name": "The Anthology"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#d9cda0",
+          "percentage": 0.6552
+        },
+        {
+          "hex": "#eae5c9",
+          "percentage": 0.2513
+        },
+        {
+          "hex": "#cbb77e",
+          "percentage": 0.0936
+        }
+      ],
+      "description": "A classic white Oxford button-down shirt made from 100% cotton. This shirt features a button-down collar, a front button placket, and a chest pocket. It's designed with a traditional American Oxford (OCBD) style, including a box pleat and locker loop at the back, and hand-cut barrel cuffs. The fabric is a slightly heavier thread with hard-wearing properties, making it suitable for both casual and dressier occasions. It can be worn year-round, paired with various outfits.",
+      "gender": "male",
+      "id": "3SAdGdJ",
+      "images": [
+        {
+          "alt_text": "White Oxford button-down shirt laid flat on a background.",
+          "cleaned_url": "https://cdn.trychannel3.com/10d3680e-30db-41f8-a86d-137260bf2386?aid=REDACTED&mid=G91d",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/7480d1cb-e407-405b-9d77-ec842ffb5a6d?aid=REDACTED&mid=G91d"
+        }
+      ],
+      "key_features": [
+        "button-down collar",
+        "placket",
+        "chest pocket",
+        "box pleat",
+        "locker loop",
+        "hand-cut barrel cuffs",
+        "Mother of Pearl buttons",
+        "22-23 stitches per inch (SPI)",
+        "Split yoke",
+        "Precise pattern matching"
+      ],
+      "materials": [
+        "100% cotton",
+        "Mother of Pearl"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "theanthology.net",
+          "max_commission_rate": 0.0,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 200.0
+          },
+          "url": "https://buy.trychannel3.com/3SAdGdJ-G91d-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "care-instructions": [
+          "Dry clean only"
+        ],
+        "chest-pocket-style": [
+          "Single patch"
+        ],
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Crew"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "shirt-cuff-style": [
+          "Button"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "top-fit": [
+          "Regular"
+        ]
+      },
+      "title": "Oxford Button-down Shirt",
+      "variants": {
+        "options": [
+          {
+            "name": "Color",
+            "values": [
+              {
+                "available": null,
+                "exists": true,
+                "label": "Blue",
+                "product_id": "GUzQ7h5",
+                "thumbnail_url": "https://cdn.trychannel3.com/67f67cfe-3384-4814-a2d4-ae56a9b098f7"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "Dusty Green",
+                "product_id": "m7HerjK",
+                "thumbnail_url": "https://cdn.trychannel3.com/024ae2b7-fb2e-47a4-bc56-08740aaa05d5"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "Dusty Yellow",
+                "product_id": "Rb8M4qW",
+                "thumbnail_url": "https://cdn.trychannel3.com/da7c516f-b04a-4dfc-a1e0-ece8cc3e5e9b"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "Light Blue",
+                "product_id": "Qa6WimI",
+                "thumbnail_url": "https://cdn.trychannel3.com/0035c3c9-0734-4a28-932c-d07b9d0cf1b1"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "Pink",
+                "product_id": "2Dh5cOT",
+                "thumbnail_url": "https://cdn.trychannel3.com/a46b4168-d75a-43b8-9099-de6a1ed05f9e"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "White",
+                "product_id": "3SAdGdJ",
+                "thumbnail_url": "https://cdn.trychannel3.com/7480d1cb-e407-405b-9d77-ec842ffb5a6d"
+              }
+            ]
+          },
+          {
+            "name": "Collar Size",
+            "values": [
+              {
+                "available": null,
+                "exists": true,
+                "label": "36cm (14\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "37cm (14 1/2\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "38cm (15\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "39cm (15 1/4\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "40cm (15 3/4\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "41cm (16\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "42cm (16 1/2\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "43cm (17\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "44cm (17 1/4\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "45cm (17 3/4\")",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "46cm (18\")",
+                "product_id": null,
+                "thumbnail_url": null
+              }
+            ]
+          }
+        ],
+        "selected": [
+          {
+            "label": "White",
+            "name": "Color"
+          }
+        ]
+      }
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "usl7",
+          "name": "Everlane"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#2d2629",
+          "percentage": 0.6669
+        },
+        {
+          "hex": "#c5a894",
+          "percentage": 0.1155
+        },
+        {
+          "hex": "#413d3e",
+          "percentage": 0.1141
+        },
+        {
+          "hex": "#110e0f",
+          "percentage": 0.1034
+        }
+      ],
+      "description": "A classic and stylish lightweight woven oxford button-down shirt in solid black. Designed for versatility, it transitions easily from office wear to evening outings and is a staple for a modern man's wardrobe. The shirt features a polished design suitable for business casual or smart-casual looks.",
+      "gender": "male",
+      "id": "ZHDLLpv",
+      "images": [
+        {
+          "alt_text": "Man wearing a black oxford button-down shirt against a white background.",
+          "cleaned_url": null,
+          "is_main_image": true,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/0a0bfef9-fa7a-4281-a4a3-191f36e1c0f6?aid=REDACTED&mid=o4ih"
+        }
+      ],
+      "key_features": [
+        "Solid black color",
+        "Button-down design",
+        "Long sleeves",
+        "Single chest pocket",
+        "Lightweight woven fabric"
+      ],
+      "materials": [
+        "woven fabric"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "taelor.style",
+          "max_commission_rate": 0.105,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 62.0
+          },
+          "url": "https://buy.trychannel3.com/ZHDLLpv-o4ih-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "chest-pocket-style": [
+          "Single patch"
+        ],
+        "clothing-features": [
+          "Lightweight"
+        ],
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ]
+      },
+      "title": "Oxford Button Down Shirt",
+      "variants": null
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "XB9q",
+          "name": "Penguin"
+        }
+      ],
+      "category": {
+        "has_children": true,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          }
+        ],
+        "slug": "shirts-2",
+        "title": "Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#bba5a4",
+          "percentage": 0.5365
+        },
+        {
+          "hex": "#735147",
+          "percentage": 0.1524
+        },
+        {
+          "hex": "#867271",
+          "percentage": 0.1201
+        },
+        {
+          "hex": "#482f29",
+          "percentage": 0.1002
+        },
+        {
+          "hex": "#a87f71",
+          "percentage": 0.0908
+        }
+      ],
+      "description": "A men's short sleeve button-down Oxford shirt by Original Penguin, designed for a classic yet modern casual look. It features a slim cut with stretch fabric for a sleek and comfortable fit, making it an ideal choice for warmer weather. The shirt is crafted from a lightweight and durable braided Oxford fabric and includes a polished button-down collar, a pocketless design, and the signature embroidered Pete logo on the left chest.",
+      "gender": "male",
+      "id": "iOjQRxz",
+      "images": [
+        {
+          "alt_text": "Man wearing a pinkish-brown button-down Oxford shirt.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/0aa2479c-0df0-469d-a8a6-22865977bbb6?aid=REDACTED&mid=kM1j",
+          "is_main_image": true,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/0aa2479c-0df0-469d-a8a6-22865977bbb6?aid=REDACTED&mid=kM1j"
+        },
+        {
+          "alt_text": "Man from the back wearing a pinkish-brown button-down shirt.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/4a08df1c-aa9e-4349-b31e-e60b4e80eb6e?aid=REDACTED&mid=kM1j",
+          "is_main_image": false,
+          "shot_type": "on_model",
+          "url": "https://cdn.trychannel3.com/4a08df1c-aa9e-4349-b31e-e60b4e80eb6e?aid=REDACTED&mid=kM1j"
+        }
+      ],
+      "key_features": [
+        "Slim Fit",
+        "Enhanced Wit Stretch For Comfort",
+        "Button Down Collar",
+        "Sleek Pocketless Design",
+        "Embroidered Pete Logo At Left Chest",
+        "Machine Wash"
+      ],
+      "materials": [
+        "100% Cotton"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": {
+            "height": null,
+            "length": null,
+            "weight": {
+              "number": 295.0,
+              "unit": "g"
+            },
+            "width": null
+          },
+          "domain": "originalpenguin.com",
+          "max_commission_rate": 0.042,
+          "price": {
+            "compare_at_price": 85.0,
+            "currency": "USD",
+            "price": 34.99
+          },
+          "url": "https://buy.trychannel3.com/iOjQRxz-kM1j-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "care-instructions": [
+          "Machine washable"
+        ],
+        "chest-pocket-style": [
+          "None"
+        ],
+        "clothing-features": [
+          "Stretchable",
+          "Lightweight"
+        ],
+        "decoration-technique": [
+          "Embroidery"
+        ],
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Solid"
+        ],
+        "sleeve-length-type": [
+          "Short"
+        ],
+        "stretch-level": [
+          "Moderate stretch"
+        ],
+        "top-fit": [
+          "Slim"
+        ]
+      },
+      "title": "Button-down Oxford Shirt",
+      "variants": {
+        "options": [
+          {
+            "name": "Color",
+            "values": [
+              {
+                "available": null,
+                "exists": true,
+                "label": "Port Royale",
+                "product_id": "iOjQRxz",
+                "thumbnail_url": "https://cdn.trychannel3.com/0aa2479c-0df0-469d-a8a6-22865977bbb6"
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "Dusty Olive",
+                "product_id": "hqpsJmr",
+                "thumbnail_url": "https://cdn.trychannel3.com/50114660-e904-4f45-ac36-2371163a668f"
+              }
+            ]
+          },
+          {
+            "name": "Size",
+            "values": [
+              {
+                "available": null,
+                "exists": true,
+                "label": "XS",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "S",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "M",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "L",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "XL",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "XXL",
+                "product_id": null,
+                "thumbnail_url": null
+              }
+            ]
+          },
+          {
+            "name": "Front Rise",
+            "values": [
+              {
+                "available": null,
+                "exists": true,
+                "label": "9 1/4\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "9 3/8\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "9 1/2\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "9 5/8\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "9 3/4\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "9 15/16\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "10 1/8\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "10 5/16\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "10 1/2\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "10 7/8\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "11 1/4\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "11 5/8\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "12\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "12 3/8\"",
+                "product_id": null,
+                "thumbnail_url": null
+              },
+              {
+                "available": null,
+                "exists": true,
+                "label": "12 3/4\"",
+                "product_id": null,
+                "thumbnail_url": null
+              }
+            ]
+          }
+        ],
+        "selected": [
+          {
+            "label": "Port Royale",
+            "name": "Color"
+          }
+        ]
+      }
+    },
+    {
+      "age": null,
+      "brands": [
+        {
+          "id": "ZQKU",
+          "name": "Drake's"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#eae4ea",
+          "percentage": 1.0
+        }
+      ],
+      "description": "A classic men's button-down shirt crafted from 100% cotton oxford cloth featuring a lilac ticking stripe pattern. This shirt is designed with a regular silhouette, a rolling button-down collar with brushed floating interlining, and refined details including whipped mother-of-pearl buttons and a chest pocket. Made in Somerset, England, it offers a timeless blend of traditional menswear style and contemporary fit.",
+      "gender": "male",
+      "id": "LCfcrFc",
+      "images": [
+        {
+          "alt_text": "Lilac ticking stripe button-down shirt displayed on a mannequin.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/687d9b0e-b5db-4808-a375-58d79ebd716a?aid=REDACTED&mid=7ocv",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/876a6783-6e07-41de-b054-d2432c0d9c1c?aid=REDACTED&mid=7ocv"
+        },
+        {
+          "alt_text": "Close-up swatch of lilac and white ticking stripe fabric.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": null,
+          "url": "https://cdn.trychannel3.com/2b8c02fc-b2b7-4158-bfd9-be3d2139fe17?aid=REDACTED&mid=7ocv"
+        },
+        {
+          "alt_text": "Close-up of the collar and placket of a lilac striped shirt.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/dd387c17-5aa9-40c7-807e-e3b90fc31324?aid=REDACTED&mid=7ocv",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/37a6aaed-6586-4c5a-a8bc-a804ede9ffab?aid=REDACTED&mid=7ocv"
+        },
+        {
+          "alt_text": "Close-up of stitching on the chest area of a striped shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/74891138-a63c-4f6d-8fdb-58c8c0bcf924?aid=REDACTED&mid=7ocv"
+        },
+        {
+          "alt_text": "Back view of a lilac ticking stripe button-down shirt.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/63746e3a-2306-4ca5-adfa-6fa31f0a0c85?aid=REDACTED&mid=7ocv",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/a611b865-4112-4f5b-bc4d-522fad331f81?aid=REDACTED&mid=7ocv"
+        }
+      ],
+      "key_features": [
+        "100% Cotton",
+        "Made in Somerset, England",
+        "Button-down collar with brushed, floating interlining",
+        "Regular silhouette",
+        "Single-needle construction",
+        "Whipped 18L Mother of Pearl buttons",
+        "Chest pocket",
+        "Box pleat",
+        "Single rounded one-button cuff"
+      ],
+      "materials": [
+        "100% Cotton"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "us.drakes.com",
+          "max_commission_rate": 0.07,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 312.0
+          },
+          "url": "https://buy.trychannel3.com/LCfcrFc-7ocv-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "chest-pocket-style": [
+          "Single patch"
+        ],
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Striped"
+        ],
+        "shirt-cuff-style": [
+          "Button"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "top-fit": [
+          "Regular"
+        ]
+      },
+      "title": "Ticking Stripe Cotton Oxford Cloth Button-down Shirt",
+      "variants": {
+        "options": [],
+        "selected": [
+          {
+            "label": "14",
+            "name": "Size"
+          }
+        ]
+      }
+    },
+    {
+      "age": "adult",
+      "brands": [
+        {
+          "id": "YnjB",
+          "name": "Gitman Brothers Vintage"
+        }
+      ],
+      "category": {
+        "has_children": false,
+        "path": [
+          {
+            "slug": "apparel-accessories",
+            "title": "Apparel & Accessories"
+          },
+          {
+            "slug": "clothing",
+            "title": "Clothing"
+          },
+          {
+            "slug": "shirts-tops",
+            "title": "Shirts & Tops"
+          },
+          {
+            "slug": "shirts-2",
+            "title": "Shirts"
+          },
+          {
+            "slug": "dress-shirts",
+            "title": "Dress Shirts"
+          }
+        ],
+        "slug": "dress-shirts",
+        "title": "Dress Shirts"
+      },
+      "colors": [
+        {
+          "hex": "#d7dde7",
+          "percentage": 0.8335
+        },
+        {
+          "hex": "#6e727e",
+          "percentage": 0.1234
+        }
+      ],
+      "description": "This classic men's dress shirt from Gitman Bros. is crafted from durable Cambridge Oxford fabric, a staple of the brand since 1978. It features a timeless blue striped pattern, a button-down collar, barrel cuffs, and a single breast pocket, making it versatile enough for both professional workdays and casual weekends.",
+      "gender": "male",
+      "id": "7g001zU",
+      "images": [
+        {
+          "alt_text": "Blue and white striped button-down shirt laid flat on a white background.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/58627064-4dd7-44e6-a1ac-b9059a8d6ccc?aid=REDACTED&mid=L3sI",
+          "is_main_image": true,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/58627064-4dd7-44e6-a1ac-b9059a8d6ccc?aid=REDACTED&mid=L3sI"
+        },
+        {
+          "alt_text": "Blue and white striped button-down shirt laid flat on a white background.",
+          "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/376a6f99-f87e-4ebc-adc2-eb7870005d6d?aid=REDACTED&mid=L3sI",
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/376a6f99-f87e-4ebc-adc2-eb7870005d6d?aid=REDACTED&mid=L3sI"
+        },
+        {
+          "alt_text": "Close-up of the collar and placket detail of a blue and white striped shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "hero",
+          "url": "https://cdn.trychannel3.com/3766f7e1-c704-4e16-ad1a-db77b50fd3aa?aid=REDACTED&mid=L3sI"
+        },
+        {
+          "alt_text": "Close-up of the sleeve cuff and button detail on a striped shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/b9a2b42c-5ad7-46df-b0a8-111a7e52d15f?aid=REDACTED&mid=L3sI"
+        },
+        {
+          "alt_text": "Close-up of a button on the sleeve of a striped shirt.",
+          "cleaned_url": null,
+          "is_main_image": false,
+          "shot_type": "detail",
+          "url": "https://cdn.trychannel3.com/fe80395b-ecd7-481e-9140-9b419e18689f?aid=REDACTED&mid=L3sI"
+        }
+      ],
+      "key_features": [
+        "Cambridge Oxford fabric for comfort and durability",
+        "Button down collar",
+        "Barrel cuffs",
+        "Single breast pocket",
+        "Classic fit"
+      ],
+      "materials": [
+        "Cambridge Oxford fabric"
+      ],
+      "offers": [
+        {
+          "availability": "InStock",
+          "condition": "new",
+          "dimensions": null,
+          "domain": "gitman.com",
+          "max_commission_rate": 0.0,
+          "price": {
+            "compare_at_price": null,
+            "currency": "USD",
+            "price": 255.0
+          },
+          "url": "https://buy.trychannel3.com/7g001zU-L3sI-8aUHo5?o=REDACTED&aid=REDACTED"
+        }
+      ],
+      "ratings": null,
+      "structured_attributes": {
+        "chest-pocket-style": [
+          "Single patch"
+        ],
+        "fabric": [
+          "Cotton"
+        ],
+        "neckline": [
+          "Collared"
+        ],
+        "pattern": [
+          "Striped"
+        ],
+        "shirt-cuff-style": [
+          "Barrel"
+        ],
+        "sleeve-length-type": [
+          "Long"
+        ],
+        "top-fit": [
+          "Tailored",
+          "Regular"
+        ]
+      },
+      "title": "Bengal Stripe Made To Order Shirt",
+      "variants": {
+        "options": [
+          {
+            "name": "Color",
+            "values": [
+              {
+                "available": null,
+                "exists": false,
+                "label": "Light Blue",
+                "product_id": "GckaQ2K",
+                "thumbnail_url": "https://cdn.trychannel3.com/b9200122-de51-4792-b4d2-9abbfc3527eb"
+              },
+              {
+                "available": null,
+                "exists": false,
+                "label": "Lavender",
+                "product_id": "9fhy3Eu",
+                "thumbnail_url": "https://cdn.trychannel3.com/a8e062a8-7d08-45bb-90ce-480f275ecf60"
+              }
+            ]
+          },
+          {
+            "name": "Option",
+            "values": []
+          }
+        ],
+        "selected": [
+          {
+            "label": "Tall",
+            "name": "Size"
+          },
+          {
+            "label": "15.5",
+            "name": "Collar"
+          },
+          {
+            "label": "34",
+            "name": "Sleeve"
+          }
+        ]
+      }
+    }
+  ]
+}

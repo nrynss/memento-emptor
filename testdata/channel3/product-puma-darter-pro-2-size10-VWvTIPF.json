@@ -1,0 +1,333 @@
+{
+  "age": "adult",
+  "brands": [
+    {
+      "id": "T0QO",
+      "name": "Puma"
+    }
+  ],
+  "category": {
+    "has_children": false,
+    "path": [
+      {
+        "slug": "apparel-accessories",
+        "title": "Apparel & Accessories"
+      },
+      {
+        "slug": "shoes",
+        "title": "Shoes"
+      },
+      {
+        "slug": "athletic-shoes",
+        "title": "Athletic Shoes"
+      }
+    ],
+    "slug": "athletic-shoes",
+    "title": "Athletic Shoes"
+  },
+  "colors": [
+    {
+      "hex": "#28292c",
+      "percentage": 0.4164
+    },
+    {
+      "hex": "#e0e3e9",
+      "percentage": 0.2627
+    },
+    {
+      "hex": "#43474c",
+      "percentage": 0.1284
+    },
+    {
+      "hex": "#131315",
+      "percentage": 0.0968
+    },
+    {
+      "hex": "#6a8798",
+      "percentage": 0.0956
+    }
+  ],
+  "description": "The PUMA Darter Pro 2 Running Shoes for men combine style and athletic performance. They feature an engineered mesh upper for breathability and are constructed with at least 30% recycled material. For cushioning and responsiveness, the shoes utilize PUMA's PROFOAM technology, while the PROTREAD outsole provides multi-surface traction. Design details include a lace-up closure, convenient pull tabs, and the signature PUMA CAT logo.",
+  "gender": "male",
+  "id": "VWvTIPF",
+  "images": [
+    {
+      "alt_text": "PUMA Darter Pro 2 running shoe in black, white, and blue on a white background.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/e1b822bb-b4be-427a-adac-930eeb461427?aid=REDACTED&mid=fsxO",
+      "is_main_image": true,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/e1b822bb-b4be-427a-adac-930eeb461427?aid=REDACTED&mid=fsxO"
+    },
+    {
+      "alt_text": "Front and back view of a pair of black running shoes.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/f8ac3a35-f171-4211-90a1-2df86f1b438f?aid=REDACTED&mid=fsxO",
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/f8ac3a35-f171-4211-90a1-2df86f1b438f?aid=REDACTED&mid=fsxO"
+    },
+    {
+      "alt_text": "Side view of a black running shoe with white and blue accents.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/0a0094e9-c967-4ec3-8a2d-f0441d09a719?aid=REDACTED&mid=fsxO",
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/0a0094e9-c967-4ec3-8a2d-f0441d09a719?aid=REDACTED&mid=fsxO"
+    },
+    {
+      "alt_text": "Three-quarter view of the PUMA Darter Pro 2 running shoe.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/9db2f7d3-fbdf-4fd9-9f2d-e1b2168fea71?aid=REDACTED&mid=fsxO",
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/9db2f7d3-fbdf-4fd9-9f2d-e1b2168fea71?aid=REDACTED&mid=fsxO"
+    },
+    {
+      "alt_text": "Close-up of the black and white outsole tread pattern of the running shoe.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/8520295c-02ca-4675-9668-90c0b00e8148?aid=REDACTED&mid=fsxO",
+      "is_main_image": false,
+      "shot_type": "detail",
+      "url": "https://cdn.trychannel3.com/8520295c-02ca-4675-9668-90c0b00e8148?aid=REDACTED&mid=fsxO"
+    },
+    {
+      "alt_text": "Two black running shoes shown side by side.",
+      "cleaned_url": null,
+      "is_main_image": false,
+      "shot_type": "lifestyle",
+      "url": "https://cdn.trychannel3.com/73dcfb6f-ed74-449b-a044-4fcc7badfb0d?aid=REDACTED&mid=fsxO"
+    },
+    {
+      "alt_text": "Pair of black running shoes shown from the back view.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/98bd1339-68f9-4bb0-b91a-5b28b7e871bb?aid=REDACTED&mid=fsxO",
+      "is_main_image": false,
+      "shot_type": "lifestyle",
+      "url": "https://cdn.trychannel3.com/98bd1339-68f9-4bb0-b91a-5b28b7e871bb?aid=REDACTED&mid=fsxO"
+    },
+    {
+      "alt_text": "Side view of a black PUMA running shoe with white and blue accents.",
+      "cleaned_url": "https://cdn.trychannel3.com/cleaned/v1/a296cb76-e483-42ae-b519-28b5cab42ae9?aid=REDACTED&mid=fsxO",
+      "is_main_image": false,
+      "shot_type": "hero",
+      "url": "https://cdn.trychannel3.com/a296cb76-e483-42ae-b519-28b5cab42ae9?aid=REDACTED&mid=fsxO"
+    }
+  ],
+  "key_features": [
+    "PROFOAM technology for immediate cushioning",
+    "PROTREAD outsole for multi-surface traction",
+    "Engineered mesh upper for breathability",
+    "Run PUMA Last for performance fit",
+    "Contains a minimum of 20 percent recycled content"
+  ],
+  "materials": [
+    "synthetic",
+    "polyester",
+    "rubber"
+  ],
+  "offers": [
+    {
+      "availability": "InStock",
+      "condition": "new",
+      "dimensions": null,
+      "domain": "zappos.com",
+      "max_commission_rate": 0.05,
+      "price": {
+        "compare_at_price": 73.0,
+        "currency": "USD",
+        "price": 54.98
+      },
+      "url": "https://buy.trychannel3.com/VWvTIPF-fsxO-8aUHo5?o=REDACTED&aid=REDACTED"
+    }
+  ],
+  "ratings": null,
+  "structured_attributes": {
+    "activity": [
+      "Running"
+    ],
+    "ankle-collar-style": [
+      "Low cut"
+    ],
+    "closure-type": [
+      "Lace-up"
+    ],
+    "compatible-playing-surface": [
+      "Multi-surface"
+    ],
+    "footwear-cut": [
+      "Low cut"
+    ],
+    "footwear-material": [
+      "Synthetic",
+      "Polyester",
+      "Rubber"
+    ],
+    "heel-height-type": [
+      "Flat"
+    ],
+    "occasion-style": [
+      "Casual"
+    ],
+    "outsole-material": [
+      "Rubber"
+    ],
+    "pattern": [
+      "Logo"
+    ],
+    "shoe-collar-height": [
+      "Low-top"
+    ],
+    "shoe-features": [
+      "Breathable design",
+      "Cushioned",
+      "Recycled materials"
+    ],
+    "sneaker-style": [
+      "Athletic"
+    ],
+    "toe-style": [
+      "Round"
+    ],
+    "upper-material": [
+      "Mesh",
+      "Synthetic"
+    ]
+  },
+  "title": "Men's Puma Darter Pro 2 Running Shoes",
+  "variants": {
+    "options": [
+      {
+        "name": "Size",
+        "values": [
+          {
+            "available": null,
+            "exists": false,
+            "label": "4",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "5.5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "6",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "6.5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "7",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": "InStock",
+            "exists": true,
+            "label": "7.5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "8",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "8.5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": "InStock",
+            "exists": true,
+            "label": "9",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": "InStock",
+            "exists": true,
+            "label": "9.5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": "InStock",
+            "exists": true,
+            "label": "10",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": "InStock",
+            "exists": true,
+            "label": "10.5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "11",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "11.5",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "12",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "13",
+            "product_id": null,
+            "thumbnail_url": null
+          },
+          {
+            "available": null,
+            "exists": false,
+            "label": "14",
+            "product_id": null,
+            "thumbnail_url": null
+          }
+        ]
+      }
+    ],
+    "selected": [
+      {
+        "label": "10",
+        "name": "Size"
+      }
+    ]
+  }
+}
