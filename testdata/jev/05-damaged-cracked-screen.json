@@ -1,0 +1,53 @@
+{
+  "request": {
+    "model": "typesafe/jev-1.14",
+    "state": {
+      "answer": "the screen was cracked when I opened the box"
+    },
+    "questions": {
+      "reason": {
+        "type": "choice",
+        "instructions": "Why is the shopper returning the item? Pick the single category that best matches the shopper's answer.",
+        "criteria": {
+          "fit_too_small": "The item is too small or too tight: too tight in the shoulders, sleeves too short, cannot button or zip, runs small.",
+          "fit_too_large": "The item is too big or too loose: swims on the shopper, falls off, runs large.",
+          "damaged_or_defective": "The item arrived broken, damaged, cracked, torn, or does not work.",
+          "not_arrived": "The item never arrived, was lost in shipping, or delivery failed.",
+          "changed_mind": "The shopper changed their mind, no longer wants the item, or gives no product fault.",
+          "unclear": "The answer gives no usable reason, or is vague, ambiguous, or off-topic, so the agent must ask again."
+        }
+      }
+    }
+  },
+  "response": {
+    "model": "typesafe/jev-1.14-20261014",
+    "answers": {
+      "reason": {
+        "type": "choice",
+        "choice": "damaged_or_defective",
+        "probabilities": {
+          "fit_too_small": 0,
+          "fit_too_large": 0,
+          "damaged_or_defective": 1,
+          "not_arrived": 0,
+          "changed_mind": 0,
+          "unclear": 0
+        },
+        "confidence": 1
+      }
+    },
+    "usage": {
+      "input_tokens": 512,
+      "output_tokens": 80,
+      "cost": 2.1504e-05,
+      "is_byok": false,
+      "cost_details": {
+        "upstream_inference_cost": 2.1504e-05,
+        "upstream_inference_prompt_cost": 2.1504e-05,
+        "upstream_inference_completions_cost": 0
+      }
+    },
+    "id": "gen-dec-1794226513-YxGCO8tK9MXErwyQel5b",
+    "provider": "TypeSafe"
+  }
+}
