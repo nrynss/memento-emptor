@@ -66,8 +66,10 @@ Spend: $0.00. Read-only listings create nothing billable.
   from 164 KB of transcripts (`testdata/lambo/`), so the live SQLite
   file is hundreds of kilobytes at most: the 1 GB minimum disk holds it
   about a thousand times over, with daily snapshots on top.
-- The embedder adds no local weight: the settled contract is BGE-M3
-  through OpenRouter over HTTPS (T0.6), and recall is the Elastic
+- The embedder adds no local weight: the contract is embeddings
+  over HTTPS (BGE-M3 via OpenRouter at the time of writing; the project
+  direction is now Elastic-native once Lambo #236 lands — either way no
+  local model weight), and recall is the Elastic
   Serverless deployment (T0.6), so nothing large or stateful sits in
   instance RAM beside the Go service and the Lambo process.
 - 512 MB RAM / 0.5 CPU is the smallest paid plan and comfortably holds a

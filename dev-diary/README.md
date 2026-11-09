@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 9 / 10 | In progress |
+| P0 | 10 / 10 | Done |
 | P1 | 0 / 5 | Not started |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T0.9: Hosting (done)
+
+**What exists.** `dev-diary/research/hosting.md`: everything on Render at $7.25/mo ($7.00 `0.5c-512mb` + $0.25 1 GB disk, Hobby workspace $0) against the $50 credit — ~6.9 months runway, several times the retention rule. Free tier disqualified three ways (spin-down, ephemeral FS, no disks). Single web service with Lambo beside it on the disk mount; Lambo binary and `lambo.toml` ship in the image, only the data dir on the disk. Exact `POST /v1/services` and `render.yaml` provisioning calls recorded (nothing created, $0 spend), plus the PayPal webhook registration pattern and a P6 pre-flight checklist (credit balance, payment method on file, region, `store-sqlite` binary, no deploys in the judged window).
+
+**What surprised.** Disk-backed services lose zero-downtime deploys (seconds dark per redeploy) — PayPal retries plus event-id idempotency cover it, but don't deploy during judging. Suspension (not deletion) is the credit-exhaustion path, with disk + 7-day snapshots retaining the store.
+
+**The next agent should know.** P6 provisions this. Two pre-flight items are user-side: confirm remaining credit on the dashboard billing page, and whether a payment method must be on file for paid compute.
 
 ### Lambo issues 236-238 (filed by the orchestrator, user sends agents to fix)
 
