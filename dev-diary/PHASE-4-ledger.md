@@ -12,7 +12,8 @@ requires:   [T1.2, T1.4, T0.10]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/lib/api/
-status:     claimed:t41-apiclient
+status:     in-review
+notes:      Typed client in web/src/lib/api/ (types, decoders, fixture, Chaaya state). Fixture replays the nine-step story; step 9 equals the frozen ledger snapshots. Gate test pins types to testdata/api. Branch task/t41-apiclient.
 ```
 A typed client for the ledger's read endpoints, with a fixture mode that serves the demo story at any step.
 
