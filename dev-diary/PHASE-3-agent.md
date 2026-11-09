@@ -36,7 +36,7 @@ requires:   [T3.1, T0.5]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/catalog/
-status:     not-started
+status:     claimed:t32-catalog
 ```
 Candidate products and variants from real retailers, as a real part of the agent, behind an interface a builder could replace. Real-retailer fulfilment is labelled as simulated.
 
@@ -50,7 +50,7 @@ requires:   [T3.1, T0.4]
 fixture-ok: yes
 size:       M · frontier
 owns:       agent/orders/
-status:     not-started
+status:     claimed:t33-orders
 ```
 Durable order state (proposed → approved → captured, or failed and refunded), a uniqueness rule on open orders per shopper and need, `PayPal-Request-Id` on every create and capture, and webhook handling idempotent on the event ID. A purchase cannot be made without an approval record. Purchases run through our own sandbox merchant.
 
