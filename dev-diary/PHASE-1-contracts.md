@@ -42,7 +42,7 @@ requires:   [T1.1, T0.8]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/contract/, docs/interface.md
-status:     not-started
+status:     claimed:t12-iface
 ```
 Final names and schemas for the proposed surface in product.md: `recall_for_purchase`, `record_correction`, `pending_questions`, `record_reason`, `record_feedback`, `explain_belief`. Served over MCP, so that any agent on PayPal's toolkit can call them, and shaped so that T0.8's findings on Astropods work.
 
@@ -60,7 +60,7 @@ requires:   [T1.1, T0.3]
 fixture-ok: yes
 size:       M · frontier
 owns:       seed/, testdata/seed/
-status:     not-started
+status:     claimed:t13-seed
 ```
 A generator for seeded shopper histories, every row marked. Event times spread across the period so promotion's gates are met honestly, as T0.3 established.
 
