@@ -192,7 +192,7 @@ describe('fixture edit through the correction path', () => {
 });
 
 describe('the edit calls the correction path and nothing else', () => {
-	const ownModules = import.meta.glob('./*.ts', {
+	const ownModules = import.meta.glob(['./*.ts', './*.svelte'], {
 		query: '?raw',
 		import: 'default',
 		eager: true
