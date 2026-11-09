@@ -119,11 +119,31 @@ validated fine, so the taxonomy is real but unreachable this way.
 Recordings: `dispute-completed-capture-not-eligible.json`,
 `dispute-fuller-shape-unsupported.json`.
 
-What can stand in, labelled for the demo: buyer-side filing through the
-sandbox resolution center (a person action), which is also what the demo
-narrative already says — "the shopper files a dispute". That path produces a
-real dispute with a real reason code and a real `CUSTOMER.DISPUTE.CREATED`
-webhook. Nothing was fabricated as a stand-in here.
+What was the stand-in is now the evidenced path. A third cycle (order,
+scripted approval, capture, no refund) followed by filing in the sandbox
+resolution center as the shopper produced a live dispute:
+`DISPUTE-ID-SANDBOX-1`, `reason: MERCHANDISE_OR_SERVICE_NOT_RECEIVED`
+(top-level and per item), `status: OPEN`, life-cycle `INQUIRY`, disputed items
+carrying the SKU (`BRX-OXF-M`), quantity and reason, `custom:
+shopper-demo-001`, the buyer message as message and evidence, and the capture
+as `seller_transaction_id`. An API `GET` on the dispute id returns all of
+this under the merchant token; the list endpoint stays empty for the merchant
+token, so read disputes by id. Recording: `dispute-get.json`.
+
+Exact click path, repeatable for the demo (sandbox shopper login; scripted
+with Playwright Chromium, with back-off between logins when the sandbox
+throttles): disputes dashboard (`/disputes/dashboard/`) → open a Payment row
+→ in the sheet choose Report a problem → filing page
+(`/resolutioncenter/filing/{transaction}/create?type=PAYMENT`) → "I haven't
+received the item or service" → tick the item, Item type Physical product,
+Category, Quantity → Continue → pick the detail ("The item hasn't reached me
+or I refused delivery") → Continue → fill Expected refund amount (blank and
+link-like values are rejected; date, charges and link stay optional) →
+Continue → seller-contact step → documents step (optional) → review →
+Submit → case page with the case id. Server state persists between steps, so
+a direct visit to the filing URL resumes. Quirks seen: the dashboard list and
+the sheet CTA render unreliably under rapid automation; waiting out the
+sandbox throttle and addressing the filing URL directly were the fixes.
 
 ## 4. Webhooks: delivery, verification, redelivery
 
@@ -161,8 +181,8 @@ Fully verified end to end.
 
 What this means for the ingest (T2.1): key idempotency on PayPal's event id,
 verify every delivery through `verify-webhook-signature`, and rely on
-resend/retry rather than polling. The refund payload shape is now verified
-above; dispute payloads still await a real dispute.
+resend/retry rather than polling. The refund payload shape is verified above,
+and the dispute payload shape below.
 
 Second session under the replacement app: a fresh webhook
 (`WEBHOOK-ID-US-1`, same three event types) shows the new app's ledger
@@ -174,6 +194,19 @@ returned `SUCCESS`. The delivered refund resource carries the refund record
 shape with no reason field. Recordings: `webhook-us-app.json`,
 `webhook-events-us-ledger.json`, `webhook-resend-us-accepted.json`,
 `webhook-delivery-refunded.json`, `webhook-verify-refunded-success.json`.
+
+Dispute webhook, third cycle: filing the case generated
+`CUSTOMER.DISPUTE.CREATED` in the ledger, and it auto-delivered to the test
+endpoint about a minute later with no resend involved — the resource carries
+`reason: MERCHANDISE_OR_SERVICE_NOT_RECEIVED`. `verify-webhook-signature` on
+the delivered copy returned `SUCCESS`. A manual resend was accepted (202); no
+duplicate arrived in the window watched, consistent with PayPal not
+re-sending an already-delivered event (redelivery itself stays evidenced by
+the invoice-sent and refunded resends). The disputed capture also appears in
+the ledger as `PAYMENT.CAPTURE.COMPLETED` with auto-delivery. Recordings:
+`dispute-event.json`, `dispute-events-ledger.json`,
+`webhook-delivery-dispute.json`, `webhook-verify-dispute-success.json`,
+`webhook-resend-dispute-accepted.json`.
 
 ## 5. Line items
 
@@ -231,13 +264,17 @@ placeholders that keep the shape:
 | Placeholder | What was removed |
 |---|---|
 | `ORDER-ID-SANDBOX-1` | wallet order id (first app) |
-| `ORDER-ID-US-1`, `ORDER-ID-US-2` | wallet order ids (replacement app, two cycles) |
-| `CAPTURE-ID-US-1`, `CAPTURE-ID-US-2` | capture ids |
+| `ORDER-ID-US-1`, `ORDER-ID-US-2`, `ORDER-ID-US-3` | wallet order ids (replacement app, three cycles) |
+| `CAPTURE-ID-US-1`, `CAPTURE-ID-US-2`, `CAPTURE-ID-US-3` | capture ids |
+| `DISPUTE-ID-SANDBOX-1` | dispute (case) id from resolution-center filing |
+| `BUYER-TRANSACTION-ID-SANDBOX-1` | buyer-side transaction id on the dispute |
 | `REFUND-ID-US-1`, `REFUND-ID-US-2` | refund ids |
 | `WEBHOOK-ID-SANDBOX-1` | webhook id (first app) |
 | `WEBHOOK-ID-US-1` | webhook id (replacement app) |
 | `WEBHOOK-EVENT-ID-1`, `-2` | webhook event ids (first app) |
-| `WEBHOOK-EVENT-US-1` | webhook event id (replacement app) |
+| `WEBHOOK-EVENT-US-1` | webhook event id (replacement app, refund) |
+| `WEBHOOK-EVENT-DISPUTE-1`, `WEBHOOK-EVENT-CAP3-1` | dispute-created and capture event ids |
+| `BUYER-EMAIL-REDACTED`, `BUYER-NAME-REDACTED` | shopper account email and name on the dispute |
 | `INVOICE-ID-SANDBOX-1` | invoice id and URL fragment |
 | `PRODUCT-ID-SANDBOX-1` | catalog product id |
 | `ITEM-ID-REDACTED`, `TEMPLATE-ID-REDACTED` | invoice item / template ids |
@@ -254,12 +291,9 @@ Authorization headers, and a filename scan for both values returns nothing.
 The same holds for the shopper site logins used for the scripted approvals:
 values travelled only in the browser session, never touched a file.
 
-## Open: a real dispute object
+## Open: nothing
 
-Everything is closed except one live dispute with a reason code. API-side
-dispute creation is rejected as `TRANSACTION_NOT_ELIGIBLE` on every shape
-tried (five attempts, two apps, before and after refunds). The path that
-stands in, for the demo: the shopper files through the sandbox resolution
-center (a person action, matching the demo narrative), which yields a real
-dispute, a real reason code and a real `CUSTOMER.DISPUTE.CREATED` webhook for
-the ingest to record.
+Every Done-when clause is met with evidence. The one piece that changes hands:
+the dispute case (`DISPUTE-ID-SANDBOX-1`) stays open in the sandbox on the
+third cycle's unrefunded capture; the demo can show it live or file a fresh
+one by repeating the click path above.

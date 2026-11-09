@@ -82,19 +82,21 @@ owns:       dev-diary/research/paypal.md, testdata/paypal/
 status:     in-review
 ```
 
-**Notes.** Full order → scripted shopper approval → capture → refund cycle
-evidenced twice against a replacement US-home sandbox merchant (the original
-merchant refused USD; the INR detour is superseded). Refund-has-no-reason is
-CONFIRMED on two full records and the webhook resource; `custom_id`
-propagates order → capture → refund as the join key. Capture records carry no
-line items; the order GET is authoritative. Webhook delivery, signature
-`SUCCESS` and resend re-verified under the new app on a refund event; the new
-app's ledger shows no backfill. Dispute creation stays open: five API attempts
-across two apps all return `TRANSACTION_NOT_ELIGIBLE`; the labelled stand-in
-is buyer-side filing through the resolution center. Card capture blocked by
-`PAYEE_NOT_ENABLED_FOR_CARD_PROCESSING`; the event simulator 404s;
-transaction listing is `NOT_AUTHORIZED`. Detail in `research/paypal.md`; 38
-recordings in `testdata/paypal/`.
+**Notes.** Three full order → scripted shopper approval → capture cycles
+against a replacement US-home sandbox merchant (the original merchant refused
+USD; the INR detour is superseded); cycles 1–2 refunded, cycle 3 left open.
+Refund-has-no-reason is CONFIRMED on two full records, the refund webhook
+resource and the delivered event; `custom_id` propagates order → capture →
+refund as the join key. Capture records carry no line items; the order GET is
+authoritative. A live dispute with reason
+`MERCHANDISE_OR_SERVICE_NOT_RECEIVED` was filed via the resolution center
+(API-side creation stays `TRANSACTION_NOT_ELIGIBLE` after five attempts);
+`CUSTOMER.DISPUTE.CREATED` auto-delivered and verifies with `SUCCESS`, and the
+repeatable click path is recorded. Webhook delivery, signature verification
+and resend verified on invoice, refund and dispute events; the ledger shows
+no backfill. Card capture blocked by `PAYEE_NOT_ENABLED_FOR_CARD_PROCESSING`;
+the event simulator 404s; transaction listing is `NOT_AUTHORIZED`. Detail in
+`research/paypal.md`; 45 recordings in `testdata/paypal/`.
 Against the sandbox, establish and record:
 
 - an order created, approved by the sandbox shopper and captured, with `PayPal-Request-Id` idempotency seen working;

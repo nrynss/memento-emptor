@@ -1,0 +1,107 @@
+{
+  "note": "CUSTOMER.DISPUTE.CREATED auto-delivered to the test endpoint about a minute after the case was filed (no resend involved). Endpoint request metadata stripped.",
+  "method": "POST",
+  "created_at": "2026-11-09 15:15:04",
+  "transmission_headers": {
+    "paypal-transmission-id": [
+      "572e6adc-dc50-11f1-98c7-eff47a90dda6"
+    ],
+    "paypal-transmission-time": [
+      "2026-11-09T15:15:04Z"
+    ],
+    "paypal-cert-url": [
+      "https://api.sandbox.paypal.com/v1/notifications/certs/CERT-360caa42-fca2a594-9eaebfdf"
+    ],
+    "paypal-auth-algo": [
+      "SHA256withRSA"
+    ],
+    "paypal-transmission-sig": [
+      "LPeoMF7hO4dgm/escHxGDwrSNyhCwzIW+IDucKzeCqrsLQSDcp25ihqhGgefTvO+3+ZwEfqno3bPJ1yQ+R8MSlikw1wYmu17c36cvW7hNd00RZthktOU4xE3rXyY4uZOyHTYnwCPtRnSv1ZfRRLIFNfKqYjrolpb0lwLxVXxbJKv+cZ2KbL03hfVhcIsGVl1hO0D7RvZ7+NFlYa7+JsMcWFF9nVoVQRJgGpswV3iVbfHc7DYHZTKh8pJabAVGc2lYXWZLLUUUltsc7cvyzGnE6ApqU58XZ2z3inHRFNS1auhSWWN0mDdziZThiHUMZp/FsLBT/IsAhhWUyy2s+ca4Q=="
+    ],
+    "paypal-auth-version": [
+      "v2"
+    ]
+  },
+  "body": {
+    "id": "WEBHOOK-EVENT-DISPUTE-1",
+    "event_version": "1.0",
+    "create_time": "2026-11-09T15:15:03.464Z",
+    "resource_type": "dispute",
+    "event_type": "CUSTOMER.DISPUTE.CREATED",
+    "summary": "A new dispute opened with case # DISPUTE-ID-SANDBOX-1",
+    "resource": {
+      "dispute_id": "DISPUTE-ID-SANDBOX-1",
+      "create_time": "2026-11-09T15:12:04.280Z",
+      "update_time": "2026-11-09T15:14:53.723Z",
+      "disputed_transactions": [
+        {
+          "buyer_transaction_id": "BUYER-TRANSACTION-ID-SANDBOX-1",
+          "seller_transaction_id": "CAPTURE-ID-US-3",
+          "transaction_status": "HELD",
+          "custom": "shopper-demo-001",
+          "seller": {
+            "merchant_id": "MERCHANT-ID-REDACTED",
+            "name": "Test Store"
+          },
+          "items": [
+            {
+              "item_id": "BRX-OXF-M",
+              "item_name": "Brand X oxford shirt",
+              "item_quantity": "1",
+              "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+              "item_type": "PRODUCT"
+            }
+          ],
+          "seller_protection_eligible": true,
+          "seller_protection_type": "EXPANDED_SELLER_PROTECTION"
+        }
+      ],
+      "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+      "status": "UNDER_REVIEW",
+      "dispute_amount": {
+        "currency_code": "USD",
+        "value": "34.00"
+      },
+      "dispute_life_cycle_stage": "INQUIRY",
+      "dispute_channel": "INTERNAL",
+      "messages": [
+        {
+          "posted_by": "BUYER",
+          "time_posted": "2026-11-09T15:12:04.280Z",
+          "content": "T04 sandbox evidence: the parcel never arrived"
+        }
+      ],
+      "offer": {
+        "buyer_requested_amount": {
+          "currency_code": "USD",
+          "value": "34.00"
+        }
+      },
+      "refund_details": {
+        "allowed_refund_amount": {
+          "currency_code": "USD",
+          "value": "34.00"
+        }
+      },
+      "links": [
+        {
+          "href": "https://api.sandbox.paypal.com/v1/customer/disputes/DISPUTE-ID-SANDBOX-1",
+          "rel": "self",
+          "method": "GET"
+        }
+      ]
+    },
+    "links": [
+      {
+        "href": "https://api.sandbox.paypal.com/v1/notifications/webhooks-events/WEBHOOK-EVENT-DISPUTE-1",
+        "rel": "self",
+        "method": "GET"
+      },
+      {
+        "href": "https://api.sandbox.paypal.com/v1/notifications/webhooks-events/WEBHOOK-EVENT-DISPUTE-1/resend",
+        "rel": "resend",
+        "method": "POST"
+      }
+    ]
+  }
+}
