@@ -43,11 +43,20 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       S · frontier
 owns:       internal/reasons/
-status:     claimed:t22-reasons
+status:     in-review
 ```
 The Jev client behind the interface: the shopper's answer becomes a reason category with a confidence. Below T0.7's floor, the refund stays a pending question and the agent asks again. A refund the shopper never explains stays an outcome with no reason and counts toward nothing. Elastic's nearest labelled reasons are passed in if T0.7 showed that it helps.
 
 **Done when:** tests replay T0.7's labelled set and match its results; the never-explained case is covered.
+
+Notes (worker t22-reasons). `internal/reasons/` holds the client behind the
+`fakes.ReasonClassifier` seam plus a pure `Settle` mapping classification to
+attached reason or pending question. Replay only: fixture transport serves
+`testdata/jev/` with keys asserted absent. Floor re-measured with no drift:
+8 clear at 1.00 accepted, 3 vague ask again, margin 0.04; refusal maps to
+unclear at 0. Neighbour context omitted by test: all 11 recorded requests
+carry the answer alone and still separate, so nothing retrieved travels
+with the question.
 
 ---
 
