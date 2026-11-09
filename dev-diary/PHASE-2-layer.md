@@ -104,11 +104,13 @@ requires:   [T1.4]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/memory/
-status:     claimed:t24-memory
+status:     in-review
 ```
 Applies T1.1's write rule. Each reasoned outcome is its own interaction and cites its belief in `depends_on`. Corrections are declared with `against`. General statements go through `derive`. Evidence counts only toward the belief its reason matches. Reads a belief's Lambo state and maps it to the ledger's four statuses.
 
 **Done when:** replaying the demo story gives Earned after the third return, Out of true after the correction with the belief still present, and no change to sizing after the dispute. A test proves a reasonless refund writes nothing to a belief.
+
+Notes: built on branch task/t24-memory in internal/memory/ (doc, graph, writer, read, story + writer tests). Writer takes the cited belief's kind and refuses mismatches with ErrKindMismatch; verdict→kind lives in the writer per T1.2's handoff. Read path returns status Out of true with standing kept. Gate passes. Handoff text is in the worker's report.
 
 ---
 
