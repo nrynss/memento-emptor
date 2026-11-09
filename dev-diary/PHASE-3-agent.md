@@ -36,7 +36,16 @@ requires:   [T3.1, T0.5]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/catalog/
-status:     claimed:t32-catalog
+status:     in-review
+
+**Notes (worker).** `agent/catalog/` parses Channel3 products, matches on
+brand id + category slug + equal fit-handle values with the shared signals
+as evidence, and marks where the data ends: no sizes in Channel3, size
+availability out-of-band at the retailer offer URL, fulfilment labelled
+simulated. Tests replay `testdata/channel3/` offline. Live re-verify: one
+`GET /v1/products/tbnrl46` (detail calls are free, 0 credits spent) agrees
+with the fixture on id, title, brand `SMwk`, category `dress-shirts`,
+`top-fit: Regular`, InStock USD 195 at `us.sunspel.com`, variants null.
 ```
 Candidate products and variants from real retailers, as a real part of the agent, behind an interface a builder could replace. Real-retailer fulfilment is labelled as simulated.
 
