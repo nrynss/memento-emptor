@@ -54,7 +54,7 @@ requires:   []
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/lambo.md, testdata/lambo/
-status:     not-started
+status:     claimed:t03-lambo
 ```
 **The gate on the whole product.** On Lambo v0.9.1 (or the current release), build a small seeded session by hand and show every condition product.md lists:
 
@@ -155,6 +155,22 @@ Lambo also uses this deployment as its recall tier: a `[recall]` section with `k
 **User decision before the trial starts:** the demo must stay up until winners are announced (product.md). A 14-day trial plus the 30-day extension only just reaches that if started now. Options: start the trial now, or self-host Elasticsearch beside the service. Recommend one with the evidence.
 
 **Done when:** `research/elastic.md` records the search results, the embedding choice and the hosting decision; recordings are in `testdata/elastic/`.
+
+**Notes.** Landed on 0.9.1-era findings: Serverless deployment (no trial), BGE-M3 via OpenRouter settled, recall tier confirmed with `timeout_ms = 20000`. Lambo 0.10.0 has since closed issue 233 (native Elastic embedder); the stay-or-switch probe is T0.6b, which does not change this task's contract.
+
+---
+
+### T0.6b: Elastic native embedder probe
+```yaml
+requires:   [T0.6]
+fixture-ok: no
+size:       XS · mid
+owns:       dev-diary/research/elastic-native.md, testdata/elastic-native/
+status:     claimed:t06b-embed
+```
+Lambo 0.10.0 closed issue 233: embeddings can now be created natively through the Elasticsearch Inference API. Probe whether the demo should switch from T0.6's settled BGE-M3-via-OpenRouter contract: replay T0.6's paraphrase set (`testdata/elastic/hybrid-documents.json`) through the native path and compare paraphrase cosine, kNN ranking effect, cost, latency, and the `lambo.toml` / feature-flag changes a switch needs, including the re-embed path. Recommend stay-or-switch with evidence. This task changes nothing: the settled contract in `research/elastic.md` stands unless a later task adopts the recommendation.
+
+**Done when:** `research/elastic-native.md` records the comparison and the recommendation; recordings are in `testdata/elastic-native/`; any test indices deleted; spend recorded.
 
 ---
 
