@@ -1,0 +1,95 @@
+{
+  "ShopperID": "cmp-broken",
+  "SessionDays": 6,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRC",
+        "BrandName": "Brand C",
+        "LineName": "Everyday Oxford Shirt",
+        "SKU": "BRC-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 1,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 4800,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRC",
+        "BrandName": "Brand C",
+        "LineName": "Everyday Oxford Shirt",
+        "SKU": "BRC-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-broken-007-d080",
+        "CaptureID": "CAP-seed-7-cmp-broken-007-d080",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-broken-007",
+        "EventID": "EVT-seed-7-cmp-broken-007-d080"
+      },
+      "Note": "Kept past the window: Brand C oxford size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 4,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4800,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRC",
+        "BrandName": "Brand C",
+        "LineName": "Everyday Oxford Shirt",
+        "SKU": "BRC-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "damaged_or_defective",
+        "Text": "arrived with a torn seam",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-broken-008-02cc",
+        "CaptureID": "CAP-seed-7-cmp-broken-008-02cc",
+        "RefundID": "RFD-seed-7-cmp-broken-008-02cc",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-broken-008",
+        "EventID": "EVT-seed-7-cmp-broken-008-02cc"
+      },
+      "Note": "Refund: Brand C oxford size M; arrived with a torn seam",
+      "SeedMark": "seeded"
+    }
+  ]
+}

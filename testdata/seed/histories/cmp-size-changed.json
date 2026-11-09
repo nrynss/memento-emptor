@@ -1,0 +1,129 @@
+{
+  "ShopperID": "cmp-size-changed",
+  "SessionDays": 9,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRF",
+        "BrandName": "Brand F",
+        "LineName": "Heritage Oxford Shirt",
+        "SKU": "BRF-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 1,
+      "Signal": "fit_feedback",
+      "Source": "shopper",
+      "Outcome": {
+        "Kind": "capture",
+        "Status": "COMPLETED",
+        "AmountMinor": 4400,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRF",
+        "BrandName": "Brand F",
+        "LineName": "Heritage Oxford Shirt",
+        "SKU": "BRF-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-size-changed-013-c5f5",
+        "CaptureID": "CAP-seed-7-cmp-size-changed-013-c5f5",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-size-changed-013",
+        "EventID": "EVT-seed-7-cmp-size-changed-013-c5f5"
+      },
+      "Note": "Fit feedback: Brand F oxford size M fits well, tied to this purchase",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 5,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4400,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRF",
+        "BrandName": "Brand F",
+        "LineName": "Heritage Oxford Shirt",
+        "SKU": "BRF-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight in the shoulders",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-size-changed-014-99e5",
+        "CaptureID": "CAP-seed-7-cmp-size-changed-014-99e5",
+        "RefundID": "RFD-seed-7-cmp-size-changed-014-99e5",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-size-changed-014",
+        "EventID": "EVT-seed-7-cmp-size-changed-014-99e5"
+      },
+      "Note": "Fit return 1: Brand F oxford size M refunded; too tight in the shoulders",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 7,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4400,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRF",
+        "BrandName": "Brand F",
+        "LineName": "Heritage Oxford Shirt",
+        "SKU": "BRF-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight across the chest",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-size-changed-015-88ee",
+        "CaptureID": "CAP-seed-7-cmp-size-changed-015-88ee",
+        "RefundID": "RFD-seed-7-cmp-size-changed-015-88ee",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-size-changed-015",
+        "EventID": "EVT-seed-7-cmp-size-changed-015-88ee"
+      },
+      "Note": "Fit return 2: Brand F oxford size M refunded; too tight across the chest",
+      "SeedMark": "seeded"
+    }
+  ]
+}

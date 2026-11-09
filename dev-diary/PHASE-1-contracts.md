@@ -60,9 +60,23 @@ requires:   [T1.1, T0.3]
 fixture-ok: yes
 size:       M · frontier
 owns:       seed/, testdata/seed/
-status:     claimed:t13-seed
+status:     in-review
 ```
 A generator for seeded shopper histories, every row marked. Event times spread across the period so promotion's gates are met honestly, as T0.3 established.
+
+Notes (T1.3, in-review): `seed/` holds the deterministic generator
+(`Generate` from a fixed seed; `GoldenSeed` reproduces the committed
+fixtures byte for byte) plus tests for determinism, the mark on every
+row, the demo shopper's promotion shape (three fit returns on distinct
+days, coverage above the 0.3 bar, dispute counting toward the seller
+only), wrong-cause rows never counting toward fit, hidden answers kept
+off the arm path, and golden fixtures. `testdata/seed/histories/`
+holds the demo shopper and five comparison shoppers (broken-item
+refund, non-arrival dispute, changed mind, genuine size change, vague
+answer); `testdata/seed/hidden/answers.json` holds the right size per
+comparison shopper. Event time is relative day offsets, and links mint
+only the ids each outcome kind actually has. Full gate result in the
+report.
 
 - **The demo shopper:** the three fit returns, realistic background purchases, the dispute later.
 - **The comparison shoppers:** a set with varied histories, including cases built to tempt a wrong cause (a refund for a broken item, a non-arrival dispute, a changed mind, a shopper whose size genuinely changed).

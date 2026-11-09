@@ -1,0 +1,95 @@
+{
+  "ShopperID": "cmp-unclear",
+  "SessionDays": 7,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRG",
+        "BrandName": "Brand G",
+        "LineName": "Slim Oxford Shirt",
+        "SKU": "BRG-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 1,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 3600,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRG",
+        "BrandName": "Brand G",
+        "LineName": "Slim Oxford Shirt",
+        "SKU": "BRG-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-unclear-016-bbb0",
+        "CaptureID": "CAP-seed-7-cmp-unclear-016-bbb0",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-unclear-016",
+        "EventID": "EVT-seed-7-cmp-unclear-016-bbb0"
+      },
+      "Note": "Kept past the window: Brand G oxford size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 5,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 3600,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRG",
+        "BrandName": "Brand G",
+        "LineName": "Slim Oxford Shirt",
+        "SKU": "BRG-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "unclear",
+        "Text": "not great",
+        "Confidence": 0.94
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-unclear-017-ade0",
+        "CaptureID": "CAP-seed-7-cmp-unclear-017-ade0",
+        "RefundID": "RFD-seed-7-cmp-unclear-017-ade0",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-unclear-017",
+        "EventID": "EVT-seed-7-cmp-unclear-017-ade0"
+      },
+      "Note": "Refund: Brand G oxford size M; shopper answer too vague to classify, ask again",
+      "SeedMark": "seeded"
+    }
+  ]
+}

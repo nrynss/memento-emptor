@@ -1,0 +1,227 @@
+{
+  "ShopperID": "demo-shopper",
+  "SessionDays": 11,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRX",
+        "BrandName": "Brand X",
+        "LineName": "Button Down Oxford Shirt",
+        "SKU": "BRX-OXF-WHT",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 1,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRY",
+        "BrandName": "Brand Y",
+        "LineName": "Everyday Tee",
+        "SKU": "BRY-TEE-GRY",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-demo-shopper-001-843c",
+        "CaptureID": "CAP-seed-7-demo-shopper-001-843c",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-demo-shopper-001",
+        "EventID": "EVT-seed-7-demo-shopper-001-843c"
+      },
+      "Note": "Kept past the window: Brand Y tee, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 2,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 3000,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRZ",
+        "BrandName": "Brand Z",
+        "LineName": "Canvas Cap",
+        "SKU": "BRZ-CAP-NVY",
+        "Size": "OS",
+        "Category": "hats"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-demo-shopper-002-0ddd",
+        "CaptureID": "CAP-seed-7-demo-shopper-002-0ddd",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-demo-shopper-002",
+        "EventID": "EVT-seed-7-demo-shopper-002-0ddd"
+      },
+      "Note": "Kept past the window: Brand Z cap, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 3,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRX",
+        "BrandName": "Brand X",
+        "LineName": "Button Down Oxford Shirt",
+        "SKU": "BRX-OXF-WHT",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight in the shoulders",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-demo-shopper-003-935a",
+        "CaptureID": "CAP-seed-7-demo-shopper-003-935a",
+        "RefundID": "RFD-seed-7-demo-shopper-003-935a",
+        "DisputeID": "",
+        "CustomID": "seed-7-demo-shopper-003",
+        "EventID": "EVT-seed-7-demo-shopper-003-935a"
+      },
+      "Note": "Fit return 1: Brand X oxford size M refunded; too tight in the shoulders",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 6,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRX",
+        "BrandName": "Brand X",
+        "LineName": "Button Down Oxford Shirt",
+        "SKU": "BRX-OXF-BLU",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight across the chest",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-demo-shopper-004-237f",
+        "CaptureID": "CAP-seed-7-demo-shopper-004-237f",
+        "RefundID": "RFD-seed-7-demo-shopper-004-237f",
+        "DisputeID": "",
+        "CustomID": "seed-7-demo-shopper-004",
+        "EventID": "EVT-seed-7-demo-shopper-004-237f"
+      },
+      "Note": "Fit return 2: Brand X oxford size M refunded; too tight across the chest",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 9,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRX",
+        "BrandName": "Brand X",
+        "LineName": "Button Down Oxford Shirt",
+        "SKU": "BRX-OXF-STR",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "sleeves too short in M",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-demo-shopper-005-9089",
+        "CaptureID": "CAP-seed-7-demo-shopper-005-9089",
+        "RefundID": "RFD-seed-7-demo-shopper-005-9089",
+        "DisputeID": "",
+        "CustomID": "seed-7-demo-shopper-005",
+        "EventID": "EVT-seed-7-demo-shopper-005-9089"
+      },
+      "Note": "Fit return 3: Brand X oxford size M refunded; sleeves too short in M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 11,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 19500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRX",
+        "BrandName": "Brand X",
+        "LineName": "Button Down Oxford Shirt",
+        "SKU": "BRX-OXF-WHT",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "not_arrived",
+        "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-demo-shopper-006-79e9",
+        "CaptureID": "CAP-seed-7-demo-shopper-006-79e9",
+        "RefundID": "",
+        "DisputeID": "DSP-seed-7-demo-shopper-006-79e9",
+        "CustomID": "seed-7-demo-shopper-006",
+        "EventID": "EVT-seed-7-demo-shopper-006-79e9"
+      },
+      "Note": "Dispute opened: Brand X parcel never arrived; carrier lost it",
+      "SeedMark": "seeded"
+    }
+  ]
+}

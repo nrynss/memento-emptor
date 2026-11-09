@@ -1,0 +1,27 @@
+[
+  {
+    "ShopperID": "cmp-broken",
+    "RightSize": "M",
+    "Why": "The torn-seam refund is damage, not fit: it counts toward the seller and never toward sizing, so the kept size M stands."
+  },
+  {
+    "ShopperID": "cmp-never-arrived",
+    "RightSize": "L",
+    "Why": "The open dispute is a parcel that never arrived, not a fit signal: it counts toward the seller and never toward sizing, so the kept size L stands."
+  },
+  {
+    "ShopperID": "cmp-changed-mind",
+    "RightSize": "M",
+    "Why": "The changed-mind refund names no product fault and counts toward nothing, so the kept size M stands."
+  },
+  {
+    "ShopperID": "cmp-size-changed",
+    "RightSize": "L",
+    "Why": "The early fits-well note for M is stale: two newer classified too-small returns in M are structural evidence the size moved, so the right size is L."
+  },
+  {
+    "ShopperID": "cmp-unclear",
+    "RightSize": "M",
+    "Why": "The vague refund sits below the confidence floor and stays a pending question with no reason, so it counts toward nothing and the kept size M stands."
+  }
+]

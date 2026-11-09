@@ -1,0 +1,95 @@
+{
+  "ShopperID": "cmp-never-arrived",
+  "SessionDays": 8,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRD",
+        "BrandName": "Brand D",
+        "LineName": "Washed Oxford Shirt",
+        "SKU": "BRD-OXF-L",
+        "Size": "L",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size L",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 2,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 5200,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRD",
+        "BrandName": "Brand D",
+        "LineName": "Washed Oxford Shirt",
+        "SKU": "BRD-OXF-L",
+        "Size": "L",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-never-arrived-009-0370",
+        "CaptureID": "CAP-seed-7-cmp-never-arrived-009-0370",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-never-arrived-009",
+        "EventID": "EVT-seed-7-cmp-never-arrived-009-0370"
+      },
+      "Note": "Kept past the window: Brand D oxford size L, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 6,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 5200,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRD",
+        "BrandName": "Brand D",
+        "LineName": "Washed Oxford Shirt",
+        "SKU": "BRD-OXF-L",
+        "Size": "L",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "not_arrived",
+        "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-never-arrived-010-7e78",
+        "CaptureID": "CAP-seed-7-cmp-never-arrived-010-7e78",
+        "RefundID": "",
+        "DisputeID": "DSP-seed-7-cmp-never-arrived-010-7e78",
+        "CustomID": "seed-7-cmp-never-arrived-010",
+        "EventID": "EVT-seed-7-cmp-never-arrived-010-7e78"
+      },
+      "Note": "Dispute opened: Brand D parcel never arrived; tracking stuck for weeks",
+      "SeedMark": "seeded"
+    }
+  ]
+}
