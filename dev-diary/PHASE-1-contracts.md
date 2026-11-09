@@ -102,11 +102,13 @@ requires:   [T1.3, T0.4]
 fixture-ok: no
 size:       S · mid
 owns:       tests/live/seed/
-status:     claimed:t13b-sandbox
+status:     in-review
 ```
 Create the demo shopper's history as real sandbox orders, captures and refunds. Purchases and refunds exist in PayPal, so the evidence comes from PayPal. Where the sandbox can't backdate, record how seeded event times are applied on the layer's side, and mark them.
 
 **Done when:** the demo shopper's transactions can be read back from the sandbox; the transcript is in the handoff log.
+
+Notes (T1.3b, in-review): `tests/live/seed/` holds the live driver (`run.sh` create/wait/capture/refund/read-back, `approve.py` scripted shopper approval, `dispute.py` resolution-center filing, `README.md` with the cycle table and anchor rule). No `*_test.go` under `tests/live/`, so the gate has nothing to run there. All six cycles read back from the sandbox: two kept captures, three refunded fit returns with the reason in words on each refund record, one open non-arrival dispute with the reason code top-level and per item. Seeded day offsets (1, 2, 3, 6, 9, 11 of 11) apply on the layer's side via `Row.SeededEvidence(anchor)`; real ids live only in the task report, placeholders in committed files. Full gate result in the report.
 
 ---
 
