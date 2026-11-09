@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 5 / 10 | In progress |
+| P2 | 6 / 10 | In progress |
 | P3 | 3 / 6 | In progress |
 | P4 | 2 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
@@ -167,6 +167,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `internal/evidence/` implementing `fakes.EvidenceStore` as-is: documents (message/reason/product + brand/category/fit-handle line), graph stubs (`evidence[<id>] <key>`, prose never enters), brand+category+fit matching, deterministic RRF fusion, contract-gated store with `ReEmbed`. Tests replay T0.6's legs; stub test proves doc-ID-only writes. Embedder stays behind `domain.EmbedderContract` — native switch changes only the kind.
 
 **What surprised.** The store assigns `doc-0001…` ids while recordings use `p1…r2` — T2.5 must persist assigned ids into stubs, never assume recording ids.
+
+### T2.3b: The evidence store, live (done)
+
+**What exists.** `tests/live/evidence/` driver (no CI tests, `out/` ignored): T0.6's hybrid legs reproduced on the real deployment with native `.jina-embeddings-v3` — BM25 ranks all four same-line shirts above distractors, kNN reproduces the recorded native shape to 4 decimals, RRF keeps reason phrases top-3. Lambo 0.10.1 (build-only) derives and recalls through the native embedder: `connect_timeout_ms`/`timeout_ms` resolve, `= 0` refused with a source-carrying error (#238 fix visible), session reports `calibration=calibrated`, shipped jina-v3 row live, paraphrase 0.674 (wash vs 0.677/0.68 — no re-calibration). DNS stall from T0.6b is gone (0.01s), so the knob is proven-read but no longer load-bearing here. Indices verified deleted (independent empty-listing check); sessions erased; nothing shared re-embedded.
+
+**What surprised.** Native `_inference` gives no usage/cost fields and `_cluster/stats` 410s on Serverless — nothing billable is API-visible; console billing confirmation stays the user's step. OpenRouter spend $0.
+
+**The next agent should know.** The native contract shape and `re-embed` path are proven; the remaining switch work is calibration confirmation on the demo shopper + console billing, both P2-closing items.
 
 ### T2.2b: Reason classification, live (done)
 

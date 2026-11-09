@@ -107,7 +107,7 @@ requires:   [T2.3]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/evidence/
-status:     in-review
+status:     done
 ```
 
 **Done when:** a new SKU matches the demo's returned items on the real deployment; the transcript is in the handoff log.
