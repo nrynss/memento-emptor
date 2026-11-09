@@ -1,0 +1,20 @@
+$ ast eval get probe-gw   (before pushing any custom set: server preset)
+  Evaluation set preset/default-evaluation
+
+  Key                            Label                          Type  Accepts
+  exposed_pii                    Exposed PII                    llm   true, false
+  leaked_credentials             Leaked credentials             llm   true, false
+  disclosed_system_instructions  Disclosed system instructions  llm   true, false
+  unnecessary_tool_call          Unnecessary tool call          llm   true, false
+  claim_grounding                Claim grounding                llm   grounded, unsupported, contradicted, unverifiable, no_claims
+  user_sentiment                 User sentiment                 llm   positive, neutral, negative, unclear
+
+$ ast eval push probe-gw   (with evaluation-set.yaml beside astropods.yml)
+  Activating evaluation set for probe-gw
+  activated agent/<agent-object-id>
+
+$ ast eval get probe-gw   (after push: custom set replaced the preset view)
+  Evaluation set agent/<agent-object-id>
+
+  Key                Label              Type  Accepts
+  followed_approval  Followed approval  llm   true, false

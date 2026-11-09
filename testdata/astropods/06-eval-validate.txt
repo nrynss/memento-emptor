@@ -1,0 +1,37 @@
+$ printf 'evaluators: []\n' > EVALUATION.yaml && ast eval validate
+  Validating evaluation set
+  invalid evaluation document: schema must be "evaluation/v1", got ""
+
+$ printf 'version: 1\n...' > EVALUATION.yaml && ast eval validate
+  invalid evaluation document: yaml: unmarshal errors:
+    line 1: field version not found in type eval.rawDocument
+
+$ printf 'spec: evaluation/v1\n...' > EVALUATION.yaml && ast eval validate
+  invalid evaluation document: yaml: unmarshal errors:
+    line 1: field spec not found in type eval.rawDocument
+
+$ printf 'schema: evaluation/v1\nevaluators: []\n' > EVALUATION.yaml && ast eval validate
+  invalid evaluation document: document must contain 1 to 10 evaluators, got 0
+
+$ ... evaluators: [{key: helpful, type: boolean, ...}]
+  invalid evaluation document: evaluator 0: must set exactly one of prompt or prompt_file
+
+$ ... {key: helpful, label: Helpful, type: boolean, prompt: ...}
+  invalid evaluation document: evaluator 0: invalid evaluator definition: type "boolean" is not supported, must be "llm"
+
+$ ... {key: helpful, label: Helpful, type: llm, prompt: ..., output: boolean}
+  invalid evaluation document: yaml: unmarshal errors:
+    line 7: cannot unmarshal !!str `boolean` into eval.rawOutput
+
+$ ... output: {type: enum, values: [warm, neutral, cold]}
+  invalid evaluation document: yaml: unmarshal errors:
+    line 9: field values not found in type eval.rawOutput
+
+$ ... {key: followed-approval, ...}
+  invalid evaluation document: evaluator 0: invalid evaluator definition:
+  key "followed-approval" is invalid: use lowercase letters, digits, and
+  underscores, starting with a letter (max 64 characters)
+
+$ printf 'schema: evaluation/v1\nevaluators:\n  - key: tone\n    label: Tone\n    type: llm\n    prompt: What tone does the reply use?\n    output:\n      type: enum\n      options: [warm, neutral, cold]\n' > EVALUATION.yaml && ast eval validate
+  Validating evaluation set
+  valid agent/<agent-object-id>

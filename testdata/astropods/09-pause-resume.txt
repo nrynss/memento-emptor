@@ -1,0 +1,23 @@
+$ ast agent pause --name probe-gw
+  Pausing probe-gw
+  probe-gw paused
+
+$ ast agent get --name probe-gw
+  probe-gw  <account>
+    Status:     Stopped
+    Reason:     Deployment is paused
+    Environment: main
+    Build:      <build-id>
+
+$ ast agent resume --name probe-gw
+  Resuming probe-gw
+  probe-gw resumed
+
+$ ast agent get --name probe-gw
+  probe-gw  <account>
+    Status:     pending
+    Reason:     Waiting for workloads to become ready
+    Environment: main
+    Build:      <build-id>
+
+  (a later read showed Status: Running again; see 03-agent-get.txt)

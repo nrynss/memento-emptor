@@ -1,0 +1,15 @@
+probe-gw  <account>
+  Status:     Running
+  Environment: main
+  Build:      <build-id>
+  Deployed:   <timestamp>
+  Namespace:  <namespace>
+  ID:         <deployment-id>
+  Launch URL:  https://probe-gw-chat-<host-suffix>.agents.astropods.ai
+  URL status:  ready
+  Components:
+    agent (probe-gw-agent)
+    collector (probe-gw-collector)
+  Alerts:
+    warning  Slowed by CPU limit  agent  pending since <timestamp>
+      The agent keeps hitting its CPU limit, which slows it down.

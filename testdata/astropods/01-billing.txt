@@ -1,0 +1,18 @@
+<account>
+  Plan:           credit
+  Period ends:    <period-end>
+
+  Usage spend:    $0.00
+  Billed spend:   $0.00
+  Credit left:    $10.00
+
+  Warning:        $5.00 (ok)
+  Limit:          $20.00 (ok)
+
+Spend controls measure usage spend, before credit is drawn down.
+<account>
+  Status:         active
+  Payment method: no
+  Credits spent:  no
+  Enforced:       yes
+  Agents stopped: no

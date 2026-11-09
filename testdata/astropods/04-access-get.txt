@@ -1,0 +1,4 @@
+→ Interface access for probe-gw
+  web     user=<user-id>
+  slack   members of the agent's account (no grants set)
+  custom  members of the agent's account (no grants set)

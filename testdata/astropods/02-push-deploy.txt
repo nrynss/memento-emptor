@@ -1,0 +1,24 @@
+$ ast push -V private -y -m "T0.8 probe: gateway agent with demo tool"
+  ...
+  done
+  Registering agent with server...
+  (warning) AGENT.md has no authors. Add "author" credit so the platform can credit the author
+  (warning) AGENT.md has no repository. Add "repository" so people can find the source
+
+  Pushed successfully!
+  Blueprint is private
+
+    probe-gw  tag <build-id>
+    View online -> https://astropods.com/<account>/probe-gw
+
+$ ast deploy --adapter web --wait
+  Deploying blueprint probe-gw as agent probe-gw
+  deployed into environment main  <deployment-id>
+
+  https://probe-gw-chat-<host-suffix>.agents.astropods.ai
+
+$ ast billing get   (after push and deploy)
+  Plan:           credit
+  Usage spend:    $0.00
+  Billed spend:   $0.00
+  Credit left:    $10.00
