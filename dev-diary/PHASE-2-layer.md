@@ -29,11 +29,13 @@ requires:   [T2.1]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/ingest/
-status:     claimed:t21b-live
+status:     in-review
 ```
 A real sandbox refund and dispute reach the running service and produce the right rows.
 
 **Done when:** the transcript is in the handoff log.
+
+note: worker branch task/t21b-live; tests/live/ingest/ (live PaymentSource over REST plus the ingest drive; no *_test.go, no CI impact). Pure read-back of existing T1.3b records, nothing created: newest ledger REFUNDED and DISPUTE.CREATED, stored deliveries re-fetched, both signatures verified live, one refund row with nil reason plus pending question, one dispute row at not_arrived counting toward the seller, both redeliveries duplicate. Transcript is in the worker report; full transcript with real ids in out/ (git-ignored). `./tools/check.sh` passes in the worktree.
 
 ---
 
