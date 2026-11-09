@@ -79,7 +79,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/paypal.md, testdata/paypal/
-status:     not-started
+status:     claimed:t04-paypal
 ```
 Against the sandbox, establish and record:
 
@@ -100,7 +100,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/channel3.md, testdata/channel3/
-status:     not-started
+status:     claimed:t05-channel3
 ```
 Search and fetch real products with variants through the API or MCP server. The question that matters: **does the data say enough about a product's cut** to match a new SKU to returned ones? If not, record what the match can use instead (title, description text, brand line). Choose a brand and product line with enough variants for the demo.
 
@@ -114,7 +114,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/elastic.md, testdata/elastic/
-status:     not-started
+status:     claimed:t06-elastic
 ```
 Hybrid search (BM25 plus vector) over a handful of product and return-reason documents: does a new SKU's text find the returned items, and does "snug across the chest" land near "too tight in the shoulders"? Choose the embedding model.
 
@@ -132,7 +132,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       S · frontier
 owns:       dev-diary/research/jev.md, testdata/jev/
-status:     not-started
+status:     claimed:t07-jev
 ```
 Jev is called through OpenRouter's decisions API (`https://openrouter.ai/api/alpha/decisions`, model `typesafe/jev-1.14`) with `OPENROUTER_API_KEY`. Don't use a `latest` alias: the classifier's confidence floor is measured on this version. Classify shopper answers ("too tight in the shoulders", "arrived broken", "changed my mind", an unclear one) into the reason categories, with probabilities. Set a confidence floor below which the agent asks again, and show on a small labelled set that the floor separates clear answers from unclear ones. Record the cost per call against the balance.
 
@@ -146,7 +146,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/astropods.md, testdata/astropods/
-status:     not-started
+status:     claimed:t08-astro
 ```
 On the free tier, confirm the features the concept relies on, which so far come only from the brief: pause for typed input and resume; feedback that arrives with trace context; OpenTelemetry traces showing tool calls in order; evaluators over those traces; a secrets vault; calling an external MCP server. Record which language the agent is written in and how it deploys.
 
@@ -176,7 +176,7 @@ requires:   [T0.2]
 fixture-ok: yes
 size:       S · mid
 owns:       dev-diary/research/ag-grid.md, spikes/ag-grid/
-status:     not-started
+status:     claimed:t10-aggrid
 ```
 Mount AG Grid through its plain JavaScript API inside a Svelte 5 component on Chaaya: custom cell renderers, theming from Chaaya's tokens, row editing, dark mode. Choose the licence tier and confirm it meets the sponsor prize's terms.
 
