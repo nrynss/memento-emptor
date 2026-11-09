@@ -1,10 +1,10 @@
-// The shopper's correction form. Everything a first-time judge needs is
-// on the form itself: what the ledger says now, what will happen, the
-// box, the button, and the result in plain words. The edit goes through
-// the contest state's correction path on submit; the form never touches a
-// belief itself. Svelte 5 runes only: props in, local $state out.
-
 <script lang="ts">
+	// The shopper's correction form. Everything a first-time judge needs is
+	// on the form itself: what the ledger says now, what will happen, the
+	// box, the button, and the result in plain words. The edit goes through
+	// the contest state's correction path on submit; the form never touches a
+	// belief itself. Svelte 5 runes only: props in, local $state out.
+
 	import type { ContestState } from './state';
 	import { confirmationLineFor, correctionPreviewLine } from './state';
 
