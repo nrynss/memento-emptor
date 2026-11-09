@@ -211,7 +211,7 @@ requires:   [T2.5, T2.1b, T2.2b, T2.3b, T2.4b]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/layer/
-status:     not-started
+status:     claimed:t26-live
 ```
 With no agent: real sandbox events in, a scripted client calling the interface, real Lambo, Elastic and Jev. Refund, pending question, reason, Earned, correction, override, dispute against the seller.
 
