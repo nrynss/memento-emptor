@@ -234,6 +234,24 @@ an explicit yes. Suggested script (keeps model spend to cents):
 Then: `ast agent trace`, `ast eval run --trace-id`, `ast eval review`,
 `ast billing get`, and this file gets its final three lines.
 
+## Chat URL revival (close-out probe)
+
+The chat host once answered 404 in an interactive session while the deployment
+itself stayed `Running` with URL status `ready`. Direct checks showed the host
+alive throughout: every path (`/`, `/health`, `/api/agent/config`) answers 302
+to the platform SSO login, which is the healthy anonymous response — a 404 is
+the failure mode. Inbound traffic counting showed the single failed request,
+confirming the failure sat behind the login, not in DNS or routing.
+`ast agent restart --component agent` could not run: it demands `--component`
+and then rejects both `agent` and the full workload name, which looks like a
+CLI-side naming bug. The cheap fix was `ast agent redeploy --name probe-gw
+--wait`: same blueprint build, same environment, same deployment id, same chat
+URL, back to `Running` with the agent and collector workloads. No spend moved
+at any step. If a 404 recurs in the browser, re-check `ast agent get` for
+`Running`/`ready`, confirm the exact host character by character (an unknown
+host is the simplest way to get a bare 404), and redeploy before rebuilding:
+nothing about the failure pointed at the image.
+
 ## Credits used
 
 `$0.00` of the `$10.00` signup credit across push, deploy, pause/resume,
