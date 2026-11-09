@@ -163,6 +163,18 @@ recorded server verdicts unchanged and still valid. Status stays
 `in-review`.
 ```
 
+**Notes (reviewer).** Consequence check: `ast eval push` replaces the
+server preset set (`exposed_pii`, `leaked_credentials`,
+`disclosed_system_instructions`, `unnecessary_tool_call`,
+`claim_grounding`, `user_sentiment` — see
+`testdata/astropods/07-eval-preset-and-push.txt`), so pushing this
+3-judge set removes those six judges from the blueprint. The set cap is
+10, so all six could be re-added alongside (9 total) without touching
+the three recorded prompts or their verdicts; the safety three matter
+most, since demo traces carry order, refund and shopper ids. Recommend
+re-adding as a T3.6/T5-prep follow-up with fresh runs, not as part of
+this landing.
+
 Astropods evaluators over real traces. Did the agent recall before recommending? Did a correction change the very next recommendation? Did any purchase skip approval?
 
 **Done when:** each evaluator passes on a good run and fails on a deliberately broken one; both are recorded.
