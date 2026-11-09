@@ -94,7 +94,7 @@ The stack, settled 9 Nov. Each piece has a job no other piece covers; the "witho
 | **PayPal** | Outcomes (refunds, disputes with reason codes, captures, line items, webhooks) and the action (the approved purchase, with idempotent request IDs) | Nothing happens and nothing is evidenced |
 | **Lambo** | Short, keyed, evidence-gated beliefs; contradiction flags; supersession; provenance; per-agent attribution | The agent can store facts, but can't tell an earned belief from a claim |
 | **Channel3** | Candidate products and variants from real retailers | There's nothing to recommend |
-| **Elastic** | Stores and searches raw evidence; Lambo evidence concepts carry the Elastic document ID | Prose ends up in Lambo's graph, and evidence can't carry across products |
+| **Elastic** | Stores and searches raw evidence; Lambo evidence concepts carry the Elastic document ID; serves as Lambo's recall tier for vector search | Prose ends up in Lambo's graph, and evidence can't carry across products |
 | **Astropods** | Runs the reference agent as a service: approval and correction forms, feedback tied to traces, evals. Independent proof of how the agent behaved | Approval and feedback become ad-hoc UI, and "the agent checked memory first" is only our own claim about our own agent |
 | **Evidence ledger (AG Grid)** | Beliefs, the evidence behind each, contradictions and corrections, with editable rows | The shopper can't see or contest what the agent believes |
 | **Reason classifier (Jev)** | Return text to reason category, with calibrated confidence. Low confidence means ask the shopper | Every refund is a guess about its cause |
