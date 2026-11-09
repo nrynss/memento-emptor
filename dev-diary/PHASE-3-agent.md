@@ -50,9 +50,22 @@ requires:   [T3.1, T0.4]
 fixture-ok: yes
 size:       M · frontier
 owns:       agent/orders/
-status:     claimed:t33-orders
+status:     in-review
 ```
 Durable order state (proposed → approved → captured, or failed and refunded), a uniqueness rule on open orders per shopper and need, `PayPal-Request-Id` on every create and capture, and webhook handling idempotent on the event ID. A purchase cannot be made without an approval record. Purchases run through our own sandbox merchant.
+
+**Notes (worker).** New package `agent/orders/`: `orders.go` (states,
+`CheckoutTransport` seam the real REST client implements, `Service`
+with propose/approve/capture/webhook/InFlight), `fake.go`
+(`FakeCheckout` replaying the T0.4 wallet-create/replay and
+capture-before-approval shapes offline), `orders_test.go` (9 tests,
+all offline, `TestKeysAbsent` fails loudly if keys leak in).
+Approve-first is enforced in code on both the capture and webhook
+paths, without calling the transport; `NewService` refuses a
+non-sandbox merchant. `InFlight` is documented as a coordination aid
+only. One design call: a COMPLETED webhook arriving after a local
+capture is a confirming no-op (that is the live sequence), while a
+second capture id for one order is refused.
 
 **Done when:** tests cover a retried create, a duplicate webhook, a second order for the same need while one is open, and a capture with no approval.
 
