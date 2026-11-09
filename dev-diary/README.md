@@ -142,7 +142,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 5 / 5 | Done |
 | P2 | 5 / 10 | In progress |
 | P3 | 3 / 6 | In progress |
-| P4 | 1 / 4 | In progress |
+| P4 | 2 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
 | P6 | 0 / 7 | Not started |
 
@@ -199,6 +199,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** Mastra `createTool` takes `execute: (inputData, context)` — the wrong signature passed spec validation and only failed on live turns (model asked the user for a shopper id instead of retrying). Fixed + defaulted demo shopper + retry-once instruction. urllib's default UA gets Cloudflare 1010 on astropods.com (browser UA fixes the proxy drive). No purchase tool on purpose — orders live in T3.3.
 
 **The next agent should know.** Standing config: fake-backed tools until T2.5 serves the layer. Redeploy after edits: `ast agent redeploy --name memento-agent --latest --wait`. `probe-gw` left Running.
+
+### T4.2: The ledger's table (done) ★
+
+**What exists.** `web/src/lib/ledger/` (row mapping, plain-JS grid wrapper, Chaaya theming, tooltip/pill renderers, keyboard navigation) + `web/src/routes/ledger/` step-picker page. Renders all 9 fixture steps in both themes (row counts pinned), keyboard traversal tested with real ArrowDown/Up, Out-of-true pill + tooltip + correction line, `Seeded` pills, weak-signal mark for kept rows. AG Grid lazy-loaded (landing chunk has zero grid references). `ag-grid-community@36.3.0` pinned exact; no Enterprise import.
+
+**What surprised.** Scope note: `web/package.json` + lockfile changed (the grid dep — required, lockfile check green). Chaaya `reactive` subscribes on any property read, so refresh runs inside `untrack()` keyed on state identity. Landing lesson: the main checkout's `node_modules` predated the merge, so the main gate failed svelte-check until a fresh `npm ci` — environment staleness, not a code defect; re-run `npm ci` on main after any branch that adds a web dep.
+
+**The next agent should know.** `toLedgerGridRow(s)` gives T4.3 row identity; `correction` already populated for beside-the-belief display. T4.4 adds editing separately — the grid is read-only here by design.
 
 ### T4.1: The ledger's data layer (done)
 

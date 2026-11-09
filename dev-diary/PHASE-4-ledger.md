@@ -27,7 +27,7 @@ requires:   [T4.1]
 fixture-ok: yes
 size:       M · frontier
 owns:       web/src/lib/ledger/, web/src/routes/ledger/
-status:     in-review
+status:     done
 notes:      Read-only AG Grid table in web/src/lib/ledger/ + web/src/routes/ledger/: six columns plus seeded mark, pill per status, Out-of-true tooltip + correction line, kept/observe mapped to a weak-signal label, Chaaya light/dark themes, autoHeight rows, lazy-loaded grid chunk. Step picker replays fixture steps 1-9. Tests: story at every step both themes, arrow-key walk of every row, phone-width render. Branch task/t42-table.
 ```
 Beliefs in AG Grid: kind, subject, value, status, evidence count, last change. The four statuses, **Claimed**, **Building**, **Earned** and **Out of true**, each with its own treatment, and a one-line tooltip explaining "Out of true" where it first appears. Seeded rows are visibly marked. Kept-without-feedback is labelled as a weak inferred signal. Light and dark, and usable at phone width.
