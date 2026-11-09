@@ -116,7 +116,7 @@ requires:   [T1.1, T1.2]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/fakes/, testdata/replay/
-status:     not-started
+status:     claimed:t14-fakes
 ```
 Fake clients for PayPal, Jev, Elastic and Lambo that replay P0's recordings, behind the same interfaces the real clients will implement. A replay of the demo shopper's whole story, from first webhook to final ledger state, as fixtures that P2, P3 and P4 can each use alone.
 
