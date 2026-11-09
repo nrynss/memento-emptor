@@ -252,6 +252,27 @@ at any step. If a 404 recurs in the browser, re-check `ast agent get` for
 host is the simplest way to get a bare 404), and redeploy before rebuilding:
 nothing about the failure pointed at the image.
 
+## Chat URL root cause (close-out, second pass)
+
+The 404 survived the redeploy because the deployed spec never declared the
+chat interface. The probe's `astropods.yml` had messaging only under
+`dev.interfaces` (local `ast project start`, chat UI verified at the local
+sidecar root). The deployed contract is `agent.interfaces.messaging: true`
+("Agent supports the messaging protocol"); without it the deployment ran only
+the agent and collector workloads, so the chat host had no web sidecar behind
+it — anonymous paths still 302 to SSO (healthy-looking), while any
+authenticated request to `/` lands on nothing: the user's 404. The Postman
+collection documents only API routes (`/api/conversations`, `/health`,
+`/api/agent/config`); there is no separate UI path to try. The fix was adding
+the four-line `agent.interfaces: {messaging: true}` block, `ast spec
+validate`, `ast push` (new build), and `ast agent redeploy --latest`: same
+deployment id, same chat URL, `Running`, still `$0.00` spent. The sidecar is
+platform-managed and does not appear in the components list, so only the
+user's browser can confirm the UI now serves post-login. If the chat host
+still 404s, the fallback is the console Agent Details page
+(`astropods.com/<account>/<blueprint>`, 200 anonymously, chat tab when signed
+in), not another path on the chat host.
+
 ## Credits used
 
 `$0.00` of the `$10.00` signup credit across push, deploy, pause/resume,
