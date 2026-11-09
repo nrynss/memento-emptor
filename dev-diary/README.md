@@ -139,7 +139,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 10 / 10 | Done |
-| P1 | 1 / 5 | In progress |
+| P1 | 2 / 5 | In progress |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
 | P4 | 0 / 4 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T1.3: Seeded shoppers (done) ★
+
+**What exists.** `seed/` generator (deterministic from `GoldenSeed`, fixtures reproducible via rewrite flag) plus `testdata/seed/histories/` (demo + 5 comparison shoppers) and `testdata/seed/hidden/answers.json`. Demo shopper mirrors the proven shape: statement, kept background, three fit returns days 3/6/9 of 11 (coverage ~0.55), later non-arrival dispute toward seller only. Comparison set tempts wrong-cause errors (broken, non-arrival, changed mind, genuine size change, vague). Tests prove determinism, universal seed marking, promotion-gate honesty, and hidden-answer separation (no `right_size` in any history).
+
+**What surprised.** Kept rows mint order/capture/event ids but no refund/dispute ids (links fill only what each outcome kind has); dispute rows fold the purchase capture into the link since a bare capture carries no signal. Verified the marking claim independently (serialized `SeedMark`, materialized `Seeded`).
+
+**The next agent should know.** `seed.Write` materializes arm inputs; `Row.SeededEvidence(anchor)` converts relative days to absolute times. Comparison answers: broken M, never-arrived L, changed-mind M, size-changed L, unclear M.
 
 ### T1.1: The domain model and architecture (done) ★
 

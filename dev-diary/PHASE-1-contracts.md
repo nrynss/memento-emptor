@@ -60,7 +60,7 @@ requires:   [T1.1, T0.3]
 fixture-ok: yes
 size:       M · frontier
 owns:       seed/, testdata/seed/
-status:     in-review
+status:     done
 ```
 A generator for seeded shopper histories, every row marked. Event times spread across the period so promotion's gates are met honestly, as T0.3 established.
 
