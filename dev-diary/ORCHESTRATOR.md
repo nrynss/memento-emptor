@@ -2,7 +2,7 @@
 
 How the orchestrator runs the work in this repository. Workers read `../AGENTS.md`. The task rules are in [`README.md`](README.md). This file covers what only the orchestrator does.
 
-**Process (user decision):** one agent per task, and no review loops. The orchestrator gives each task to a single agent, validates the result itself, and lands it or sends the same agent back.
+**Process (user decision, amended):** one agent per task. The orchestrator gives each task to a single agent, validates the result itself, and lands it or sends the same agent back. After a wave lands, the orchestrator runs a review–remediation loop: one review agent per phase, phases one by one, to catch what validation missed. A review agent re-verifies every Done-when and exit criterion, cross-checks frozen contracts against their implementations, and hunts doc-vs-code drift, fixture gaps, and untested paths. Small fixes (docs, tests, fixtures) land on the review branch; structural findings become new tasks. No phase's review starts until every task it reviews has landed.
 
 The orchestrator is the one session the user talks to. It picks tasks, dispatches agents, validates and lands their work, and keeps the board true. It does not write product code.
 
