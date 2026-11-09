@@ -139,7 +139,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 10 / 10 | Done |
-| P1 | 3 / 5 | In progress |
+| P1 | 4 / 5 | In progress |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
 | P4 | 0 / 4 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T1.4: Fixtures and fakes (done)
+
+**What exists.** `internal/fakes/` (four interfaces — payment, classifier, store, graph — plus replay driver; unknown requests fail with `ErrNoRecording`, never invented) and `testdata/replay/` (manifest, 9-step story, per-phase inputs for P2/P3/P4). Gate proves offline: replay runs with keys unset and proxies broken, key-pattern scan covers replayed fixtures. `record_reason` stays ask-again (vague "not great" → unclear 0.94 < 0.98 floor) so the frozen T1.2 snapshots don't move.
+
+**What surprised.** `domain.Subject` has no JSON tags (frozen) so replay output uses `Kind/ID/Name` vs snapshots' lowercase — decoding is case-insensitive, comparison test normalizes explicitly. Seeded returns enter pre-classified (as the seed model intends); the live Jev leg covers only the vague answer, but `ClassifierFake` serves all 11 labelled phrases for T2.2's table test.
+
+**The next agent should know.** P2's real clients implement the fakes' interfaces as-is or record the difference. P1 contracts are now frozen except the live T1.3b twin: any shared-type change updates `testdata/` in the same commit and is the orchestrator's call.
 
 ### T1.2: The interface (done) ★
 
