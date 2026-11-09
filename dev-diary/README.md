@@ -158,7 +158,7 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **What surprised.** The licence is Apache-2.0, by the user's decision, not MIT. The task's `owns` line named only `web/package.json`, so it was widened to `web/` to cover the app the task writes. An independent review found the web test step vacuous and the Go filter too broad. The web app now carries a real test, the gate checks the lockfile in both directions, and the Go filter drops only `web/node_modules`. `go mod tidy` keeps the Keel requirement because `internal/version/pin.go` carries a `tools`-tagged blank import.
 
-**The next agent should know.** The web app builds static with a `200.html` fallback, and T1.1 can change the adapter. CI has not been observed on a push yet, because the branch has not been pushed. The workflow runs the same gate.
+**The next agent should know.** The web app builds static with a `200.html` fallback, and T1.1 can change the adapter. CI runs green on `main`: the first push ran the gate and passed. The workflow's `checkout`, `setup-go` and `setup-node` actions still target Node 20 and GitHub forces them onto Node 24, which warns but does not fail.
 
 ### T0.1: Accounts and keys (done, by the user)
 
