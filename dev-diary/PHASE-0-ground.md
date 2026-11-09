@@ -178,11 +178,13 @@ requires:   [T0.2]
 fixture-ok: yes
 size:       S · mid
 owns:       dev-diary/research/ag-grid.md, spikes/ag-grid/
-status:     claimed:t10-aggrid
+status:     in-review
 ```
 Mount AG Grid through its plain JavaScript API inside a Svelte 5 component on Chaaya: custom cell renderers, theming from Chaaya's tokens, row editing, dark mode. Choose the licence tier and confirm it meets the sponsor prize's terms.
 
 **Done when:** the spike renders the four belief statuses with an editable row; `research/ag-grid.md` records what worked and any Chaaya gap, with issue text if needed.
+
+**Notes.** Community tier (MIT), no Enterprise import; meets the sponsor prize on the face of it, with Devpost wording left to submission. `spikes/ag-grid/` is self-contained (own package, tests, demo) and `web/` is untouched. Plain-JS `createGrid` in `$effect` after `ModuleRegistry.registerModules([AllCommunityModule])`; theme from live Chaaya tokens with `colorSchemeDark` for dark mode, applied via `setGridOption` so edits survive toggling; status pill and seeded-mark renderers; status select editor plus editable note with `onEdit` reporting. jsdom needs ResizeObserver/matchMedia/rAF stubs, `suppressColumnVirtualisation`, and a `firstDataRendered` wait; theme CSS is not observable there. No Chaaya gap found.
 
 ---
 

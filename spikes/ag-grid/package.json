@@ -1,0 +1,27 @@
+{
+	"name": "memento-emptor-spike-ag-grid",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"description": "T0.10 spike: AG Grid mounted through its plain JavaScript API inside a Svelte 5 component on Chaaya. Delete-able; not part of the shipped app.",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"test": "vitest run",
+		"check": "svelte-check --tsconfig ./tsconfig.json"
+	},
+	"dependencies": {
+		"@nrynss/chaaya": "0.6.0",
+		"ag-grid-community": "36.3.0"
+	},
+	"devDependencies": {
+		"@sveltejs/vite-plugin-svelte": "^7.0.0",
+		"svelte": "^5.57.0",
+		"svelte-check": "^4.7.6",
+		"typescript": "^5.9.3",
+		"vite": "^8.2.2",
+		"vitest": "^5.0.1",
+		"jsdom": "^30.0.1"
+	}
+}
