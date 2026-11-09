@@ -1,0 +1,9 @@
+# Push pointer only: `ast eval push memento-agent -f eval-spec.yml` run
+# from this directory activates the EVALUATION.yaml beside this file as
+# the memento-agent set on the server. It names the existing blueprint;
+# it does not define a new agent, build an image, or change the
+# reference agent in ../runtime/ (frozen). Kept because the CLI reads
+# EVALUATION.yaml beside the spec file, and this task owns agent/evals/
+# alone.
+spec: blueprint/v1
+name: memento-agent

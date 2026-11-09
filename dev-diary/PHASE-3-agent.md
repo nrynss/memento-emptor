@@ -128,8 +128,26 @@ requires:   [T3.1, T3.4]
 fixture-ok: no
 size:       S · mid
 owns:       agent/evals/
-status:     claimed:t35-evals
+status:     in-review
+
+**Notes (worker).** New package `agent/evals/`: `EVALUATION.yaml` (3
+boolean LLM judges: recall_first, correction_honoured,
+approval_before_purchase), `eval-spec.yml` (push pointer naming the
+memento-agent blueprint — the CLI reads the set beside the spec file),
+offline shape test, package doc. Pushed and scored server-side over the
+existing T3.1/T3.4 traces, zero new turns. Pass run: fad137db true ×3
+(0.97/0.98/0.99). Fail runs: 29335c48 recall false (errored recall,
+asked for shopper id); d6e19c5a correction false (feedback turn, no
+recommendation). Approval has no violating trace (the agent owns no
+purchase tool), so its fail is a constructed counterfactual judged with
+the identical prompt text off-platform: real 839514c8 transcript true,
+purchase-claimed-without-yes false. Spend $0.07 server + ~$0.0001
+counterfactual ($0.27 → $0.34 of credit). Finding: the judge reads the
+turn's text, not its tool spans — v1 recall (span order) failed on a
+good trace, so recall_first judges the reply's grounding (belief id,
+evidence, seeded marks) while span order stays human-checked.
 ```
+
 Astropods evaluators over real traces. Did the agent recall before recommending? Did a correction change the very next recommendation? Did any purchase skip approval?
 
 **Done when:** each evaluator passes on a good run and fails on a deliberately broken one; both are recorded.
