@@ -1,0 +1,1 @@
+{"id":"ORDER-ID-SANDBOX-1","status":"PAYER_ACTION_REQUIRED","payment_source":{"paypal":{}},"links":[{"href":"https://api.sandbox.paypal.com/v2/checkout/orders/ORDER-ID-SANDBOX-1","rel":"self","method":"GET"},{"href":"APPROVAL-URL-REDACTED","rel":"payer-action","method":"GET"}]}

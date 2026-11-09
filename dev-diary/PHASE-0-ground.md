@@ -79,8 +79,19 @@ requires:   [T0.1]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/paypal.md, testdata/paypal/
-status:     claimed:t04-paypal
+status:     in-review
 ```
+
+**Notes.** Webhook delivery, signature verification (`SUCCESS`) and resend are
+fully evidenced against the sandbox, using an invoice-sent event to a test
+endpoint. Order create is idempotent under a repeated `PayPal-Request-Id`;
+capture before approval fails with `ORDER_NOT_APPROVED`. Capture, refund and
+dispute-with-reason are one shopper approval away: the wallet order is created
+and awaiting approval, the dispute surface accepts the reason code and rejects
+only on eligibility, and the refund endpoint accepts the body shape. Direct
+card capture is blocked by `PAYEE_NOT_ENABLED_FOR_CARD_PROCESSING`; the event
+simulator 404s; transaction listing returns `NOT_AUTHORIZED`. Full detail and
+the exact follow-up commands are in `research/paypal.md` and the task report.
 Against the sandbox, establish and record:
 
 - an order created, approved by the sandbox shopper and captured, with `PayPal-Request-Id` idempotency seen working;

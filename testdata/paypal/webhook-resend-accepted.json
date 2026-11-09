@@ -1,0 +1,5 @@
+{
+  "id": "WEBHOOK-EVENT-ID-1",
+  "event_type": "INVOICING.INVOICE.SENT",
+  "summary": "The webhook event that is triggered when an invoice is sent."
+}
