@@ -47,9 +47,9 @@ depends on it, and mark it `blocked`.
 ./tools/check.sh
 ```
 
-It runs formatting, vet, the Go tests, the Svelte check, lint, the web tests and the web build. CI
-runs the same script on every push to `main` and every pull request. A commit that fails its own
-gate does not exist.
+It runs formatting, vet, the Go tests, a lockfile check, the Svelte check, lint, the web tests and
+the web build. CI runs the same script on every push to `main` and every pull request. A commit
+that fails its own gate does not exist.
 
 Run it from the repository root. It reads the Go packages and then builds `web/`. Install the web
 dependencies once with `npm ci` inside `web/`.

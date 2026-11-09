@@ -55,6 +55,7 @@ run_web() {
 }
 
 echo "-- lockfile"
+run_web "lockfile" node scripts/check-lock.mjs
 run_web "lockfile" npm ci --dry-run
 
 echo "-- svelte-check"
