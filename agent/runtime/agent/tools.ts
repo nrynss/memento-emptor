@@ -34,7 +34,7 @@ export const recallTool = createTool({
     trace_id: optionalTrace,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => recallForPurchase(context.shopper_id, context.trace_id),
+  execute: async (input) => recallForPurchase(input.shopper_id, input.trace_id),
 });
 
 export const recordCorrectionTool = createTool({
@@ -48,8 +48,8 @@ export const recordCorrectionTool = createTool({
     trace_id: optionalTrace,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) =>
-    recordCorrection(context.shopper_id, context.text, context.contradicts_belief_id, context.trace_id),
+  execute: async (input) =>
+    recordCorrection(input.shopper_id, input.text, input.contradicts_belief_id, input.trace_id),
 });
 
 export const pendingQuestionsTool = createTool({
@@ -61,7 +61,7 @@ export const pendingQuestionsTool = createTool({
     limit: z.number().optional(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => pendingQuestions(context.shopper_id),
+  execute: async (input) => pendingQuestions(input.shopper_id),
 });
 
 export const recordReasonTool = createTool({
@@ -75,9 +75,9 @@ export const recordReasonTool = createTool({
     trace_id: optionalTrace,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => {
-    void context.shopper_id;
-    return recordReason(context.question_id, context.answer_text, context.trace_id);
+  execute: async (input) => {
+    void input.shopper_id;
+    return recordReason(input.question_id, input.answer_text, input.trace_id);
   },
 });
 
@@ -94,9 +94,9 @@ export const recordFeedbackTool = createTool({
     trace_id: optionalTrace,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => {
-    void context.shopper_id;
-    return recordFeedback(context.custom_id, context.sku, context.size, context.feedback_text, context.trace_id);
+  execute: async (input) => {
+    void input.shopper_id;
+    return recordFeedback(input.custom_id, input.sku, input.size, input.feedback_text, input.trace_id);
   },
 });
 
@@ -109,9 +109,9 @@ export const explainBeliefTool = createTool({
     belief_id: z.string(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => {
-    void context.shopper_id;
-    return explainBelief(context.belief_id) ?? { error: `unknown belief ${context.belief_id}` };
+  execute: async (input) => {
+    void input.shopper_id;
+    return explainBelief(input.belief_id) ?? { error: `unknown belief ${input.belief_id}` };
   },
 });
 
@@ -123,7 +123,7 @@ export const ledgerBeliefsTool = createTool({
     include_seeded: z.boolean().optional(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => ledgerBeliefs(context.shopper_id),
+  execute: async (input) => ledgerBeliefs(input.shopper_id),
 });
 
 export const ledgerBeliefTool = createTool({
@@ -134,9 +134,9 @@ export const ledgerBeliefTool = createTool({
     belief_id: z.string(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => {
-    void context.shopper_id;
-    return ledgerBelief(context.belief_id) ?? { error: `unknown belief ${context.belief_id}` };
+  execute: async (input) => {
+    void input.shopper_id;
+    return ledgerBelief(input.belief_id) ?? { error: `unknown belief ${input.belief_id}` };
   },
 });
 
@@ -147,7 +147,7 @@ export const ledgerEvidenceTool = createTool({
     shopper_id: z.string(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => ledgerEvidence(context.shopper_id),
+  execute: async (input) => ledgerEvidence(input.shopper_id),
 });
 
 export const lookupReturnTool = createTool({
@@ -158,7 +158,7 @@ export const lookupReturnTool = createTool({
     order_id: z.string(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async ({ context }) => lookupReturn(context.order_id),
+  execute: async (input) => lookupReturn(input.order_id),
 });
 
 export const tools = {
