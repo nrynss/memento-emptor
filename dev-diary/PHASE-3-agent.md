@@ -86,9 +86,32 @@ requires:   [T3.1, T3.3]
 fixture-ok: no
 size:       M · frontier
 owns:       agent/loops/
-status:     claimed:t34-loops
+status:     in-review
 ```
 The asynchronous loop, with Astropods' input forms and feedback:
+
+**Notes (worker).** New package `agent/loops/`: one-short-question
+builder (`AskOne`), strict explicit-yes gate (`IsApprovalYes`),
+`ApproveAfterYes` (Service.Approve then transport mirror, non-yes
+refused with `ErrNotApproved`, nothing mirrored), correction-wins
+recommendation helper, and transaction-tied `Feedback` with `Validate`.
+9 tests: approval gating over `FakeCheckout` (capture fails closed
+pre-approval, vague reply mirrors nothing, yes approves + mirrors +
+captures), plus a replay pinning all four loops to
+`testdata/replay/p3-turns.json`. Deployed agent needed no redeploy:
+runtime instructions already carry the four loops and the image is
+unchanged. Live 6-turn arc, one conversation, model claude-sonnet-4-6:
+shopping → recall + pending question (trace 879c8752, $0.0350); clear
+fit answer → record_reason accepted (trace 35598171, $0.0280);
+correction → record_correction corr_live01 with precedence (trace
+cef908ae, $0.0302); next recommendation M per corr_live01 with belief
+blf_8f2c41 standing (trace fad137db, $0.0357, asks for yes); yes →
+confirmed, purchase honestly declined as unwired (trace 839514c8,
+$0.0186); fits-well note → record_feedback accepted (trace d6e19c5a,
+$0.0399). Total $0.19, no turn over the $0.10 guard; billing $0.08 →
+$0.27. Standing gap for T3.6: the deployed agent owns no purchase
+tool, so approval-to-capture is proved in code (`ApproveAfterYes` +
+orders tests), not on a live order.
 
 - **Why did it go back?** The agent polls `pending_questions` and asks one short question when a refund arrives.
 - **Approval** before payment.
