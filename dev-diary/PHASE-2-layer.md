@@ -66,9 +66,24 @@ requires:   [T2.2]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/reasons/
-status:     claimed:t22b-live
+status:     in-review
 ```
 **Done when:** the labelled set gives T0.7's results on the live service, within the brief's budget; the transcript is in the handoff log.
+
+Notes (worker t22b-live). `tests/live/reasons/` holds a main-program
+driver (no `*_test.go`, so CI builds it but never runs it), plus
+`run.sh`, `README.md`, and a git-ignored `out/` for raw replies. One
+sequential run of all 11 phrases through the frozen client with the key
+attached by the driver's transport wrapper: 11/11 categories match the
+recorded table, 8 clear attach and 3 vague ask again, floor margin
+unchanged at 0.04 (clear 1.00 against vague 0.96). Confidence wobbled
+on two vague items (`not great` 0.94→0.93, `meh` 0.68→0.51), both
+still `unclear` and far under the floor; verdicts are what gate
+beliefs, and the driver fails on any category or verdict mismatch.
+Model resolved to `typesafe/jev-1.14-20261014`, identical to T0.7, so
+the floor stands. Total $0.000235284 for 5,602 input tokens, exactly
+T0.7's total; no guard tripped. Full transcript is in the worker's
+report.
 
 ---
 
