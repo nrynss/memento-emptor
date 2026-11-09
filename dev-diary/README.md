@@ -141,7 +141,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
 | P2 | 7 / 10 | In progress |
-| P3 | 3 / 6 | In progress |
+| P3 | 4 / 6 | In progress |
 | P4 | 2 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
 | P6 | 0 / 7 | Not started |
@@ -199,6 +199,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `agent/catalog/` matching on brand id + category + equal fit-handle sets with shared cut signals as evidence; Bonobos negative control (line name alone never matches); `ExcludeIDs` skips returned SKUs; `FulfilmentSimulated` on every candidate; apparel size gap pointed out-of-band at the retailer URL; shoe InStock sizes with narrowing echoed. Tests replay all fixtures; one live detail call re-verified the demo SKU (0 credits — detail calls are free).
 
 **What surprised.** Search and detail share one wire shape, so one decoder covers both. No dependency gaps.
+
+### T3.4: Asking the shopper (done) ★
+
+**What exists.** `agent/loops/` policy: ask-one-first-pending, strict explicit-yes gate, approve-then-mirror (local record and transport agree before capture), correction-wins recommendation, transaction-tied feedback; 9 tests incl. fail-closed capture and replay pin to `p3-turns.json`. Live: 6 deployed turns, one conversation — pending poll → reason (fit-too-small accepted) → correction (`corr_live01`, precedence) → honoured next turn → yes-approval (purchase honestly declined, no purchase tool) → fits-well feedback. Traces `879c8752/35598171/cef908ae/fad137db/839514c8/d6e19c5a`; spend $0.19 total (billing $0.08 → $0.27), max turn under the $0.10 guard.
+
+**What surprised.** Turn 2's answer reinforced the old L-direction belief while M takes precedence — correct per decision-vs-belief, agent stated both. Approval-to-capture is proved in code, not on a live order: the deployed agent owns no purchase tool, so T3.6 needs the orders wiring to close that gap.
+
+**The next agent should know.** T3.4's approve loop must mirror real approval into the transport or capture correctly fails. T3.5's evaluators score these traces.
 
 ### T3.3: Orders and double-buy protection (done) ★
 

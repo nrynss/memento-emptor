@@ -86,7 +86,7 @@ requires:   [T3.1, T3.3]
 fixture-ok: no
 size:       M · frontier
 owns:       agent/loops/
-status:     in-review
+status:     done
 ```
 The asynchronous loop, with Astropods' input forms and feedback:
 
