@@ -1,0 +1,54 @@
+{
+ "deployment_note": "same Serverless deployment as T0.6 (engine 9.7.0); host/cluster ids scrubbed as in testdata/elastic/deployment.json",
+ "text_embedding_endpoints": [
+  {
+   "inference_id": ".google-gemini-embedding-001",
+   "task_type": "text_embedding",
+   "service": "elastic",
+   "model_id": "google-gemini-embedding-001",
+   "similarity": "cosine",
+   "dimensions": 3072
+  },
+  {
+   "inference_id": ".jina-embeddings-v3",
+   "task_type": "text_embedding",
+   "service": "elastic",
+   "model_id": "jina-embeddings-v3",
+   "similarity": "cosine",
+   "dimensions": 1024
+  },
+  {
+   "inference_id": ".jina-embeddings-v5-text-nano",
+   "task_type": "text_embedding",
+   "service": "elastic",
+   "model_id": "jina-embeddings-v5-text-nano",
+   "similarity": "cosine",
+   "dimensions": 768
+  },
+  {
+   "inference_id": ".jina-embeddings-v5-text-small",
+   "task_type": "text_embedding",
+   "service": "elastic",
+   "model_id": "jina-embeddings-v5-text-small",
+   "similarity": "cosine",
+   "dimensions": 1024
+  },
+  {
+   "inference_id": ".openai-text-embedding-3-large",
+   "task_type": "text_embedding",
+   "service": "elastic",
+   "model_id": "openai-text-embedding-3-large",
+   "similarity": "cosine",
+   "dimensions": 3072
+  },
+  {
+   "inference_id": ".openai-text-embedding-3-small",
+   "task_type": "text_embedding",
+   "service": "elastic",
+   "model_id": "openai-text-embedding-3-small",
+   "similarity": "cosine",
+   "dimensions": 1536
+  }
+ ],
+ "lambo_rule": "only a text_embedding endpoint with float elements works; sparse (.elser-2-elastic) and task-type embedding endpoints are refused"
+}

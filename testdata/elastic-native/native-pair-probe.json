@@ -1,0 +1,112 @@
+{
+ "cost_note": "Elastic returns no usage or cost fields on _inference responses (top-level key is only the task type). Nothing in-band meters the calls; billing is console-side. The user confirms it in the Elastic console (same standing check as T0.6).",
+ "latency_note": "curl timings are warm-connection; python-urllib timings pay a ~6.2s DNS stall per fresh resolution on this network (AAAA for this hostname times out; see lambo-elastic-embedder.json). curl does not wait for AAAA.",
+ "native_doc_latencies_note": "per-call means over 8 INGEST calls; each pays the ~6.2s DNS stall (fresh urllib connection), so engine time is ~1s like curl",
+ "native_endpoint": ".jina-embeddings-v3",
+ "native_engine_knn": {
+  "engine": "HNSW approximate scores, not exact cosine; ranking is the comparable signal",
+  "note": "same shape as the settled kNN leg: both reason phrases and all four same-line shirts rank above both distractors; p6 (the roomier cut) trails in both spaces",
+  "order": [
+   [
+    "r2",
+    0.7408
+   ],
+   [
+    "p1",
+    0.6476
+   ],
+   [
+    "r1",
+    0.6385
+   ],
+   [
+    "p2",
+    0.6224
+   ],
+   [
+    "p4",
+    0.6166
+   ],
+   [
+    "p3",
+    0.6163
+   ],
+   [
+    "p5",
+    0.5582
+   ],
+   [
+    "p6",
+    0.5509
+   ]
+  ],
+  "query": "snug across the chest, pulls at the buttons (input_type=SEARCH; docs embedded with INGEST, exactly what Lambo sends)"
+ },
+ "native_exact_cosine_knn": {
+  "note": "exact cosine over the same vectors: r2 top, all fit items above both distractors (p5 0.1159, p6 0.1011)",
+  "order": [
+   [
+    "r2",
+    0.4825
+   ],
+   [
+    "p1",
+    0.2943
+   ],
+   [
+    "r1",
+    0.2776
+   ],
+   [
+    "p2",
+    0.2445
+   ],
+   [
+    "p3",
+    0.2321
+   ],
+   [
+    "p4",
+    0.232
+   ],
+   [
+    "p5",
+    0.1159
+   ],
+   [
+    "p6",
+    0.1011
+   ]
+  ]
+ },
+ "native_pair_cosine_r1_r2": 0.6769,
+ "native_unrelated_floor": {
+  "note": "same unrelated pairs as the settled contract's 0.45-0.60 floor; the native space sits lower and wider",
+  "pairs": {
+   "p1-p5": 0.3508,
+   "p2-p5": 0.4022,
+   "p3-p4": 0.4375,
+   "r1-p4": 0.2349,
+   "r1-p5": 0.2543,
+   "r1-p6": 0.1624,
+   "r2-p4": 0.2471,
+   "r2-p5": 0.1781
+  }
+ },
+ "openrouter_pair_latency_s": 1.84,
+ "openrouter_pair_recheck": {
+  "cost": 1.6e-07,
+  "prompt_tokens": 16,
+  "settled_value": 0.68,
+  "value": 0.6794
+ },
+ "paraphrase_pair": [
+  "too tight in the shoulders",
+  "snug across the chest"
+ ],
+ "plain_no_input_type_pair_cosine": 0.4745,
+ "plain_vs_typed_note": "without input_type the pair collapses to 0.47; with INGEST/INGEST it is 0.677. Lambo always sends INGEST for documents and SEARCH for queries, so the Lambo path uses the good configuration; a hand-rolled client that omits the field gets the bad one.",
+ "settled_contract": "kind=bge_m3, model=baai/bge-m3, dim=1024, via OpenRouter (testdata/elastic/hybrid-documents.json, research/elastic.md)",
+ "vectors": "omitted (same rule as testdata/elastic/)",
+ "native_doc_latency_note": "8 INGEST calls averaged 7.29s per call; each pays the ~6.2s DNS stall (fresh urllib connection), so engine time is ~1s like curl"
+}

@@ -181,11 +181,27 @@ requires:   [T0.6]
 fixture-ok: no
 size:       XS · mid
 owns:       dev-diary/research/elastic-native.md, testdata/elastic-native/
-status:     claimed:t06b-embed
+status:     in-review
 ```
 Lambo 0.10.0 closed issue 233: embeddings can now be created natively through the Elasticsearch Inference API. Probe whether the demo should switch from T0.6's settled BGE-M3-via-OpenRouter contract: replay T0.6's paraphrase set (`testdata/elastic/hybrid-documents.json`) through the native path and compare paraphrase cosine, kNN ranking effect, cost, latency, and the `lambo.toml` / feature-flag changes a switch needs, including the re-embed path. Recommend stay-or-switch with evidence. This task changes nothing: the settled contract in `research/elastic.md` stands unless a later task adopts the recommendation.
 
 **Done when:** `research/elastic-native.md` records the comparison and the recommendation; recordings are in `testdata/elastic-native/`; any test indices deleted; spend recorded.
+
+**Notes.** Verdict: stay (see `research/elastic-native.md`, recordings in
+`testdata/elastic-native/`). Native `.jina-embeddings-v3` (1024 dims, same
+width) matches the settled number head-to-head (pair cosine 0.677 vs 0.68)
+and the kNN ranking shape (reason phrases plus all four same-line shirts
+above both distractors either way), with no quality gain; absolute
+thresholds do not transfer (native floor 0.16-0.44 vs settled 0.45-0.60)
+and there is no calibration row for `kind = "elastic"`. Native inference
+returns no usage/cost in-band (console check stays a user step). Warm
+latency is equal (~1s); cold from this network the native path cannot
+connect at all (hardcoded 5s connect timeout vs a ~6.2s DNS stall on the
+deployment hostname — AAAA never answers — while openrouter.ai resolves
+in 0.08s). `lambo.toml` shape and `embed-elastic` build proven; `re-embed`
+documented but not exercisable live on this network. Every test index
+deleted (empty listing verified). Spend: $1.6e-07 OpenRouter; ~30 short
+native calls, unmetered in-band.
 
 ---
 
