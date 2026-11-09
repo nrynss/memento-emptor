@@ -348,7 +348,7 @@ Full issue text lives on GitHub. When the fixes release, the follow-up here is: 
 
 **What surprised.** The deployment is Elastic Serverless (9.7.0), not a trial — the brief's trial-vs-self-host framing did not apply. Installed Lambo 0.8.0 lacks `recall-elastic`, and cold rustls handshakes (~6.8 s) trip the default 5 s timeout: every `lambo.toml` needs `timeout_ms = 20000` in `[recall]` (proposed Lambo issue text in the worker's report; the user files it). Serverless excludes vectors from `_source`, so Lambo's exact re-scoring keeps engine HNSW scores — an accepted, slightly widened difference. Spend bounded under $0.00001; test indices deleted.
 
-**The next agent should know.** The embedder contract is fixed (`kind=bge_m3`, `url=https://openrouter.ai/api`, `model=baai/bge-m3`, `dim=1024`, `api_key_env=OPENROUTER_API_KEY`); every later session must match or re-embed (`lambo re-embed`). T0.9 no longer needs an Elasticsearch trial decision — only Lambo persistence plus public HTTPS. The user should confirm the Serverless project's billing in the Elastic console.
+**The next agent should know.** The embedder contract is fixed (`kind=bge_m3`, `url=https://openrouter.ai/api`, `model=baai/bge-m3`, `dim=1024`, `api_key_env=OPENROUTER_API_KEY`); every later session must match or re-embed (`lambo re-embed`). T0.9 no longer needs an Elasticsearch trial decision — only Lambo persistence plus public HTTPS. Billing resolved by the user in the console: 0.7095 ECU month-to-date (vector DB 0.6921, add-ons 0.0174), FREE during trial.
 
 ### T0.10: AG Grid inside Chaaya (done)
 
