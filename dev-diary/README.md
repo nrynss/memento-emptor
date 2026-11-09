@@ -152,6 +152,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### T0.6b: Elastic native embedder probe (done)
+
+**What exists.** `dev-diary/research/elastic-native.md` plus 4 recordings in `testdata/elastic-native/`. Head-to-head of Lambo 0.10.0 native embeddings (`.jina-embeddings-v3`, 1024 dims) vs the settled BGE-M3-via-OpenRouter contract on T0.6's paraphrase set: pair cosine 0.677 vs 0.68 (wash), same kNN ranking shape, no quality gain. Verdict: stay. The settled contract in `research/elastic.md` is untouched.
+
+**What surprised.** The native path cannot write from this network at all: Lambo's elastic embedder has a hardcoded 5 s connect timeout vs a ~6.2 s DNS stall (AAAA for the deployment hostname never answers; openrouter.ai resolves in 0.08 s). This also re-explains T0.6's "cold rustls handshake" — it was the same DNS stall, not TLS. Native inference returns no usage/cost in-band (console check still a user step), has no calibration row (every measured constant would need re-measuring), and would couple both vector dependencies to one service.
+
+**The next agent should know.** Revisit only with healthy DNS (or a configurable Lambo connect timeout), trivial console billing, and re-measured calibration on jina-v3. The `lambo.toml` switch shape and `re-embed` path are documented in the research file.
+
 ### T0.3: Lambo promotion on a seeded session (done) ★
 
 **What exists.** `dev-diary/research/lambo.md` plus 8 recordings in `testdata/lambo/` (three MCP transcripts, four `/api/inspect` responses, the exact `lambo.toml`). Proved on Lambo v0.10.0, local-only, $0: three fit returns citing the belief take it to Venerable (`distinct_interactions` 3.0≥3.0, coverage 0.667≥0.3, one hop per eval cycle); GC sweeps run from file cadence, Swarm is the policy; the `against` correction renders the contradiction warning on recall, inspect, and `/api/inspect` `warnings[]` while the belief stays Venerable; a non-fit dispute leaves sizing untouched (seller belief refused Candidate); ledger mapping is one shape per state; sessions isolate shoppers on a shared store file. Demotion targets Canonical only — a Venerable belief is held, never demoted.

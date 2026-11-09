@@ -181,7 +181,7 @@ requires:   [T0.6]
 fixture-ok: no
 size:       XS · mid
 owns:       dev-diary/research/elastic-native.md, testdata/elastic-native/
-status:     in-review
+status:     done
 ```
 Lambo 0.10.0 closed issue 233: embeddings can now be created natively through the Elasticsearch Inference API. Probe whether the demo should switch from T0.6's settled BGE-M3-via-OpenRouter contract: replay T0.6's paraphrase set (`testdata/elastic/hybrid-documents.json`) through the native path and compare paraphrase cosine, kNN ranking effect, cost, latency, and the `lambo.toml` / feature-flag changes a switch needs, including the re-embed path. Recommend stay-or-switch with evidence. This task changes nothing: the settled contract in `research/elastic.md` stands unless a later task adopts the recommendation.
 
