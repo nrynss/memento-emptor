@@ -247,7 +247,7 @@ requires:   [T0.1, T0.3]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/hosting.md
-status:     not-started
+status:     claimed:t09-hosting
 ```
 Lambo needs a persistent disk, and the service needs a public HTTPS endpoint for PayPal webhooks. Work out what Render costs for both until winners are announced, against the $50 credit. **User decision:** everything on Render, or Lambo on the user's own server with Render serving the public demo and webhooks. Recommend one.
 
