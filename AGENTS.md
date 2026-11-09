@@ -144,7 +144,8 @@ publishing the video, submitting, or spending past the brief's budget. Ask first
   `errors.Is` and `errors.As`, no panics, no stored contexts, and a doc comment on every exported
   identifier.
 - Svelte 5 only. Runes, not stores, not `export let`, not `$:`. Wrap a Chaaya observable with
-  `reactive` and take the teardown `attach` returns.
+  `reactive`. Use `attach(target)` to run the target's own `attach()` in the component's effect,
+  and it calls the teardown when the component goes away.
 - Comments describe behaviour. A comment naming a retry, fallback or default the code lacks is a
   defect.
 - No dates, windows or target days in `dev-diary/`. Order work by `requires` only. The hackathon

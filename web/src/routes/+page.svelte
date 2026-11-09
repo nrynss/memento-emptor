@@ -1,5 +1,9 @@
+<script lang="ts">
+	import { productName } from '$lib/product';
+</script>
+
 <svelte:head>
-	<title>Memento Emptor</title>
+	<title>{productName}</title>
 	<meta
 		name="description"
 		content="A memory layer for shopping agents built on PayPal, learned from what happened to the money."

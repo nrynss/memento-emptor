@@ -28,7 +28,7 @@ fi
 # Go tooling must not walk web/node_modules, which carries third-party Go
 # snippets that are not this project's code.
 all_pkgs=$(go list ./...)
-go_pkgs=$(printf '%s\n' "$all_pkgs" | grep -v '^github.com/nrynss/memento-emptor/web/' || true)
+go_pkgs=$(printf '%s\n' "$all_pkgs" | grep -v '^github.com/nrynss/memento-emptor/web/node_modules/' || true)
 [ -n "$go_pkgs" ] || fail "go list" "no Go packages found"
 
 echo "-- go vet"
@@ -53,6 +53,9 @@ run_web() {
 	fi
 	rm -f "$log"
 }
+
+echo "-- lockfile"
+run_web "lockfile" npm ci --dry-run
 
 echo "-- svelte-check"
 run_web "svelte-check" npm run check

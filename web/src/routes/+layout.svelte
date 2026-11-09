@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { theme as themeStore, themeToggleLabel } from '@nrynss/chaaya/theme';
 	import { reactive } from '@nrynss/chaaya/svelte';
+	import { productName, tagline } from '$lib/product';
 
 	let { children } = $props();
 
@@ -23,7 +24,7 @@
 
 <div class="shell">
 	<header class="shell-header">
-		<a class="shell-brand" href={resolve('/')}>Memento Emptor</a>
+		<a class="shell-brand" href={resolve('/')}>{productName}</a>
 		<button type="button" onclick={toggle}>{label}</button>
 	</header>
 
@@ -32,6 +33,6 @@
 	</main>
 
 	<footer class="shell-footer">
-		Memory for shopping agents, learned from what happened to the money.
+		{tagline}
 	</footer>
 </div>
