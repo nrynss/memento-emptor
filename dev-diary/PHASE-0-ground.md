@@ -82,16 +82,19 @@ owns:       dev-diary/research/paypal.md, testdata/paypal/
 status:     in-review
 ```
 
-**Notes.** Webhook delivery, signature verification (`SUCCESS`) and resend are
-fully evidenced against the sandbox, using an invoice-sent event to a test
-endpoint. Order create is idempotent under a repeated `PayPal-Request-Id`;
-capture before approval fails with `ORDER_NOT_APPROVED`. Capture, refund and
-dispute-with-reason are one shopper approval away: the wallet order is created
-and awaiting approval, the dispute surface accepts the reason code and rejects
-only on eligibility, and the refund endpoint accepts the body shape. Direct
-card capture is blocked by `PAYEE_NOT_ENABLED_FOR_CARD_PROCESSING`; the event
-simulator 404s; transaction listing returns `NOT_AUTHORIZED`. Full detail and
-the exact follow-up commands are in `research/paypal.md` and the task report.
+**Notes.** Full order → scripted shopper approval → capture → refund cycle
+evidenced twice against a replacement US-home sandbox merchant (the original
+merchant refused USD; the INR detour is superseded). Refund-has-no-reason is
+CONFIRMED on two full records and the webhook resource; `custom_id`
+propagates order → capture → refund as the join key. Capture records carry no
+line items; the order GET is authoritative. Webhook delivery, signature
+`SUCCESS` and resend re-verified under the new app on a refund event; the new
+app's ledger shows no backfill. Dispute creation stays open: five API attempts
+across two apps all return `TRANSACTION_NOT_ELIGIBLE`; the labelled stand-in
+is buyer-side filing through the resolution center. Card capture blocked by
+`PAYEE_NOT_ENABLED_FOR_CARD_PROCESSING`; the event simulator 404s;
+transaction listing is `NOT_AUTHORIZED`. Detail in `research/paypal.md`; 38
+recordings in `testdata/paypal/`.
 Against the sandbox, establish and record:
 
 - an order created, approved by the sandbox shopper and captured, with `PayPal-Request-Id` idempotency seen working;

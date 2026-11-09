@@ -48,20 +48,27 @@ AGENTS.md they are for a person, and no code reads them), and no headless path
 was found. The order id and the exact follow-up commands are in the task
 report's handoff, not here.
 
-Currency finding (follow-up): the first USD order's approval was refused with
-"This seller doesn't accept payments in your currency", so the merchant does
-not receive USD as configured. No API available to this app reveals the
-merchant's home currency: `GET /v1/identity/oauth2/userinfo` with the merchant
-token returns only the app identity (`sub`); `GET /v1/reporting/balances`
-returns `NOT_AUTHORIZED` like the transaction listing. The already-recorded
-catalog event carries an Indian business phone (country code redacted with the
-rest), which suggests INR, but recreating the identical shape in INR fails at
-creation with `CURRENCY_NOT_SUPPORTED` — so INR is not the answer either, and
-order creation cannot confirm receivability anyway (USD created fine and was
-refused only at approval). Open: read the home currency in the developer
-dashboard (Sandbox, Accounts, the business account's profile) and either add
-a USD balance / allow receiving USD, or recreate the app under a USD-home
-sandbox business account. The demo's amounts stay USD either way.
+Resolution: the merchant was replaced with a fresh US-home sandbox account and
+REST app (new client-id/secret in the keyring; token grant succeeds, 31
+scopes). Order `ORDER-ID-US-1` was approved through scripted shopper login
+(Playwright Chromium driving the sandbox checkout: email, password, Complete
+Purchase, landing back on the return URL with a payer id) and captured:
+`COMPLETED`, capture `CAPTURE-ID-US-1`. A second identical cycle
+(`ORDER-ID-US-2` / `CAPTURE-ID-US-2`) confirmed repeatability. Back-to-back
+scripted logins hit a transient sandbox risk throttle once; a short wait
+cleared it. Create-response shape varies by app: the new app's create echoes
+no `purchase_units`; the order GET is authoritative for line items.
+Recordings: `order-usd-approved.json`, `order-get-approved-line-items.json`,
+`capture-completed.json`, `capture-get.json`, plus the `*2*` second-cycle
+equivalents.
+
+Currency finding (follow-up): RESOLVED by replacing the merchant. The first
+USD order's approval was refused with "This seller doesn't accept payments in
+your currency" under the original merchant; no API available to that app
+revealed its home currency, and INR failed at creation with
+`CURRENCY_NOT_SUPPORTED`. The replacement US-home sandbox account and REST app
+approves and captures USD with no currency complaint. The demo's amounts stay
+USD; the old INR detour is superseded, not evidence of anything about PayPal.
 
 ## 2. Refund, and what it carries
 
@@ -70,19 +77,23 @@ approval above.
 
 Surface probe: `POST /v2/payments/captures/{nonexistent}/refund` with
 `{amount, note_to_payer}`.
-Result: 404 `INVALID_RESOURCE_ID` on `capture_id`. The endpoint is reachable
-and authenticated; the body shape was accepted and only the address was wrong.
+Result: 404 `INVALID_RESOURCE_ID` on `capture_id`. The endpoint is reachable and
+authenticated; the body shape was accepted and only the address was wrong.
 Recording: `testdata/paypal/refund-nonexistent-capture.json`.
 
-On the brief's claim that a refund has no reason field: partly verified. The
-refund request took `amount` plus `note_to_payer` with no reason demanded, and
-the toolkit's `create_refund` (v1.11.0 source) posts the same shape to the
-same endpoint. What the refund *record* and its webhook carry (whether a GET
-shows any reason-like field) is unverified and needs the capture.
+On the brief's claim that a refund has no reason field: CONFIRMED, twice over.
+Two full refunds on two captured orders returned `COMPLETED`, and both refund
+records carry id, amount, `note_to_payer`, `seller_payable_breakdown`,
+`custom_id`, status, timestamps, payer and links — no reason or reason-like
+field anywhere. The `PAYMENT.CAPTURE.REFUNDED` webhook resource carries the
+same shape, also with no reason field. Recordings: `refund-record.json`,
+`refund2-record.json`, `webhook-delivery-refunded.json`.
 
-What this means for the layer, as far as the sandbox shows: a refund arrives
-as an outcome without a reason, so the reason has to come from the shopper
-(`pending_questions` / `record_reason`). Nothing seen contradicts that.
+What this means for the layer is settled: a refund arrives as an outcome
+without a reason, so the reason has to come from the shopper
+(`pending_questions` / `record_reason`). Useful join key: `custom_id`
+(`shopper-demo-001`) propagates order → capture → refund, so the layer can tie
+a refund to its order without relying on PayPal ids.
 
 ## 3. Dispute with a reason code
 
@@ -96,13 +107,23 @@ value passed validation; eligibility needs a funded/captured transaction, the
 same approval blocker as the refund.
 Recording: `testdata/paypal/dispute-create-transaction-not-eligible.json`.
 
-So the sandbox produces disputes through this API (seller-side create is the
-sandbox testing path; in live, buyers file through the resolution center), but
-a dispute with a reason code is one capture away, not zero. Nothing was
-fabricated as a stand-in; dispute evidence is pending the same one-click
-approval. For the demo's use (a never-arrived item mapping to seller
-reliability, never to sizing), the reason-code half is verified at the
-validation layer only.
+Follow-up against two completed captures (second cycle run precisely so the
+dispute could precede any refund): the minimal shape and the minimal shape
+plus `dispute_amount` both pass schema validation and both return
+`TRANSACTION_NOT_ELIGIBLE`; a fuller shape with messages is rejected on
+schema (`UNSUPPORTED_FIELDS`). Five attempts across two apps, order ids and
+capture ids, before and after refunds, all agree. Sandbox seller-side dispute
+creation through this API is gated beyond "completed capture" in a way no
+request shape tried can satisfy; the documented reason enum itself is
+validated fine, so the taxonomy is real but unreachable this way.
+Recordings: `dispute-completed-capture-not-eligible.json`,
+`dispute-fuller-shape-unsupported.json`.
+
+What can stand in, labelled for the demo: buyer-side filing through the
+sandbox resolution center (a person action), which is also what the demo
+narrative already says — "the shopper files a dispute". That path produces a
+real dispute with a real reason code and a real `CUSTOMER.DISPUTE.CREATED`
+webhook. Nothing was fabricated as a stand-in here.
 
 ## 4. Webhooks: delivery, verification, redelivery
 
@@ -140,8 +161,19 @@ Fully verified end to end.
 
 What this means for the ingest (T2.1): key idempotency on PayPal's event id,
 verify every delivery through `verify-webhook-signature`, and rely on
-resend/retry rather than polling. The transport is identical for
-capture/refund/dispute events; only their payloads are still unverified.
+resend/retry rather than polling. The refund payload shape is now verified
+above; dispute payloads still await a real dispute.
+
+Second session under the replacement app: a fresh webhook
+(`WEBHOOK-ID-US-1`, same three event types) shows the new app's ledger
+contains only events generated after subscription — no backfill of the two
+captures or the first refund. Refunding the second capture generated
+`PAYMENT.CAPTURE.REFUNDED`; manual resend returned 202 and delivered within
+about a minute, and `verify-webhook-signature` on the delivered refund event
+returned `SUCCESS`. The delivered refund resource carries the refund record
+shape with no reason field. Recordings: `webhook-us-app.json`,
+`webhook-events-us-ledger.json`, `webhook-resend-us-accepted.json`,
+`webhook-delivery-refunded.json`, `webhook-verify-refunded-success.json`.
 
 ## 5. Line items
 
@@ -150,8 +182,13 @@ capture/refund/dispute events; only their payloads are still unverified.
   Recording: `testdata/paypal/order-get-line-items.json`.
 - `GET /v2/invoicing/invoices/{id}` returns `items[]` with name and quantity.
   Recording: `testdata/paypal/invoice-get-line-items.json`.
-- Line items from a capture or a transaction-detail read are pending the
-  approval. The reporting API is not a fallback: listing transactions returns
+- Capture-side line items: settled. Capture records (GET and the capture
+  response) carry NO items — `purchase_units[]` there holds only payments,
+  reference and shipping. Line items live on the order GET, and `custom_id`
+  propagates order → capture → refund, so that is the join key.
+  Recordings: `order-get-approved-line-items.json`, `capture-get.json`,
+  `capture2-get.json`.
+- The reporting API is not a fallback: listing transactions returns
   `NOT_AUTHORIZED` (insufficient permissions for this app), not history.
   Recording: `testdata/paypal/reporting-transactions-not-authorized.json`.
   The ledger must read orders/captures, not the reporting API, unless the
@@ -179,7 +216,12 @@ Toolkit tool list below is from `@paypal/agent-toolkit` v1.11.0's README
   authorize/`confirm-payment-source`; reporting detail. `simulate-events`
   404s either way.
 
-This matches product.md's "What PayPal's tools cover" against v1.11.0.
+This matches product.md's "What PayPal's tools cover" against v1.11.0. Scope
+note: the replacement app's grant has 31 scopes against the first app's 29 —
+invoicing scope gone, `shipping/trackers/readwrite` and
+`wallet/mandates/read|write` added. Recording: `token-scopes-us-app.json`
+beside the original `token-scopes.json`. None of this task's calls needed the
+differing scopes.
 
 ## Placeholders
 
@@ -188,14 +230,20 @@ placeholders that keep the shape:
 
 | Placeholder | What was removed |
 |---|---|
-| `ORDER-ID-SANDBOX-1` | wallet order id |
-| `WEBHOOK-ID-SANDBOX-1` | webhook id |
-| `WEBHOOK-EVENT-ID-1`, `-2` | webhook event ids |
+| `ORDER-ID-SANDBOX-1` | wallet order id (first app) |
+| `ORDER-ID-US-1`, `ORDER-ID-US-2` | wallet order ids (replacement app, two cycles) |
+| `CAPTURE-ID-US-1`, `CAPTURE-ID-US-2` | capture ids |
+| `REFUND-ID-US-1`, `REFUND-ID-US-2` | refund ids |
+| `WEBHOOK-ID-SANDBOX-1` | webhook id (first app) |
+| `WEBHOOK-ID-US-1` | webhook id (replacement app) |
+| `WEBHOOK-EVENT-ID-1`, `-2` | webhook event ids (first app) |
+| `WEBHOOK-EVENT-US-1` | webhook event id (replacement app) |
 | `INVOICE-ID-SANDBOX-1` | invoice id and URL fragment |
 | `PRODUCT-ID-SANDBOX-1` | catalog product id |
 | `ITEM-ID-REDACTED`, `TEMPLATE-ID-REDACTED` | invoice item / template ids |
 | `MERCHANT-EMAIL-REDACTED`, `MERCHANT-ID-REDACTED`, `PHONE-REDACTED` | sandbox merchant contact and account id from PayPal responses |
 | `PAYER-EMAIL-REDACTED` | invoice recipient address (a placeholder-shaped address) |
+| `PAYER-ID-REDACTED` | shopper payer id from approval and capture responses |
 | `APPROVAL-URL-REDACTED` | payer-action approval URL (contains the order token) |
 | `WEBHOOK-SITE-UUID-REDACTED`, `DELIVERY-UUID-REDACTED`, `TRANSMISSION-ID-REDACTED`, `TRANSMISSION-SIG-REDACTED` | ephemeral capture URL, delivery and signature values |
 | `DEBUG-ID-REDACTED` | PayPal debug ids |
@@ -203,13 +251,15 @@ placeholders that keep the shape:
 
 Keys never entered any recording: the client id/secret travelled only in
 Authorization headers, and a filename scan for both values returns nothing.
+The same holds for the shopper site logins used for the scripted approvals:
+values travelled only in the browser session, never touched a file.
 
-## Open: one human click finishes the rest
+## Open: a real dispute object
 
-After the sandbox shopper approves the wallet order (order id and approval
-URL are in the task report, not committed here), run in order: capture the
-order; GET the order and the capture (line items); refund the capture with a
-`note_to_payer` and GET the refund (record shape); create the dispute with a
-reason code on the capture id (dispute shape). Each call reuses the commands
-above with the same headers. If the order has expired by then, recreate it
-with the same body and a fresh `PayPal-Request-Id`.
+Everything is closed except one live dispute with a reason code. API-side
+dispute creation is rejected as `TRANSACTION_NOT_ELIGIBLE` on every shape
+tried (five attempts, two apps, before and after refunds). The path that
+stands in, for the demo: the shopper files through the sandbox resolution
+center (a person action, matching the demo narrative), which yields a real
+dispute, a real reason code and a real `CUSTOMER.DISPUTE.CREATED` webhook for
+the ingest to record.

@@ -1,0 +1,92 @@
+{
+ "note": "PAYMENT.CAPTURE.REFUNDED delivered to the test endpoint after manual resend under the new app. Endpoint request metadata stripped.",
+ "method": "POST",
+ "created_at": "2026-11-09 14:19:07",
+ "transmission_headers": {
+  "paypal-transmission-id": [
+   "84a68f24-dc48-11f1-84a3-4bf6b72839b4"
+  ],
+  "paypal-transmission-time": [
+   "2026-11-09T14:19:04Z"
+  ],
+  "paypal-cert-url": [
+   "https://api.sandbox.paypal.com/v1/notifications/certs/CERT-360caa42-fca2a594-9eaebfdf"
+  ],
+  "paypal-auth-algo": [
+   "SHA256withRSA"
+  ],
+  "paypal-transmission-sig": [
+   "A5tghmoWxPeYIPC216LoalI3uyMHaFQJEk/tNHVSRlxGBfonqHj6HXzSvyjF711hbsrc4gToGdd3ko2+ujY++IVE5N3VcSTIz58y3ER9TlZDbWOPXeY+PDRoFpDe7wFJsXzJeNlpANoFCLWugStzjtXx+/ta2xMdO5gJQ93wrt8Jvt4eRZNLeyIFR1uS5itGVydF7FFrR3Znqbr/lvsBYOpb2REhaRrvVpXfKOytpr16M65ackRP9KnawfqOKWI3LU/APiInxw4Cu1sRkRJr/aS7R1RE2qDc7iSV6C0x8X4Ajh+AXmajIC1XVIg7JZ3+eWXfW2TjPH1FC4Fku4Ouww=="
+  ],
+  "paypal-auth-version": [
+   "v2"
+  ]
+ },
+ "body": {
+  "id": "WEBHOOK-EVENT-US-1",
+  "event_version": "1.0",
+  "create_time": "2026-11-09T14:18:56.864Z",
+  "resource_type": "refund",
+  "resource_version": "2.0",
+  "event_type": "PAYMENT.CAPTURE.REFUNDED",
+  "summary": "A $ 34.0 USD capture payment was refunded",
+  "resource": {
+   "id": "REFUND-ID-US-2",
+   "amount": {
+    "currency_code": "USD",
+    "value": "34.00"
+   },
+   "note_to_payer": "T04 sandbox evidence, second cycle",
+   "seller_payable_breakdown": {
+    "gross_amount": {
+     "currency_code": "USD",
+     "value": "34.00"
+    },
+    "paypal_fee": {
+     "currency_code": "USD",
+     "value": "0.00"
+    },
+    "net_amount": {
+     "currency_code": "USD",
+     "value": "34.00"
+    },
+    "total_refunded_amount": {
+     "currency_code": "USD",
+     "value": "34.00"
+    }
+   },
+   "custom_id": "shopper-demo-001",
+   "status": "COMPLETED",
+   "create_time": "2026-11-09T06:18:52-08:00",
+   "update_time": "2026-11-09T06:18:52-08:00",
+   "payer": {
+    "email_address": "MERCHANT-EMAIL-REDACTED",
+    "merchant_id": "MERCHANT-ID-REDACTED"
+   },
+   "links": [
+    {
+     "href": "https://api.sandbox.paypal.com/v2/payments/refunds/REFUND-ID-US-2",
+     "rel": "self",
+     "method": "GET"
+    },
+    {
+     "href": "https://api.sandbox.paypal.com/v2/payments/captures/CAPTURE-ID-US-2",
+     "rel": "up",
+     "method": "GET"
+    }
+   ]
+  },
+  "links": [
+   {
+    "href": "https://api.sandbox.paypal.com/v1/notifications/webhooks-events/WEBHOOK-EVENT-US-1",
+    "rel": "self",
+    "method": "GET"
+   },
+   {
+    "href": "https://api.sandbox.paypal.com/v1/notifications/webhooks-events/WEBHOOK-EVENT-US-1/resend",
+    "rel": "resend",
+    "method": "POST"
+   }
+  ]
+ }
+}
