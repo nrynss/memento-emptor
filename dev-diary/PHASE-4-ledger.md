@@ -27,7 +27,7 @@ requires:   [T4.1]
 fixture-ok: yes
 size:       M · frontier
 owns:       web/src/lib/ledger/, web/src/routes/ledger/
-status:     not-started
+status:     claimed:t42-table
 ```
 Beliefs in AG Grid: kind, subject, value, status, evidence count, last change. The four statuses, **Claimed**, **Building**, **Earned** and **Out of true**, each with its own treatment, and a one-line tooltip explaining "Out of true" where it first appears. Seeded rows are visibly marked. Kept-without-feedback is labelled as a weak inferred signal. Light and dark, and usable at phone width.
 

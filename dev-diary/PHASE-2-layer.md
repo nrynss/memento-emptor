@@ -29,7 +29,7 @@ requires:   [T2.1]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/ingest/
-status:     not-started
+status:     claimed:t21b-live
 ```
 A real sandbox refund and dispute reach the running service and produce the right rows.
 
@@ -66,7 +66,7 @@ requires:   [T2.2]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/reasons/
-status:     not-started
+status:     claimed:t22b-live
 ```
 **Done when:** the labelled set gives T0.7's results on the live service, within the brief's budget; the transcript is in the handoff log.
 
@@ -92,7 +92,7 @@ requires:   [T2.3]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/evidence/
-status:     not-started
+status:     claimed:t23b-live
 ```
 **Done when:** a new SKU matches the demo's returned items on the real deployment; the transcript is in the handoff log.
 
@@ -120,7 +120,7 @@ requires:   [T2.4, T1.3]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/memory/
-status:     not-started
+status:     claimed:t24b-live
 ```
 The demo shopper's history against a real Lambo with T0.3's settings.
 
@@ -134,7 +134,7 @@ requires:   [T2.1, T2.2, T2.3, T2.4]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/server/, cmd/memento/
-status:     not-started
+status:     claimed:t25-server
 ```
 The service, on Keel, serving T1.2's contract over MCP and the ledger's read endpoints. `recall_for_purchase` returns the correction with precedence over the belief. Every call is logged, so the ledger can show that a recommendation followed a recall.
 
