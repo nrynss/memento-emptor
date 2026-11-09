@@ -12,7 +12,7 @@ requires:   [T0.2, T0.3, T0.4, T0.6, T0.7]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/domain/, docs/architecture.md
-status:     not-started
+status:     claimed:t11-domain
 ```
 The types the whole product shares:
 
