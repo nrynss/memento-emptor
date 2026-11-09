@@ -79,7 +79,7 @@ requires:   [T0.1]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/paypal.md, testdata/paypal/
-status:     in-review
+status:     done
 ```
 
 **Notes.** Three full order → scripted shopper approval → capture cycles

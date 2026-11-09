@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 7 / 10 | In progress |
+| P0 | 8 / 10 | In progress |
 | P1 | 0 / 5 | Not started |
 | P2 | 0 / 10 | Not started |
 | P3 | 0 / 6 | Not started |
@@ -151,6 +151,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T0.4: PayPal sandbox events (done)
+
+**What exists.** `dev-diary/research/paypal.md` plus 45 scrubbed recordings in `testdata/paypal/`. Full loop evidenced twice against a replacement US-home sandbox app: wallet order create (idempotent on `PayPal-Request-Id`), scripted shopper approval via Playwright, capture `COMPLETED`, order-side line items, refund `COMPLETED` with full record, and a live dispute `MERCHANDISE_OR_SERVICE_NOT_RECEIVED`, status OPEN, filed by the shopper in the resolution center. Two reason-code answers: refund records carry NO reason field (two records plus webhook confirm), disputes carry the reason top-level and per item. Webhooks: full CRUD, delivery, `verify-webhook-signature` SUCCESS, resend — including auto-delivery of the dispute event in ~1 minute. Toolkit v1.11.0 mapped: create-dispute, webhook CRUD/resend/verify, payouts, vault, contesting are REST-only.
+
+**What surprised.** The original merchant account could not hold USD (approval refused; receiving-preference flip didn't stick) and INR order creation 422s — fixed by a fresh US-home business account + app, keyring swapped. Seller-side dispute creation via API is gated beyond completed-capture in this sandbox (`TRANSACTION_NOT_ELIGIBLE` even on completed captures); the working path is shopper filing in the resolution center, click-path recorded. Capture records carry no line items — the ledger reads order + capture together, joined on `custom_id`, never the reporting API (`NOT_AUTHORIZED`). Card checkout needs card processing enabled on the merchant. `simulate-events` 404s; catalog creation emits `CATALOG.PRODUCT.CREATED`.
+
+**The next agent should know.** Ingest (T2.1) keys idempotency on PayPal's event id, verifies every delivery, and treats refunds as outcomes-without-reason pending the shopper's answer. Cycle 3's capture stays open/disputed for demo reuse; cycles 1–2 are refunded and settled. Per the user's decision, workers may use the sandbox site logins (shopper approval, resolution-center filing) with values never printed, written, or committed.
 
 ### T0.8: Astropods (done)
 
