@@ -48,6 +48,21 @@ AGENTS.md they are for a person, and no code reads them), and no headless path
 was found. The order id and the exact follow-up commands are in the task
 report's handoff, not here.
 
+Currency finding (follow-up): the first USD order's approval was refused with
+"This seller doesn't accept payments in your currency", so the merchant does
+not receive USD as configured. No API available to this app reveals the
+merchant's home currency: `GET /v1/identity/oauth2/userinfo` with the merchant
+token returns only the app identity (`sub`); `GET /v1/reporting/balances`
+returns `NOT_AUTHORIZED` like the transaction listing. The already-recorded
+catalog event carries an Indian business phone (country code redacted with the
+rest), which suggests INR, but recreating the identical shape in INR fails at
+creation with `CURRENCY_NOT_SUPPORTED` — so INR is not the answer either, and
+order creation cannot confirm receivability anyway (USD created fine and was
+refused only at approval). Open: read the home currency in the developer
+dashboard (Sandbox, Accounts, the business account's profile) and either add
+a USD balance / allow receiving USD, or recreate the app under a USD-home
+sandbox business account. The demo's amounts stay USD either way.
+
 ## 2. Refund, and what it carries
 
 No live refund exists: a refund needs a capture, which is blocked on the
