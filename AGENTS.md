@@ -57,7 +57,7 @@ dependencies once with `npm ci` inside `web/`.
 ## Keys
 
 Keys come from the system keyring or the environment. They are never written to a file in this
-repository, never committed, and never printed. The project uses no `.env`; `.env.example` names
+repository, never committed, and never printed. The project uses no `.env`. `.env.example` names
 the variables and holds no value.
 
 Before a live run, source the loader. It exports every key the code reads, leaves a variable you

@@ -12,11 +12,11 @@ handoff log records the discrepancy and the orchestrator asks the user.
 Every area file opens with:
 
 - the service, its version or tier, and the account it ran under, with no account detail that
-  identifies a person;
+  identifies a person.
 - the commands or requests that were run, in order, with the key read from the environment and
-  never shown;
-- the result each one gave, as a short transcript or the fields that matter;
-- what the result means for the build, in plain words;
+  never shown.
+- the result each one gave, as a short transcript or the fields that matter.
+- what the result means for the build, in plain words.
 - any credit, spend or trial window the run used.
 
 A claim without a command or a transcript is not evidence. A transcript that shows a key is
