@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 8 / 10 | In progress |
+| P2 | 9 / 10 | In progress |
 | P3 | 4 / 6 | In progress |
 | P4 | 2 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
@@ -173,6 +173,12 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `tests/live/ingest/` driver (reads only — zero new sandbox records): token, webhook config, 20-entry ledger, two deliveries re-fetched and re-verified (`SUCCESS`, SHA256withRSA), refund→capture→order and dispute→capture→order chains. Refund row nil-reason → pending; dispute `not_arrived` 1.0 → seller; redeliveries duplicate-safe. A T0.4-recorded body against the current webhook id correctly returns FAILURE — the crypto is really checked.
 
 **What surprised.** Verify API field is `webhook_event`, not `request_body` (the latter 400s) — noted for whoever next touches `research/paypal.md`. Capture GET's `up` link yields the order id, so the existing T1.3b records sufficed with nothing created; driver catalogs the SKUs and fails on unknown ones.
+
+### T2.5: The interface calls (done) ★
+
+**What exists.** `internal/api/server/` + `cmd/memento/`: the Keel service composing all four layer pieces behind the fakes' seams, 9 frozen tools over MCP plus plain per-tool routes, call log, webhook ingest, health check. Recall assembles through one constructor that fails closed (`ErrOverrideMissing` — nil/foreign/mismatched override can never serve). All 10 contract examples pass on fakes; story drive earns/contradicts/holds/grows; recall-before-correction logged under one trace.
+
+**What surprised.** Frozen `domain.Subject` has no JSON tags — the service normalizes keys at its encode boundary rather than touching frozen types (accepted pattern; contracts stay frozen). Recall serves only Venerable fit beliefs — T2.6 confirms the bar before the agent depends on it. `pin.go` blank import now redundant (server imports the wire package for real) — left alone, harmless.
 
 ### T2.4b: The Lambo writer, live (done) ★
 

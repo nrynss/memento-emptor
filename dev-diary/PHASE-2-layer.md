@@ -191,7 +191,7 @@ requires:   [T2.1, T2.2, T2.3, T2.4]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/server/, cmd/memento/
-status:     in-review
+status:     done
 ```
 
 Notes (worker t25-server). `internal/api/server/` holds the service: nine frozen tools over MCP (JSON-RPC on POST /mcp: initialize, tools/list from the frozen schemas, tools/call) plus one plain POST /tools/{name} per tool for the ledger, GET /calls[?trace_id=] for the call log, POST /webhooks/payment for ingest, GET /healthz. Plain-route errors use the shared error envelope; MCP tool errors ride inside the result with isError. `cmd/memento/` wires the real pieces behind the fakes' seams (ingest, classifier, evidence store; recording graph) and serves offline with `-seed` loading the frozen demo history. Every call is logged with shopper and trace; recall is assembled through one constructor that fails closed (ErrOverrideMissing) instead of serving a contradicted belief without its override. Responses normalize the tagless domain.Subject keys at the encode boundary so the wire matches the frozen schemas byte-exact.
