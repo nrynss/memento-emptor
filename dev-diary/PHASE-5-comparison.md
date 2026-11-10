@@ -128,6 +128,34 @@ Worker notes (in-review): `bench/README.md` written offline ($0 spend): limits u
 
 ---
 
+### T5.7: Hardened comparison shoppers
+```yaml
+requires:   [T5.4, T1.3]
+fixture-ok: yes
+size:       M · frontier
+owns:       seed/, testdata/seed/, bench/FROZEN.md
+status:     claimed:t57-harden
+```
+Arm 2 scored a perfect 15/15 on the current set by correct causal algebra over clean histories — so per product.md, harden with cases a real history would contain: LONG NOISY histories (many mixed-signal rows where raw context drowns and beliefs must carry) and MULTI-BRAND histories (same shopper, several brands, cross-brand cut matching). Design 4 new shoppers (2 per class) with hidden answers, generate through the T1.3 generator path (new hidden answers, same seeded-marking + determinism rules; NO edits to existing shoppers or answers), and AMEND the freeze: append the new rows to FROZEN.md with fresh hashes (freeze amendment, same commit as the fixtures).
+
+**Done when:** 4 new deterministic shoppers with hidden answers validate like T1.3's set (deterministic, marked, answers separated and unguessable from arm inputs); the freeze manifest covers them; all gates pass.
+
+---
+
+### T5.8: Re-run on the hardened set
+```yaml
+requires:   [T5.7]
+fixture-ok: no
+size:       M · frontier
+owns:       bench/runs/
+status:     not-started
+```
+Re-run all three arms on the hardened shoppers only (repeat count per freeze), with the real `recall_forphurchase` + pending shape for arm 3, neutral instrument, cumulative $5 cap, publish-everything rule.
+
+**Done when:** every hardened-shopper run is committed, complete, and verified against the amended freeze.
+
+---
+
 ## Exit Criteria
 
 - [ ] The harness and grader work on fixtures (T5.1, T5.2).
