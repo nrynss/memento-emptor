@@ -74,7 +74,8 @@ disks = disks_node if isinstance(disks_node, list) else disks_node.get("items", 
 
 rates = {"free": 0.0, "starter": starter, "standard": 25.0}
 run_rate, unknown, drifted, notes = 0.0, [], [], []
-for svc in services:
+for entry in services:
+    svc = entry.get("service", entry) if isinstance(entry, dict) else entry
     sid = svc.get("id", "?")
     details = svc.get("serviceDetails", {})
     plan = details.get("plan", "?")
@@ -88,7 +89,8 @@ for svc in services:
         notes.append(f"service {sid} has an unexpected name (still settled-rate)")
 
 disk_gb_total = 0
-for disk in disks:
+for entry in disks:
+    disk = entry.get("disk", entry) if isinstance(entry, dict) else entry
     if not isinstance(disk, dict) or "sizeGB" not in disk:
         continue
     try:
@@ -129,7 +131,8 @@ import json, os, sys, urllib.request
 state = json.load(open(sys.argv[1]))
 api, key = sys.argv[2], os.environ["RENDER_API_KEY"]
 services = state["services"] if isinstance(state.get("services"), list) else []
-for svc in services:
+for entry in services:
+    svc = entry.get("service", entry) if isinstance(entry, dict) else entry
     details = svc.get("serviceDetails", {})
     if svc.get("type") != "web_service" or details.get("plan") != "starter":
         req = urllib.request.Request(f"{api}/services/{svc['id']}/suspend", method="POST",

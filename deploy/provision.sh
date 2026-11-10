@@ -64,6 +64,7 @@ unset payload
 python3 - "$created" <<'EOF'
 import json, sys
 svc = json.loads(sys.argv[1])
+svc = svc.get("service", svc)
 details = svc.get("serviceDetails", {})
 print("service:", svc.get("id"), svc.get("name"), svc.get("branch"))
 print("url:", svc.get("serviceDetails", {}).get("url", svc.get("slug", "")))
