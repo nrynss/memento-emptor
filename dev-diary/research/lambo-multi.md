@@ -98,7 +98,8 @@ Every transcript and report is in `testdata/lambo-multi/transcripts/` and
 
 One `lambo serve --transport http --port 0` with the credential above. A
 single PID served 20 sessions, each attached at `/mcp/s/<session>` on its
-first request, and every session read back its own write. Transcript:
+first request; every session's stats named itself with three concepts, and a
+recall in one session did not reach another's. Transcript:
 `transcripts/check1.jsonl`, report `reports/check1.json`.
 
 | Measurement | Value |
@@ -359,9 +360,9 @@ sessions costing 28 MiB in the hub.
 > store: a prefix grant still has to pass `is_pinned`, which is the
 > allowlist. Requested: let a configured
 > `[[web.credential]] session_prefix` (or a new `[web] session_prefix`)
-> authorize reads of any
-> **existing** session under it by relaxing that allowlist gate, using the
-> existing loaded-view cap and TTL plus an idle rule, and keeping the same
+> authorize reads of any **existing** session under it by relaxing that
+> allowlist gate, using the existing loaded-view cap and TTL plus an idle
+> rule, and keeping the same
 > uniform 404 for absent ids. Until then a deployment must restart the reader
 > to add a shopper, which drops the ledger for everyone else for the restart
 > window. Affects the T4 ledger and the T6.1 deploy.
