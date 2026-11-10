@@ -109,7 +109,7 @@ requires:   [T7.1, T8.2]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/pool/
-status:     claimed:t83-pool-reader
+status:     in-review
 ```
 `product_fit` over settled rows only, with T0.12's queries: the denominator, fit returns by direction, feedback by verdict, distinct shoppers by direction, and the seeded split. The status comes from T7.1's rule function, never a second copy of it. The connection stays warm, with a 20 s timeout, so a cold TLS handshake (about 6.9 s in T0.12) never lands on a recommendation. When the index can't be reached, the pool says so and recall carries on without it: it never pretends to an empty pool.
 
@@ -126,6 +126,20 @@ status:     not-started
 A small seeded population in a test-prefixed index, read back through `product_fit`, with warm and cold latency recorded. No model spend. Test indices deleted afterwards.
 
 **Done when:** the transcript and the latencies are in the handoff log.
+
+---
+
+### T8.3c: Union per-direction shoppers
+```yaml
+requires:   [T8.3]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/pool/
+status:     not-started
+```
+T8.3's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the rule's eight-shopper floor: 10 shoppers whose only small evidence is `feedback: too_small` read Building where the documented rule says Earned. Either add a second per-direction filter+cardinality that unions fit returns with fit feedback verdicts (and decide what the recorded fixture then pins), or narrow `domain.PoolCounts`/`ShopperCountsView` to returns-only — the latter is a contract change and the orchestrator's call.
+
+**Done when:** the per-direction shopper counts match the documented rule, whichever resolution is chosen; the fixture pins the new numbers; the gate passes.
 
 ---
 
