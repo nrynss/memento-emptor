@@ -3,8 +3,8 @@
 Arm 2 in round 2 is the shopper's raw PayPal history and nothing else. This
 directory holds the responses recorded from PayPal's Agent Toolkit for the demo
 shopper, and the extraction that turns them into arm 2's prompt input. It holds
-no refund reason, no fit category, no signal strength, no belief and no
-confidence: those belong to the layer.
+no reason, fit category, signal strength, belief or confidence that the layer
+produced: those belong to the layer.
 
 ## What was run
 
@@ -24,12 +24,20 @@ The sandbox app's token carried 37 scopes, including
 `https://uri.paypal.com/services/payments/orders/client_sdk_orders_api`.
 Transaction Search is what lets `list_transactions` answer at all.
 
-Each tool call was made with `tools/call` over stdio. The MCP server stringifies
-the function result into `content[0].text`; the tool itself returns the PayPal
-REST response body unchanged. So each committed recording is the REST body the
-tool wrapped, in the JSON text the model would receive.
+Each of the four listed calls was made with `tools/call` over stdio. The MCP
+server stringifies the function result into `content[0].text`; the tool itself
+returns the PayPal REST response body unchanged. So each committed recording is
+the REST body the tool wrapped, in the JSON text the model would receive.
 `probe-mcp-result.json` is one untouched JSON-RPC result: the envelope
 (`result.content[0].type = "text"`) and the text it carries.
+
+`probe-tools-used.json` is that session's `tools/list`: four tools,
+`list_transactions`, `get_refund`, `list_disputes` and `get_dispute`. `get_order`
+is a toolkit tool, but it is not in that listing and no JSON-RPC envelope for
+the three order calls was kept. Those three bodies carry the order GET shape
+T0.4 recorded from REST (`testdata/paypal/order-get-approved-line-items.json`),
+the endpoint `get_order` wraps and returns unchanged, so their provenance as
+tool output rests on that shape rather than on a recorded tool listing.
 
 | Tool | REST call it wraps | Recordings |
 |---|---|---|
@@ -45,8 +53,8 @@ longer range returns `400 INVALID_REQUEST`.
 
 The three order ids came from a REST `GET /v2/payments/captures/{id}` reading
 `supplementary_data.related_ids.order_id`, a lookup outside the toolkit used
-only to address `get_order`. The order responses in this directory are the
-toolkit's output; the capture read is not arm input.
+only to address `get_order`. The three order responses are the body `get_order`
+returns for those ids, unchanged; the capture read is not arm input.
 
 ## What the toolkit actually returns
 
@@ -56,24 +64,32 @@ toolkit's output; the capture read is not arm input.
    note, custom field, instrument and protection fields. It returns no
    `cart_info`, no `payer_info` and no `shipping_info`. This is not a redaction
    here: the committed response has the same keys the tool produced. A probe
-   call that passed `fields: "all"` returned the identical shape
-   (`probe-transactions-fields-all.json`), because the tool schema has
-   `additionalProperties: false` and no `fields` property, so the argument is
-   dropped before the REST call.
+   call that passed `fields: "all"` returned the identical shape and, byte for
+   byte, the same body (`probe-transactions-fields-all.json`), because the tool
+   schema has `additionalProperties: false` and no `fields` property, so the
+   argument is dropped before the REST call.
 2. **Line items come from `get_order`, not the listing.** `get_order` returns
    `purchase_units[].items` with name, SKU, quantity, unit amount, description
    and category. A caller can only ask for an order it already has an id for;
    the listing does not name one. Arm 2 therefore gets line items only for
    orders whose ids the agent already holds.
-3. **A pending dispute hold is invisible under the default status.** The tool
-   defaults `transaction_status` to `S`, so the `T1110` hold placed by the open
-   dispute appears only in a second call with `transaction_status=P`. The
-   recorded pending row is that hold. A caller that lists only successful
-   transactions never sees it.
+3. **A pending dispute hold needs the `P` status to reach the listing.** The
+   tool defaults `transaction_status` to `S`, so the `T1110` hold placed by the
+   open dispute appears in the transaction listing only in a second call with
+   `transaction_status=P`. The recorded pending row is that hold. A caller that
+   never lists pending transactions can still meet it in one other place:
+   `get_order` for the held capture's order carries the same hold as a pending
+   refund under `purchase_units[].payments.refunds`
+   (`HOLD-TRANSACTION-ID-1`, amount `32.32`). The extraction drops `payments`
+   from orders, so arm 2's input carries the hold only as the `P` transaction
+   row.
 4. **Refund status is a row and a record.** A refund is a `T1107` row in the
    transaction listing, and the same id answers `get_refund`, which adds the
-   status, the seller's `note_to_payer` and the fee breakdown. Neither carries
-   a reason for the refund; the note is free text the seller wrote.
+   refund status (`COMPLETED`, where the row carries the reporting `S`), the
+   `seller_payable_breakdown` with its platform fees, and the explicit
+   `custom_id`. Neither carries a reason for the refund. The seller's free text
+   is in both: `get_refund`'s `note_to_payer` repeats the listing row's
+   `transaction_note` and `transaction_subject`.
 5. **Dispute reason codes are on `get_dispute`.** `list_disputes` returns the
    dispute summary (id, reason, status, amount, disputed transaction); it now
    returns this merchant's disputes. `get_dispute` adds the per-item reason,
@@ -87,7 +103,9 @@ toolkit's output; the capture read is not arm input.
    shoppers therefore depends on the integration setting `custom_id`. Rows for
    other shoppers were removed from the committed copies, and so was the one
    other dispute in `probe-list-disputes.json`, because they carry other
-   people's data; `total_items` and every other field are left as returned.
+   people's data; `total_items` (18 here, against 5 kept rows) and every other
+   field are left as returned. The extraction emits only
+   `transaction_details[]` entries, so the counts do not reach arm 2.
 
 ## The extraction
 
@@ -98,9 +116,12 @@ verbatim; the package adds no header text.
 
 Each output record comes from one toolkit response:
 
-- **Transaction:** the whole `transaction_details[]` entry, unchanged.
+- **Transaction:** the whole `transaction_details[]` entry, unchanged, free
+  text included (`transaction_subject`, `transaction_note`).
 - **Order:** `id`, `status`, `intent`, `create_time`, and each purchase unit's
-  `reference_id`, `custom_id`, `description`, `amount` and `items`.
+  `reference_id`, `custom_id`, `description`, `amount` and `items`. The
+  purchase unit's `payments` — capture status, refunds and the dispute hold —
+  is dropped.
 - **Refund:** `id`, `amount`, `status`, `custom_id`, `create_time`,
   `update_time`, `note_to_payer`, `seller_payable_breakdown`.
 - **Dispute:** `dispute_id`, `reason`, `status`, `dispute_state`,
@@ -112,14 +133,17 @@ Each output record comes from one toolkit response:
 
 Everything else on an order, refund or dispute is dropped: buyer and seller
 identities, messages, evidence bodies and API links are not needed to state
-what happened. Trimming removes fields; it never names a new one. The test
+what happened. Trimming removes fields; it never names a new one. Records are
+grouped by kind — transactions, orders, refunds, disputes — and each group is
+ordered by its date and then its id, so the same responses always encode to the
+same bytes. The array is not one chronological list. The test
 `TestExtractCarriesWhatTheToolkitReturned` finds the one recording each output
 record came from and fails on any output field path or value that recording did
-not return. A reason category, signal or confidence would have no source path
-to match. `TestExtractionInventsNoReason` checks the layer's vocabulary by name
-as well, and `TestExtractDemoShopper` pins what the demo shopper gets: 6
-transactions (5 successful, 1 pending hold), 3 orders with line items, 2
-refunds and 1 dispute with its reason code.
+not return, empty objects and arrays included. A reason category, signal or
+confidence would have no source path to match. `TestExtractionInventsNoReason`
+checks the layer's vocabulary by name as well, and `TestExtractDemoShopper` pins
+what the demo shopper gets: 6 transactions (5 successful, 1 pending hold), 3
+orders with line items, 2 refunds and 1 dispute with its reason code.
 
 `Load` reads four file patterns and ignores the probes:
 `list-transactions-*.json`, `get-order-*.json`, `get-refund-*.json`,
@@ -127,30 +151,57 @@ refunds and 1 dispute with its reason code.
 
 ## Redaction
 
-Identifiers, account details and personal data were replaced with fixed
-placeholders, as in `dev-diary/research/paypal.md`. The table lists the ones
-this directory uses; `HOLD-TRANSACTION-ID-1` and `REFERENCE-ID-US-1/2` are new
-here because T0.4 did not record those rows.
+Identifiers and personal data were replaced with fixed placeholders, as in
+`dev-diary/research/paypal.md`. The table lists the ones these files use;
+`HOLD-TRANSACTION-ID-1` and `REFERENCE-ID-US-1/2` are new here because T0.4 did
+not record those rows. Two values are left as returned, as T0.4 left them: the
+merchant's generic sandbox business name (`Test Store`, also inside
+`soft_descriptor`) and the shopper's `country_code` (`IN` on the first cycle,
+`US` on the other two). Neither identifies a person.
 
 | Placeholder | What was removed |
 |---|---|
 | `ORDER-ID-US-1`, `-2`, `-3` | the three order ids |
 | `CAPTURE-ID-US-1`, `-2`, `-3` | the three capture transaction ids |
 | `REFUND-ID-US-1`, `-2` | the two refund ids (also their `T1107` row ids) |
-| `HOLD-TRANSACTION-ID-1` | the pending `T1110` hold row id |
+| `HOLD-TRANSACTION-ID-1` | the pending `T1110` hold row id (also its refund record on the order) |
 | `REFERENCE-ID-US-1`, `-2` | the reporting `paypal_reference_id` on two capture rows |
 | `DISPUTE-ID-SANDBOX-1` | the dispute id |
-| `BUYER-TRANSACTION-ID-SANDBOX-1` | the buyer-side transaction id on the dispute |
+| `BUYER-TRANSACTION-ID-SANDBOX-1` | the buyer-side transaction id on the dispute, and the third capture row's reporting reference |
 | `PAYER-ID-REDACTED` | payer account ids (including the reporting `paypal_account_id`) and payer ids on orders and disputes |
 | `MERCHANT-ID-REDACTED` | merchant ids and the reporting account number |
 | `BUYER-EMAIL-REDACTED` | shopper email addresses |
 | `MERCHANT-EMAIL-REDACTED` | merchant email address |
 | `BUYER-NAME-REDACTED` | shopper name in every shape it appeared |
-| `PHONE-REDACTED` | shopper phone numbers |
 | `SHOPPER-ADDRESS-REDACTED`, `SHOPPER-CITY-REDACTED`, `SHOPPER-STATE-REDACTED`, `SHOPPER-POSTAL-REDACTED` | shopper street, city, state and postal code |
+
+No phone number appears in these recordings, so `PHONE-REDACTED` from the
+research table is not used here.
 
 No key, token or site login was written to any file. A scan for the removed
 values over this directory and the recordings returns nothing.
+
+## Handoff to T10.3
+
+Round 2's shoppers must be built so this extraction sees them and so the arm
+stays fair:
+
+- Give every order, and the capture, refund and dispute behind it, the
+  shopper's `custom_id`. It is the only per-shopper key the listing returns.
+  `PayerEmail` is a fallback the default listing can never satisfy: it returns
+  no `payer_info`.
+- Supply `get_order` responses for the line items. The listing names no order
+  id, so without them arm 2 gets amounts and no items.
+- Keep the seller's free text fit-neutral. A refund carries no reason, but its
+  note does: `note_to_payer` on `get_refund` is the same text the `T1107` row
+  shows as `transaction_note` and `transaction_subject`, and the extraction
+  passes the listing row whole. A note like the demo's "fit return" hands arm 2
+  the reason and breaks case 3's premise.
+- The listing window is 31 days and `page_size` defaults to 100, so a longer
+  history is several calls. Disputes are listed as summaries and read by id.
+- Arm 2's input carries ids and amounts, which is what round 1's F3 finding
+  asked the freeze to settle. The extraction's ordering and field lists above
+  are the input contract to freeze.
 
 ## Reproduce
 

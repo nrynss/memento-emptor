@@ -84,8 +84,8 @@ func TestExtractCarriesWhatTheToolkitReturned(t *testing.T) {
 		if err != nil {
 			t.Fatalf("record %d: %v", index, err)
 		}
-		sourceFields := scalarFields(source)
-		for path, values := range scalarFields(record) {
+		sourceFields := fieldPaths(source)
+		for path, values := range fieldPaths(record) {
 			sourceValues, ok := sourceFields[path]
 			if !ok {
 				t.Errorf("record %d: field %q was not returned by the Agent Toolkit", index, path)
@@ -107,7 +107,7 @@ func TestExtractionInventsNoReason(t *testing.T) {
 	banned := []string{"signal", "confidence", "belief", "classif",
 		"counts_toward", "seed_mark", "write", "precedence", "pending"}
 	for index, record := range extractDemo(t) {
-		for path := range scalarFields(record) {
+		for path := range fieldPaths(record) {
 			leaf := path
 			if dot := strings.LastIndex(leaf, "."); dot >= 0 {
 				leaf = leaf[dot+1:]
@@ -175,6 +175,12 @@ func TestExtractDemoShopper(t *testing.T) {
 			unit, ok := units[0].(map[string]any)
 			if !ok {
 				t.Fatal("order purchase unit is not an object")
+			}
+			// The trim keeps the order and its items, not the payments
+			// under them: a capture's status and the dispute hold recorded
+			// there arrive from the transaction listing instead.
+			if _, ok := unit["payments"]; ok {
+				t.Error("order purchase unit carries payments the trim drops")
 			}
 			items := nestedSlice(unit, "items")
 			if len(items) == 0 {
@@ -370,15 +376,25 @@ func sourceFor(record map[string]any, sources sourceIndex) (map[string]any, erro
 	}
 }
 
-// scalarFields maps every scalar path in a value to the scalar values at
-// that path. Array elements share their parent's path, so only the field
-// names matter.
-func scalarFields(value any) map[string][]any {
+// fieldPaths maps every path in a value to the scalar values found at it.
+// Object and array paths are recorded even when they hold no scalar, so an
+// output field that carries an empty object or array is still a path the
+// source response must have. Array elements share their parent's path, so
+// only the field names and values matter.
+func fieldPaths(value any) map[string][]any {
 	fields := map[string][]any{}
+	record := func(path string) {
+		if path != "" {
+			if _, ok := fields[path]; !ok {
+				fields[path] = nil
+			}
+		}
+	}
 	var walk func(any, string)
 	walk = func(current any, path string) {
 		switch typed := current.(type) {
 		case map[string]any:
+			record(path)
 			for key, child := range typed {
 				next := key
 				if path != "" {
@@ -387,6 +403,7 @@ func scalarFields(value any) map[string][]any {
 				walk(child, next)
 			}
 		case []any:
+			record(path)
 			for _, child := range typed {
 				walk(child, path)
 			}
