@@ -152,6 +152,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### R5 review: P5 comparison (APPROVE, landed)
+
+Re-verified both exit criteria with independent runs (6 shoppers × 3 arms, byte-equality, cap math, three-way hidden-answer check incl. a failed attempt to construct a leaking shopper). Fix landed: F1–F4 + extraction rule moved from README handoffs onto the T5.1/T5.2 phase-doc lines where T5.4's freeze author reads them. Findings (advisories for freeze/pilot): arm-2 inputs omit amounts/IDs (define the contract at freeze; ID-cites in arm-2 runs = hallucination signal); pilot needs a two-turn driver + extraction rule in bench/pilot/; T2.6 direction note lives only in README (P2 follow-up, not P5's to fix).
+
 ### R2 review: P2 layer (FINDINGS — 1 non-blocking, landed)
 
 Re-verified all six exit criteria against code + committed live artifacts; all fail-closed properties hold against constructed counterexamples (override deleted, changed-mind, uncovered fake, approve-first both paths). One new offline test landed (`TestChangedMindClosesQuestionWithoutBelief` — accepted-but-counts-nowhere had writer-level but no service-level coverage). One real honesty gap found: the frozen offline story's third return is mixed-direction (`fit_too_large`) while the live T2.6 run was fixed to all-small — the offline suite and the live run prove different things. Remedy + product question with the user.
