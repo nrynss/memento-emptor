@@ -118,7 +118,10 @@ func (h *HTTPIndex) Put(ctx context.Context, row domain.FitRow) error {
 // the three line fields and the per-line shopper hash, and reports how many
 // documents went. Conflicting concurrent writes are retried by the
 // deployment rather than aborting the delete, because an opt-out must
-// remove every row it names.
+// remove every row it names. The deployment reports per-document failures
+// in the same answer, so a delete that removed only part of a shopper's
+// rows fails with ErrIncompleteDelete and the caller knows the opt-out did
+// not fully happen.
 func (h *HTTPIndex) DeleteShopper(ctx context.Context, line domain.ProductLine, shopperHash string) (int, error) {
 	switch {
 	case line.Brand == "" || line.Category == "" || line.FitHandle == "" || shopperHash == "":
@@ -147,13 +150,19 @@ func (h *HTTPIndex) DeleteShopper(ctx context.Context, line domain.ProductLine, 
 		return 0, fmt.Errorf("%w: delete rows for line %q/%q/%q: status %d: %s",
 			ErrIndexStatus, line.Brand, line.Category, line.FitHandle, status, excerpt(body))
 	}
-	var deleted struct {
-		Deleted int `json:"deleted"`
+	var result struct {
+		Deleted  int               `json:"deleted"`
+		Failures []json.RawMessage `json:"failures"`
 	}
-	if err := json.Unmarshal(body, &deleted); err != nil {
+	if err := json.Unmarshal(body, &result); err != nil {
 		return 0, fmt.Errorf("fitindex: read delete response: %w", err)
 	}
-	return deleted.Deleted, nil
+	if len(result.Failures) > 0 {
+		return result.Deleted, fmt.Errorf("%w: line %q/%q/%q: %d rows deleted, %d failed",
+			ErrIncompleteDelete, line.Brand, line.Category, line.FitHandle,
+			result.Deleted, len(result.Failures))
+	}
+	return result.Deleted, nil
 }
 
 // do sends one request and returns the status and body. A transport

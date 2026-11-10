@@ -588,6 +588,65 @@ func TestForgetRemovesEveryLineAndLeavesOthers(t *testing.T) {
 	}
 }
 
+// TestForgetWaitsForAWriteThatPassedTheConsentCheck holds a write in
+// flight inside the index call, after it has passed the consent check.
+// Forget then runs while the write still holds the writer's lock, so its
+// deletes wait for the write; the row is deleted, and no row for the
+// opted-out shopper remains.
+func TestForgetWaitsForAWriteThatPassedTheConsentCheck(t *testing.T) {
+	index := newFakeIndex()
+	pooling := true
+	writer := writerFor(t, index, "payer-0001", WithPooling(func() bool { return pooling }))
+	ctx := context.Background()
+	purchase := testPurchase("CAP-T82-0012")
+
+	entered := make(chan struct{})
+	release := make(chan struct{})
+	index.beforePut = func() {
+		close(entered)
+		<-release
+	}
+	writeDone := make(chan error, 1)
+	go func() {
+		writeDone <- writer.Captured(ctx, purchase, captureTime)
+	}()
+	<-entered // the write passed the consent check and is in the index call
+
+	forgetDone := make(chan struct{})
+	var (
+		removed   int
+		forgetErr error
+	)
+	go func() {
+		removed, forgetErr = writer.Forget(ctx, []domain.ProductLine{testLine})
+		close(forgetDone)
+	}()
+	// Let Forget reach the writer's lock before the write is released. The
+	// pause is not what makes the test pass: with the shared lock Forget
+	// cannot pass the in-flight write, and the assertion on the count below
+	// fails if its delete ran before the row landed.
+	time.Sleep(20 * time.Millisecond)
+	pooling = false
+	close(release)
+
+	if err := <-writeDone; err != nil {
+		t.Fatalf("in-flight write: %v", err)
+	}
+	<-forgetDone
+	if forgetErr != nil {
+		t.Fatalf("forget: %v", forgetErr)
+	}
+	if removed != 1 {
+		t.Errorf("forget removed %d rows, want the 1 the in-flight write landed", removed)
+	}
+	if len(index.docs) != 0 {
+		t.Errorf("index holds %d rows for the opted-out shopper, want 0", len(index.docs))
+	}
+	if len(writer.rows) != 0 {
+		t.Errorf("writer holds %d purchase rows after the opt-out, want 0", len(writer.rows))
+	}
+}
+
 // TestSeededRowsCarryTheMark writes a seeded capture. The row and the
 // document both carry the seeded mark, so the ledger can split on it.
 func TestSeededRowsCarryTheMark(t *testing.T) {
@@ -636,6 +695,9 @@ func TestContestWithNoCauseUnsettles(t *testing.T) {
 	}
 	if row.Settled || row.SettledKind != "" {
 		t.Errorf("settled = %v/%q, want unsettled: an unclear answer is not a cause", row.Settled, row.SettledKind)
+	}
+	if !row.SettledAt.IsZero() {
+		t.Errorf("row keeps settled_at %s although the corrected reason leaves it unsettled", row.SettledAt)
 	}
 	encoded, err := json.Marshal(documentFor(row))
 	if err != nil {

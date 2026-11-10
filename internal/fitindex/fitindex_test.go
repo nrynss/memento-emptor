@@ -40,12 +40,13 @@ type testingT interface {
 // refused. It records what reached it, so a test can assert that a path
 // wrote nothing.
 type fakeIndex struct {
-	created  int
-	docs     map[string]domain.FitRow
-	versions map[string]int64
-	writes   int
-	deleted  int
-	putErr   error
+	created   int
+	docs      map[string]domain.FitRow
+	versions  map[string]int64
+	writes    int
+	deleted   int
+	putErr    error
+	beforePut func()
 }
 
 // newFakeIndex builds an empty index.
@@ -66,10 +67,14 @@ func (f *fakeIndex) Create(ctx context.Context) error {
 }
 
 // Put replaces one row at its version, accepting an equal version and
-// refusing an older one, as external_gte does.
+// refusing an older one, as external_gte does. beforePut runs first, so a
+// test can hold a write in flight inside the index call.
 func (f *fakeIndex) Put(ctx context.Context, row domain.FitRow) error {
 	if err := ctx.Err(); err != nil {
 		return err
+	}
+	if f.beforePut != nil {
+		f.beforePut()
 	}
 	if f.putErr != nil {
 		return f.putErr

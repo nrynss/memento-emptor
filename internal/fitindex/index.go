@@ -47,6 +47,10 @@ var (
 	ErrOlderEvent = errors.New("fitindex: an older event cannot overwrite a newer state")
 	// ErrIndexStatus means the index answered with an error status.
 	ErrIndexStatus = errors.New("fitindex: index answered with an error status")
+	// ErrIncompleteDelete means the index deleted some of a shopper's rows
+	// and reported per-document failures on the rest, so an opt-out did not
+	// fully happen.
+	ErrIncompleteDelete = errors.New("fitindex: delete did not remove every row")
 	// ErrMissingIndex means a writer was built without an index.
 	ErrMissingIndex = errors.New("fitindex: missing index")
 	// ErrMissingKeyer means a writer was built without an identity keyer.
@@ -278,9 +282,13 @@ func (w *Writer) Contested(ctx context.Context, p Purchase, reason domain.Catego
 // Forget deletes every row the writer's shopper wrote in the given lines,
 // one per-line hash per line, and reports how many documents went. The
 // caller records the opt-out in the shopper's own memory first, so the
-// Pooling check stops new rows; Forget removes what is already written. A
-// line the shopper never bought in deletes nothing.
+// Pooling check stops new rows; Forget removes what is already written. It
+// holds the writer's lock across every delete, so no write that passed the
+// consent check can land a row behind it. A line the shopper never bought
+// in deletes nothing.
 func (w *Writer) Forget(ctx context.Context, lines []domain.ProductLine) (int, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	removed := 0
 	for _, line := range lines {
 		if err := ctx.Err(); err != nil {
@@ -292,21 +300,20 @@ func (w *Writer) Forget(ctx context.Context, lines []domain.ProductLine) (int, e
 				line.Brand, line.Category, line.FitHandle, err)
 		}
 		deleted, err := w.index.DeleteShopper(ctx, line, shopperHash)
+		removed += deleted
 		if err != nil {
 			return removed, fmt.Errorf("fitindex: forget line %q/%q/%q: %w",
 				line.Brand, line.Category, line.FitHandle, err)
 		}
-		removed += deleted
-		w.forgetRows(shopperHash)
+		w.forgetRowsLocked(shopperHash)
 	}
 	return removed, nil
 }
 
-// forgetRows drops the purchase facts held for one per-line hash, so a row
-// written after an opt-back-in starts from the events that follow it.
-func (w *Writer) forgetRows(shopperHash string) {
-	w.mu.Lock()
-	defer w.mu.Unlock()
+// forgetRowsLocked drops the purchase facts held for one per-line hash, so
+// a row written after an opt-back-in starts from the events that follow
+// it. The caller holds the writer's lock.
+func (w *Writer) forgetRowsLocked(shopperHash string) {
 	for txnHash, row := range w.rows {
 		if row.ShopperHash == shopperHash {
 			delete(w.rows, txnHash)
@@ -332,9 +339,10 @@ type change struct {
 // record applies one event to the purchase's row and replaces the whole
 // document at the row's version. Facts about the purchase are recorded
 // whenever an event carries them; the state moves only when the event is
-// at least as new as the state held. A write the index refuses as older
-// leaves the newer state standing and is not an error: the delivery is
-// done and its retry must stay harmless.
+// at least as new as the state held. The consent check and the write hold
+// the writer's lock, so a write cannot land behind a concurrent Forget. A
+// write the index refuses as older leaves the newer state standing and is
+// not an error: the delivery is done and its retry must stay harmless.
 func (w *Writer) record(ctx context.Context, p Purchase, ch change) error {
 	if err := ctx.Err(); err != nil {
 		return fmt.Errorf("fitindex: record purchase: %w", err)
@@ -342,6 +350,11 @@ func (w *Writer) record(ctx context.Context, p Purchase, ch change) error {
 	if ch.at.IsZero() {
 		return fmt.Errorf("fitindex: record purchase %q: %w", p.TxnID, ErrMissingEventTime)
 	}
+
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	// The consent check shares the lock with Forget, so a delivery that
+	// passed it either wrote before the opt-out's deletes or never writes.
 	if w.pooling != nil && !w.pooling() {
 		return nil
 	}
@@ -349,9 +362,6 @@ func (w *Writer) record(ctx context.Context, p Purchase, ch change) error {
 	if err != nil {
 		return err
 	}
-
-	w.mu.Lock()
-	defer w.mu.Unlock()
 	held, ok := w.rows[row.TxnHash]
 	if !ok {
 		held = &row
@@ -419,25 +429,30 @@ func transactionID(link domain.TransactionLink) string {
 
 // merge records an event's facts and, when the event is at least as new as
 // the state held, moves the row to the event's state. Event time breaks
-// ties inside a rank, so an older event cannot undo a newer state.
+// ties inside a rank, so an older event cannot undo a newer state. A row
+// that ends unsettled carries no settlement time: the time belongs to the
+// settlement, not to the purchase.
 func merge(held *domain.FitRow, ch change) {
 	held.CapturedAt = earliest(held.CapturedAt, ch.capturedAt)
 	held.RefundedAt = earliest(held.RefundedAt, ch.refundedAt)
 	held.SettledAt = earliest(held.SettledAt, ch.settledAt)
 
 	candidate := domain.FitRow{State: ch.state, EventAt: ch.at}
-	if candidate.Version() < held.Version() {
-		return
+	if candidate.Version() >= held.Version() {
+		held.State = ch.state
+		held.EventAt = ch.at
+		held.Reason = ch.reason
+		held.Direction = directionFor(ch)
+		held.Verdict = ch.verdict
+		held.Settled = ch.settled
+		held.SettledKind = ch.kind
+		if ch.contested {
+			held.ReasonContested = true
+		}
 	}
-	held.State = ch.state
-	held.EventAt = ch.at
-	held.Reason = ch.reason
-	held.Direction = directionFor(ch)
-	held.Verdict = ch.verdict
-	held.Settled = ch.settled
-	held.SettledKind = ch.kind
-	if ch.contested {
-		held.ReasonContested = true
+	if !held.Settled {
+		held.SettledKind = ""
+		held.SettledAt = time.Time{}
 	}
 }
 

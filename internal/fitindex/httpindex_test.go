@@ -285,6 +285,27 @@ func TestDeleteShopperFiltersEveryLineFieldAndTheShopperHash(t *testing.T) {
 	}
 }
 
+// TestDeleteShopperReportsPartialFailures answers a delete with the
+// deployment's per-document failures. A partial opt-out must fail: the
+// count of rows that went comes back with an error, so the caller knows the
+// delete did not fully happen.
+func TestDeleteShopperReportsPartialFailures(t *testing.T) {
+	server, _ := recordingServer(t, http.StatusOK,
+		`{"deleted":2,"failures":[{"index":"test-fit-rows","id":"row-1","status":409,`+
+			`"cause":{"type":"version_conflict_engine_exception","reason":"version conflict"}}]}`)
+	index, err := NewHTTPIndex(server.URL, "test-api-key", "test-fit-rows")
+	if err != nil {
+		t.Fatalf("build client: %v", err)
+	}
+	removed, err := index.DeleteShopper(context.Background(), testLine, "abc123")
+	if !errors.Is(err, ErrIncompleteDelete) {
+		t.Fatalf("partial delete error = %v, want ErrIncompleteDelete", err)
+	}
+	if removed != 2 {
+		t.Errorf("removed = %d, want the 2 documents the answer says went", removed)
+	}
+}
+
 // TestDeleteShopperRefusesAnIncompleteFilter refuses a delete whose filter
 // would match more than the shopper's rows.
 func TestDeleteShopperRefusesAnIncompleteFilter(t *testing.T) {
