@@ -26,6 +26,15 @@ var ErrWriteRuleChanged = errors.New("memory: write rule changed under the write
 // belief. The write stops and nothing touches the graph.
 var ErrKindMismatch = errors.New("memory: evidence counts toward a different belief kind")
 
+// ErrDirectionMismatch is returned when fit evidence is offered to a fit
+// belief pointing the other way: a too-large return offered to a
+// runs-small belief, or a too-small return offered to a runs-large
+// belief. A reason's direction must match the belief's direction to count
+// toward it. The write stops and nothing touches the graph: the evidence
+// neither supports nor contradicts the belief, so no against edge is
+// declared here. Contradictions stay shopper-driven.
+var ErrDirectionMismatch = errors.New("memory: evidence direction does not match the belief")
+
 // VerdictCountsToward reports which belief kind explicit fit feedback
 // counts toward. It reads the verdict, not the reason category: a
 // fits-well verdict has no reason category yet counts toward fit as
@@ -89,16 +98,21 @@ func structuralOp(signal domain.Signal) error {
 // matches no belief kind — a refund the shopper never explained, a
 // changed mind, an unclear answer — writes nothing to any belief and
 // reports written false. Evidence offered to a belief of a different kind
-// than its reason counts toward is refused with ErrKindMismatch and
-// likewise touches nothing. The event time travels with the write so
-// seeded history counts as spread out.
-func WriteEvidence(ctx context.Context, g Graph, beliefContent string, kind domain.BeliefKind, actionContent string, ev domain.Evidence) (bool, error) {
+// than its reason counts toward is refused with ErrKindMismatch, and
+// evidence whose direction does not match the belief's direction is
+// refused with ErrDirectionMismatch; both refuse without touching the
+// graph, declaring nothing against the belief. The event time travels
+// with the write so seeded history counts as spread out.
+func WriteEvidence(ctx context.Context, g Graph, beliefContent string, kind domain.BeliefKind, beliefDir domain.FitDirection, actionContent string, ev domain.Evidence) (bool, error) {
 	counts := ev.CountsToward()
 	if counts == domain.BeliefKindNone {
 		return false, nil
 	}
 	if counts != kind {
 		return false, fmt.Errorf("%w: evidence counts toward %q, offered to %q", ErrKindMismatch, string(counts), string(kind))
+	}
+	if dir := ev.Reason.Category.Direction(); dir != domain.FitDirectionNone && beliefDir != dir {
+		return false, fmt.Errorf("%w: evidence points %q, offered to a belief pointing %q", ErrDirectionMismatch, string(dir), string(beliefDir))
 	}
 	if err := structuralOp(domain.SignalClassifiedOutcome); err != nil {
 		return false, err

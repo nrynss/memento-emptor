@@ -200,6 +200,7 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 			kind:      view.Kind,
 			subject:   view.Subject,
 			value:     view.Value,
+			direction: domain.DirectionForValue(view.Value),
 			seeded:    view.Seeded,
 			createdAt: earliest,
 			updatedAt: updated,
@@ -270,7 +271,7 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 			}
 			continue
 		}
-		if _, err := memory.WriteEvidence(ctx, s.graph, item.belief.content, item.belief.kind, stub, item.rec.row); err != nil {
+		if _, err := memory.WriteEvidence(ctx, s.graph, item.belief.content, item.belief.kind, item.belief.direction, stub, item.rec.row); err != nil {
 			return fmt.Errorf("server: load seed: write evidence: %w", err)
 		}
 	}

@@ -114,7 +114,7 @@ func TestDemoStoryArc(t *testing.T) {
 		{domain.GraphVenerable, domain.StatusEarned, 3},
 	}
 	for i, ret := range returns {
-		written, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, ret.action, fitReturn(fakes.OccurredAt(ret.event), ret.text))
+		written, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, domain.FitDirectionSmall, ret.action, fitReturn(fakes.OccurredAt(ret.event), ret.text))
 		if err != nil {
 			t.Fatalf("write return %d: %v", i+1, err)
 		}
@@ -169,7 +169,7 @@ func TestDemoStoryArc(t *testing.T) {
 		Link:       domain.TransactionLink{OrderID: "ORD-7XK-04", CaptureID: "CAP-7XK-04", DisputeID: "PP-D-51713", CustomID: "memento-shopper01-04", EventID: "WH-2EV-04"},
 		OccurredAt: sellerAt,
 	}
-	written, err := memory.WriteEvidence(ctx, g, fakes.BeliefShipsReliably, domain.BeliefKindSeller, fakes.DisputeNeverArrived, dispute)
+	written, err := memory.WriteEvidence(ctx, g, fakes.BeliefShipsReliably, domain.BeliefKindSeller, domain.FitDirectionNone, fakes.DisputeNeverArrived, dispute)
 	if err != nil {
 		t.Fatalf("write dispute: %v", err)
 	}

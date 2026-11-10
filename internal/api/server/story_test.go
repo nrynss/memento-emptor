@@ -87,11 +87,14 @@ func storyHarness(t *testing.T) (*Service, *spyGraph) {
 
 // storyAllowlist covers every content the story drive writes: the three
 // belief contents, the correction verbatim, and the stubs for every story
-// event across the doc ids one fresh store can assign.
+// event across the doc ids one fresh store can assign. It also covers the
+// runs-large belief the direction test earns, so the same harness serves
+// both drives.
 func storyAllowlist() []string {
 	out := []string{"I've lost weight, use M"}
 	brand := domain.Subject{Kind: domain.SubjectBrand, ID: "brand-x-001", Name: "Brand X"}
 	out = append(out, beliefContent(domain.BeliefKindFit, brand, fitBeliefValue(domain.CategoryFitTooSmall, "Brand X", "M")))
+	out = append(out, beliefContent(domain.BeliefKindFit, brand, fitBeliefValue(domain.CategoryFitTooLarge, "Brand X", "M")))
 	seller := domain.Subject{Kind: domain.SubjectSeller, ID: "seller-for-brand-x-001", Name: "Brand X seller"}
 	out = append(out, beliefContent(domain.BeliefKindSeller, seller, sellerBeliefValue))
 	out = append(out, beliefContent(domain.BeliefKindFit, brand, feedbackBeliefValue("M")))
@@ -212,7 +215,13 @@ func TestStoryEndToEnd(t *testing.T) {
 	}
 
 	answerReason(t, svc, shopper, "WH-2EV-02", "the sleeves are way too short and I can't button it")
-	third := answerReason(t, svc, shopper, "WH-2EV-03", "it swims on me, far too big")
+	// The third answer stays same-direction: the offline story proves the
+	// frozen all-small fixtures, where every return counts toward the
+	// runs-small belief. Opposite-direction answers are covered by the
+	// direction test, which proves they attach nowhere on a
+	// runs-small-only graph. The classifier fake serves recordings only,
+	// so the story reuses a recorded all-small answer here.
+	third := answerReason(t, svc, shopper, "WH-2EV-03", "too tight in the shoulders")
 	if !third.Accepted {
 		t.Fatal("third return was not accepted as evidence")
 	}
@@ -364,7 +373,6 @@ func TestStoryEndToEnd(t *testing.T) {
 	prose := []string{
 		"too tight in the shoulders",
 		"the sleeves are way too short",
-		"it swims on me",
 		"MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
 		"The M fits well across the shoulders.",
 	}

@@ -124,14 +124,16 @@ type evidenceRecord struct {
 	beliefIDs []string
 }
 
-// beliefRecord is one stored belief: its identity, its graph content, and
-// when it last changed. Status, standing and warnings always come from
-// the graph at read time, never from stored copies.
+// beliefRecord is one stored belief: its identity, its graph content, the
+// fit direction it points (none when the belief states none), and when it
+// last changed. Status, standing and warnings always come from the graph
+// at read time, never from stored copies.
 type beliefRecord struct {
 	id        string
 	kind      domain.BeliefKind
 	subject   domain.Subject
 	value     string
+	direction domain.FitDirection
 	seeded    bool
 	createdAt time.Time
 	updatedAt time.Time
@@ -430,7 +432,7 @@ func (s *Service) writeEvidenceRow(ctx context.Context, st *shopperState, rec *b
 	if err != nil {
 		return fmt.Errorf("server: build graph stub: %w", err)
 	}
-	written, err := memory.WriteEvidence(ctx, s.graph, rec.content, rec.kind, stub, evRec.row)
+	written, err := memory.WriteEvidence(ctx, s.graph, rec.content, rec.kind, rec.direction, stub, evRec.row)
 	if err != nil {
 		return fmt.Errorf("server: write evidence: %w", err)
 	}

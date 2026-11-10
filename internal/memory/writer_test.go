@@ -46,7 +46,7 @@ func TestReasonlessRefundWritesNothing(t *testing.T) {
 		{"WH-2EV-02", fakes.ReturnTwo, "too tight across the chest"},
 		{"WH-2EV-03", fakes.ReturnThree, "sleeves too short in M"},
 	} {
-		if _, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, ret.action, fitReturn(fakes.OccurredAt(ret.event), ret.text)); err != nil {
+		if _, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, domain.FitDirectionSmall, ret.action, fitReturn(fakes.OccurredAt(ret.event), ret.text)); err != nil {
 			t.Fatalf("seed return %d: %v", i+1, err)
 		}
 	}
@@ -55,7 +55,7 @@ func TestReasonlessRefundWritesNothing(t *testing.T) {
 		t.Fatalf("seeded sizing reads status %q dependents %d, want Earned 3", before.Status, before.Dependents)
 	}
 
-	written, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, fakes.DisputeNeverArrived, reasonlessRefund(fakes.OccurredAt("WH-2EV-05")))
+	written, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, domain.FitDirectionSmall, fakes.DisputeNeverArrived, reasonlessRefund(fakes.OccurredAt("WH-2EV-05")))
 	if err != nil {
 		t.Fatalf("reasonless refund returned error: %v", err)
 	}
@@ -81,7 +81,7 @@ func TestUnmatchedReasonsWriteNothing(t *testing.T) {
 		}
 		ev := fitReturn(at, "shoppers words")
 		ev.Reason = &domain.Reason{Category: category, Text: "shoppers words", Confidence: 1.0}
-		written, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, fakes.ReturnOne, ev)
+		written, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, domain.FitDirectionSmall, fakes.ReturnOne, ev)
 		if err != nil {
 			t.Errorf("category %q returned error: %v", category, err)
 			continue
@@ -113,10 +113,10 @@ func TestKindMismatchRefuses(t *testing.T) {
 
 	dispute := fitReturn(at, "never arrived")
 	dispute.Reason = &domain.Reason{Category: domain.CategoryNotArrived, Text: "MERCHANDISE_OR_SERVICE_NOT_RECEIVED", Confidence: 1.0}
-	if _, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, fakes.DisputeNeverArrived, dispute); !errors.Is(err, memory.ErrKindMismatch) {
+	if _, err := memory.WriteEvidence(ctx, g, fakes.BeliefRunsSmall, domain.BeliefKindFit, domain.FitDirectionSmall, fakes.DisputeNeverArrived, dispute); !errors.Is(err, memory.ErrKindMismatch) {
 		t.Errorf("dispute offered to sizing: error = %v, want ErrKindMismatch", err)
 	}
-	if _, err := memory.WriteEvidence(ctx, g, fakes.BeliefShipsReliably, domain.BeliefKindSeller, fakes.ReturnOne, fitReturn(at, "too tight")); !errors.Is(err, memory.ErrKindMismatch) {
+	if _, err := memory.WriteEvidence(ctx, g, fakes.BeliefShipsReliably, domain.BeliefKindSeller, domain.FitDirectionNone, fakes.ReturnOne, fitReturn(at, "too tight")); !errors.Is(err, memory.ErrKindMismatch) {
 		t.Errorf("fit return offered to seller: error = %v, want ErrKindMismatch", err)
 	}
 	if _, err := memory.WriteFeedback(ctx, g, fakes.BeliefShipsReliably, domain.BeliefKindSeller, fakes.FeedbackFitsWell, contract.FeedbackFitsWell, at); !errors.Is(err, memory.ErrKindMismatch) {

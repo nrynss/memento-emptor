@@ -145,7 +145,8 @@ func evidenceSummary(row domain.Evidence, n int) string {
 }
 
 // ensureFitBelief returns the fit belief for a brand, creating it from
-// the first classified direction when nothing exists yet.
+// the first classified direction when nothing exists yet. The new belief
+// points the creating category's way.
 func (s *Service) ensureFitBelief(ctx context.Context, st *shopperState, item domain.Item, category domain.Category, at time.Time) (*beliefRecord, error) {
 	for _, rec := range st.beliefs {
 		if rec.kind == domain.BeliefKindFit && rec.subject.ID == item.BrandID {
@@ -153,7 +154,7 @@ func (s *Service) ensureFitBelief(ctx context.Context, st *shopperState, item do
 		}
 	}
 	subject := domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName}
-	return s.newBelief(ctx, st, domain.BeliefKindFit, subject, fitBeliefValue(category, item.BrandName, item.Size), false, at)
+	return s.newBelief(ctx, st, domain.BeliefKindFit, subject, fitBeliefValue(category, item.BrandName, item.Size), category.Direction(), false, at)
 }
 
 // ensureSellerBelief returns the seller belief behind a brand's
@@ -165,12 +166,12 @@ func (s *Service) ensureSellerBelief(ctx context.Context, st *shopperState, item
 			return rec, nil
 		}
 	}
-	return s.newBelief(ctx, st, domain.BeliefKindSeller, subject, sellerBeliefValue, false, at)
+	return s.newBelief(ctx, st, domain.BeliefKindSeller, subject, sellerBeliefValue, domain.FitDirectionNone, false, at)
 }
 
 // newBelief derives one belief in the graph and stores its record. The
 // event time travels with the write so honestly spread history promotes.
-func (s *Service) newBelief(ctx context.Context, st *shopperState, kind domain.BeliefKind, subject domain.Subject, value string, seeded bool, at time.Time) (*beliefRecord, error) {
+func (s *Service) newBelief(ctx context.Context, st *shopperState, kind domain.BeliefKind, subject domain.Subject, value string, direction domain.FitDirection, seeded bool, at time.Time) (*beliefRecord, error) {
 	content := beliefContent(kind, subject, value)
 	if err := memory.EnsureBelief(ctx, s.graph, content, at); err != nil {
 		return nil, fmt.Errorf("server: ensure belief: %w", err)
@@ -181,6 +182,7 @@ func (s *Service) newBelief(ctx context.Context, st *shopperState, kind domain.B
 		kind:      kind,
 		subject:   subject,
 		value:     value,
+		direction: direction,
 		seeded:    seeded,
 		createdAt: at,
 		updatedAt: at,
@@ -440,6 +442,7 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 		rec.counts = counts
 	}
 	if counts == domain.BeliefKindNone {
+		markUnattached(rows)
 		delete(st.pending, question.id)
 		return contract.RecordReasonResponse{
 			ReasonID:     id,
@@ -456,6 +459,26 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 	belief, err := s.beliefForReason(ctx, st, question, reason)
 	if err != nil {
 		return contract.RecordReasonResponse{}, err
+	}
+	if belief == nil {
+		// Direction mismatch: the answer is classified and the question
+		// closes, but no fit belief points its way, so the rows count
+		// toward nothing. They stay stored with their reason — visible
+		// as unattached, never silent — and no against edge is
+		// declared: contradictions stay shopper-driven.
+		markUnattached(rows)
+		delete(st.pending, question.id)
+		return contract.RecordReasonResponse{
+			ReasonID:     id,
+			QuestionID:   question.id,
+			Category:     reason.Category,
+			Confidence:   reason.Confidence,
+			CountsToward: countsTowardView(domain.BeliefKindNone),
+			Accepted:     false,
+			AskAgain:     false,
+			BeliefID:     nil,
+			TraceID:      traceOf(req.TraceID),
+		}, nil
 	}
 	for _, rec := range rows {
 		if err := s.writeEvidenceRow(ctx, st, belief, rec, stubKey(rec.row)); err != nil {
@@ -496,9 +519,25 @@ func (st *shopperState) rowsForEvent(eventID string) []*evidenceRecord {
 	return out
 }
 
+// markUnattached stores classified rows that count toward nothing as
+// observations with no belief link: the reason stays visible on the row
+// while no structural edge is written. The slice is never nil-linked, so
+// the ledger renders an empty belief list instead of a missing one.
+func markUnattached(rows []*evidenceRecord) {
+	for _, rec := range rows {
+		rec.counts = domain.BeliefKindNone
+		rec.writeOp = domain.WriteObserve
+		rec.beliefIDs = []string{}
+	}
+}
+
 // beliefForReason returns the belief a classified answer counts toward:
-// the most-supported fit belief for the brand, or the seller belief
-// behind the transaction. It creates the belief on first sight.
+// the most-supported fit belief for the brand pointing the reason's way,
+// or the seller belief behind the transaction. It creates the belief on
+// first sight. When fit beliefs exist for the brand but none points the
+// reason's way, it returns nil: the answer counts toward nothing and the
+// caller stores it unattached. A nil belief is never an error, and no
+// against edge is declared on the way out.
 func (s *Service) beliefForReason(ctx context.Context, st *shopperState, question *pendingRecord, reason *domain.Reason) (*beliefRecord, error) {
 	item := domain.Item{}
 	if len(question.items) > 0 {
@@ -507,9 +546,15 @@ func (s *Service) beliefForReason(ctx context.Context, st *shopperState, questio
 	if reason.Category.CountsToward() == domain.BeliefKindSeller {
 		return s.ensureSellerBelief(ctx, st, item, question.awaitingSince)
 	}
+	want := reason.Category.Direction()
 	var best *beliefRecord
+	anyFit := false
 	for _, rec := range st.beliefs {
 		if rec.kind != domain.BeliefKindFit || rec.subject.ID != item.BrandID {
+			continue
+		}
+		anyFit = true
+		if rec.direction != want {
 			continue
 		}
 		if best == nil || len(rec.evIDs) > len(best.evIDs) {
@@ -519,9 +564,12 @@ func (s *Service) beliefForReason(ctx context.Context, st *shopperState, questio
 	if best != nil {
 		return best, nil
 	}
+	if anyFit {
+		return nil, nil
+	}
 	return s.newBelief(ctx, st, domain.BeliefKindFit,
 		domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName},
-		fitBeliefValue(reason.Category, item.BrandName, item.Size), false, question.awaitingSince)
+		fitBeliefValue(reason.Category, item.BrandName, item.Size), want, false, question.awaitingSince)
 }
 
 // RecordFeedback records explicit fit feedback tied to a specific
@@ -642,7 +690,7 @@ func (s *Service) beliefForFeedback(ctx context.Context, st *shopperState, item 
 	}
 	return s.newBelief(ctx, st, domain.BeliefKindFit,
 		domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName},
-		feedbackBeliefValue(item.Size), false, at)
+		feedbackBeliefValue(item.Size), domain.FitDirectionNone, false, at)
 }
 
 // ExplainBelief answers why the layer believes something: every piece of
@@ -783,8 +831,12 @@ func (s *Service) LedgerBelief(ctx context.Context, req contract.LedgerBeliefReq
 
 // LedgerEvidence lists the ledger's evidence rows, newest first: outcomes
 // with their reasons, what each counts toward, seeded marks and belief
-// links. Only rows that count toward a belief appear; an unexplained
-// outcome counts toward nothing and stays in pending questions.
+// links. Rows that count toward a belief carry its link. Classified rows
+// that count toward nothing — a changed mind, or a fit answer pointing
+// nowhere the shopper's beliefs point — still appear, unattached but with
+// their reason, so nothing the shopper said goes silent. Only an
+// unexplained outcome stays out: with no reason it counts toward nothing
+// and stays in pending questions.
 func (s *Service) LedgerEvidence(ctx context.Context, req contract.LedgerEvidenceRequest) (contract.LedgerEvidenceResponse, error) {
 	if strings.TrimSpace(req.ShopperID) == "" {
 		return contract.LedgerEvidenceResponse{}, fmt.Errorf("server: ledger evidence: %w", ErrMissingShopper)
@@ -795,7 +847,7 @@ func (s *Service) LedgerEvidence(ctx context.Context, req contract.LedgerEvidenc
 	st := s.state(req.ShopperID)
 	rows := []contract.LedgerEvidenceRow{}
 	for _, rec := range st.evidence {
-		if len(rec.beliefIDs) == 0 {
+		if len(rec.beliefIDs) == 0 && rec.row.Reason == nil {
 			continue
 		}
 		if req.BeliefID != "" {
