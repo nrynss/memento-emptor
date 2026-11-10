@@ -177,6 +177,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### PayPal Transaction Search enabled (user, stands)
+
+The sandbox app's grant now carries **37 scopes**, including `https://uri.paypal.com/services/reporting/search/read`. `GET /v1/reporting/transactions` answers `200`; the date range must be **31 days or less** (a longer range is `400 INVALID_REQUEST`). `transaction_details[]` carries `transaction_info`, `payer_info`, `cart_info`, `shipping_info` and the other reporting blocks. The ledger still reads orders/captures for evidence; the reporting API is arm 2's transaction-listing source (T10.1). The earlier `NOT_AUTHORIZED` recording stays as the pre-enablement state.
+
 ### New services pre-approved (user, stands)
 
 The user has approved creating the pivot's new services: the merchant app's own Render service (T9.3d) and the second Astropods deployment (T9.5). Record each one's monthly cost or tier in the handoff log and keep the task's guard; do not stop for a second approval. A spend beyond a task's brief is still the user's call.

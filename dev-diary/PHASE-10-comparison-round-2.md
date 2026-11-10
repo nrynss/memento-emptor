@@ -16,7 +16,7 @@ size:       S · mid
 owns:       bench/round2/arm2/
 status:     not-started
 ```
-Record exactly what the Agent Toolkit returns for a shopper's history: transaction listing, line items, refund and dispute status, dispute reason codes. Start from T0.4's recordings (`research/paypal.md`) and fill any gap with sandbox reads. The reporting read needs the app's Transaction Search permission: confirm the OAuth token carries `https://uri.paypal.com/services/reporting/search/read` before recording, and stop if it does not. Write the extraction that turns that, and only that, into arm 2's prompt input: no refund reason, no classification, no signal strength, nothing the layer produced. No model spend.
+Record exactly what the Agent Toolkit returns for a shopper's history: transaction listing, line items, refund and dispute status, dispute reason codes. Start from T0.4's recordings (`research/paypal.md`) and fill any gap with sandbox reads. Transaction Search is enabled on the sandbox app and the token carries `https://uri.paypal.com/services/reporting/search/read`; the reporting read must use a date range of 31 days or less (`400` otherwise). Stop if the scope disappears before the run. Write the extraction that turns that, and only that, into arm 2's prompt input: no refund reason, no classification, no signal strength, nothing the layer produced. No model spend.
 
 **Done when:** the recorded responses and the extraction, with a test, are in `bench/round2/arm2/`. A test proves the extraction's output has no field the Agent Toolkit didn't return.
 

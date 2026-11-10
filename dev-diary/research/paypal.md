@@ -221,11 +221,17 @@ the ledger as `PAYMENT.CAPTURE.COMPLETED` with auto-delivery. Recordings:
   propagates order → capture → refund, so that is the join key.
   Recordings: `order-get-approved-line-items.json`, `capture-get.json`,
   `capture2-get.json`.
-- The reporting API is not a fallback: listing transactions returns
-  `NOT_AUTHORIZED` (insufficient permissions for this app), not history.
+- The reporting API was not available when first probed: listing transactions
+  returned `NOT_AUTHORIZED` (insufficient permissions for this app).
   Recording: `testdata/paypal/reporting-transactions-not-authorized.json`.
-  The ledger must read orders/captures, not the reporting API, unless the
-  app's permissions change.
+  **Transaction Search is now enabled on the sandbox app**: the live grant
+  carries 37 scopes including
+  `https://uri.paypal.com/services/reporting/search/read`, and `GET
+  /v1/reporting/transactions` answers `200`. The date range must be 31 days or
+  less (`400 INVALID_REQUEST` otherwise); `transaction_details[]` carries
+  `transaction_info`, `payer_info`, `cart_info`, `shipping_info` and the other
+  reporting blocks. The ledger still reads orders/captures for evidence; the
+  reporting API is arm 2's transaction-listing source (T10.1).
 
 ## 6. Agent Toolkit / MCP server vs plain REST
 
