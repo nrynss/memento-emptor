@@ -84,11 +84,13 @@ requires:   [T5.4]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/freeze_check.sh, tools/check.sh
-status:     not-started
+status:     in-review
 ```
 Generate `bench/freeze_check.sh` from the FROZEN.md manifest (single testable place for the manifest-extraction) and invoke it from `tools/check.sh`, so the gate verifies frozen hashes on every run. One-line check.sh change only: call the script, no other gate behavior changes.
 
 **Done when:** the gate fails on a tampered frozen file and passes on the frozen tree.
+
+Worker notes (in-review): `bench/freeze_check.sh` extracts the ```manifest block from `bench/FROZEN.md` §1 via one commented `extract_manifest` function, pins the 21-row count (manifest edits fail), then `sha256sum -c` strict (tamper/missing/unreadable fail, nothing skipped). `tools/check.sh` gains exactly one line: `bench/freeze_check.sh || fail "freeze" ...` before gofmt. Tamper, missing-file, and row-count failures all proven (reversible mutations, restored); full gate green on the frozen tree.
 
 ---
 

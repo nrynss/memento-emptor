@@ -17,6 +17,8 @@ for tool in go node npm; do
 	command -v "$tool" >/dev/null 2>&1 || fail "tools" "$tool is not on PATH"
 done
 
+bench/freeze_check.sh || fail "freeze" "frozen comparison inputs mismatch (bench/FROZEN.md section 1)"
+
 echo "-- gofmt"
 go_files=$(git ls-files '*.go')
 if [ -n "$go_files" ]; then
