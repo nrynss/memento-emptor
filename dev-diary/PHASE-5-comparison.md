@@ -28,11 +28,13 @@ requires:   [T1.3, T5.1]
 fixture-ok: yes
 size:       M · frontier
 owns:       bench/grader/
-status:     claimed:t52-grader
+status:     in-review
 ```
 Scores a run on the five measures in product.md, as counts: right size first time against the hidden answer; wrong-cause errors; corrections honoured on the very next recommendation; citations that really support the recommendation; tokens per recommendation.
 
 A citation is checked mechanically where it can be (the cited evidence exists and has the right reason category). Any model judgement used is logged as a model's opinion, never as a measurement.
+
+Worker report: `bench/grader/` scores hand-built runs on the five measures as counts, offline (no key, no network, no spend): right-size by normalized equality; wrong-cause only when a non-fit cite backs a size off the kept baseline (holding size is an exclusion); correction by next-turn size equality; cites mechanical (resolves plus fit kind, feedback counts by verdict per T1.2); tokens via harness.CountTokens with basis `harness-words-v1` recorded on every score. Good arm-3-style run plus a bad run per measure, all green.
 
 **Done when:** hand-built good and bad runs score as expected for every measure.
 
