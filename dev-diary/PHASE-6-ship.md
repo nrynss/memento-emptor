@@ -12,7 +12,7 @@ requires:   [T2.6, T3.6, T0.9]
 fixture-ok: no
 size:       M · mid
 owns:       deploy/
-status:     in-review
+status:     done
 ```
 The service, the ledger and Lambo, on the hosting T0.9 chose. PayPal webhooks point at the public endpoint. Lambo's data persists across a restart. A budget guard protects the credits while the demo is public.
 

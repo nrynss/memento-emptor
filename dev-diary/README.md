@@ -144,7 +144,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 9 / 9 | Done |
-| P6 | 0 / 7 | Not started |
+| P6 | 1 / 8 | In progress |
 
 ---
 
@@ -223,6 +223,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** 45 committed runs (5 shoppers × 3 arms × 3 repeats) with full records, graded by the frozen grader: arm 1 0/15 (one M-default guess), arm 2 15/15 0 wrong-cause, arm 3 0/15 real recommendations (12 outright + 3 informed refusals; graded 3/15 on the mention-artifact — T5.6 presents both numbers). Real `recall_for_purchase` + pending per run; cumulative $5 cap enforced in code ($0.08 total spend). Freeze verified green before and after.
 
 **What surprised.** Review confirmed the headline with an independent recompute; the only fix was doc dedup. Arm 2 wins honestly (causal algebra from raw rows); arm 3's layer compacts to nothing on thin histories (max 1–2 same-direction rows, never Earned) and refuses instead of guessing — the honesty T5.6 must report: arm 2 beats arm 3 here *because the layer refuses without Earned belief*. Neutral instrument for all arms (reference agent contaminates).
+
+### T6.1: Deploy (done)
+
+**What exists.** `deploy/` (Dockerfile, render.yaml, provision/guard/start/paypal-webhook scripts, seed-once): service `memento-emptor` + 1 GB disk provisioned, $7.25/mo shape verified live. Review approved with no fixes; settled-shape match, API unwrap fixes, Done-when honestly gated on landing (Dockerfile rides the merge).
+
+**What surprised.** Review caught nothing (clean approve). Pre-land blockers were both external (unfetchable repo → GitHub connect; 402 → user card), now resolved.
 
 ### T5.4b: Freeze-check script (done)
 
