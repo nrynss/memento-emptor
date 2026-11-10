@@ -135,7 +135,7 @@ requires:   [T9.4]
 fixture-ok: no
 size:       S · mid
 owns:       agent/second/
-status:     in-review
+status:     done
 ```
 A second Astropods deployment with its own name and prompt and its own traces, recalling through the same layer. It is written fresh: no shared prompt text with the reference agent beyond the layer's tool descriptions, so that its picking up a correction proves the layer carried it, not the prompt. Budget: under $0.50.
 
@@ -202,5 +202,5 @@ product.md's demo from step 0 to step 7, live, on the hosted service: the new sh
 - [x] The ledger shows the deciding step and the pool, with no other shopper's rows (T9.2).
 - [ ] The merchant app is built and deployed, reading only `product_fit` (T9.3, T9.3d).
 - [x] The reference agent never refuses on evidence and records standalone corrections (T9.4).
-- [ ] A second agent honours a correction it never saw (T9.5).
+- [x] A second agent honours a correction it never saw (T9.5).
 - [ ] The pivoted layer is live, and the demo runs end to end (T9.6, T9.7).

@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 12 / 13 | In progress (T8.5c) |
-| P9 | 5 / 9 | In progress (T9.5, T9.6) |
+| P9 | 6 / 9 | In progress (T9.6) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -192,6 +192,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** Render's env-vars API echoes secret values on write/read — the worker rotated once after an in-transit echo (dead token, no file copy). Treat API/dashboard output as sensitive. The merchant build imports repo-root `testdata/api`, so the image's web stage copies it.
 
 **The next agent should not have to work out.** T9.6 appends the merchant key entry (digest in the T9.3d notes) to the layer's `MEMENTO_MERCHANT_KEYS` and raises `deploy/guard.sh`'s ceiling to the combined shape. **T9.3e** (new) wires the page from the fixture transport to same-origin `/tools/product_fit`. Post-push verify: `curl https://memento-merchant.onrender.com/healthz` → 200, then `/` → 200 HTML, then the layer entry makes live reads return the pool. Until then the proxy answers 502/503 and the app reads its bundled snapshot.
+
+### T9.5: Second agent (done)
+
+**What exists.** `agent/second/` is a second Astropods deployment (`memento-second`, own name/prompt/traces): fresh prompt with zero shared 5-grams vs the reference instructions, tool descriptions byte-matching the frozen contract, own stand-in store with the same ids. Live proof: reference trace (record_correction → M) and second trace (recall → first recommendation M from `corr_3b7e52`, citing rung, Out-of-true, counts). Spend $0.13 of $0.50. Review APPROVE with no fixes.
+
+**What surprised.** Both deployments still answer from frozen stand-in state — the proof is structural (the prompt cannot produce the correction on its own), not a shared backend. T9.6 must wire both deployments to one served layer and re-drive the pair to upgrade the proof. The proxy is lenient about conversation ids (a mis-addressed send still returned 200). The second agent offers to "lock in" M — approval-shaped, nothing behind it; the demo script must not accept.
+
+**The next agent should not have to work out.** Drive with `DEPLOYMENT=<id> OUT=<dir> python3 agent/second/drive.py` — never bake a deployment id into a script. Push needed an `AGENT.md` beside `astropods.yml`. T9.6's re-drive is load-bearing for the demo claim.
 
 ### T9.4: Reference agent, after the pivot (done)
 
