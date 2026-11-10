@@ -152,7 +152,9 @@ func WriteFeedback(ctx context.Context, g Graph, beliefContent string, kind doma
 // belief it contradicts. The correction applies at once with precedence
 // in the read path while the belief stays standing: the write cites the
 // belief in against, never in depends_on, so it adds no evidence to the
-// belief it contradicts.
+// belief it contradicts. A correction with no belief to name is a standing
+// correction: StandingCorrections.Record keeps it until EnsureBeliefDeclaring
+// writes the belief it matches.
 func RecordCorrection(ctx context.Context, g Graph, correctionContent, beliefContent string, at time.Time) error {
 	if err := structuralOp(domain.SignalCorrection); err != nil {
 		return err

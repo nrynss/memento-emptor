@@ -9,4 +9,11 @@
 // state to the ledger's four statuses through the frozen round trip, with
 // the contradiction overlay deciding Out of true while the underlying
 // standing is kept beside it.
+//
+// A correction with no belief to contradict stands on its own: it derives
+// as a note, so it never promotes, and waits in a per-shopper journal
+// until a matching belief about the same subject is written, which
+// declares it against that belief once. SameSubject holds the match in one
+// place, on the domain's brand, product line and belief kind, never on the
+// shopper's words.
 package memory
