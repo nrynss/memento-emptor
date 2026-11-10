@@ -347,6 +347,8 @@ sessions costing 28 MiB in the hub.
 
 **1. `serve-web` cannot read a session created after it started.**
 
+Filed as [Lambo issue 241](https://github.com/nrynss/lambo/issues/241).
+
 > **Title:** serve-web: an allowlist fixed at startup cannot read a session created later
 >
 > **Body:** In v0.10.1 `lambo serve-web` serves the ordered union of
