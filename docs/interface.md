@@ -231,6 +231,10 @@ used. The steps are ordered, strongest first:
 | 4. The statement | `statement` | The shopper's general statement. It is Claimed and never promotes |
 | 5. Nothing | `none` | None of the above applies, and the response says so |
 
+The own-evidence step's `basis` is `own_evidence`. The pre-pivot schema
+spelled that step `belief`, so a caller matching the literal string must
+switch to the new value.
+
 The shopper's usual size is the size the shopper most often kept or said
 fits well, in any brand; failing that, it is the size read from their
 general statement. It is never mapped across brands. A tie for most often

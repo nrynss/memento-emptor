@@ -114,10 +114,12 @@ the evidence store, not a belief in the graph. One purchase is one row.
 - **The pool is read with one line-and-size query over settled rows.**
   Filter the three line fields plus size; the denominator is the settled
   filter's count, not the query's total. Distinct shoppers come from a
-  cardinality aggregation per direction. The aggregation measured about
-  236 ms warm; the first request on a cold connection took about 6.9 s,
-  so the client keeps connections alive and uses a 20 s timeout, well
-  above the measured cold maximum. (`research/elastic-fit.md` check 6)
+  cardinality aggregation over the fit-classified rows for the Building
+  floor, and one per direction for the directional counts. The
+  aggregation measured about 236 ms warm; the first request on a cold
+  connection took about 6.9 s, so the client keeps connections alive and
+  uses a 20 s timeout, well above the measured cold maximum.
+  (`research/elastic-fit.md` check 6)
 - **The status rule is a pure function of the counts.** The reader calls
   it; the ledger and the merchant app read the same numbers.
   (`internal/domain`, `docs/interface.md` "The pool's status rule")
