@@ -130,11 +130,23 @@ requires:   [T8.3]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/pool/
-status:     claimed:t83b-live-pool
+status:     in-review
 ```
 A small seeded population in a test-prefixed index, read back through `product_fit`, with warm and cold latency recorded. No model spend. Test indices deleted afterwards.
 
 **Done when:** the transcript and the latencies are in the handoff log.
+
+**Notes (in-review).** `tests/live/pool/` holds the driver (`main.go`, `run.sh`, its README and the `out/` ignore). It creates `t83b-fit-rows` through `fitindex.NewHTTPIndex` and `Create`, writes eight seeded rows on the demo line in size M through one fit writer per shopper (five `Refunded`+`Classified` small, one large, one `Feedback` fits-well, one `Kept`), and reads them back through `pool.NewReader(...).Fit`, the `product_fit` path. Cleanup deletes the index in a deferred function before printing the empty `t83b-` listing.
+
+The run read the pool as Building toward small: eight settled rows, kept 1, returns small 5 large 1, fits-well feedback 1, reasons `fit_too_small` 5 and `fit_too_large` 1, shoppers fit 7 small 5 large 1, seeded 8, live 0, recent 8. The cold read on a fresh transport took 6.863 s and the warm connection's `Warm` took 6.724 s; three warm reads took 239–240 ms. An empty size read as a valid empty pool (Claimed, zero counts, no error). No model spend; one kilobyte-scale index, 22 row writes, reads, counts and the delete.
+
+Three things the next agent should not have to rediscover:
+
+- The kept row settles the denominator but joins no fit-shopper count: `Shoppers.Fit` is 7 of 8, because the reader's `fit_shoppers` filter counts settled returns with a fit category plus settled feedback only. The driver's first run asserted 8 and the live deployment answered 7; the fix is in the driver's `wantCounts`, not the reader.
+- The warm reader's `Warm` is itself a cold handshake on a fresh transport (6.724 s here), so the transcript's warm reads are only fast because `Warm` paid first. A layer that skips `Warm` pays the same ~6.9 s on its first recommendation read; the 20 s timeout is what keeps that read succeeding.
+- `pool.HTTPIndex` exposes `Warm` and `Aggregate` only, so the driver carries its own small read/delete probe (prefix listing, `_count`, `DELETE`) for the empty-listing check, the same shape T8.2b's driver uses.
+
+The dev-diary report's transcript is the handoff log entry; it is not committed here.
 
 ---
 
