@@ -333,7 +333,7 @@ requires:   [T2.7]
 fixture-ok: yes
 size:       S · frontier
 owns:       internal/domain/, internal/memory/, internal/api/server/
-status:     not-started
+status:     claimed:t28-rival
 ```
 N consecutive opposite-direction classified returns (N=3, mirroring the Earned bar) birth a same-kind opposite-direction rival belief instead of landing unattached. The count resets on any same-direction return or on a correction. The rival starts unpromoted (None/Candidate per the normal gates — birth is not promotion) and the existing belief is untouched (no auto-against, no demotion). Update the domain rule, writer, and router; add consecutive-opposite tests (birth at exactly 3, reset on interruption, no birth at 2).
 
