@@ -123,6 +123,22 @@ Two breakages outside `owns`, reported not touched: `internal/api/server` (`Test
 
 ---
 
+### T7.5: Refresh the frozen replay for the tightened contract
+```yaml
+requires:   [T7.4]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/fakes/, testdata/replay/
+status:     in-review
+```
+T7.4 requires the pivot's pool and precedence fields, but the replay builds contract Go values directly, so its marshaled output already emits the new null keys while frozen `testdata/replay/p3-turns.json` and `p4-ledger.json` do not have them. Update the fakes to emit the required fields where they do not already, and refresh the two frozen replay fixtures to the tightened shape in the same commit (orchestrator's call under rule 1; the freeze manifest gains no new files). Do not change what the replay proves — only the wire shape.
+
+**Done when:** `TestReplayMatchesFixtures`, `TestReplayMatchesContract` and `TestP3TurnsMatchContract` pass against the tightened contract; the refreshed fixtures differ from the old ones only by the required pivot fields; the gate passes.
+
+**Notes (in-review).** No code change in `internal/fakes/` was needed: T7.4 removed the `omitempty` from `BeliefView.Precedence`, `RecallResponse.Pool` and `RecallResponse.PoolLookup`, so the replay's marshaled final state already carried `"precedence": null` on every ledger belief — the frozen `p4-ledger.json` was the only side behind. The refresh is six added lines across the two fixtures, all mirroring the tightened `testdata/api` examples byte-for-byte in meaning: `p4-ledger.json` gains `"precedence": null` on all four beliefs; `p3-turns.json` turn 1 (recall) gains `"pool": null`, `"pool_lookup": "unavailable"` and the belief's `own_evidence`-overridden-by-`correction` precedence exactly as the base recall fixture; turn 6 (explain) gains `"precedence": null` on the belief. `story.json` and `p2-inputs.json` are byte-identical. The full pre/post diff was checked key-by-key against the api fixtures: every difference is a required pivot field, and evidence, pending and all other turns are identical. This also resolves the second breakage T7.4 reported outside its `owns`; the served-side comparison remains T8.5c's.
+
+---
+
 ## Exit Criteria
 
 - [ ] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).

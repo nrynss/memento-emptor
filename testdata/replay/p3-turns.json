@@ -137,10 +137,13 @@
                 "occurred_at": "2026-10-26T10:00:00Z"
               }
             ],
+            "precedence": {"step": "own_evidence", "overridden": true, "overridden_by": "correction"},
             "seeded": true,
             "updated_at": "2026-11-05T14:02:11Z"
           }
         ],
+        "pool": null,
+        "pool_lookup": "unavailable",
         "overriding_correction": {
           "correction_id": "corr_3b7e52",
           "text": "I've lost weight, use M",
@@ -403,6 +406,7 @@
               "occurred_at": "2026-10-26T10:00:00Z"
             }
           ],
+          "precedence": null,
           "seeded": true,
           "updated_at": "2026-11-05T14:02:11Z"
         },
