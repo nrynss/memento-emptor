@@ -226,7 +226,7 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 
 **What exists.** Direction is part of the match: `Category.Direction()` vs stored belief direction; mismatch attaches to an existing opposite-direction belief if present, else counts toward nothing visibly (`accepted:false/ask_again:false`, reason kept, unattached in ledger evidence); never auto-`against`. Writer backstops with `ErrDirectionMismatch`. Mixed-direction tests both levels; offline story all-small matching frozen fixtures; contract shape unchanged (F2 prose fixed: accepted:false no longer implies ask_again:true).
 
-**What surprised.** Review confirmed the pinned rule's unreachable branch: opposite-direction beliefs can't arise via the service (creation needs zero existing fit beliefs) — genuine direction reversal (shopper's size changed, three "far too big" returns) stays unattached forever. With the user on F1: needs a rival-birth rule (see question below).
+**What surprised.** Review confirmed the pinned rule's unreachable branch: opposite-direction beliefs can't arise via the service (creation needs zero existing fit beliefs) — genuine direction reversal (shopper's size changed, three "far too big" returns) stays unattached forever. User decision (F1): N consecutive opposite-direction classified returns birth a same-kind rival belief (N=3 mirrors the Earned bar) — new tasks T2.8 (offline) + T2.8b (live) in the phase doc.
 
 ### T2.6: The layer end to end, live (done) ★
 
