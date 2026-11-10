@@ -2,16 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://memento-emptor.local/testdata/api/record_correction.response.schema.json",
   "title": "record_correction response",
-  "description": "The correction applies at once. The contradicted belief keeps its status and standing and now renders its warning.",
+  "description": "The correction applies at once. With a belief, it keeps its status and standing and now renders its warning beside the correction; with none, the correction stands alone and belief_id is absent.",
   "type": "object",
-  "required": ["correction", "belief_id", "status", "standing", "contradicted", "guidance", "trace_id"],
+  "required": ["correction", "status", "standing", "contradicted", "guidance", "trace_id"],
   "additionalProperties": false,
   "properties": {
     "correction": {"$ref": "common.schema.json#/$defs/Correction"},
     "belief_id": {"type": "string", "minLength": 1},
     "status": {"type": "string", "enum": ["Claimed", "Building", "Earned", "Out of true"]},
     "standing": {"type": "string", "enum": ["None", "Candidate", "Venerable"]},
-    "contradicted": {"type": "boolean", "const": true},
+    "contradicted": {"type": "boolean"},
     "guidance": {"$ref": "common.schema.json#/$defs/Guidance"},
     "trace_id": {"type": ["string", "null"]}
   }

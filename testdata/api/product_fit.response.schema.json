@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/product_fit.response.schema.json",
+  "title": "product_fit response",
+  "description": "The pooled product-fit belief for one product line and size: its status, the direction it rates, and the settled counts behind it. It carries no shopper identity, no row and no free text.",
+  "type": "object",
+  "required": ["pool"],
+  "additionalProperties": false,
+  "properties": {
+    "pool": {"$ref": "common.schema.json#/$defs/Pool"}
+  }
+}

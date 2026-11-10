@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 	"unicode/utf8"
+
+	"github.com/nrynss/memento-emptor/internal/domain"
 )
 
 // The gate for the frozen surface: every example in testdata/api validates
@@ -322,6 +324,14 @@ func goValueFor(name string) (any, bool) {
 		return &ExplainBeliefRequest{}, true
 	case "explain_belief.response":
 		return &ExplainBeliefResponse{}, true
+	case "product_fit.request":
+		return &ProductFitRequest{}, true
+	case "product_fit.response":
+		return &ProductFitResponse{}, true
+	case "set_pooling.request":
+		return &SetPoolingRequest{}, true
+	case "set_pooling.response":
+		return &SetPoolingResponse{}, true
 	case "ledger_beliefs.request":
 		return &LedgerBeliefsRequest{}, true
 	case "ledger_beliefs.response":
@@ -361,11 +371,11 @@ func exampleFiles(t *testing.T, dir string) []string {
 	return names
 }
 
-// TestToolsFrozen pins the surface: nine tools, exact names, and a schema
+// TestToolsFrozen pins the surface: eleven tools, exact names, and a schema
 // file behind every descriptor.
 func TestToolsFrozen(t *testing.T) {
-	if len(ToolNames) != 9 {
-		t.Fatalf("frozen surface has %d tools, want 9", len(ToolNames))
+	if len(ToolNames) != 11 {
+		t.Fatalf("frozen surface has %d tools, want 11", len(ToolNames))
 	}
 	seen := map[ToolName]bool{}
 	for _, name := range ToolNames {
@@ -587,5 +597,361 @@ func TestCorrectionLeavesBeliefStanding(t *testing.T) {
 	}
 	if response.Guidance.Basis != GuidanceCorrection {
 		t.Errorf("guidance basis = %q, want correction", response.Guidance.Basis)
+	}
+}
+
+// readExample decodes one example file into a wire type.
+func readExample(t *testing.T, name string, target any) {
+	t.Helper()
+	raw, err := os.ReadFile(filepath.Join(apiDir(t), name))
+	if err != nil {
+		t.Fatalf("read %s: %v", name, err)
+	}
+	if err := json.Unmarshal(raw, target); err != nil {
+		t.Fatalf("parse %s: %v", name, err)
+	}
+}
+
+// TestPrecedenceSteps pins the five steps and their order: a correction
+// wins over own evidence, which wins over the pool, which wins over a
+// statement, with nothing last.
+func TestPrecedenceSteps(t *testing.T) {
+	cases := []struct {
+		basis GuidanceBasis
+		value string
+		rank  int
+	}{
+		{GuidanceCorrection, "correction", 1},
+		{GuidanceOwnEvidence, "own_evidence", 2},
+		{GuidancePool, "pool", 3},
+		{GuidanceStatement, "statement", 4},
+		{GuidanceNone, "none", 5},
+		{GuidanceBasis("bogus"), "bogus", 0},
+	}
+	for _, tc := range cases {
+		if string(tc.basis) != tc.value {
+			t.Errorf("basis = %q, want %q", tc.basis, tc.value)
+		}
+		if got := tc.basis.Rank(); got != tc.rank {
+			t.Errorf("GuidanceBasis(%q).Rank() = %d, want %d", tc.basis, got, tc.rank)
+		}
+	}
+	if len(GuidanceBases) != 5 {
+		t.Fatalf("GuidanceBases holds %d steps, want 5", len(GuidanceBases))
+	}
+	for i := 1; i < len(GuidanceBases); i++ {
+		if !(GuidanceBases[i-1].Rank() < GuidanceBases[i].Rank()) {
+			t.Errorf("GuidanceBases is not strongest first at %d: %q then %q",
+				i, GuidanceBases[i-1], GuidanceBases[i])
+		}
+	}
+	if GuidanceBelief != GuidanceOwnEvidence {
+		t.Errorf("GuidanceBelief = %q, want the own-evidence step", GuidanceBelief)
+	}
+}
+
+// poolCounts turns the wire counts into the domain counts the status rule
+// reads. A direction's outcomes are its returns and its feedback together:
+// the rule is about how the size ran, whichever way the shopper said so.
+func poolCounts(c PoolCountsView) domain.PoolCounts {
+	return domain.PoolCounts{
+		TooSmall:         c.Returns.TooSmall + c.Feedback.TooSmall,
+		TooLarge:         c.Returns.TooLarge + c.Feedback.TooLarge,
+		FitsWell:         c.Feedback.FitsWell,
+		ShoppersTooSmall: c.Shoppers.TooSmall,
+		ShoppersTooLarge: c.Shoppers.TooLarge,
+		Shoppers:         c.Shoppers.Fit,
+	}
+}
+
+// countFields flattens the counts for the arithmetic checks.
+func countFields(c PoolCountsView) map[string]int {
+	return map[string]int{
+		"settled":                      c.Settled,
+		"kept":                         c.Kept,
+		"returns.too_small":            c.Returns.TooSmall,
+		"returns.too_large":            c.Returns.TooLarge,
+		"feedback.fits_well":           c.Feedback.FitsWell,
+		"feedback.too_small":           c.Feedback.TooSmall,
+		"feedback.too_large":           c.Feedback.TooLarge,
+		"reasons.fit_too_small":        c.Reasons.FitTooSmall,
+		"reasons.fit_too_large":        c.Reasons.FitTooLarge,
+		"reasons.damaged_or_defective": c.Reasons.DamagedOrDefective,
+		"reasons.not_arrived":          c.Reasons.NotArrived,
+		"reasons.changed_mind":         c.Reasons.ChangedMind,
+		"shoppers.fit":                 c.Shoppers.Fit,
+		"shoppers.too_small":           c.Shoppers.TooSmall,
+		"shoppers.too_large":           c.Shoppers.TooLarge,
+	}
+}
+
+// checkPoolCounts pins a counts block to its own arithmetic and to the
+// status the rule decides from it. The denominator is every settled
+// purchase; the return reasons add up to the returns; and the status reads
+// Earned or Out of true from the counts it is shown with.
+func checkPoolCounts(t *testing.T, name string, pool PoolView) {
+	t.Helper()
+	all := countFields(pool.Counts)
+	seeded := countFields(pool.Seeded)
+	live := countFields(pool.Live)
+	recent := countFields(pool.Recent)
+	for field, total := range all {
+		if seeded[field]+live[field] != total {
+			t.Errorf("%s: %s: seeded %d + live %d = %d, want %d",
+				name, field, seeded[field], live[field], seeded[field]+live[field], total)
+		}
+		if recent[field] > total {
+			t.Errorf("%s: %s: recent %d exceeds the total %d", name, field, recent[field], total)
+		}
+	}
+	returns := pool.Counts.Returns.TooSmall + pool.Counts.Returns.TooLarge
+	if returns != pool.Counts.Reasons.FitTooSmall+pool.Counts.Reasons.FitTooLarge {
+		t.Errorf("%s: direction counts do not equal the fit reason counts", name)
+	}
+	if pool.Counts.Reasons.FitTooSmall != pool.Counts.Returns.TooSmall ||
+		pool.Counts.Reasons.FitTooLarge != pool.Counts.Returns.TooLarge {
+		t.Errorf("%s: fit reason counts differ from the direction counts", name)
+	}
+	settled := pool.Counts.Returns.TooSmall + pool.Counts.Returns.TooLarge +
+		pool.Counts.Reasons.DamagedOrDefective + pool.Counts.Reasons.NotArrived +
+		pool.Counts.Reasons.ChangedMind +
+		pool.Counts.Feedback.FitsWell + pool.Counts.Feedback.TooSmall + pool.Counts.Feedback.TooLarge +
+		pool.Counts.Kept
+	if settled != pool.Counts.Settled {
+		t.Errorf("%s: settled counts add to %d, want the denominator %d", name, settled, pool.Counts.Settled)
+	}
+	verdict := domain.DecidePool(poolCounts(pool.Counts), poolCounts(pool.Recent))
+	if verdict.Status != pool.Status {
+		t.Errorf("%s: status %q, want %q from the counts", name, pool.Status, verdict.Status)
+	}
+	if pool.Direction == nil {
+		if verdict.Direction != domain.FitDirectionNone {
+			t.Errorf("%s: direction is null, want %q from the counts", name, verdict.Direction)
+		}
+	} else if *pool.Direction != verdict.Direction {
+		t.Errorf("%s: direction %q, want %q from the counts", name, *pool.Direction, verdict.Direction)
+	}
+}
+
+// TestPoolFixturesMatchTheRule checks every pooled example against the
+// domain rule and against its own arithmetic.
+func TestPoolFixturesMatchTheRule(t *testing.T) {
+	var fit ProductFitResponse
+	readExample(t, "product_fit.response.example.json", &fit)
+	checkPoolCounts(t, "product_fit", fit.Pool)
+
+	for _, name := range []string{
+		"recall_for_purchase.response.example-correction.json",
+		"recall_for_purchase.response.example-pool.json",
+		"recall_for_purchase.response.example-own.json",
+	} {
+		var response RecallResponse
+		readExample(t, name, &response)
+		if response.Pool == nil {
+			t.Fatalf("%s: no pool", name)
+		}
+		checkPoolCounts(t, name, *response.Pool)
+	}
+}
+
+// TestProductFitCarriesNoShopperRows pins the pool's privacy: no shopper
+// identity, no purchase row and no free text.
+func TestProductFitCarriesNoShopperRows(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(apiDir(t), "product_fit.response.example.json"))
+	if err != nil {
+		t.Fatalf("read product_fit example: %v", err)
+	}
+	var doc any
+	if err := json.Unmarshal(raw, &doc); err != nil {
+		t.Fatalf("parse product_fit example: %v", err)
+	}
+	forbiddenKeys := map[string]bool{
+		"shopper_id": true, "shopper_hash": true, "custom_id": true,
+		"order_id": true, "capture_id": true, "refund_id": true,
+		"dispute_id": true, "text": true, "reason_text": true,
+	}
+	var walk func(value any, path string)
+	walk = func(value any, path string) {
+		switch typed := value.(type) {
+		case map[string]any:
+			for key, child := range typed {
+				if forbiddenKeys[key] {
+					t.Errorf("product_fit carries %s at %s", key, path)
+				}
+				walk(child, path+"."+key)
+			}
+		case []any:
+			for i, child := range typed {
+				walk(child, fmt.Sprintf("%s[%d]", path, i))
+			}
+		case string:
+			if strings.Contains(strings.ToLower(typed), "shopper") {
+				t.Errorf("product_fit carries a shopper reference at %s: %q", path, typed)
+			}
+		}
+	}
+	walk(doc, "$")
+}
+
+// TestRecallMarksOverriddenSteps pins the disagreement rule: both sides
+// come back, the winning step decides, and the lower one is marked
+// overridden rather than hidden or dropped.
+func TestRecallMarksOverriddenSteps(t *testing.T) {
+	t.Run("the correction overrides both lower steps", func(t *testing.T) {
+		var response RecallResponse
+		readExample(t, "recall_for_purchase.response.example-correction.json", &response)
+		if response.Guidance.Basis != GuidanceCorrection || response.OverridingCorrection == nil {
+			t.Fatal("the correction does not decide")
+		}
+		if len(response.Beliefs) != 1 {
+			t.Fatalf("beliefs = %d, want the contradicted belief kept", len(response.Beliefs))
+		}
+		precedence := response.Beliefs[0].Precedence
+		if precedence == nil || !precedence.Overridden || precedence.OverriddenBy == nil || *precedence.OverriddenBy != GuidanceCorrection {
+			t.Errorf("belief precedence = %+v, want own evidence overridden by the correction", precedence)
+		}
+		if response.Pool == nil || response.Pool.Precedence == nil || !response.Pool.Precedence.Overridden {
+			t.Fatal("the pool is not marked overridden")
+		}
+		if got := *response.Pool.Precedence.OverriddenBy; got != GuidanceCorrection {
+			t.Errorf("pool overridden by %q, want correction", got)
+		}
+		if response.PoolLookup != PoolConsulted {
+			t.Errorf("pool lookup = %q, want consulted", response.PoolLookup)
+		}
+	})
+	t.Run("the pool overrides the statement", func(t *testing.T) {
+		var response RecallResponse
+		readExample(t, "recall_for_purchase.response.example-pool.json", &response)
+		if response.Guidance.Basis != GuidancePool {
+			t.Fatalf("guidance basis = %q, want pool", response.Guidance.Basis)
+		}
+		if len(response.Beliefs) != 1 || response.Beliefs[0].Precedence == nil {
+			t.Fatal("the statement belief is missing its precedence")
+		}
+		precedence := response.Beliefs[0].Precedence
+		if !precedence.Overridden || precedence.OverriddenBy == nil || *precedence.OverriddenBy != GuidancePool {
+			t.Errorf("statement precedence = %+v, want overridden by the pool", precedence)
+		}
+		if response.Pool == nil || response.Pool.Precedence == nil || response.Pool.Precedence.Overridden {
+			t.Fatal("the pool is not the deciding step")
+		}
+		if response.Pool.Status != domain.StatusEarned {
+			t.Errorf("pool status = %q, want Earned", response.Pool.Status)
+		}
+		if response.Guidance.BeliefID != nil {
+			t.Error("pool guidance points at a belief")
+		}
+	})
+	t.Run("own evidence overrides the pool", func(t *testing.T) {
+		var response RecallResponse
+		readExample(t, "recall_for_purchase.response.example-own.json", &response)
+		if response.Guidance.Basis != GuidanceOwnEvidence {
+			t.Fatalf("guidance basis = %q, want own_evidence", response.Guidance.Basis)
+		}
+		if len(response.Beliefs) != 1 || response.Beliefs[0].Precedence == nil {
+			t.Fatal("the own belief is missing its precedence")
+		}
+		precedence := response.Beliefs[0].Precedence
+		if precedence.Step != GuidanceOwnEvidence || precedence.Overridden {
+			t.Errorf("own belief precedence = %+v, want the deciding own-evidence step", precedence)
+		}
+		if response.Beliefs[0].Status != domain.StatusBuilding {
+			t.Errorf("own belief status = %q, want Building: a label never gates the step", response.Beliefs[0].Status)
+		}
+		if response.Pool == nil || response.Pool.Precedence == nil || !response.Pool.Precedence.Overridden {
+			t.Fatal("the pool is not marked overridden")
+		}
+		if got := *response.Pool.Precedence.OverriddenBy; got != GuidanceOwnEvidence {
+			t.Errorf("pool overridden by %q, want own_evidence", got)
+		}
+	})
+}
+
+// TestRecallNeverRefuses pins the never-refuses rule: with nothing to go
+// on, recall answers with an empty list and says so, rather than failing.
+func TestRecallNeverRefuses(t *testing.T) {
+	var response RecallResponse
+	readExample(t, "recall_for_purchase.response.example-none.json", &response)
+	if len(response.Beliefs) != 0 {
+		t.Errorf("beliefs = %d, want none", len(response.Beliefs))
+	}
+	if response.Pool != nil {
+		t.Error("a thin pool is returned as a belief")
+	}
+	if response.PoolLookup != PoolConsulted {
+		t.Errorf("pool lookup = %q, want consulted with an empty pool", response.PoolLookup)
+	}
+	if response.Guidance.Basis != GuidanceNone {
+		t.Errorf("guidance basis = %q, want none", response.Guidance.Basis)
+	}
+	if response.Guidance.Text == "" {
+		t.Error("recall refuses to say anything")
+	}
+}
+
+// TestCorrectionStandsWithoutBelief pins the standing record: a
+// correction with no belief carries no against declaration, contradicts
+// nothing, and still decides the recommendation.
+func TestCorrectionStandsWithoutBelief(t *testing.T) {
+	var request RecordCorrectionRequest
+	readExample(t, "record_correction.request.example-standing.json", &request)
+	if request.ContradictsBeliefID != "" {
+		t.Errorf("standing request contradicts %q, want no belief", request.ContradictsBeliefID)
+	}
+	var response RecordCorrectionResponse
+	readExample(t, "record_correction.response.example-standing.json", &response)
+	if response.Correction.ContradictsBeliefID != "" {
+		t.Errorf("standing correction declares against %q", response.Correction.ContradictsBeliefID)
+	}
+	if response.BeliefID != "" {
+		t.Errorf("standing correction reports belief %q", response.BeliefID)
+	}
+	if response.Contradicted {
+		t.Error("standing correction marks a belief contradicted")
+	}
+	if response.Status != domain.StatusClaimed || response.Standing != domain.GraphNone {
+		t.Errorf("standing correction reads %q/%q, want Claimed/None", response.Status, response.Standing)
+	}
+	if response.Guidance.Basis != GuidanceCorrection || response.Guidance.BeliefID != nil {
+		t.Errorf("standing correction guidance = %+v, want the correction alone", response.Guidance)
+	}
+}
+
+// TestSetPoolingExamples pins the consent response: opting out removes the
+// rows already written, and opting back in removes none.
+func TestSetPoolingExamples(t *testing.T) {
+	var request SetPoolingRequest
+	readExample(t, "set_pooling.request.example.json", &request)
+	if request.Pooling {
+		t.Error("the opt-out example does not opt out")
+	}
+	var response SetPoolingResponse
+	readExample(t, "set_pooling.response.example.json", &response)
+	if response.Pooling || response.RowsRemoved != 3 {
+		t.Errorf("opt-out response = %+v, want pooling false and 3 rows removed", response)
+	}
+	var optIn SetPoolingResponse
+	readExample(t, "set_pooling.response.example-optin.json", &optIn)
+	if !optIn.Pooling || optIn.RowsRemoved != 0 {
+		t.Errorf("opt-in response = %+v, want pooling true and no rows removed", optIn)
+	}
+}
+
+// TestFitVerdictVocabularyMatchesDomain pins the pooled row's verdicts to
+// the wire's fit verdicts, so the two vocabularies cannot drift.
+func TestFitVerdictVocabularyMatchesDomain(t *testing.T) {
+	cases := []struct {
+		wire FeedbackVerdict
+		row  domain.FitVerdict
+	}{
+		{FeedbackFitsWell, domain.FitVerdictFitsWell},
+		{FeedbackTooSmall, domain.FitVerdictTooSmall},
+		{FeedbackTooLarge, domain.FitVerdictTooLarge},
+	}
+	for _, tc := range cases {
+		if string(tc.wire) != string(tc.row) {
+			t.Errorf("wire verdict %q differs from the fit row's %q", tc.wire, tc.row)
+		}
 	}
 }

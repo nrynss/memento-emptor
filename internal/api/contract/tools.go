@@ -4,13 +4,14 @@ package contract
 // agents on the payment toolkit and the ledger code against them.
 type ToolName string
 
-// The frozen tool names: six layer calls and three ledger reads.
+// The frozen tool names: eight layer calls and three ledger reads.
 const (
-	// ToolRecallForPurchase recalls the beliefs that apply to a purchase,
-	// each with its status and evidence, plus any overriding correction.
+	// ToolRecallForPurchase recalls what applies to a purchase: the
+	// shopper's beliefs, the pooled fit, any correction, each with its
+	// status and precedence step.
 	ToolRecallForPurchase ToolName = "recall_for_purchase"
 	// ToolRecordCorrection records the shopper's explicit correction at
-	// once, declared against the belief it contradicts.
+	// once, against a belief or as a standing record.
 	ToolRecordCorrection ToolName = "record_correction"
 	// ToolPendingQuestions lists the refunds still missing a reason.
 	ToolPendingQuestions ToolName = "pending_questions"
@@ -22,6 +23,12 @@ const (
 	// ToolExplainBelief explains a belief: every piece of evidence and
 	// its reason, every correction, the history in order.
 	ToolExplainBelief ToolName = "explain_belief"
+	// ToolProductFit reads the pooled product fit for one product line and
+	// size: its status and the counts behind it, never a shopper row.
+	ToolProductFit ToolName = "product_fit"
+	// ToolSetPooling records the shopper's opt-out of pooling, or opts
+	// them back in.
+	ToolSetPooling ToolName = "set_pooling"
 	// ToolLedgerBeliefs lists the ledger's belief rows.
 	ToolLedgerBeliefs ToolName = "ledger_beliefs"
 	// ToolLedgerBelief reads one ledger row in full.
@@ -38,6 +45,8 @@ var ToolNames = []ToolName{
 	ToolRecordReason,
 	ToolRecordFeedback,
 	ToolExplainBelief,
+	ToolProductFit,
+	ToolSetPooling,
 	ToolLedgerBeliefs,
 	ToolLedgerBelief,
 	ToolLedgerEvidence,
@@ -62,13 +71,13 @@ func Tools() []ToolDescriptor {
 	return []ToolDescriptor{
 		{
 			Name:           ToolRecallForPurchase,
-			Description:    "Recall what applies before recommending: the beliefs for this shopper and product, each with status and evidence, plus any shopper correction that overrides them. Call first on every turn that may end in a recommendation; when a correction is present, recommend from it.",
+			Description:    "Recall what applies before recommending. It never refuses: the shopper's beliefs and the pooled product fit come back each with a status label, thin evidence included. Guidance names the precedence step that decided (correction, own_evidence, pool, statement, none); when steps disagree both are returned with the lower marked overridden. When a correction is present, recommend from it.",
 			RequestSchema:  "recall_for_purchase.request.schema.json",
 			ResponseSchema: "recall_for_purchase.response.schema.json",
 		},
 		{
 			Name:           ToolRecordCorrection,
-			Description:    "Record the shopper's explicit correction at once. The correction takes precedence over the contradicted belief immediately; the belief stays and is shown beside it. The contradicted belief id is required.",
+			Description:    "Record the shopper's explicit correction at once. With a belief it takes precedence over it immediately and the belief stays beside the warning; with no belief it is kept as a standing record that contradicts nothing yet and is declared against a matching belief when one appears.",
 			RequestSchema:  "record_correction.request.schema.json",
 			ResponseSchema: "record_correction.response.schema.json",
 		},
@@ -95,6 +104,18 @@ func Tools() []ToolDescriptor {
 			Description:    "Explain why the layer believes something: every piece of evidence with its reason, every correction, and the history in order. Cite this, not the raw transaction history, when justifying a recommendation.",
 			RequestSchema:  "explain_belief.request.schema.json",
 			ResponseSchema: "explain_belief.response.schema.json",
+		},
+		{
+			Name:           ToolProductFit,
+			Description:    "Read the pooled product fit for one product line and size: its status, the direction it rates, settled counts by direction, feedback by verdict and reason by category, distinct shoppers by direction, and the seeded split. Carries no shopper identity, no row and no free text.",
+			RequestSchema:  "product_fit.request.schema.json",
+			ResponseSchema: "product_fit.response.schema.json",
+		},
+		{
+			Name:           ToolSetPooling,
+			Description:    "Record the shopper's pooling choice. Pooling is opt-out: their classified outcomes count toward the pool unless they say no. Opting out stops new fit rows and removes the rows already written, and the response says how many.",
+			RequestSchema:  "set_pooling.request.schema.json",
+			ResponseSchema: "set_pooling.response.schema.json",
 		},
 		{
 			Name:           ToolLedgerBeliefs,

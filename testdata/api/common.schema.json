@@ -80,7 +80,7 @@
     },
     "Correction": {
       "type": "object",
-      "required": ["correction_id", "text", "contradicts_belief_id", "recorded_at", "takes_precedence"],
+      "required": ["correction_id", "text", "recorded_at", "takes_precedence"],
       "additionalProperties": false,
       "properties": {
         "correction_id": {"type": "string", "minLength": 1},
@@ -88,6 +88,16 @@
         "contradicts_belief_id": {"type": "string", "minLength": 1},
         "recorded_at": {"type": "string", "minLength": 1},
         "takes_precedence": {"type": "boolean", "const": true}
+      }
+    },
+    "Precedence": {
+      "type": "object",
+      "required": ["step", "overridden", "overridden_by"],
+      "additionalProperties": false,
+      "properties": {
+        "step": {"type": "string", "enum": ["correction", "own_evidence", "pool", "statement", "none"]},
+        "overridden": {"type": "boolean"},
+        "overridden_by": {"type": ["string", "null"], "enum": ["correction", "own_evidence", "pool", "statement", "none", null]}
       }
     },
     "Belief": {
@@ -104,6 +114,7 @@
         "contradicted": {"type": "boolean"},
         "contradicted_by": {"type": ["object", "null"], "$ref": "common.schema.json#/$defs/Correction"},
         "evidence": {"type": "array", "items": {"$ref": "common.schema.json#/$defs/Evidence"}},
+        "precedence": {"type": ["object", "null"], "$ref": "common.schema.json#/$defs/Precedence"},
         "seeded": {"type": "boolean"},
         "updated_at": {"type": "string", "minLength": 1}
       }
@@ -114,7 +125,7 @@
       "additionalProperties": false,
       "properties": {
         "text": {"type": "string", "minLength": 1},
-        "basis": {"type": "string", "enum": ["correction", "belief", "none"]},
+        "basis": {"type": "string", "enum": ["correction", "own_evidence", "pool", "statement", "none"]},
         "correction_id": {"type": ["string", "null"]},
         "belief_id": {"type": ["string", "null"]}
       }
@@ -162,6 +173,86 @@
       "properties": {
         "evidence": {"$ref": "common.schema.json#/$defs/Evidence"},
         "belief_ids": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "ProductLine": {
+      "type": "object",
+      "required": ["brand_id", "category", "fit_handle"],
+      "additionalProperties": false,
+      "properties": {
+        "brand_id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "fit_handle": {"type": "string", "minLength": 1}
+      }
+    },
+    "DirectionCounts": {
+      "type": "object",
+      "required": ["too_small", "too_large"],
+      "additionalProperties": false,
+      "properties": {
+        "too_small": {"type": "integer", "minimum": 0},
+        "too_large": {"type": "integer", "minimum": 0}
+      }
+    },
+    "VerdictCounts": {
+      "type": "object",
+      "required": ["fits_well", "too_small", "too_large"],
+      "additionalProperties": false,
+      "properties": {
+        "fits_well": {"type": "integer", "minimum": 0},
+        "too_small": {"type": "integer", "minimum": 0},
+        "too_large": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ReasonCounts": {
+      "type": "object",
+      "required": ["fit_too_small", "fit_too_large", "damaged_or_defective", "not_arrived", "changed_mind"],
+      "additionalProperties": false,
+      "properties": {
+        "fit_too_small": {"type": "integer", "minimum": 0},
+        "fit_too_large": {"type": "integer", "minimum": 0},
+        "damaged_or_defective": {"type": "integer", "minimum": 0},
+        "not_arrived": {"type": "integer", "minimum": 0},
+        "changed_mind": {"type": "integer", "minimum": 0}
+      }
+    },
+    "ShopperCounts": {
+      "type": "object",
+      "required": ["fit", "too_small", "too_large"],
+      "additionalProperties": false,
+      "properties": {
+        "fit": {"type": "integer", "minimum": 0},
+        "too_small": {"type": "integer", "minimum": 0},
+        "too_large": {"type": "integer", "minimum": 0}
+      }
+    },
+    "PoolCounts": {
+      "type": "object",
+      "required": ["settled", "kept", "returns", "feedback", "reasons", "shoppers"],
+      "additionalProperties": false,
+      "properties": {
+        "settled": {"type": "integer", "minimum": 0},
+        "kept": {"type": "integer", "minimum": 0},
+        "returns": {"$ref": "common.schema.json#/$defs/DirectionCounts"},
+        "feedback": {"$ref": "common.schema.json#/$defs/VerdictCounts"},
+        "reasons": {"$ref": "common.schema.json#/$defs/ReasonCounts"},
+        "shoppers": {"$ref": "common.schema.json#/$defs/ShopperCounts"}
+      }
+    },
+    "Pool": {
+      "type": "object",
+      "required": ["line", "size", "status", "direction", "counts", "seeded", "live", "recent"],
+      "additionalProperties": false,
+      "properties": {
+        "line": {"$ref": "common.schema.json#/$defs/ProductLine"},
+        "size": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "enum": ["Claimed", "Building", "Earned", "Out of true"]},
+        "direction": {"type": ["string", "null"], "enum": ["small", "large", null]},
+        "counts": {"$ref": "common.schema.json#/$defs/PoolCounts"},
+        "seeded": {"$ref": "common.schema.json#/$defs/PoolCounts"},
+        "live": {"$ref": "common.schema.json#/$defs/PoolCounts"},
+        "recent": {"$ref": "common.schema.json#/$defs/PoolCounts"},
+        "precedence": {"type": ["object", "null"], "$ref": "common.schema.json#/$defs/Precedence"}
       }
     }
   }

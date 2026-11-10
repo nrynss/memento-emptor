@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/set_pooling.response.schema.json",
+  "title": "set_pooling response",
+  "description": "The resulting choice, and how many existing fit rows opting out removed. Opting back in removes nothing.",
+  "type": "object",
+  "required": ["shopper_id", "pooling", "rows_removed", "trace_id"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "pooling": {"type": "boolean"},
+    "rows_removed": {"type": "integer", "minimum": 0},
+    "trace_id": {"type": ["string", "null"]}
+  }
+}

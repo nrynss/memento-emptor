@@ -1,0 +1,14 @@
+{
+  "shopper_id": "shopper_05",
+  "beliefs": [],
+  "pool_lookup": "consulted",
+  "overriding_correction": null,
+  "guidance": {
+    "text": "No memory applies yet: no correction, no fit evidence, no pool and no general statement. Ask the shopper which size they usually take.",
+    "basis": "none",
+    "correction_id": null,
+    "belief_id": null
+  },
+  "pending_count": 0,
+  "trace_id": null
+}

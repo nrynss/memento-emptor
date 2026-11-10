@@ -2,9 +2,9 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://memento-emptor.local/testdata/api/record_correction.request.schema.json",
   "title": "record_correction request",
-  "description": "The shopper's explicit correction, declared against the belief it contradicts. The contradicted belief id is required.",
+  "description": "The shopper's explicit correction. With a contradicts_belief_id it is declared against that belief at once; without one the correction is kept as a standing record that contradicts nothing yet.",
   "type": "object",
-  "required": ["shopper_id", "text", "contradicts_belief_id"],
+  "required": ["shopper_id", "text"],
   "additionalProperties": false,
   "properties": {
     "shopper_id": {"type": "string", "minLength": 1},

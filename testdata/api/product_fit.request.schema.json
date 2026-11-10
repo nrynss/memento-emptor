@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/product_fit.request.schema.json",
+  "title": "product_fit request",
+  "description": "One product line and one size: the brand, the category and the fit handle name the line together, and the size names the variant the counts are for.",
+  "type": "object",
+  "required": ["brand_id", "category", "fit_handle", "size"],
+  "additionalProperties": false,
+  "properties": {
+    "brand_id": {"type": "string", "minLength": 1},
+    "category": {"type": "string", "minLength": 1},
+    "fit_handle": {"type": "string", "minLength": 1},
+    "size": {"type": "string", "minLength": 1}
+  }
+}

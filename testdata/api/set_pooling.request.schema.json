@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://memento-emptor.local/testdata/api/set_pooling.request.schema.json",
+  "title": "set_pooling request",
+  "description": "The shopper's pooling choice. Pooling is opt-out: their classified outcomes count toward the pool unless they say no.",
+  "type": "object",
+  "required": ["shopper_id", "pooling"],
+  "additionalProperties": false,
+  "properties": {
+    "shopper_id": {"type": "string", "minLength": 1},
+    "pooling": {"type": "boolean"},
+    "trace_id": {"type": "string", "minLength": 1}
+  }
+}

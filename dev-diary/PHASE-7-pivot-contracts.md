@@ -12,7 +12,7 @@ requires:   [T0.11, T0.12]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/contract/, internal/domain/, docs/interface.md, docs/architecture.md, testdata/api/
-status:     claimed:t71-pivot-contracts
+status:     in-review
 ```
 Change the frozen contract to the pivot in product.md, and update every fixture in `testdata/api/` in the same commit.
 
@@ -27,6 +27,17 @@ Change the frozen contract to the pivot in product.md, and update every fixture 
 `docs/architecture.md` gains the second write path (ingest to the fit index), the per-shopper Lambo hub, and the merchant app reading only `product_fit`.
 
 **Done when:** every new and changed example in `testdata/api/` validates against its schema and its Go type, with unknown fields rejected. The status rule's table test covers each boundary (2 vs 3 shoppers, 7 vs 8, 59% vs 60%, exactly twice, a 90-day flip). The precedence enum, the fit row and the usual-size rule each have a table test. The gate passes.
+
+**Notes (in-review).** `internal/domain/` gains three pure pieces, each with its own table test: the fit row (`ProductLine`, `FitPurchaseState` with `Rank`, `FitSettledKind`, `FitVerdict`, `FitRow.Version()`, which is the state rank with event time inside it), the pool rule (`PoolCounts`, `DecidePool`, and the five thresholds `PoolBuildingShoppers`, `PoolEarnedShoppers`, `PoolEarnedSharePercent`, `PoolEarnedRatio`, `PoolRecentWindow`) and the usual-size rule (`UsualSizeFor`). `internal/api/contract/` turns `GuidanceBasis` into the five precedence steps, adds `PrecedenceView` to every belief and to the pool, adds `PoolView` with the counts shapes, `product_fit` and `set_pooling` (eleven tools), and makes the correction's belief optional. `testdata/api/` has twelve new examples, four new schemas and five changed schemas; the document carries all thirty-one validating blocks.
+
+Four things the next agent should not have to rediscover:
+
+- The served layer's tests compare its JSON to the base fixtures, and the server builds `RecordCorrectionResponse` with plain string fields. So every pivot field is optional (`omitempty`), the base `recall_for_purchase.response.example.json` stays the pre-pool shape, and the pivot examples are extra files. T8.5 switches the served layer to them and can make the fields required then.
+- The 60% share counts every fit-classified settled outcome, fits-well included. On directional outcomes alone the "twice the opposite" rule already implies a two-thirds share, so the 60% floor would never bind; it bites when fits-well verdicts dilute a direction. The fixture pool is 61.7% and Earned for exactly that reason.
+- Below the Building floor the pool reports Claimed, the ledger's only word for a belief with no evidence behind it. The recent window is judged only at or above the floor: read literally, a quiet line would flip to Out of true with nothing newer to disagree. `DecidePool`'s table test pins both.
+- T0.12's event-sequence version is superseded by the state rank plus event time, so the row carries the times and computes the version; `event_seq` is not a field. The domain's direction words are `small`/`large` while the index stores `too_small`/`too_large`; the writer maps them, and `docs/architecture.md` says so.
+
+Open for T9.3: `product_fit` answers for one line and size. The merchant app needs the seller's line list from somewhere (its own config or a later read), since the contract does not enumerate lines. Full gate result in the report.
 
 ---
 

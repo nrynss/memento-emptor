@@ -62,20 +62,73 @@ const (
 	TimelineStatus TimelineKind = "status"
 )
 
-// GuidanceBasis names what the agent should recommend from right now.
+// GuidanceBasis names the precedence step that decided what to recommend.
+// The steps are ordered, strongest first: a correction wins over the
+// shopper's own evidence, which wins over the pooled product fit, which
+// wins over a general statement; with none of them, nothing applies.
 type GuidanceBasis string
 
-// The guidance bases.
+// The precedence steps, strongest first.
 const (
-	// GuidanceCorrection means a correction overrides the belief. The
-	// agent recommends from the correction, immediately.
+	// GuidanceCorrection means the shopper's correction decides. The agent
+	// recommends from it, immediately.
 	GuidanceCorrection GuidanceBasis = "correction"
-	// GuidanceBelief means no correction applies. The agent recommends
-	// from the strongest belief, citing its evidence.
-	GuidanceBelief GuidanceBasis = "belief"
-	// GuidanceNone means there is nothing to recommend from yet.
+	// GuidanceOwnEvidence means the shopper's own fit evidence decides, at
+	// any status: fit is personal, so it beats the pool.
+	GuidanceOwnEvidence GuidanceBasis = "own_evidence"
+	// GuidanceBelief is the name the served layer was written against; it
+	// is the own-evidence step.
+	GuidanceBelief = GuidanceOwnEvidence
+	// GuidancePool means the pooled product fit decides, adjusted from the
+	// shopper's usual size.
+	GuidancePool GuidanceBasis = "pool"
+	// GuidanceStatement means the shopper's general statement decides. It
+	// is Claimed and never promotes.
+	GuidanceStatement GuidanceBasis = "statement"
+	// GuidanceNone means nothing applies yet, and the layer says so.
 	GuidanceNone GuidanceBasis = "none"
 )
+
+// GuidanceBases lists the precedence steps, strongest first.
+var GuidanceBases = []GuidanceBasis{
+	GuidanceCorrection,
+	GuidanceOwnEvidence,
+	GuidancePool,
+	GuidanceStatement,
+	GuidanceNone,
+}
+
+// Rank is the step's place in the precedence order: a lower rank is
+// stronger. An unknown step ranks zero and never wins.
+func (b GuidanceBasis) Rank() int {
+	switch b {
+	case GuidanceCorrection:
+		return 1
+	case GuidanceOwnEvidence:
+		return 2
+	case GuidancePool:
+		return 3
+	case GuidanceStatement:
+		return 4
+	case GuidanceNone:
+		return 5
+	default:
+		return 0
+	}
+}
+
+// PrecedenceView says which step an item came from and whether a stronger
+// step decided the purchase instead. An overridden item is still returned,
+// so the agent and the ledger show both sides rather than hide one.
+type PrecedenceView struct {
+	// Step is the precedence step the item came from.
+	Step GuidanceBasis `json:"step"`
+	// Overridden is true when a stronger step decided. The item is still
+	// returned and never sets the recommendation.
+	Overridden bool `json:"overridden"`
+	// OverriddenBy names the stronger step, or null when this item decided.
+	OverriddenBy *GuidanceBasis `json:"overridden_by"`
+}
 
 // OutcomeView is the wire form of domain.Outcome: what happened to the
 // money, kept separate from the item and the reason.
@@ -165,15 +218,17 @@ type EvidenceView struct {
 
 // CorrectionView is the shopper's explicit correction. It applies at once
 // with precedence over the belief it contradicts, and the belief itself
-// is never deleted.
+// is never deleted. A correction with no belief yet stands on its own: it
+// carries no against declaration until a matching belief appears.
 type CorrectionView struct {
 	// CorrectionID identifies the correction.
 	CorrectionID string `json:"correction_id"`
 	// Text is the shopper's verbatim first-person words.
 	Text string `json:"text"`
 	// ContradictsBeliefID is the against declaration: the belief this
-	// correction contradicts.
-	ContradictsBeliefID string `json:"contradicts_belief_id"`
+	// correction contradicts. It is absent while the correction stands
+	// on its own.
+	ContradictsBeliefID string `json:"contradicts_belief_id,omitempty"`
 	// RecordedAt is when the correction was recorded, RFC 3339.
 	RecordedAt string `json:"recorded_at"`
 	// TakesPrecedence is always true. It marks the override so an agent
@@ -208,6 +263,10 @@ type BeliefView struct {
 	ContradictedBy *CorrectionView `json:"contradicted_by"`
 	// Evidence is every piece of evidence that counts toward this belief.
 	Evidence []EvidenceView `json:"evidence"`
+	// Precedence names the precedence step that produced the belief and
+	// whether a stronger step decided instead. Recall sets it; the ledger
+	// reads leave it out.
+	Precedence *PrecedenceView `json:"precedence,omitempty"`
 	// Seeded marks generated history. Every seeded row carries the mark.
 	Seeded bool `json:"seeded"`
 	// UpdatedAt is the last change to the belief, RFC 3339.
@@ -215,16 +274,19 @@ type BeliefView struct {
 }
 
 // GuidanceView tells the agent what to recommend from right now. The
-// decision follows the shopper immediately: a correction wins over the
-// belief without waiting for new evidence.
+// decision follows the shopper immediately: a correction wins over any
+// belief without waiting for new evidence, and Basis says which precedence
+// step decided.
 type GuidanceView struct {
 	// Text states what to recommend now, in words.
 	Text string `json:"text"`
-	// Basis names what the text comes from: correction, belief or none.
+	// Basis names the precedence step the text comes from: correction,
+	// own_evidence, pool, statement, or none.
 	Basis GuidanceBasis `json:"basis"`
 	// CorrectionID identifies the winning correction, or null.
 	CorrectionID *string `json:"correction_id"`
-	// BeliefID identifies the strongest belief, or null.
+	// BeliefID identifies the belief that decided, or null. It is null for
+	// a pool decision, which names its line and size on the pool itself.
 	BeliefID *string `json:"belief_id"`
 }
 
@@ -292,6 +354,12 @@ type RecallRequest struct {
 	BrandID string `json:"brand_id"`
 	// LineName is the product line under consideration, when known.
 	LineName string `json:"line_name,omitempty"`
+	// Category is the product category slug under consideration, when
+	// known. With the brand and the fit handle it names the product line
+	// the pool is keyed by.
+	Category string `json:"category,omitempty"`
+	// FitHandle is the candidate line's cut, when known.
+	FitHandle string `json:"fit_handle,omitempty"`
 	// SKU is the candidate variant under consideration, when known.
 	SKU string `json:"sku,omitempty"`
 	// SizeConsidered is the size the agent is leaning toward, when known.
@@ -301,20 +369,32 @@ type RecallRequest struct {
 	TraceID string `json:"trace_id,omitempty"`
 }
 
-// RecallResponse returns the beliefs that apply, each with its status
-// and evidence, and any correction that overrides them. When
-// OverridingCorrection is present the agent recommends from it first:
-// the correction ships both at the top level and inside each
-// contradicted belief, so it cannot be read past.
+// RecallResponse returns what applies to this purchase. It never refuses:
+// thin evidence comes back labelled thin. Beliefs are the shopper's own,
+// each carrying the precedence step that produced it; Pool is the pooled
+// product fit when the pool has something to say; Guidance names the step
+// that decided. Every item carries its status label, and when steps
+// disagree both are returned with the lower marked overridden. When
+// OverridingCorrection is present the agent recommends from it first: the
+// correction ships both at the top level and inside each contradicted
+// belief, so it cannot be read past.
 type RecallResponse struct {
 	// ShopperID identifies the shopper.
 	ShopperID string `json:"shopper_id"`
-	// Beliefs are the beliefs that apply to this purchase.
+	// Beliefs are the shopper's own beliefs that apply, each with its
+	// status, evidence and precedence step.
 	Beliefs []BeliefView `json:"beliefs"`
+	// Pool is the pooled product-fit belief for the product, or absent
+	// when the pool was not consulted or has nothing to say.
+	Pool *PoolView `json:"pool,omitempty"`
+	// PoolLookup says whether recall consulted the pool: consulted when the
+	// index answered, unavailable when it could not be reached. Recall
+	// carries on without a pool and never pretends an empty one.
+	PoolLookup PoolLookup `json:"pool_lookup,omitempty"`
 	// OverridingCorrection is the correction the agent must honour
 	// first, or null when none applies.
 	OverridingCorrection *CorrectionView `json:"overriding_correction"`
-	// Guidance states what to recommend now, correction first.
+	// Guidance states what to recommend now, by precedence step.
 	Guidance GuidanceView `json:"guidance"`
 	// PendingCount is how many refunds still miss a reason. Above zero
 	// means the agent should ask, via pending_questions.
@@ -324,33 +404,40 @@ type RecallResponse struct {
 }
 
 // RecordCorrectionRequest records the shopper's explicit, first-person
-// correction. ContradictsBeliefID is required: the correction is declared
-// against the belief it contradicts, never floating.
+// correction. ContradictsBeliefID is optional: with a belief the
+// correction is declared against it at once, and with none it is kept as a
+// standing record that never promotes. When a matching belief appears
+// later, the layer declares the standing correction against it then.
 type RecordCorrectionRequest struct {
 	// ShopperID identifies the shopper.
 	ShopperID string `json:"shopper_id"`
 	// Text is the shopper's verbatim first-person words.
 	Text string `json:"text"`
 	// ContradictsBeliefID is the against declaration: the belief this
-	// correction contradicts.
-	ContradictsBeliefID string `json:"contradicts_belief_id"`
+	// correction contradicts. It is omitted for a standing correction.
+	ContradictsBeliefID string `json:"contradicts_belief_id,omitempty"`
 	// TraceID is the host trace for this turn, when the host has one.
 	TraceID string `json:"trace_id,omitempty"`
 }
 
-// RecordCorrectionResponse confirms the correction applies at once. The
-// contradicted belief keeps its status and standing: it is shown beside
-// the correction, never deleted.
+// RecordCorrectionResponse confirms the correction applies at once. With a
+// belief, the contradicted belief keeps its status and standing and is
+// shown beside the correction, never deleted. With no belief, the
+// correction stands alone: there is no belief to report.
 type RecordCorrectionResponse struct {
 	// Correction is the recorded correction.
 	Correction CorrectionView `json:"correction"`
-	// BeliefID identifies the contradicted belief.
-	BeliefID string `json:"belief_id"`
-	// Status is the belief's ledger status, unchanged.
+	// BeliefID identifies the contradicted belief. It is absent while the
+	// correction stands on its own.
+	BeliefID string `json:"belief_id,omitempty"`
+	// Status is the belief's ledger status, unchanged. A standing
+	// correction reports its own label, Claimed.
 	Status domain.BeliefStatus `json:"status"`
-	// Standing is the belief's underlying graph state, unchanged.
+	// Standing is the belief's underlying graph state, unchanged. A
+	// standing correction reports None.
 	Standing domain.GraphState `json:"standing"`
-	// Contradicted is always true here: the warning now renders.
+	// Contradicted is true when a belief carries the warning now. It is
+	// false for a standing correction, which contradicts no belief yet.
 	Contradicted bool `json:"contradicted"`
 	// Guidance states what to recommend now, from the correction.
 	Guidance GuidanceView `json:"guidance"`
@@ -531,4 +618,172 @@ type LedgerEvidenceResponse struct {
 	ShopperID string `json:"shopper_id"`
 	// Evidence are the evidence rows with their belief links.
 	Evidence []LedgerEvidenceRow `json:"evidence"`
+}
+
+// PoolLookup names whether recall consulted the pool.
+type PoolLookup string
+
+// The pool lookup outcomes.
+const (
+	// PoolConsulted means the pool index answered. The Pool object is
+	// present when the pool has something to say and absent when it does
+	// not.
+	PoolConsulted PoolLookup = "consulted"
+	// PoolUnavailable means the pool index could not be reached. Recall
+	// carries on without it and never pretends an empty pool.
+	PoolUnavailable PoolLookup = "unavailable"
+)
+
+// ProductLineView is the wire form of domain.ProductLine: the brand, the
+// category and the fit handle that name one product line together.
+type ProductLineView struct {
+	// BrandID identifies the brand.
+	BrandID string `json:"brand_id"`
+	// Category is the product category slug, such as shirts.
+	Category string `json:"category"`
+	// FitHandle is the line's cut, such as regular or slim.
+	FitHandle string `json:"fit_handle"`
+}
+
+// DirectionCountsView counts settled returns by the direction they point.
+type DirectionCountsView struct {
+	// TooSmall counts settled returns whose reason says the item ran small.
+	TooSmall int `json:"too_small"`
+	// TooLarge counts settled returns whose reason says it ran large.
+	TooLarge int `json:"too_large"`
+}
+
+// VerdictCountsView counts settled fit feedback by verdict.
+type VerdictCountsView struct {
+	// FitsWell counts feedback saying the size fits.
+	FitsWell int `json:"fits_well"`
+	// TooSmall counts feedback saying the size was too small.
+	TooSmall int `json:"too_small"`
+	// TooLarge counts feedback saying the size was too large.
+	TooLarge int `json:"too_large"`
+}
+
+// ReasonCountsView counts settled returns by reason category. It is the
+// merchant's "why it comes back": a fit reason is a sizing cause, and the
+// other categories are not.
+type ReasonCountsView struct {
+	// FitTooSmall counts returns whose reason is too small.
+	FitTooSmall int `json:"fit_too_small"`
+	// FitTooLarge counts returns whose reason is too large.
+	FitTooLarge int `json:"fit_too_large"`
+	// DamagedOrDefective counts returns of a broken or defective item.
+	DamagedOrDefective int `json:"damaged_or_defective"`
+	// NotArrived counts returns of an item that never arrived.
+	NotArrived int `json:"not_arrived"`
+	// ChangedMind counts returns with no product fault.
+	ChangedMind int `json:"changed_mind"`
+}
+
+// ShopperCountsView counts distinct shoppers, never identities. Fit is the
+// Building floor and is not the sum of the directions: a shopper who
+// returned one size each way counts once.
+type ShopperCountsView struct {
+	// Fit counts distinct shoppers with any fit-classified outcome.
+	Fit int `json:"fit"`
+	// TooSmall counts distinct shoppers in the too-small direction.
+	TooSmall int `json:"too_small"`
+	// TooLarge counts distinct shoppers in the too-large direction.
+	TooLarge int `json:"too_large"`
+}
+
+// PoolCountsView holds the settled counts for one product line and size.
+// Only settled purchases count: a purchase still inside its window, and a
+// refund with no reason yet, count toward nothing.
+type PoolCountsView struct {
+	// Settled is the denominator: every settled purchase in the line and
+	// size, including returns with a non-fit reason and kept purchases.
+	Settled int `json:"settled"`
+	// Kept counts purchases kept past the return window with no feedback.
+	Kept int `json:"kept"`
+	// Returns counts settled returns by direction.
+	Returns DirectionCountsView `json:"returns"`
+	// Feedback counts settled feedback by verdict.
+	Feedback VerdictCountsView `json:"feedback"`
+	// Reasons counts settled returns by reason category.
+	Reasons ReasonCountsView `json:"reasons"`
+	// Shoppers counts distinct shoppers, never identities.
+	Shoppers ShopperCountsView `json:"shoppers"`
+}
+
+// PoolView is the pooled product-fit belief for one product line and one
+// size: its label, the direction it rates, and the settled counts behind
+// it. It carries no shopper identity, no row and no free text.
+type PoolView struct {
+	// Line is the product line the pool is about.
+	Line ProductLineView `json:"line"`
+	// Size is the size the counts are for: the shopper's usual size when
+	// one is known, otherwise the size under consideration.
+	Size string `json:"size"`
+	// Status is the pooled label, in the ledger's words.
+	Status domain.BeliefStatus `json:"status"`
+	// Direction is the direction the label rates, or null when no
+	// direction leads.
+	Direction *domain.FitDirection `json:"direction"`
+	// Counts is every settled purchase in the line and size, seeded and
+	// live.
+	Counts PoolCountsView `json:"counts"`
+	// Seeded is the seeded part of the counts. Every seeded row carries
+	// the mark, and the ledger shows the split.
+	Seeded PoolCountsView `json:"seeded"`
+	// Live is the lived part of the counts.
+	Live PoolCountsView `json:"live"`
+	// Recent is the last 90 days of event time alone, the window the Out
+	// of true rule reads.
+	Recent PoolCountsView `json:"recent"`
+	// Precedence names the precedence step when recall returns the pool,
+	// and whether a stronger step decided instead. product_fit leaves it
+	// out.
+	Precedence *PrecedenceView `json:"precedence,omitempty"`
+}
+
+// ProductFitRequest asks for the pooled product fit of one product line and
+// size. The merchant app reads this and nothing else.
+type ProductFitRequest struct {
+	// BrandID identifies the brand.
+	BrandID string `json:"brand_id"`
+	// Category is the product category slug, such as shirts.
+	Category string `json:"category"`
+	// FitHandle is the line's cut, such as regular or slim.
+	FitHandle string `json:"fit_handle"`
+	// Size is the size the counts are for.
+	Size string `json:"size"`
+}
+
+// ProductFitResponse is the pooled belief with its status and the counts
+// behind it.
+type ProductFitResponse struct {
+	// Pool is the pooled product-fit belief for the line and size.
+	Pool PoolView `json:"pool"`
+}
+
+// SetPoolingRequest records the shopper's pooling choice. Pooling is
+// opt-out: a shopper's classified outcomes count toward the pool unless
+// they say no. Pooling false opts out and removes the rows already
+// written; Pooling true opts back in.
+type SetPoolingRequest struct {
+	// ShopperID identifies the shopper.
+	ShopperID string `json:"shopper_id"`
+	// Pooling is the shopper's choice: true keeps their outcomes in the
+	// pool, false opts out.
+	Pooling bool `json:"pooling"`
+	// TraceID is the host trace for this turn, when the host has one.
+	TraceID string `json:"trace_id,omitempty"`
+}
+
+// SetPoolingResponse confirms the choice and says how many existing fit
+// rows opting out removed. Opting back in removes nothing.
+type SetPoolingResponse struct {
+	// ShopperID identifies the shopper.
+	ShopperID string `json:"shopper_id"`
+	// Pooling is the resulting choice.
+	Pooling bool `json:"pooling"`
+	// RowsRemoved is how many fit rows the change removed.
+	RowsRemoved int `json:"rows_removed"`
+	// TraceID echoes the request's trace id, or null.
+	TraceID *string `json:"trace_id"`
 }
