@@ -1,0 +1,24 @@
+# yaml-language-server: $schema=https://astropods.com/schema/package.json
+spec: blueprint/v1
+name: memento-second
+
+agent:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  interfaces:
+    messaging: true
+
+models:
+  # Astro AI Gateway — managed model access (injects ASTRO_GATEWAY_URL +
+  # ASTRO_GATEWAY_API_KEY at deploy). The deploy-time pick arrives as
+  # MODEL_DEFAULT. Same model as the reference agent so a turn costs the
+  # same on either deployment and the pair stays comparable.
+  default:
+    provider: gateway
+    models: [claude-sonnet-4-6]
+
+dev:
+  interfaces:
+    messaging:
+      adapters: [web]
