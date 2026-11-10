@@ -107,14 +107,7 @@ DEFERRED (rationale + owner), or OUT-OF-SCOPE (reason).
   rule, and explicit fit feedback tied to a purchase counts toward fit by
   verdict (the T1.2 handoff), via `supportKind`. No later stage may quote a
   `LayerContext` tally line as a layer verdict.
-- T5.1 F2 (classified changed-mind tallied as "pending"): ADOPTED.
-  In `LayerContext`, "pending" means counts-toward-none outcome rows; it
-  sweeps in classified no-fault rows the real `pending_questions` would
-  never list. That is frozen and documented behavior of the stand-in, not a
-  claim about the layer. True pending semantics (only below-floor unclear
-  stays open) come from the real `pending_questions` call in T5.5's arm-3
-  memory fetch, and the per-row notes carry the underlying facts either way.
-- T5.1 F3 (arm-2 input contract: amounts and all transaction IDs omitted):
+- T5.1 F2 (arm-2 input contract: amounts and all transaction IDs omitted):
   ADOPTED. Arm 2's input is `RawHistoryContext` exactly as hashed: outcome
   kind + status, signal, source, brand/line/SKU/size/category, reason
   category + text + confidence, write op, seed mark, note. No `AmountMinor`,
@@ -124,6 +117,13 @@ DEFERRED (rationale + owner), or OUT-OF-SCOPE (reason).
   note-substring refs through the human mapping step; a verbatim
   transaction ID in an arm-2 reply matches no arm input and is graded as an
   unresolved cite (a hallucination signal), never repaired by hand.
+- T5.1 F3 (classified changed-mind tallied as "pending"): ADOPTED.
+  In `LayerContext`, "pending" means counts-toward-none outcome rows; it
+  sweeps in classified no-fault rows the real `pending_questions` would
+  never list. That is frozen and documented behavior of the stand-in, not a
+  claim about the layer. True pending semantics (only below-floor unclear
+  stays open) come from the real `pending_questions` call in T5.5's arm-3
+  memory fetch, and the per-row notes carry the underlying facts either way.
 - T5.1 F4 (arm-3 stub is not the `recall_for_purchase` wire shape):
   ADOPTED. The stub carries no belief ids, values, guidance, or pending
   count, and T5.5 must not grade from it. Every arm-3 turn fetches memory
