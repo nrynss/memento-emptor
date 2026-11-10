@@ -76,3 +76,4 @@ assert details.get("runtime") in ("docker", "image"), "runtime drifted from the 
 assert not details.get("disk"), "the stateless merchant service takes no disk"
 print("provision: settled shape holds ($7.00/mo, no disk)")
 EOF
+unset created

@@ -28,5 +28,5 @@ FROM debian:trixie-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY --from=go-build /out/merchant-edge /app/merchant-edge
 COPY --from=web-build /src/merchant/build /app/merchant
-ENV MERCHANT_STATIC_DIR=/app/merchant
+ENV MERCHANT_STATIC=/app/merchant
 CMD ["/app/merchant-edge"]
