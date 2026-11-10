@@ -34,7 +34,7 @@ requires:   [T4.3, T6.1, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/judges/
-status:     not-started
+status:     held: no P6 tasks run (user order)
 ```
 The first screen is a "For judges: start here" table: the demo, the evidence ledger, the merchant app, the traces, both comparison rounds, and the seeded rows clearly marked. Test credentials for the sandbox, if a judge needs them, are safe to publish and are sandbox-only.
 
@@ -48,7 +48,7 @@ requires:   [T6.1, T9.6, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · frontier
 owns:       README.md, docs/submission.md
-status:     not-started
+status:     held: no P6 tasks run (user order)
 ```
 The README is written for a developer on PayPal's Agent Toolkit, opening with the description line in product.md. It follows product.md's "How it is consumed": a seller or platform runs the layer beside its PayPal app. It covers how to plug in (keys included), setup a judge can follow, the architecture, and what is simulated and seeded. `docs/submission.md` drafts the form's text: the description; each tool and how it was used; what changed in Lambo during the hackathon, since it is an existing dependency. The README closes with where the product could go next: a network across sellers, as product.md describes it, clearly marked as not built.
 
@@ -62,7 +62,7 @@ requires:   [T9.7, T10.5]
 fixture-ok: no
 size:       M · user
 owns:       docs/video.md
-status:     not-started
+status:     held: no P6 tasks run (user order)
 ```
 Under 3 minutes, on YouTube, public, showing the project working end to end, with no third-party trademarks or unlicensed music. Opens on the shopper's problem, shows what a builder plugs in, leads with the number the user picks from T10.5, and signs off with *Caveat agens*, with its translation. An agent drafts the script in `docs/video.md`; the user records and publishes.
 
@@ -76,7 +76,7 @@ requires:   [T6.2, T6.3]
 fixture-ok: no
 size:       S · user
 owns:       none (repository settings)
-status:     not-started
+status:     held: no P6 tasks run (user order)
 ```
 Before the switch, the orchestrator checks the whole history for keys, account details and anything the diary rule forbids. The user makes the repository public, with the MIT licence visible in the About section.
 
@@ -90,7 +90,7 @@ requires:   [T6.4, T6.5]
 fixture-ok: no
 size:       S · user
 owns:       none (Devpost)
-status:     not-started
+status:     held: no P6 tasks run (user order)
 ```
 The user submits on Devpost, selecting every sponsor tool used so that it counts for sponsor prizes: PayPal, Channel3, AG Grid, Render, Elastic and Astropods. Hosted demo URL, public repository, video.
 
@@ -104,7 +104,7 @@ requires:   [T6.6]
 fixture-ok: no
 size:       XS · user
 owns:       none
-status:     not-started
+status:     held: no P6 tasks run (user order)
 ```
 After the deadline, submissions are locked. Don't edit the repository, video or linked materials until winners are announced. Keep the demo, test credentials, trials and credits active until then.
 
@@ -118,7 +118,7 @@ requires:   [T6.3]
 fixture-ok: yes
 size:       S · mid
 owns:       docs-site/
-status:     not-started
+status:     held: no P6 tasks run (user order)
 ```
 An Astro Starlight site publishing the builder documentation: what the layer is, the interface reference from `docs/interface.md`, the architecture from `docs/architecture.md`, the submission summary, and links to the demo, ledger, and repo. Separate from the ledger web app; static build.
 

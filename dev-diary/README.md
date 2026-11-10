@@ -117,7 +117,7 @@ status:     not-started
 - **fixture-ok:** Whether the task can be built and tested against `testdata/` alone.
 - **size:** Scope from XS to XL, then the class: the kind of work it is. The user assigns the agent and model.
 - **owns:** The paths this task alone edits. T0.2 may adjust them to Keel's layout; if so, it updates every phase document in the same commit.
-- **status:** `not-started`, `claimed:<agent>`, `in-review`, `done`, `blocked`, or `superseded` (the user replaced the task's plan; the task says by what).
+- **status:** `not-started`, `claimed:<agent>`, `in-review`, `done`, `blocked`, `held` (the user ordered the task not to run), or `superseded` (the user replaced the task's plan; the task says by what).
 
 | Class | Send it for |
 |---|---|
@@ -165,7 +165,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
-| P6 | 1 / 8 | Paused for the pivot |
+| P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 3 / 11 | In progress |
 | P9 | 1 / 8 | In progress |
