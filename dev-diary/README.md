@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
-| P5 | 3 / 6 | In progress |
+| P5 | 4 / 6 | In progress |
 | P6 | 0 / 7 | Not started |
 
 ---
@@ -191,6 +191,14 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `web/src/lib/contest/` (CorrectionButton column, ContestEditor form, correction-path-only transport, state helpers, source-scan + mount tests — 19/19 with reviewer's additions). Edit moves Earned→Out of true, standing kept, row visible; three layers of proof that only `record_correction` fires.
 
 **What surprised.** Review caught a real rendered bug: file-header `//` comments in Svelte compile to visible text nodes (fixed; same pattern pre-exists frozen in T4.2's `LedgerGrid.svelte` — follow-up task to sweep all `.svelte` files, not a silent fix). T4.4's own mount tests needed a client-entry import path (Vitest resolves `svelte` to server build here).
+
+### T5.4: Freeze (done)
+
+**What exists.** `bench/FROZEN.md`: 21-row sha256 manifest (histories, answers-hash-only, seed, harness, grader, extraction, drivers, neutral instrument), pinned model/caps/basis/repeats, publish-everything rule, every follow-up resolved as adopt/defer/owner. Review re-verified hashes, prompt parity, hidden-answer separation byte-level; one doc fix (row count, F2/F3 labels).
+
+**What surprised.** Review proved the neutral-instrument rejection with the discarded runs (recall with wrong shopper is unguessable under no-memory prompts). $5 cap is declared-not-enforced (T5.5 codes it); probe-turn spend should be committed as marked runs.
+
+**The next agent should know.** Freeze inputs live where T5.5 reads them. Verifier script is a minted follow-up (T5.4b in the phase doc), not a gap.
 
 ### T5.3: The baseline pilot (done)
 
@@ -303,6 +311,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `agent/catalog/` matching on brand id + category + equal fit-handle sets with shared cut signals as evidence; Bonobos negative control (line name alone never matches); `ExcludeIDs` skips returned SKUs; `FulfilmentSimulated` on every candidate; apparel size gap pointed out-of-band at the retailer URL; shoe InStock sizes with narrowing echoed. Tests replay all fixtures; one live detail call re-verified the demo SKU (0 credits — detail calls are free).
 
 **What surprised.** Search and detail share one wire shape, so one decoder covers both. No dependency gaps.
+
+### T3.8: Public shopper page (done)
+
+**What exists.** `agent/frontend/` separate deployment (own spec, ROOT image serving :80): no-login 200 on the public frontend host, chat host untouched, one messaging turn + three page turns with recall-first spans, $0.13 of $0.50. F1–F3 answered in code: root stays, page+serve() compose, separate deployment (runtime spec untouched).
+
+**What surprised.** The 30-turn cap increments before generation (a 502 burns budget too — conservative, left as-is); corrections live in container memory only (redeploy resets — the honest demo reset). Purchases provably unwired.
 
 ### T3.7: Public reachability probe (done — negative: platform gap)
 

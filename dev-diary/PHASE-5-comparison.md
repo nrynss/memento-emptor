@@ -68,13 +68,27 @@ requires:   [T5.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/FROZEN.md
-status:     in-review
+status:     done
 ```
 Record the commit and a hash of every shopper, catalog entry, prompt and grader file.
 
 Freeze record: `bench/FROZEN.md` (21 sha256 rows: 6 histories, hidden answers by hash only, seed generator, harness prompt template, grader, pilot extraction rule + run schema + driver/grade commands, neutral instrument). Catalog: no Channel3 entry is an arm input (synthetic candidate). Instrument: neutral `pilot-baseline` for all three arms; reference agent rejected. Repeats fixed: 3 per shopper per arm. Deviation recorded in-file: verifier is a manifest + procedure, no gate-run script fits in owns (needs an orchestrator follow-up).
 
 **Done when:** a script verifies the hashes and the gate runs it; no arm 3 run exists before this commit.
+
+---
+
+### T5.4b: Freeze-check script
+```yaml
+requires:   [T5.4]
+fixture-ok: yes
+size:       XS · mid
+owns:       bench/freeze_check.sh, tools/check.sh
+status:     not-started
+```
+Generate `bench/freeze_check.sh` from the FROZEN.md manifest (single testable place for the manifest-extraction) and invoke it from `tools/check.sh`, so the gate verifies frozen hashes on every run. One-line check.sh change only: call the script, no other gate behavior changes.
+
+**Done when:** the gate fails on a tampered frozen file and passes on the frozen tree.
 
 ---
 
