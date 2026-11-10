@@ -5,8 +5,9 @@ export { layerUrlEnvVar, merchantEnvVars, merchantKeyEnvVar } from './config';
 export { decodePool, decodeProductFitResponse, productFitRequestFields } from './decode';
 export { MerchantApiError } from './errors';
 export { createFixtureTransport, fixtureEarnedOxford, fixturePools } from './fixture';
-export { createLayerHttpTransport, type LayerHttpOptions } from './http';
+export { createLayerHttpTransport, createSameOriginTransport, type LayerHttpOptions, type SameOriginOptions } from './http';
 export { lineKey, merchantLines, toProductFitRequest, type MerchantLine } from './lines';
+export { loadSellerPools, type PoolSource, type SellerPools } from './source';
 export {
 	BUILDING_RULE,
 	CLAIMED_RULE,

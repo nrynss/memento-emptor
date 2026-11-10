@@ -217,11 +217,25 @@ requires:   [T9.3d, T9.6]
 fixture-ok: yes
 size:       S · mid
 owns:       merchant/
-status:     claimed:t93e-live-reads
+status:     in-review
 ```
 Wire the merchant page from the fixture transport to same-origin `/tools/product_fit`; no caller credential is needed (the edge holds the merchant key server-side). Until then the proxy answers 502/503 and the app reads its bundled snapshot. T9.6 registers the key entry on the layer first.
 
-**Done when:** the deployed page renders live pool counts through the proxy; the fixture transport remains for tests; the gate passes.### T9.7: The demo, after the pivot ★
+**Done when:** the deployed page renders live pool counts through the proxy; the fixture transport remains for tests; the gate passes.
+
+**Notes (worker).** `merchant/src/lib/pool/http.ts` gains `createSameOriginTransport`, which posts to `/tools/product_fit` on its own origin with no `authorization` header — the edge injects the service key and drops any client-sent one. `merchant/src/lib/pool/source.ts` is the page's read order as `loadSellerPools`: the whole six-line grid loads live first, and wholly from the bundled snapshot when the live read fails, never a half-live mix; a snapshot failure fails loudly. `+page.svelte` reads live-first with the snapshot fallback and names the vintage under the heading ("Live pool counts, read through the merchant proxy." vs "Bundled snapshot: the live read is not answering yet."). The fixture transport is untouched and still serves every test. New gates: `same-origin.test.ts` (same-origin post shape, no credential, no other tool, no shopper field, loud refusal) and `source.test.ts` (live-first, whole-grid snapshot fallback, loud snapshot failure). The gate passes: merchant 8 files, 45 tests, both frontends green.
+
+**Live proof (local edge + served layer, not the public layer).** Seeded the T9.1 population into scratch index `t93e-proof` (`deploy/seed -fit-only`, all six verdicts verified back), served it with the unmodified pivoted layer on its loopback port (pool and fit wired; hub address dummy — `product_fit` serves from the default service and never dials it), and pointed the unmodified merchant edge at it with a locally minted merchant key. Through the proxy with no caller credential, all six lines read Earned/Building/Building/Building/Claimed/Out-of-true with seeded-only counts (demo oxford Earned small, settled 22, seeded 22, live 0 — the live shape, distinct from the bundled 60/48 snapshot); any other `/tools/` path 404s at the edge untouched. With the layer stopped the proxy answers 502 `layer-unreachable` and the page falls back to the snapshot (unit-proved). Index deleted afterwards (`t93e-proof*` listing `[]`); production `fit-rows` untouched. Spend $0.00 (no model call; Elastic test-prefix churn only).
+
+Three things the next agent should not have to rediscover:
+
+- The same-origin transport sends no key by construction, so the no-elastic proof test's env-var pin (`MEMENTO_LAYER_URL`, `MEMENTO_MERCHANT_KEY`) is untouched: those names now belong to the direct-layer transport and the deploy, not the page.
+- The deployed page picks up this change with the next merchant-service redeploy (static build); no edge or layer change is needed, but the live vintage also needs T9.6's merchant-key entry on the layer's `MEMENTO_MERCHANT_KEYS`.
+- The built bundle carries `/tools/product_fit` and no `authorization` string — grep the page chunk after any transport change.
+
+---
+
+### T9.7: The demo, after the pivot ★
 ```yaml
 requires:   [T9.2, T9.3d, T9.5, T9.6]
 fixture-ok: no

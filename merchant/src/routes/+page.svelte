@@ -1,33 +1,38 @@
 // The merchant page: one read-only table over the seller's lines, and the
-// why for the selected row. Every row comes from product_fit: counts and
-// a status, never a personal row. Selecting a row opens the counts behind
-// its status and the rule it was judged by.
+// why for the selected row. Every row comes from product_fit through the
+// same-origin proxy, with no caller credential: counts and a status, never
+// a personal row. Until the proxy answers, the grid reads the bundled
+// snapshot. Selecting a row opens the counts behind its status and the
+// rule it was judged by.
 
 <script lang="ts">
 	import {
 		createFixtureTransport,
+		createSameOriginTransport,
 		explainWhy,
+		loadSellerPools,
 		MerchantClient,
 		merchantLines,
-		toProductFitRequest,
+		type PoolSource,
 		type PoolView
 	} from '$lib/pool';
 	import { toMerchantGridRows, type MerchantGridRow } from '$lib/merchant/rows';
 	import MerchantGrid from '$lib/merchant/MerchantGrid.svelte';
 	import { merchantName } from '$lib/product';
 
-	const client = new MerchantClient(createFixtureTransport());
+	const client = new MerchantClient(createSameOriginTransport());
+	const snapshot = new MerchantClient(createFixtureTransport());
 
 	let pools: PoolView[] = $state([]);
 	let selectedId: string | null = $state(null);
+	let source: PoolSource | null = $state(null);
 	let error: string | null = $state(null);
 
 	async function load(): Promise<void> {
 		try {
-			const rows = await Promise.all(
-				merchantLines.map((line) => client.productFit(toProductFitRequest(line)))
-			);
-			pools = rows.map((row) => row.pool);
+			const loaded = await loadSellerPools(client, snapshot, merchantLines);
+			pools = loaded.pools.map((row) => row.pool);
+			source = loaded.source;
 			const gridRows = toMerchantGridRows(pools);
 			selectedId = gridRows[0]?.id ?? null;
 		} catch (loadError) {
@@ -77,6 +82,15 @@
 {#if error !== null}
 	<p role="alert">{error}</p>
 {:else}
+	{#if source !== null}
+		<p class="source-line">
+			{#if source === 'live'}
+				Live pool counts, read through the merchant proxy.
+			{:else}
+				Bundled snapshot: the live read is not answering yet.
+			{/if}
+		</p>
+	{/if}
 	<MerchantGrid {rows} {selectedId} {onSelect} />
 	{#if selected !== null}
 		<section class="why-panel" aria-label="Why this row">

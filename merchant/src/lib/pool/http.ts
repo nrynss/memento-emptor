@@ -12,6 +12,40 @@ export interface LayerHttpOptions {
 	fetchFn?: typeof fetch;
 }
 
+/** Where the same-origin proxy serves product_fit, and how to reach it. */
+export interface SameOriginOptions {
+	fetchFn?: typeof fetch;
+	path?: string;
+}
+
+/** Posts product_fit reads to the same-origin proxy with no credential.
+ * The merchant edge holds the merchant key server-side and drops any
+ * client-sent authorization, so the browser sends none. */
+export function createSameOriginTransport(options?: SameOriginOptions): {
+	call: (tool: MerchantToolName, request: Record<string, unknown>) => Promise<unknown>;
+} {
+	const fetchFn = options?.fetchFn ?? fetch;
+	const path = options?.path ?? '/tools/product_fit';
+	return {
+		async call(tool: MerchantToolName, request: Record<string, unknown>): Promise<unknown> {
+			if (tool !== 'product_fit') {
+				throw new MerchantApiError('unknown-tool', 'the merchant app reads product_fit only');
+			}
+			const response = await fetchFn(path, {
+				method: 'POST',
+				headers: {
+					'content-type': 'application/json'
+				},
+				body: JSON.stringify(request)
+			});
+			if (!response.ok) {
+				throw new MerchantApiError('unknown-request', `the pool read failed: ${response.status}`);
+			}
+			return (await response.json()) as unknown;
+		}
+	};
+}
+
 /** Posts product_fit reads to the layer with the merchant key. */
 export function createLayerHttpTransport(options: LayerHttpOptions): {
 	call: (tool: MerchantToolName, request: Record<string, unknown>) => Promise<unknown>;
