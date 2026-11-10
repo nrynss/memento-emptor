@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 10 / 10 | Done |
+| P2 | 10 / 12 | In progress |
 | P3 | 5 / 6 | In progress |
 | P4 | 4 / 4 | Done |
 | P5 | 2 / 6 | In progress |

@@ -259,6 +259,34 @@ With no agent: real sandbox events in, a scripted client calling the interface, 
 
 ---
 
+### T2.7: Direction-aware reason matching ★
+```yaml
+requires:   [T2.5]
+fixture-ok: yes
+size:       M · frontier
+owns:       internal/domain/, internal/memory/, internal/api/server/
+status:     claimed:t27-direction
+```
+The writer and the server attach any fit-kind reason to the most-supported fit belief with no direction check (R2 finding F1). Change the rule: a reason's direction must match the belief's direction to count toward it. A `fit_too_large` return does not attach to a runs-small belief; it attaches to an existing same-kind opposite-direction belief if one is present, otherwise it counts toward nothing (visible as unattached with its reason, never silent). No automatic `against` edges — contradictions stay shopper-driven so Venerable semantics are untouched. Update the domain mapping, the memory writer check, and the server's `beliefForReason`; align the offline story's third answer with the frozen all-small fixtures; add mixed-direction tests proving a "too big" return neither supports nor contradicts the runs-small belief. Contract change (user decision): frozen fixtures move in the same commit if the contract shape changes.
+
+**Done when:** mixed-direction tests prove no-attach/no-contradict on mismatch and correct attach on match; the offline story matches the frozen fixtures; all P2 suites green.
+
+---
+
+### T2.7b: Direction rule, live
+```yaml
+requires:   [T2.7]
+fixture-ok: no
+size:       XS · frontier
+owns:       tests/live/direction/
+status:     not-started
+```
+Re-prove the corrected writer against live Lambo (native embedder, 0.10.1+): same-direction returns earn, an opposite-direction return attaches nowhere, recall reflects it. Throwaway session, deleted after; spend bounded like T2.4b.
+
+**Done when:** live inspect + recall show the corrected behavior; transcript in the handoff log.
+
+---
+
 ## Exit Criteria
 
 - [ ] PayPal events become evidence, idempotently (T2.1, T2.1b).
