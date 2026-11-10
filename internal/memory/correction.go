@@ -86,7 +86,8 @@ type Belief struct {
 // while no belief contradicted them. The graph holds each correction as a
 // note, which never promotes; the journal holds the subject and the one
 // declaration, which a derive cannot carry. The caller keeps one journal
-// per shopper, beside the graph.
+// per shopper, beside the graph, and serialises that shopper's writes: a
+// journal is not safe for concurrent use.
 type StandingCorrections struct {
 	corrections []Correction
 }
@@ -94,9 +95,10 @@ type StandingCorrections struct {
 // Record writes one standing correction. It derives the shopper's words as
 // a note, the kind that never promotes, so the record has no structural
 // edge, no score and no canonization contribution, and adds it to the
-// journal with no Against. The same words about the same subject are one
-// correction: recording them again keeps the entry already held, standing
-// or declared, so a repeat never adds a second declaration later.
+// journal with no Against. The same words about the same subject, line and
+// size are one correction: recording them again keeps the entry already
+// held, standing or declared, so a repeat never adds a second declaration
+// later. The same words about another line or size are their own entry.
 func (j *StandingCorrections) Record(ctx context.Context, g Graph, c Correction) error {
 	if j == nil {
 		return ErrNoStandingJournal

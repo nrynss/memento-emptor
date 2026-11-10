@@ -264,6 +264,59 @@ func TestStandingCorrectionStandsThenDeclaresOnce(t *testing.T) {
 	}
 }
 
+// TestStandingCorrectionDeclaresAgainstEarnedBelief proves the declaration
+// adds no evidence: a belief already earned from three returns keeps
+// Venerable and its three dependents when a standing correction is declared
+// against it, and reads Out of true with the warning beside it.
+func TestStandingCorrectionDeclaresAgainstEarnedBelief(t *testing.T) {
+	ctx := context.Background()
+	g := standingGraph()
+	journal := &memory.StandingCorrections{}
+	correctionAt := mustParse(t, "2026-11-05T14:02:11Z")
+
+	if err := journal.Record(ctx, g, memory.Correction{
+		Text:       fakes.CorrectionLostWeight,
+		Subject:    brandX(),
+		Line:       shirtsRegular,
+		Size:       "M",
+		RecordedAt: correctionAt,
+	}); err != nil {
+		t.Fatalf("record standing correction: %v", err)
+	}
+	earnBelief(t, ctx, g, beliefRunsSmallLater)
+
+	declared, err := journal.Declare(ctx, g, memory.Belief{
+		Content: beliefRunsSmallLater,
+		Kind:    domain.BeliefKindFit,
+		Subject: brandX(),
+	})
+	if err != nil {
+		t.Fatalf("declare standing correction against the earned belief: %v", err)
+	}
+	if declared != 1 {
+		t.Fatalf("declared %d corrections, want 1", declared)
+	}
+	reading := readStatus(t, ctx, g, beliefRunsSmallLater)
+	if reading.Standing != domain.GraphVenerable || reading.Status != domain.StatusOutOfTrue {
+		t.Errorf("declared belief reads standing %q status %q, want Venerable Out of true: the belief stays",
+			reading.Standing, reading.Status)
+	}
+	if !reading.Contradicted || reading.Dependents != 3 {
+		t.Errorf("declared belief reads contradicted %v dependents %d, want true 3: against adds no evidence",
+			reading.Contradicted, reading.Dependents)
+	}
+	if count := strings.Count(reading.Warning, fakes.CorrectionLostWeight); count != 1 {
+		t.Errorf("warning %q names the correction %d times, want 1", reading.Warning, count)
+	}
+	if own := readStatus(t, ctx, g, fakes.CorrectionLostWeight); own.Standing != domain.GraphNone || own.Dependents != 0 {
+		t.Errorf("declared correction reads standing %q dependents %d, want None 0: it never earns",
+			own.Standing, own.Dependents)
+	}
+	if got := journal.Standing(); got[0].Against != beliefRunsSmallLater {
+		t.Errorf("journal records against %q, want %q", got[0].Against, beliefRunsSmallLater)
+	}
+}
+
 // TestCorrectionAgainstExistingBeliefUnchanged pins today's path: a
 // correction naming an existing belief ships at once, declares against it,
 // adds no evidence, leaves the belief standing, and never becomes a
@@ -391,9 +444,11 @@ func TestSameSubject(t *testing.T) {
 			want: false,
 		},
 		{
+			// The belief's words name size L and the correction names M;
+			// the size is no key, so neither side's size narrows the match.
 			name: "different sizes still match",
 			cor:  memory.Correction{Subject: brand, Size: "M"},
-			bel:  memory.Belief{Kind: domain.BeliefKindFit, Subject: brand},
+			bel:  memory.Belief{Content: beliefRunsSmallLater, Kind: domain.BeliefKindFit, Subject: brand},
 			want: true,
 		},
 		{
