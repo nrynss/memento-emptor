@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 10 / 10 | Done |
 | P3 | 5 / 6 | In progress |
 | P4 | 2 / 4 | In progress |
-| P5 | 0 / 6 | Not started |
+| P5 | 1 / 6 | In progress |
 | P6 | 0 / 7 | Not started |
 
 ---
@@ -151,6 +151,12 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T5.1: The harness (done)
+
+**What exists.** `bench/harness/` runs every seed shopper through 3 arms offline (scripted replies, no model/keys/network): complete records with prompt/reply/token counts/spend math, per-arm tool calls (none / `read_history` / `recall_for_purchase`), prompts differing ONLY in the memory block (byte-proven), caps enforced pre- and post-call (4000 tokens, $0.05 — token cap binds first), hidden answers unreachable (static + prompt-content + indirect-leak assessment).
+
+**What surprised.** Review passed with 4 freeze-time follow-ups, recorded for T5.4: F1 — arm-3 tally counts fits-well as `counts toward ""` (real layer counts verdict→kind, T1.2 handoff); F2 — classified changed-mind tallied as "pending" though only below-floor unclear is truly pending; F3 — arm-2 inputs omit amounts + all transaction IDs (freeze must define the arm-2 input contract); F4 — arm-3 stub is not the wire shape (T5.5 must run real `recall_for_purchase`). Also: `TestSeedHistoriesCarryNoCorrections` pins the no-corrections premise (revisit on the first live-correction run); word-count tokens are ~5x under live BPE — re-measure with the live tokenizer on the pilot (T5.3), don't trust the proxy.
 
 ### T2.1: PayPal ingest (done)
 
