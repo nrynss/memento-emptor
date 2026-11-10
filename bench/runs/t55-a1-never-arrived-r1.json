@@ -1,0 +1,92 @@
+{
+  "run_id": "t55-a1-never-arrived-r1",
+  "shopper_id": "cmp-never-arrived",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-never-arrived\nCandidate: a new Washed Oxford Shirt from Brand D (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+  "arm_memory_tool": "",
+  "arm_memory_response": "",
+  "agent_tool_spans": [
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1368
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 12
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1298
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1263
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1313
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 619
+    }
+  ],
+  "recall_observed": false,
+  "reply": "Since no past purchase size or body measurements were provided, I recommend **M** as a neutral mid-range starting point, as no sizing information was given to guide a more specific recommendation.",
+  "contaminated": false,
+  "trace_cost_usd": 0.001295999999,
+  "prompt_words": 65,
+  "reply_words": 31,
+  "capped": false,
+  "sent_at": "2026-11-10T10:19:12Z",
+  "trace_at": "2026-11-10T10:19:19Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "standalone-token",
+    "size_quote": "Since no past purchase size or body measurements were provided, I recommend **M** as a neutral mid-range starting point, as no sizing information was given to guide a more specific recommendation.",
+    "id_refs": null
+  },
+  "score": {
+    "ShopperID": "cmp-never-arrived",
+    "RightSize": false,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 96,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}
