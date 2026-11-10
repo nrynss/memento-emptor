@@ -1,0 +1,11 @@
+# Dependency and build output. Mirrors the root rules for web/.
+build/
+.svelte-kit/
+.vite/
+*.tsbuildinfo
+
+# Test artifacts.
+test-results/
+playwright-report/
+blob-report/
+.cache/
