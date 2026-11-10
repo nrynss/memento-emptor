@@ -54,9 +54,9 @@ size:       S · mid
 owns:       deploy/merchant/
 status:     not-started
 ```
-Its own Render service, following T6.1's provision and guard pattern. It reaches the layer's `product_fit` and nothing else. Before anything is created, record the monthly cost of the new service in the brief and ask the user: creating a paid service is the user's call.
+Its own Render service, following T6.1's provision and guard pattern. It reaches the layer's `product_fit` and nothing else. The user has pre-approved new services for the pivot: record the service's monthly cost in the brief and the handoff log, and keep the guard, but do not stop for a second approval.
 
-**Done when:** the public URL serves the app; the guard reports it; the cost is recorded; the user approved the creation.
+**Done when:** the public URL serves the app; the guard reports it; the cost is recorded in the handoff log.
 
 ---
 
@@ -96,7 +96,7 @@ size:       S · mid
 owns:       deploy/render.yaml, deploy/seed/, deploy/guard.sh, deploy/provision.sh
 status:     not-started
 ```
-The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Any change to the monthly cost is recorded and approved by the user first.
+The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
 
 **Done when:** the public URL answers `recall_for_purchase` for the demo shopper with the pool step working, and `product_fit` for the demo oxford reads Earned. The guard reports green. Spend is recorded.
 

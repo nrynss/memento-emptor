@@ -177,6 +177,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### New services pre-approved (user, stands)
+
+The user has approved creating the pivot's new services: the merchant app's own Render service (T9.3d) and the second Astropods deployment (T9.5). Record each one's monthly cost or tier in the handoff log and keep the task's guard; do not stop for a second approval. A spend beyond a task's brief is still the user's call.
+
 ### T0.12: Elastic fit index (done)
 
 **What exists.** `dev-diary/research/elastic-fit.md` records all eight checks with requests, responses and results, the exact mapping (18 structured keyword/boolean/integer/date fields, `dynamic: strict`, no text or vector), the reusable line-and-size aggregation, and the write rule: whole-document `PUT` to `_id = sha256("txn|" + transaction id)` with `version = event_seq` and `external_gte` (a `409` is an older event that must not win; the same version is a harmless retry). `testdata/elastic-fit/` holds the generator/harness and ten redacted recordings; `t012-*` indices were deleted (live check: empty listing). Review passed with non-blocking findings; fixes committed.

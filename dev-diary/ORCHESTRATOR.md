@@ -112,6 +112,7 @@ anything unmet, and anything surprising.
 - **No key is ever printed.** Check for leaks with `grep -rlF -- "$VALUE"`, which prints only file names, with the value loaded and never echoed.
 - **PayPal is sandbox only.** No live PayPal credential enters this repository or any process it starts.
 - **Every live (`b`) task carries a budget and a guard in its brief.** Run one case first, check its cost, and stop and report if it goes over. The orchestrator keeps the running spend in the handoff log. Credits to protect: Channel3, Render, Jev.
+- **New services for the pivot are pre-approved.** The user has approved creating the merchant app's Render service (T9.3d) and the second Astropods deployment (T9.5). Record each one's monthly cost or tier in the handoff log and keep the task's guard; do not stop for a second approval.
 - **Anything outward is the user's call:** filing an issue, pushing, making the repository public, publishing the video, submitting, or a spend beyond the brief's budget. Ask first, every time.
 
 ---
