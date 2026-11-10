@@ -1,0 +1,93 @@
+{
+  "run_id": "t55-a3-broken-r1",
+  "shopper_id": "cmp-broken",
+  "arm": 3,
+  "arm_name": "memento",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-broken\nCandidate: a new Everyday Oxford Shirt from Brand C (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: Memento layer. Live recall for this shopper and brand, served by the layer:\nRecall request: {\"brand_id\":\"BRC\",\"shopper_id\":\"cmp-broken\",\"trace_id\":\"t55-a3-broken-r1\"}\nRecall response:\n{\n  \"shopper_id\": \"cmp-broken\",\n  \"beliefs\": [],\n  \"overriding_correction\": null,\n  \"guidance\": {\n    \"text\": \"No recommendation yet: too little evidence.\",\n    \"basis\": \"none\",\n    \"correction_id\": null,\n    \"belief_id\": null\n  },\n  \"pending_count\": 0,\n  \"trace_id\": \"t55-a3-broken-r1\"\n}\nPending questions request: {\"shopper_id\": \"cmp-broken\"}\nPending questions response:\n{\n  \"shopper_id\": \"cmp-broken\",\n  \"questions\": []\n}",
+  "arm_memory_tool": "recall_for_purchase shopper_id=cmp-broken brand_id=BRC trace_id=t55-a3-broken-r1 + pending_questions shopper_id=cmp-broken",
+  "arm_memory_response": "recall_for_purchase response:\n{\"shopper_id\":\"cmp-broken\",\"beliefs\":[],\"overriding_correction\":null,\"guidance\":{\"text\":\"No recommendation yet: too little evidence.\",\"basis\":\"none\",\"correction_id\":null,\"belief_id\":null},\"pending_count\":0,\"trace_id\":\"t55-a3-broken-r1\"}\npending_questions response:\n{\"shopper_id\":\"cmp-broken\",\"questions\":[]}",
+  "agent_tool_spans": [
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1619
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1605
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 532
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1624
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1601
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    }
+  ],
+  "recall_observed": false,
+  "reply": "I cannot recommend a size for this shopper — the memory layer returned no beliefs, no correction, and no prior evidence, so there is no basis to suggest any size.",
+  "contaminated": false,
+  "trace_cost_usd": 0.001854,
+  "prompt_words": 111,
+  "reply_words": 30,
+  "capped": false,
+  "sent_at": "2026-11-10T10:43:11Z",
+  "trace_at": "2026-11-10T10:43:20Z",
+  "extraction": {
+    "size": "",
+    "size_rule": "none",
+    "size_quote": "",
+    "id_refs": null,
+    "notes": "live layer seed, settled before recall: 7 polls over 60s: -for-BRC ships reliably for this shopper=None/1/0.000"
+  },
+  "score": {
+    "ShopperID": "cmp-broken",
+    "RightSize": false,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 141,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}
