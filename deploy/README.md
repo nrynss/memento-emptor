@@ -37,7 +37,8 @@ owner=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" \
 # see ORCHESTRATOR handoff for the exact call. Shape:
 # type web_service, runtime docker, plan starter, region virginia,
 # disk lambo-data 1 GB at /var/lambo-data, healthCheckPath /healthz,
-# dockerfilePath ./deploy/Dockerfile, branch main, autoDeploy true.
+# envSpecificDetails.dockerfilePath ./deploy/Dockerfile, dockerContext .,
+# branch main, autoDeployTrigger commit, env values as top-level envVars.
 ```
 
 Or point the dashboard at `deploy/render.yaml` (blueprint path, same

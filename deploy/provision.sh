@@ -34,22 +34,24 @@ print(json.dumps({
     "ownerId": owner,
     "repo": os.environ.get("REPO", "https://github.com/nrynss/memento-emptor"),
     "branch": os.environ.get("BRANCH", "main"),
-    "autoDeploy": True,
+    "autoDeployTrigger": "commit",
+    "envVars": [
+        {"key": "PAYPAL_CLIENT_ID", "value": env("PAYPAL_CLIENT_ID")},
+        {"key": "PAYPAL_CLIENT_SECRET", "value": env("PAYPAL_CLIENT_SECRET")},
+        {"key": "LAMBO_ES_API_KEY", "value": env("LAMBO_ES_API_KEY")},
+        {"key": "ELASTIC_URL", "value": env("ELASTIC_URL")},
+        {"key": "OPENROUTER_API_KEY", "value": env("OPENROUTER_API_KEY")},
+    ],
     "serviceDetails": {
         "runtime": "docker",
         "plan": "starter",
         "region": "virginia",
-        "dockerfilePath": "./deploy/Dockerfile",
-        "dockerContext": ".",
+        "envSpecificDetails": {
+            "dockerfilePath": "./deploy/Dockerfile",
+            "dockerContext": ".",
+        },
         "healthCheckPath": "/healthz",
         "disk": {"name": "lambo-data", "mountPath": "/var/lambo-data", "sizeGB": 1},
-        "envVars": [
-            {"key": "PAYPAL_CLIENT_ID", "value": env("PAYPAL_CLIENT_ID")},
-            {"key": "PAYPAL_CLIENT_SECRET", "value": env("PAYPAL_CLIENT_SECRET")},
-            {"key": "LAMBO_ES_API_KEY", "value": env("LAMBO_ES_API_KEY")},
-            {"key": "ELASTIC_URL", "value": env("ELASTIC_URL")},
-            {"key": "OPENROUTER_API_KEY", "value": env("OPENROUTER_API_KEY")},
-        ],
     },
 }))
 EOF
