@@ -1,0 +1,221 @@
+{
+  "check": 3,
+  "case_a": {
+    "case": "stdio-one-per-session",
+    "writers": 8,
+    "writes_each": 20,
+    "wall_s": 0.04,
+    "writes_total": 160,
+    "failures": 0,
+    "latency_s": {
+      "w-00": {
+        "median": 0.002,
+        "max": 0.004,
+        "error": null
+      },
+      "w-01": {
+        "median": 0.002,
+        "max": 0.003,
+        "error": null
+      },
+      "w-02": {
+        "median": 0.002,
+        "max": 0.003,
+        "error": null
+      },
+      "w-03": {
+        "median": 0.002,
+        "max": 0.003,
+        "error": null
+      },
+      "w-04": {
+        "median": 0.002,
+        "max": 0.003,
+        "error": null
+      },
+      "w-05": {
+        "median": 0.002,
+        "max": 0.005,
+        "error": null
+      },
+      "w-06": {
+        "median": 0.002,
+        "max": 0.003,
+        "error": null
+      },
+      "w-07": {
+        "median": 0.002,
+        "max": 0.004,
+        "error": null
+      }
+    },
+    "stats": {
+      "w-00": "nodes=40 edges=39 concepts=20 canonical=0",
+      "w-01": "nodes=40 edges=39 concepts=20 canonical=0",
+      "w-02": "nodes=40 edges=39 concepts=20 canonical=0",
+      "w-03": "nodes=40 edges=39 concepts=20 canonical=0",
+      "w-04": "nodes=40 edges=39 concepts=20 canonical=0",
+      "w-05": "nodes=40 edges=39 concepts=20 canonical=0",
+      "w-06": "nodes=40 edges=39 concepts=20 canonical=0",
+      "w-07": "nodes=40 edges=39 concepts=20 canonical=0"
+    },
+    "logs": {
+      "w-00": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      },
+      "w-01": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      },
+      "w-02": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      },
+      "w-03": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      },
+      "w-04": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      },
+      "w-05": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      },
+      "w-06": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      },
+      "w-07": {
+        "sqlite_busy": 0,
+        "database_locked": 0,
+        "write_failed": 0,
+        "timeouts": 0,
+        "errors": 0
+      }
+    },
+    "db_counts": {
+      "w-00": 20,
+      "w-01": 20,
+      "w-02": 20,
+      "w-03": 20,
+      "w-04": 20,
+      "w-05": 20,
+      "w-06": 20,
+      "w-07": 20
+    }
+  },
+  "case_b": {
+    "case": "one-hub-eight-sessions",
+    "writers": 8,
+    "writes_each": 20,
+    "wall_s": 0.1,
+    "writes_total": 160,
+    "failures": 0,
+    "latency_s": {
+      "shopper-00": {
+        "median": 0.005,
+        "max": 0.006,
+        "error": null
+      },
+      "shopper-01": {
+        "median": 0.005,
+        "max": 0.007,
+        "error": null
+      },
+      "shopper-02": {
+        "median": 0.004,
+        "max": 0.008,
+        "error": null
+      },
+      "shopper-03": {
+        "median": 0.005,
+        "max": 0.006,
+        "error": null
+      },
+      "shopper-04": {
+        "median": 0.005,
+        "max": 0.006,
+        "error": null
+      },
+      "shopper-05": {
+        "median": 0.005,
+        "max": 0.007,
+        "error": null
+      },
+      "shopper-06": {
+        "median": 0.005,
+        "max": 0.006,
+        "error": null
+      },
+      "shopper-07": {
+        "median": 0.005,
+        "max": 0.006,
+        "error": null
+      }
+    },
+    "stats": {
+      "shopper-00": "nodes=40 edges=39 concepts=20 canonical=0",
+      "shopper-01": "nodes=40 edges=39 concepts=20 canonical=0",
+      "shopper-02": "nodes=40 edges=39 concepts=20 canonical=0",
+      "shopper-03": "nodes=40 edges=39 concepts=20 canonical=0",
+      "shopper-04": "nodes=40 edges=39 concepts=20 canonical=0",
+      "shopper-05": "nodes=40 edges=39 concepts=20 canonical=0",
+      "shopper-06": "nodes=40 edges=39 concepts=20 canonical=0",
+      "shopper-07": "nodes=40 edges=39 concepts=20 canonical=0"
+    },
+    "logs": {
+      "sqlite_busy": 0,
+      "database_locked": 0,
+      "write_failed": 0,
+      "timeouts": 0,
+      "errors": 0
+    },
+    "db_counts": {
+      "shopper-00": 20,
+      "shopper-01": 20,
+      "shopper-02": 20,
+      "shopper-03": 20,
+      "shopper-04": 20,
+      "shopper-05": 20,
+      "shopper-06": 20,
+      "shopper-07": 20
+    }
+  },
+  "case_c": {
+    "second_writer_exit": 0,
+    "second_process_is_proxy": true,
+    "second_process_took_no_lease": true,
+    "write_landed_in_holder": true,
+    "holder_stats": "nodes=4 edges=3 concepts=2 canonical=0",
+    "proxied_stats_owner_line": "session 'shopper-held' (owner agent 'memento-hub')",
+    "stderr": [
+      "2026-11-10T15:01:10.116434Z  INFO lambo::mcp::proxy: lambo serve: proxying to the session holder (this process takes no lease and holds no graph; every write happens in the holder, under the holder's fencing token) session=shopper-held dialled=/run/user/<uid>/lambo/shopper-held-28c80b5d8734ca0e.sock derived=/run/user/<uid>/lambo/shopper-held-28c80b5d8734ca0e.sock",
+      "2026-11-10T15:01:10.117347Z  INFO lambo::mcp::proxy: lambo serve: proxy client disconnected",
+      "2026-11-10T15:01:10.117367Z  INFO lambo::mcp::serve: lambo serve: proxy closed (no lease was ever taken by this process)"
+    ]
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "check": 4,
+  "index_prefix": "t011-multi-bb7582",
+  "sessions": [
+    "shopper-alpha",
+    "shopper-bravo",
+    "shopper-charlie"
+  ],
+  "indices": [
+    "t011-multi-bb7582-meta",
+    "t011-multi-bb7582-v-271bc9a15ddef9b4"
+  ],
+  "data_index": {
+    "name": "t011-multi-bb7582-v-271bc9a15ddef9b4",
+    "documents_per_session": {
+      "shopper-alpha": 3,
+      "shopper-bravo": 3,
+      "shopper-charlie": 3
+    },
+    "total": 9,
+    "one_index_for_every_session": true
+  },
+  "markers": {
+    "count": 4,
+    "sessions": [
+      "shopper-alpha",
+      "shopper-bravo",
+      "shopper-charlie",
+      "shopper-pinned"
+    ],
+    "ids_are_hashes": true
+  },
+  "recall_isolation": [
+    {
+      "session": "shopper-alpha",
+      "own_token_found": true,
+      "leaked_from": []
+    },
+    {
+      "session": "shopper-bravo",
+      "own_token_found": true,
+      "leaked_from": []
+    },
+    {
+      "session": "shopper-charlie",
+      "own_token_found": true,
+      "leaked_from": []
+    }
+  ],
+  "inspect_isolation": [
+    {
+      "session": "shopper-alpha",
+      "other": "shopper-bravo",
+      "miss": true
+    },
+    {
+      "session": "shopper-bravo",
+      "other": "shopper-alpha",
+      "miss": true
+    },
+    {
+      "session": "shopper-charlie",
+      "other": "shopper-alpha",
+      "miss": true
+    }
+  ],
+  "sample_document": {
+    "session_id": "shopper-alpha",
+    "node_id": "082befa4-0fbd-4ece-a9dd-1a8eb7f50382",
+    "canonical_key": "alpha as brand it keep own record shopper zephyrlin",
+    "content": "shopper-alpha keeps Zephyrline as its own brand record",
+    "concept_type": "Observation",
+    "created_at": "2026-11-10T15:03:22.895152523Z",
+    "v": 4294967297
+  },
+  "deleted": [
+    "t011-multi-bb7582-meta",
+    "t011-multi-bb7582-v-271bc9a15ddef9b4"
+  ],
+  "indices_after_delete": [],
+  "other_t011_indices": [],
+  "spend_usd": 0.0,
+  "spend_note": "fixture embedder computes vectors in-process; the tier mirrors them, so no embedding endpoint was called"
+}

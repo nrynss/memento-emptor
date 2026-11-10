@@ -1,0 +1,82 @@
+{
+  "check": 6,
+  "sessions": [
+    "shopper-one",
+    "shopper-two",
+    "shopper-three"
+  ],
+  "promotion": {
+    "shopper-one": {
+      "status": "Venerable",
+      "venerable": true,
+      "coverage": 0.6666666666666666,
+      "distinct_interactions": 3.0,
+      "blast_radius": 3,
+      "reason": "stage 3: 3 dependents, needs more than 5"
+    },
+    "shopper-two": {
+      "status": "Venerable",
+      "venerable": true,
+      "coverage": 0.6666666666666666,
+      "distinct_interactions": 3.0,
+      "blast_radius": 3,
+      "reason": "stage 3: 3 dependents, needs more than 5"
+    },
+    "shopper-three": {
+      "status": "Venerable",
+      "venerable": true,
+      "coverage": 0.6666666666666666,
+      "distinct_interactions": 3.0,
+      "blast_radius": 3,
+      "reason": "stage 3: 3 dependents, needs more than 5"
+    }
+  },
+  "gc_survived_seen": {
+    "shopper-one": 2,
+    "shopper-two": 2,
+    "shopper-three": 2
+  },
+  "after_noise_in_first": {
+    "shopper-one": {
+      "status": "Venerable",
+      "venerable": true,
+      "coverage": 0.6666666666666666,
+      "distinct_interactions": 3.0,
+      "blast_radius": 3,
+      "reason": "stage 3: 3 dependents, needs more than 5"
+    },
+    "shopper-two": {
+      "status": "Venerable",
+      "venerable": true,
+      "coverage": 0.6666666666666666,
+      "distinct_interactions": 3.0,
+      "blast_radius": 3,
+      "reason": "stage 3: 3 dependents, needs more than 5"
+    },
+    "shopper-three": {
+      "status": "Venerable",
+      "venerable": true,
+      "coverage": 0.6666666666666666,
+      "distinct_interactions": 3.0,
+      "blast_radius": 3,
+      "reason": "stage 3: 3 dependents, needs more than 5"
+    }
+  },
+  "unmoved": {
+    "shopper-one": true,
+    "shopper-two": true,
+    "shopper-three": true
+  },
+  "stats": {
+    "shopper-one": "nodes=64 edges=66 concepts=32 canonical=0",
+    "shopper-two": "nodes=24 edges=26 concepts=12 canonical=0",
+    "shopper-three": "nodes=24 edges=26 concepts=12 canonical=0"
+  },
+  "gc": {
+    "shopper-one": "gc: last_gc_at=2026-11-10T15:08:53.918810810+00:00 last_gc_epoch=150 last_sweep trigger=mutations collected=0 deferred=0 cap=32 cap_bound=false",
+    "shopper-two": "gc: last_gc_at=2026-11-10T15:08:49.736361667+00:00 last_gc_epoch=132 last_sweep trigger=mutations collected=0 deferred=0 cap=32 cap_bound=false",
+    "shopper-three": "gc: last_gc_at=2026-11-10T15:08:49.737523174+00:00 last_gc_epoch=132 last_sweep trigger=mutations collected=0 deferred=0 cap=32 cap_bound=false"
+  },
+  "coverage_agrees": true,
+  "all_venerable": true
+}

@@ -1,0 +1,49 @@
+{
+  "check": 7,
+  "results": {
+    "healthz": {
+      "status": 200
+    },
+    "api_sessions": {
+      "status": 200,
+      "sessions": [
+        "shopper-alpha",
+        "shopper-bravo"
+      ]
+    },
+    "inspect_shopper-alpha": {
+      "status": 200,
+      "found": true,
+      "session": "shopper-alpha"
+    },
+    "inspect_shopper-bravo": {
+      "status": 200,
+      "found": true,
+      "session": "shopper-bravo"
+    },
+    "inspect_shopper-late": {
+      "status": 404,
+      "session": "shopper-late"
+    },
+    "cross_inspect": {
+      "status": 200,
+      "found": false
+    },
+    "alias_inspect": {
+      "status": 200,
+      "found": true
+    },
+    "unserved_session": {
+      "status": 404
+    },
+    "after_restart": {
+      "status": 200,
+      "found": true
+    }
+  },
+  "served": [
+    "shopper-alpha",
+    "shopper-bravo"
+  ],
+  "unserved": "shopper-late"
+}

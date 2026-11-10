@@ -1,0 +1,109 @@
+{
+  "check": 2,
+  "names": [
+    {
+      "name": "shopper-ec93bbe352d017ca696f92ec83d08b791f9a409614f9d6d630ce38db6106d34f",
+      "len": 72,
+      "expected": 200,
+      "status": 200,
+      "why": "64-character hex hash behind the prefix (72 bytes)"
+    },
+    {
+      "name": "ec93bbe352d017ca696f92ec83d08b791f9a409614f9d6d630ce38db6106d34f",
+      "len": 64,
+      "expected": 404,
+      "status": 404,
+      "why": "bare hash: outside the credential's session_prefix scope"
+    },
+    {
+      "name": "shopper-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "len": 128,
+      "expected": 200,
+      "status": 200,
+      "why": "128 bytes, the documented maximum"
+    },
+    {
+      "name": "shopper-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "len": 129,
+      "expected": 404,
+      "status": 404,
+      "why": "129 bytes, one past the maximum"
+    },
+    {
+      "name": "shopper-Shopper:01_A.B-2",
+      "len": 24,
+      "expected": 200,
+      "status": 200,
+      "why": "every allowed punctuation character"
+    },
+    {
+      "name": "shopper-a b",
+      "len": 11,
+      "expected": 404,
+      "status": 404,
+      "why": "space"
+    },
+    {
+      "name": "shopper-a+b",
+      "len": 11,
+      "expected": 404,
+      "status": 404,
+      "why": "plus"
+    },
+    {
+      "name": "shopper-%2Dencoded",
+      "len": 18,
+      "expected": 404,
+      "status": 404,
+      "why": "percent sign (never decoded)"
+    },
+    {
+      "name": "shopper-\u00e4",
+      "len": 10,
+      "expected": 404,
+      "status": 404,
+      "why": "non-ASCII"
+    },
+    {
+      "name": "other-a",
+      "len": 7,
+      "expected": 404,
+      "status": 404,
+      "why": "well formed, outside the credential's prefix"
+    },
+    {
+      "name": ".shopper-leading-dot",
+      "len": 20,
+      "expected": 404,
+      "status": 404,
+      "why": "leading dot (fails the shape, like a prefix miss)"
+    },
+    {
+      "name": "shopper/slash",
+      "len": 13,
+      "expected": 404,
+      "status": 404,
+      "why": "slash (unrouted path)"
+    }
+  ],
+  "create_without_restart": {
+    "session": "shopper-ec93bbe352d017ca696f92ec83d08b791f9a409614f9d6d630ce38db6106d34f",
+    "request": "initialize at /mcp/s/shopper-ec93bbe352d017ca696f92ec83d08b791f9a409614f9d6d630ce38db6106d34f",
+    "first_stats_line": "session 'shopper-ec93bbe352d017ca696f92ec83d08b791f9a409614f9d6d630ce38db6106d34f' (owner agent 'memento-hub')",
+    "same_pid": true,
+    "attach_logged": true,
+    "wrote_and_read_back": true
+  },
+  "create_capability": {
+    "existing_session_status": 200,
+    "absent_session_status": 404,
+    "absent_detail": "initialize /mcp/s/shopper-absent-48cbff: HTTP 404: b''",
+    "note": "the uniform 404 never says whether the session exists"
+  },
+  "hash": {
+    "payer_hash": "ec93bbe352d017ca696f92ec83d08b791f9a409614f9d6d630ce38db6106d34f",
+    "len": 64,
+    "prefixed": "shopper-ec93bbe352d017ca696f92ec83d08b791f9a409614f9d6d630ce38db6106d34f",
+    "prefixed_len": 72
+  }
+}

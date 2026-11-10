@@ -1,0 +1,23 @@
+{
+  "check": "1b",
+  "max_attached": 4,
+  "idle_detach_secs": 2,
+  "eviction": {
+    "attach_after_limit": "shopper-d",
+    "detach_lines": [
+      "2026-11-10T15:11:29.625341Z  INFO lambo::mcp::serve::registry: lambo serve: detaching a session session=shopper-a reason=\"evicted\""
+    ]
+  },
+  "reattach_after_eviction": {
+    "session": "shopper-a",
+    "concept_read_back": true,
+    "content": "shopper-a keeps one concept about Brand E [Logic] (score 0.86, id bdec63e3)"
+  },
+  "idle_detach": {
+    "detach_lines": [
+      "2026-11-10T15:11:31.102101Z  INFO lambo::mcp::serve::registry: lambo serve: detaching a session session=shopper-c reason=\"idle\"",
+      "2026-11-10T15:11:33.104036Z  INFO lambo::mcp::serve::registry: lambo serve: detaching a session session=shopper-d reason=\"idle\"",
+      "2026-11-10T15:11:33.104035Z  INFO lambo::mcp::serve::registry: lambo serve: detaching a session session=shopper-a reason=\"idle\""
+    ]
+  }
+}

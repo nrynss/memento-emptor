@@ -1,0 +1,140 @@
+{
+  "check": 5,
+  "sessions": 20,
+  "concepts_each": 5,
+  "hub_attached": [
+    "2026-11-10T15:05:41.217073Z  INFO lambo::mcp::serve::registry: lambo serve: session attached (on demand) session=shopper-18 agent=memento-hub credential=memento",
+    "2026-11-10T15:05:41.221581Z  INFO lambo::memory::builder: Memory session attached (daemon + flush + canonization running) session=shopper-19 agent=memento-hub existing=false match_strategy=Hybrid promotion_policy=Swarm embedder=fixture dim=1024",
+    "2026-11-10T15:05:41.221680Z  INFO lambo::mcp::serve::registry: lambo serve: session attached (on demand) session=shopper-19 agent=memento-hub credential=memento"
+  ],
+  "stats": {
+    "shopper-00": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-01": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-02": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-03": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-04": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-05": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-06": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-07": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-08": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-09": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-10": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-11": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-12": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-13": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-14": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-15": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-16": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-17": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-18": "nodes=10 edges=9 concepts=5 canonical=0",
+    "shopper-19": "nodes=10 edges=9 concepts=5 canonical=0"
+  },
+  "positive_control": true,
+  "pairs_checked": 380,
+  "calls": 780,
+  "leaks": [],
+  "shared_brand_recall": [
+    {
+      "session": "shopper-00",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-01",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-02",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-03",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-04",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-05",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-06",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-07",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-08",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-09",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-10",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-11",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-12",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-13",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-14",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-15",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-16",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-17",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-18",
+      "foreign_markers": []
+    },
+    {
+      "session": "shopper-19",
+      "foreign_markers": []
+    }
+  ],
+  "db_counts": {
+    "shopper-00": 5,
+    "shopper-01": 5,
+    "shopper-02": 5,
+    "shopper-03": 5,
+    "shopper-04": 5,
+    "shopper-05": 5,
+    "shopper-06": 5,
+    "shopper-07": 5,
+    "shopper-08": 5,
+    "shopper-09": 5,
+    "shopper-10": 5,
+    "shopper-11": 5,
+    "shopper-12": 5,
+    "shopper-13": 5,
+    "shopper-14": 5,
+    "shopper-15": 5,
+    "shopper-16": 5,
+    "shopper-17": 5,
+    "shopper-18": 5,
+    "shopper-19": 5
+  }
+}

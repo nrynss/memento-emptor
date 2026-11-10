@@ -1,0 +1,48 @@
+# The configuration the T0.11 checks run: SQLite, the fixture embedder, the
+# T0.3 cadence, and one serve credential that attaches shopper sessions on
+# demand. Replace <run-dir> with the directory the checks run in, and set
+# LAMBO_MULTI_TOKEN in the environment before starting the serve: the file
+# names the variable, never its value.
+#
+# `path = "lambo.db"` is relative to the process's working directory; run
+# `lambo --config lambo-multi.toml provision` once before the first serve.
+
+[store]
+kind = "sqlite"
+path = "lambo.db"
+
+[embedder]
+kind = "fixture"
+dim = 1024
+calibration = "off"
+
+[daemon]
+gc_interval = 1
+gc_idle_floor = 1
+gc_max_interval_secs = 3600
+canonization_eval_interval_secs = 5
+
+# One pinned session so /mcp and a stdio serve have a default. Every other
+# session under the credential's prefix attaches on its first request.
+[serve]
+sessions = ["shopper-pinned"]
+default_session = "shopper-pinned"
+max_attached = 16            # pinned + on-demand; default 16
+attach_concurrency = 1       # SQLite clamps the default 2 to 1 anyway
+idle_detach_secs = 900       # an on-demand session unused this long detaches
+
+[[serve.credential]]
+name = "memento"
+token_env = "LAMBO_MULTI_TOKEN"
+session_prefix = "shopper-"  # ids must be longer than the prefix
+create = true                # the first request may create the session
+
+# Check 4 adds this table on the live deployment; leave it out for local runs.
+#
+# [recall]
+# kind = "elastic"
+# url = "https://<deployment>"
+# api_key = { env = "LAMBO_ES_API_KEY" }
+# index_prefix = "t011-multi-REPLACE"
+# refresh = "true"
+# timeout_ms = 10000

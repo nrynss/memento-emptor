@@ -297,7 +297,7 @@ requires:   [T0.3]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/lambo-multi.md, testdata/lambo-multi/
-status:     claimed:t011-lambo-multi
+status:     in-review
 ```
 **The gate on per-shopper memory after the pivot.** product.md now keeps every shopper in their own Lambo session, keyed by a salted hash of their PayPal payer ID. T0.3 proved two sessions don't see each other, on one writer each. The deploy runs one writer for one session (`deploy/start.sh`, `LAMBO_SESSION`). Find out, on the Lambo release the deploy pins (`deploy/Dockerfile`), how the layer serves many shoppers:
 
@@ -314,6 +314,8 @@ Local first: the SQLite store, and the fixture embedder wherever the check allow
 Any gap becomes Lambo issue text in the handoff log, for the user to file. Don't work around it here. If 1 and 2 both fail (one writer per session and no sessions on demand), this task is `blocked`, and the orchestrator asks the user with options.
 
 **Done when:** `research/lambo-multi.md` holds each check's command and result, and a recommendation for how the deploy should serve many shoppers. Transcripts are in `testdata/lambo-multi/` with no key. Test indices are deleted (empty listing shown) and spend is recorded.
+
+**Notes.** Lambo v0.10.1 already multiplexes: one `lambo serve --transport http` hosts one writer per session and many sessions, and a credential with `session_prefix` plus `create = true` attaches a new shopper's session on its first `/mcp/s/<session>` request, bounded by `max_attached` (default 16, pinned sessions included), `idle_detach_secs` (900) and `max_sessions` (32 MCP clients); idle detach and LRU eviction both leave the data in SQLite and re-attach on the next request. Measured: 21.1 MiB baseline plus about 0.4 MiB per attached small session and 29.7 KiB per concept, against 19.7 MiB per separate stdio writer; 512 MB fits the recommended 16 attached sessions even at 500 concepts each. The addressed-name rule is 1 to 128 bytes of `[A-Za-z0-9._:-]`, so a 64-hex payer hash is named `shopper-<hash>` (72 bytes) — a bare hash is outside the credential's prefix and not addressable. Eight concurrent writers on one SQLite file lost nothing and hit no lock errors; a second writer on a held session proxies into the holder rather than refusing. The Elastic recall tier keeps all sessions in one contract index with a `session_id` filter: three sessions shared one data index, recall and inspect stayed scoped, and every test index under `t011-multi-` was deleted (`[]` listing). Twenty sessions with overlapping brands leaked nothing across 380 pairs (780 calls); three interleaved sessions each reached Venerable at coverage 0.6667 and were unmoved by noise in another. `serve-web` takes the session per request from a start-time allowlist, so a shopper created after the reader started is a 404 until a restart — the one gap, written up as issue text in the research file. Spend: $0.00 (fixture embedder; no embedding endpoint called). Recommendation: one HTTP hub in `deploy/start.sh` (prefix credential, `max_attached` 16), sessions named `shopper-<hash>`, the ledger reading `/s/<session>/api/inspect` from a `serve-web` started with the demo shoppers.
 
 ### T0.12: The Elastic fit index ★
 ```yaml

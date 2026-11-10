@@ -1,0 +1,132 @@
+{
+  "check": 1,
+  "process": {
+    "pid": 15490,
+    "startup_s_to_port": 0.027,
+    "first_initialize_s": 0.002,
+    "baseline_rss_mib": 21.1,
+    "baseline_fds": 14,
+    "binary": "v0.10.1"
+  },
+  "sessions": [],
+  "attach": [
+    {
+      "attached": 1,
+      "rss_mib": 22.1,
+      "fds": 15,
+      "marginal_kib": 1092.0
+    },
+    {
+      "attached": 5,
+      "rss_mib": 23.6,
+      "fds": 19,
+      "marginal_kib": 516.8
+    },
+    {
+      "attached": 10,
+      "rss_mib": 24.8,
+      "fds": 24,
+      "marginal_kib": 380.8
+    },
+    {
+      "attached": 20,
+      "rss_mib": 26.8,
+      "fds": 34,
+      "marginal_kib": 294.2
+    }
+  ],
+  "seeded": {
+    "sessions": 20,
+    "concepts_each": 3,
+    "rss_mib": 28.3,
+    "fds": 34,
+    "marginal_kib_per_session": 371.2,
+    "stats": {
+      "shopper-00-2d132241": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-01-8051064e": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-02-73ea0581": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-03-9453430a": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-04-469ce3a1": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-05-714188c3": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-06-f1e29dd1": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-07-02642315": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-08-24f1cca5": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-09-a13403d9": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-10-56dd4fa2": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-11-b6bdb006": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-12-ea48fbe7": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-13-af710432": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-14-2f1b531b": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-15-c960295a": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-16-c9f8b115": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-17-44e21d76": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-18-319f7d06": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ],
+      "shopper-19-5b1d9f4f": [
+        "nodes=6 edges=5 concepts=3 canonical=0"
+      ]
+    }
+  },
+  "per_concept": {
+    "added": 100,
+    "rss_before_mib": 28.3,
+    "rss_after_mib": 31.2,
+    "kib_per_concept": 29.7,
+    "five_hundred_concept_session_mib": 14.5
+  },
+  "one_writer_per_session": {
+    "runs": 10,
+    "startup_s_median": 0.006,
+    "rss_mib_median": 19.7,
+    "rss_mib_max": 19.9,
+    "fds_max": 13
+  },
+  "starter_512mb": {
+    "baseline_mib": 21.1,
+    "marginal_mib_per_attached_session": 0.4,
+    "kib_per_concept": 29.7,
+    "headroom_mib_for_other_services": 192,
+    "fits_small_sessions": 824,
+    "fits_500_concept_sessions": 20,
+    "default_max_attached": 16,
+    "default_max_sessions": 32,
+    "bound_note": "max_attached is the real bound on one hub; memory is the second bound, and 32 attached sessions at the measured marginal sit far inside 512 MB"
+  }
+}
