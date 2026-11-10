@@ -141,7 +141,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
 | P2 | 10 / 10 | Done |
-| P3 | 4 / 6 | In progress |
+| P3 | 5 / 6 | In progress |
 | P4 | 2 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
 | P6 | 0 / 7 | Not started |
@@ -227,6 +227,12 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** The deployment exposes two hostnames (chat + frontend); both 302 anonymously. `ast agent access set` offers `anyone` (= any signed-in user) but no public option. Public is documented only in an adapter-auth warning and has never been observed working — platform gap, not config. The earlier flip landed on `memento-agent` by mistake (user-confirmed; its posture is the user's call).
 
 **The next agent should know.** No-login serving on Astropods is PROVEN on the public frontend host (dedicated `agents.public.astropods.ai` hostname; chat host correctly stays signed-in): anonymous 200 with our page body, model turn $0.0057 with tool spans. Follow-up T3.8 (public shopper page) added to the phase doc, parked until the full demo exists (requires T3.6). memento-agent's own Public posture is the user's call.
+
+### T3.5: Evals (done)
+
+**What exists.** `agent/evals/` 3-judge set (`recall_first`, `correction_honoured`, `approval_before_purchase`) pushed over the T3.1/T3.4 traces, every judge pass-and-fail recorded. Fail cases: errored recall, constructed ignores-correction counterfactual, constructed purchase-without-yes counterfactual (both pairs committed with identical prompts pinned by test, off-platform verdicts True/False as expected). $0.07 server spend, well under guard.
+
+**What surprised.** Review caught a vacuous fail case (feedback turn proving nothing about ignoring corrections) — fixed by constructing the discriminating counterfactual, verified off-platform. Deeper findings, recorded: the judges read reply text, not tool spans (span order stays human-checked); pushing the custom set REPLACED the preset safety judges — re-add (safety three at minimum) as T3.6/T5 follow-up, 3+6=9 fits the cap of 10. `correction_honoured` scores false on every non-recommendation turn by design — scope eval sweeps to recommendation turns or expect red on feedback/approval turns.
 
 ### T3.4: Asking the shopper (done) ★
 

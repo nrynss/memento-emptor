@@ -128,7 +128,7 @@ requires:   [T3.1, T3.4]
 fixture-ok: no
 size:       S · mid
 owns:       agent/evals/
-status:     in-review
+status:     done
 
 **Notes (worker).** New package `agent/evals/`: `EVALUATION.yaml` (3
 boolean LLM judges: recall_first, correction_honoured,
