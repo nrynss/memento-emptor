@@ -47,7 +47,7 @@ requires:   [T7.1]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/identity/, .env.example, tools/env.sh
-status:     claimed:t72-identity-keys
+status:     in-review
 ```
 One place that turns PayPal identifiers into the keys the layer stores:
 
@@ -58,6 +58,15 @@ One place that turns PayPal identifiers into the keys the layer stores:
 The salt is a key: it comes from the keyring through `tools/env.sh` and is never written to a file. The entry is `service identity account memento-emptor kind salt`, read as `MEMENTO_IDENTITY_SALT`; it holds 32 random bytes as 64 lowercase hex characters. It is named in `.env.example` by name only and in the handoff log. Seeded rows use a fixed, published seed salt marked as seeded, so the population replays byte for byte; live rows use the keyring salt. Generate it once: rotating it changes every session name and per-line hash, orphaning existing sessions and breaking opt-out's recompute.
 
 **Done when:** table tests pin every construction, including a payer whose session name is exactly at the length limit. A test shows the per-line hash differs across lines for one payer. No salt value appears in any committed file. The gate passes.
+
+**Notes (in-review).** `internal/identity/` is the one place the three keys are built. `NewKeyer(hexSalt)` takes the salt as a parameter and validates 32 bytes after hex-decoding: missing is `ErrMissingSalt`, malformed is `ErrMalformedSalt`, and neither falls back to a default. The returned `Keyer` is immutable and safe for concurrent use. `Keyer.SessionName(payerID)` returns `shopper-` plus 64 lowercase hex; `Keyer.LineShopperHash(payerID, domain.ProductLine)` returns 64 lowercase hex; `TxnHash(txnID)` is the unsalted `sha256("txn|" + id)`. Every HMAC-SHA256 message is a version tag followed by length-prefixed fields (decimal byte length, `:`, the bytes): session `memento/session/v1|<payer id>`; line `memento/line-shopper/v1|<brand><category><fit handle><payer id>`, in that order. `SeedSaltHex` is the published seed salt, the sha256 of a published phrase, for seeded rows and seeded shoppers only; live keys use `MEMENTO_IDENTITY_SALT`, which `tools/env.sh` now reads from the keyring and `.env.example` names without a value. Every expected digest in the table tests is hardcoded under the seed salt, and no test reads the live salt. `ValidSessionName` and `MaxAddressedNameBytes` expose the graph's addressed-name rule so a caller can check a name before using it.
+
+Four things the next agent should not have to rediscover:
+
+- The session name is fixed width at 72 bytes, so no payer can produce a name at the rule's 128-byte limit. The boundary is pinned by `ValidSessionName` (128 bytes accepted, 129 refused) and the builder is exercised with a 128-byte payer id; the brief's literal "payer whose session name is exactly at the length limit" cannot arise from a fixed-width hash and is met by the boundary test rather than a special case.
+- `NewKeyer` accepts uppercase hex because it decodes to the same 32 key bytes; the keyring value is lowercase. A malformed-salt error reports lengths only, never the supplied value.
+- The per-line construction refines T0.12's sketch (`sha256(<line salt> + "#" + shopper id)`): one salt keys an HMAC over the length-prefixed line fields and payer id, so the harness's per-line salt becomes a message purpose tag. The meaning is the same: one shopper's rows in two lines share nothing.
+- `TxnHash` is a package function with no salt, so rotating the identity salt moves session names and per-line hashes but leaves transaction row ids stable. Nothing in the repository calls the package yet; T8.1's deploy naming, T8.2's writer and T9.1's population are the first callers.
 
 ---
 

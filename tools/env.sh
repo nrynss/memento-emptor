@@ -39,6 +39,7 @@ OPENROUTER_API_KEY|openrouter|
 LAMBO_ES_API_KEY|elastic|api-key
 ELASTIC_URL|elastic|url
 RENDER_API_KEY|render|
+MEMENTO_IDENTITY_SALT|identity|salt
 KEYS
 
 	if ! command -v secret-tool >/dev/null 2>&1; then
