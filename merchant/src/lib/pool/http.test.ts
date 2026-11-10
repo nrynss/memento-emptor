@@ -50,6 +50,19 @@ describe('layer HTTP transport', () => {
 		expect(seen).toHaveLength(0);
 	});
 
+	it('rejects a shopper field before reaching the network', async () => {
+		const seen: { url: unknown; init: unknown }[] = [];
+		const transport = createLayerHttpTransport({
+			baseUrl: 'https://layer.example',
+			merchantKey: 'merchant-key-for-test',
+			fetchFn: okFetch(seen) as unknown as typeof fetch
+		});
+		await expect(
+			new MerchantClient(transport).productFit({ ...line, shopper_id: 'shopper_01' } as never)
+		).rejects.toMatchObject({ code: 'unknown-request' });
+		expect(seen).toHaveLength(0);
+	});
+
 	it('fails loudly when the layer refuses', async () => {
 		const transport = createLayerHttpTransport({
 			baseUrl: 'https://layer.example',

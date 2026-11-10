@@ -74,7 +74,7 @@ A separate, read-only app for the sandbox merchant's product lines. It reads the
 
 Four things the next agent should not have to rediscover:
 
-- The fixture transport validates with `checkProductFitRequest`, which requires exactly the four line-and-size fields: pass seller lines through `toProductFitRequest`, since `MerchantLine` carries a display `label` the contract rejects.
+- `MerchantClient.productFit` validates with `checkProductFitRequest`, which requires exactly the four line-and-size fields, so both transports reject anything more before it reaches the layer: pass seller lines through `toProductFitRequest`, since `MerchantLine` carries a display `label` the contract rejects.
 - `svelte-check` resolves `node:` imports only with `@types/node` in devDependencies; `merchant` carries it while `web/` does not need it.
 - The `Out of true` fixture needs a recent window that is itself judged (at least 3 fit shoppers) yet fails the Earned bar; between three and seven recent fit shoppers no direction can earn, so a quiet Earned line reads Out of true.
 - The page loads through the fixture transport; wiring the HTTP transport is a config task (base URL plus merchant key), and the key never enters a file.

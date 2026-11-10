@@ -14,22 +14,26 @@ export interface MerchantTransport {
 }
 
 /** Refuses any request that is not exactly one product_fit read. */
-export function checkProductFitRequest(request: Record<string, unknown>): ProductFitRequest {
-	const fields = Object.keys(request).sort();
+export function checkProductFitRequest(request: unknown): ProductFitRequest {
+	if (typeof request !== 'object' || request === null || Array.isArray(request)) {
+		throw new MerchantApiError('unknown-request', 'product_fit reads one line and size, nothing else');
+	}
+	const record = request as Record<string, unknown>;
+	const fields = Object.keys(record).sort();
 	const wanted = [...productFitRequestFields].sort();
 	if (fields.length !== wanted.length || fields.some((field, index) => field !== wanted[index])) {
 		throw new MerchantApiError('unknown-request', 'product_fit reads one line and size, nothing else');
 	}
 	for (const field of wanted) {
-		if (typeof request[field] !== 'string' || (request[field] as string) === '') {
+		if (typeof record[field] !== 'string' || (record[field] as string) === '') {
 			throw new MerchantApiError('unknown-request', `product_fit needs ${field}`);
 		}
 	}
 	return {
-		brand_id: request['brand_id'] as string,
-		category: request['category'] as string,
-		fit_handle: request['fit_handle'] as string,
-		size: request['size'] as string
+		brand_id: record['brand_id'] as string,
+		category: record['category'] as string,
+		fit_handle: record['fit_handle'] as string,
+		size: record['size'] as string
 	};
 }
 
@@ -41,9 +45,12 @@ export class MerchantClient {
 		this.transport = transport;
 	}
 
-	/** Reads the pooled fit for one product line and size. */
+	/** Reads the pooled fit for one product line and size. Any request naming
+	 * more than the line and size fails before reaching the transport, so no
+	 * transport can carry a shopper field to the layer. */
 	async productFit(request: ProductFitRequest): Promise<ProductFitResponse> {
-		const raw = await this.transport.call('product_fit', { ...request });
+		const checked = checkProductFitRequest(request);
+		const raw = await this.transport.call('product_fit', { ...checked });
 		return decodeProductFitResponse(raw);
 	}
 }
