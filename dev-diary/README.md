@@ -185,6 +185,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **The next agent should not have to work out.** Guidance bases are exactly the contract's five steps. `decodePoolPrecedence` omits the key when the fixture has none, staying byte-equal per `omitempty`. T9.6 must send the demo shopper's link token as a bearer header on ledger reads and contest calls.
 
+### T9.3e: Merchant page reads live (done, live vintage waits on deploy)
+
+**What exists.** `merchant/src/lib/pool/source.ts` loads live-first with whole-grid snapshot fallback (structurally never half-live) and names the vintage in the UI; `createSameOriginTransport` POSTs `/tools/product_fit` with no credential. Fixture transport untouched for tests. Proved against a local edge + served layer: all six lines read the T9.1 verdicts with seeded-only counts (demo oxford settled 22 / seeded 22 / live 0 — distinct from the bundled 60/48 snapshot). Review APPROVE with no fixes.
+
+**What surprised.** Nothing structural. The built bundle carries `/tools/product_fit` and no `authorization` string.
+
+**The next agent should not have to work out.** The live vintage needs T9.6's merchant-key entry plus a merchant-service redeploy (no edge/layer change). After any transport change, grep the page chunk for the endpoint and the absence of `authorization`.
+
 ### T9.3d: Merchant app deployed (done, verify after push)
 
 **What exists.** `deploy/merchant/` provisions `memento-merchant` (starter, virginia, docker, no disk) following the T6.1 pattern: `provision.sh`, `render.yaml`, edge `main.go` (injects the merchant key server-side, drops caller auth), `guard.sh` with settled/over-limit snapshots, README. Service is live in shape; first deploy is `build_failed` because Render builds `main`, which gains the Dockerfile only on land — the green deploy auto-follows the push via `autoDeployTrigger: commit` (T6.1 precedent). Guard live: 2 services, 1 GB disk, run-rate $14.25/mo vs $15.00 ceiling, exit 0. Cost: **$7.00/mo** new ($14.25/mo combined vs $50 credit ≈ 3.5 months runway). Review APPROVE with two fixes (static-dir env name, transient API response unset).

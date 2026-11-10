@@ -217,7 +217,7 @@ requires:   [T9.3d, T9.6]
 fixture-ok: yes
 size:       S · mid
 owns:       merchant/
-status:     in-review
+status:     done
 ```
 Wire the merchant page from the fixture transport to same-origin `/tools/product_fit`; no caller credential is needed (the edge holds the merchant key server-side). Until then the proxy answers 502/503 and the app reads its bundled snapshot. T9.6 registers the key entry on the layer first.
 
