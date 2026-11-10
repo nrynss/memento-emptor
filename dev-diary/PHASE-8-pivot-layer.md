@@ -377,7 +377,7 @@ requires:   [T8.5, T8.5b]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     not-started
+status:     claimed:t85c-relink
 ```
 T8.5b pinned two defects live, both needing `internal/api/server/`: a restored declared view matches no precedence class after restart (beliefs get fresh ids, the stale `ContradictsBeliefID` matches nothing), so the correction loses all force and the pool decides; and a wired pool consulted on an empty line returns Claimed with a `(nil, consulted)` lookup the assembler rejects. Re-link declared views by content match on restore, and decide the consulted-empty guard (serve it or refuse it loudly). Tripwires for both live in `tests/live/precedence/`.
 

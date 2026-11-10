@@ -90,7 +90,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/contract/, testdata/api/, docs/interface.md, docs/architecture.md
-status:     not-started
+status:     claimed:t74-tighten
 ```
 T7.1 could not make the pivot's core required: `internal/api/server` compares its served JSON to the base fixtures and `testdata/replay/` is frozen, so `pool`, `pool_lookup` and per-item `precedence` are optional and a conforming implementation could never return a pool. Once T8.5 serves the pivot, make them required, add a Claimed and a Building `product_fit` example (all four current pool fixtures are Earned), and update the schemas, Go types, tests and docs in the same commit. Do this before the round 2 freeze (T10.3).
 
