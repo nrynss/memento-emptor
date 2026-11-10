@@ -59,10 +59,11 @@ remains the round 1 record.
   $5.00 cumulative budget, including one overwritten $0.0018 shakedown turn).
   This document (T5.6) is offline: no keys, no network, no model turns,
   no spend.
-- Seed histories carry no corrections (pinned by
-  `TestSeedHistoriesCarryNoCorrections`), so the correction measure is nil
+- The 45-turn set's seed histories carry no corrections (pinned by
+  `TestSeedHistoriesCarryNoCorrections`), so its correction measure is nil
   across all three arms — stated plainly in the measures section, not
-  manufactured.
+  manufactured. The separate correction round T5.9 ran afterwards and its
+  counts are in the Corrections section.
 
 ## Headline counts
 
@@ -80,6 +81,10 @@ belief.
 Arm 2 matches arm 3 on wrong-cause errors: 0 in both arms. Arm 1 got 0 of 15
 right (12 empty replies, 3 wrong-size M recommendations on
 `cmp-never-arrived` against the hidden L).
+
+The correction column's `nil` is the 45-turn frozen set only: those seed
+histories contain no corrections. T5.9 ran one correction turn in every cell
+afterwards; its counts are under Corrections.
 
 ## Measure by measure
 
@@ -120,11 +125,11 @@ baseline), which the grader counts as a legitimate exclusion, not an error
 
 ### 3. Corrections honoured on the very next recommendation
 
-Nil across all three arms: every score carries `correction_honoured: null`
-because the frozen seed histories contain no corrections. The demo-shopper
-correction story ("I've lost weight, use M") is not part of this frozen set,
-so this comparison says nothing about correction handling. It is reported as
-nil, not as 0, and no correction behavior is claimed for any arm.
+Nil for the 45 frozen turns: every score in `bench/runs/scores.json` carries
+`correction_honoured: null`, because those seed histories contain no
+corrections. It is nil, not 0, and no correction behaviour is claimed for any
+arm from those runs. The correction round T5.9 measured this separately; its
+counts are in Corrections below.
 
 ### 4. Citations that really support the recommendation (mechanical: cite resolves to exactly one history row that counts toward fit)
 
@@ -154,6 +159,35 @@ run files carry `prompt_words` + `reply_words` for the same turn. The ~5x
 live-BPE factor from the freeze record applies equally to all arms, so
 cross-arm token comparisons hold on the frozen basis.
 
+## Corrections
+
+T5.9 added one correction turn to every cell after the T5.5 and T5.8 sweeps: 9
+shoppers × 3 arms = 27 turns. Each reuses the published first turn
+(`source_run_id` in the run file), then the shopper names a different size than
+the arm just gave ("Actually I take L now", or M where the arm had already
+named L, so the correction always contradicts), then one re-ask. Run files and
+grades: `bench/runs/t59/`, scores in `bench/runs/t59/t59-scores.json`.
+
+- Honoured on the next recommendation: 27 of 27, 9 of 9 in every arm.
+- Wrong-cause errors: 0 across all 27 turns.
+- Arm 3 routed the correction through the real `record_correction` path in 2
+  of 9 cells (`t59-a3-noisy-large.json`, `t59-a3-noisy-small.json`): the
+  Venerable belief was kept standing with its evidence, the correction
+  recorded beside it as the override, and the next guidance given on the
+  correction's basis. In the other 7 of 9 arm-3 cells recall served no belief
+  before or after, so there was no `record_correction` call to make and the
+  correction travelled in conversation text only — the same path arms 1 and 2
+  have. Each of those 7 arm-3 run files records `correction_recorded: false`
+  and the reason.
+
+The mechanism difference is real; the outcome difference is not. Arms 1 and 2
+have no graph, so the correction exists only as text in the conversation and
+the next turn honours it because that text is still in the prompt. Arm 3 can
+contradict a belief and keep it, and did so in 2 of 9 cells. Every arm honoured
+every correction, so corrections did not discriminate the arms: this round
+shows a stated preference is followed on the next turn, not that any arm
+handles corrections better.
+
 ## What this does and does not prove
 
 Proves on these constructed cases: the refusal mechanism works as designed —
@@ -165,7 +199,9 @@ correctly about damage, never-arrived, changed-mind, and vague rows 15 times
 out of 15 with 0 wrong-cause.
 
 Does not prove: real-world accuracy (we wrote the shoppers and the answers);
-correction handling (no corrections in the set); citation quality at scale
+correction handling beyond one stated correction on the next turn (T5.9's 27
+turns are in Corrections; a correction that changes something other than a
+size, or arrives mid-conversation, is unmeasured); citation quality at scale
 (arm-2 cites are mostly human-mapped prose, and 34 of 40 resolve to non-fit
 rows); behavior on long histories where signal drowns in noise or on
 multi-brand histories (recorded as hardening candidates in the freeze, not

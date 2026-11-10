@@ -46,11 +46,15 @@ requires:   [T10.2]
 fixture-ok: yes
 size:       XS · light
 owns:       bench/README.md
-status:     claimed:t102b-corrections
+status:     in-review
 ```
 The round 1 record reports the correction measure as nil and stops at T5.6, which reads as if corrections were never measured. T5.9 published 27 correction turns (9 shoppers × 3 arms): 27/27 honoured, 0 wrong-cause, and arm 3 routed 2 of 9 through the real `record_correction` path. Add a short "Corrections" subsection to `bench/README.md` with those counts, the mechanism difference, and a pointer to `bench/runs/t59/t59-scores.json`; state plainly that corrections did not discriminate the arms. No other count and no run file changes.
 
 **Done when:** the T5.9 counts are in the record with their evidence file; `bench/freeze_check.sh` and the gate pass; no run file or frozen input changed.
+
+Worker notes (in-review): `bench/README.md` gains a `## Corrections` section after the five measures and before "What this does and does not prove": 9 shoppers × 3 arms = 27 turns, honoured 27 of 27 (9 of 9 in every arm), wrong-cause 0 across all 27, with the evidence file `bench/runs/t59/t59-scores.json` and the per-run directory `bench/runs/t59/`. It states the mechanism difference (arms 1 and 2 carry the correction as conversation text; arm 3 made the real `record_correction` call in 2 of 9 cells, `t59-a3-noisy-large.json` and `t59-a3-noisy-small.json`, keeping the Venerable belief with the override beside it, and had no belief to declare against in the other 7 of 9), and says plainly that corrections did not discriminate the arms. Three existing nil statements now point at that section instead of implying the measure was never taken: the Setup seed bullet, the sentence under the headline table, and measure 3. The "does not prove" paragraph now names what T5.9 leaves unmeasured (a correction to anything but size, or one arriving mid-conversation) rather than saying corrections were absent. No other count changed, and no run, scores, fixture or freeze input was touched; `bench/freeze_check.sh` green (25 rows) and `./tools/check.sh` green.
+
+Surprises for the next agent: the T5.9 scores carry `correction_honoured` as a real boolean on all 27 rows, so the round 1 table's `nil` and the corrections section's `27 of 27` describe different sets (the 45 frozen turns and the 27 correction turns). A reader collapsing them into one column would overstate the T5.5 set. The HEADLINE TABLE is deliberately left unchanged, with the pointer sitting under it, because its rows are the 45-turn counts. `correction_recorded` exists only on the arm-3 score rows (9 of 9; arms 1 and 2 have no such field), so the 2 of 9 is arm 3's denominator alone and must not be read as 2 of 27.
 
 ---
 
