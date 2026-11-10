@@ -130,7 +130,7 @@ requires:   [T8.3]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/pool/
-status:     in-review
+status:     done
 ```
 A small seeded population in a test-prefixed index, read back through `product_fit`, with warm and cold latency recorded. No model spend. Test indices deleted afterwards.
 
@@ -307,7 +307,7 @@ The live layer through the hub and a test-prefixed fit index: one shopper per pr
 
 - [ ] One Lambo process serves every shopper, live (T8.1, T8.1b).
 - [x] Every purchase writes and updates its fit row at ingest, live (T8.2, T8.2b).
-- [ ] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
+- [x] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
 - [x] A correction stands on its own (T8.4).
 - [x] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).
 - [x] Webhook deliveries are verified against PayPal's signature, not a fixture (T8.7).

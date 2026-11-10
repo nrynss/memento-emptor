@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 8 / 12 | In progress (T8.5 running) |
+| P8 | 9 / 12 | In progress (T8.1b, T8.5) |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -200,6 +200,49 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** A redacted recording cannot verify live — the signature covers the exact bytes, so the byte-exact delivery lives in git-ignored `out/` and only shapes/verdicts are committed. The signature is bound to the subscription id, so multi-subscription discovery tries every candidate unless `PUBLIC_URL` narrows it. The `Client` caches the subscription list for process lifetime (T8.5 owns the refresh decision).
 
 **The next agent should not have to work out.** T8.5 wires the deployed route: read the raw body bounded like the other routes, pass `ingest.Delivery{Header, Body}` to the shopper's service, and resolve the shopper via `custom_id`. Until then the deployed path keeps T2.1's fixture gate while every wired caller of `HandleDelivery` is verified for real. Set `PUBLIC_URL` on the service once the Render subscription exists beside the test-endpoint one.
+
+### T8.3b: Pool reader, live (done)
+
+**What exists.** `tests/live/pool/` (driver, `run.sh`, README, git-ignored `out/`) writes 8 seeded rows to `t83b-fit-rows` through the fit writer (5× returned/classified `fit_too_small`, 1× `fit_too_large`, 1× feedback `fits_well`, 1× kept) and reads them back through `pool.Reader.Fit`. Review APPROVE with one fix (cleanup-failure stderr now redacted like every other error path).
+
+**Live transcript** (verbatim from `bash tests/live/pool/run.sh`; index deleted, prefix empty before and after):
+
+```
+$ source tools/env.sh
+$ bash tests/live/pool/run.sh
+
+T8.3b live pool reader -- index t83b-fit-rows, deployment <deployment>
+-- prefix listing before: GET /_cat/indices/t83b-* -> []
+-- create: PUT /t83b-fit-rows with the recorded mapping (no settings) -> ok
+-- wrote 8 seeded rows: 5 returned+classified fit_too_small, 1 fit_too_large, 1 feedback fits_well, 1 kept
+-- _count: 8 docs, 8 settled
+
+== cold read (fresh transport)
+Fit: Building/small, settled=8 seeded=8 live=0 recent=8
+cold: 6.863 s
+
+== Warm + 3 warm reads
+Warm: 6.724 s (Warm itself pays the handshake on a fresh transport)
+warm reads: 239 ms / 240 ms / 239 ms, all agreeing with the cold read
+
+== full counts
+kept 1, returns small 5 large 1, feedback fits-well 1
+reasons {fit_too_small:5, fit_too_large:1}
+shoppers {Fit:7, TooSmall:5, TooLarge:1}
+seeded 8 / live 0 / recent 8
+
+== empty size XXL
+Claimed, zero counts, no error
+
+-- cleanup: DELETE /t83b-fit-rows -> 200 {"acknowledged":true}
+-- prefix listing after: GET /_cat/indices/t83b-* -> []
+
+model spend: $0 (rows written directly, no classifier call)
+elastic: one kilobyte-scale index, 22 row writes, reads/counts/delete; nothing billable beyond the existing project
+PASS T8.3b live pool: seeded pool read warm and cold; index deleted
+```
+
+**Latencies.** Cold 6.863 s (fresh transport), Warm 6.724 s (also a handshake), warm reads 239–240 ms. Call `Warm` at boot — the first touch always pays the ~6.9 s handshake, inside the 20 s timeout. The kept row settles the denominator but joins no fit-shopper count (Fit 7 of 8).
 
 ### T8.3c: Union per-direction shoppers (done)
 
