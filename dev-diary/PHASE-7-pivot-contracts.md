@@ -47,7 +47,7 @@ requires:   [T7.1]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/identity/, .env.example, tools/env.sh
-status:     in-review
+status:     done
 ```
 One place that turns PayPal identifiers into the keys the layer stores:
 
@@ -101,6 +101,6 @@ T7.1 could not make the pivot's core required: `internal/api/server` compares it
 ## Exit Criteria
 
 - [ ] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).
-- [ ] Every stored key is built in one place, with the salt from the keyring (T7.2).
+- [x] Every stored key is built in one place, with the salt from the keyring (T7.2).
 - [x] Consent for pooling is decided: opt-out (T7.3).
 - [ ] The contract requires the pool and per-item precedence once the served layer supports them (T7.4).

@@ -87,6 +87,9 @@ secret-tool lookup service elastic account memento-emptor kind url
 
 # Render, for the hosted demo and the PayPal webhook endpoint.
 secret-tool lookup service render account memento-emptor
+
+# The identity salt for shopper session names and per-line hashes.
+secret-tool lookup service identity account memento-emptor kind salt
 ```
 
 The PayPal sandbox site logins are in the keyring too, for a person signing in to the sandbox. No

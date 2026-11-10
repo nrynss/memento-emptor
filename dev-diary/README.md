@@ -166,7 +166,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
-| P7 | 2 / 4 | In progress (T7.2) |
+| P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 0 / 10 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
 | P10 | 3 / 6 | In progress |
@@ -184,6 +184,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** `list_transactions` returns `transaction_info` only — no line items, no payer block; line items need `get_order`, and only for order ids the caller already holds. The default `transaction_status=S` hides the pending dispute hold; a second call with `P` is needed. The listing is merchant-wide with no shopper filter: the only per-shopper key is `custom_field` (the seller's `custom_id`), so T10.3 must set it on generated orders. Refund free text (`note_to_payer`, `transaction_subject`) reaches arm 2 through the plain listing; the demo says "fit return", so generated notes must stay fit-neutral or case 3 is unfair. `list_disputes` now returns this merchant's disputes, unlike T0.4.
 
 **The next agent should not have to work out.** Feed `arm2.Extract` verbatim as arm 2's prompt memory. Use a 31-day reporting window and `transaction_status` S and P. Do not add a reason or signal to the extraction. T10.3 owns the fairness checks: set `custom_field`, keep notes fit-neutral, and decide whether line items and order ids are supplied to every arm. The `get_order` envelope proves the tool call; the other two order bodies are the same tool's output kept as recorded.
+
+### T7.2: Shopper and purchase keys (done)
+
+**What exists.** `internal/identity/` builds all three stored keys from an explicit salt: `shopper-<64 hex>` session names, per-line shopper hashes, and the unsalted `sha256("txn|" + id)` row id. `NewKeyer` validates 32 bytes after hex-decoding (`ErrMissingSalt` / `ErrMalformedSalt`, no fallback, and the error never echoes the value); the `Keyer` is immutable. HMAC messages are version-tagged and length-prefixed: `memento/session/v1|…` and `memento/line-shopper/v1|…`. `SeedSaltHex` is the published seed salt (sha256 of a stated phrase) for seeded rows and seeded shoppers; live keys use `MEMENTO_IDENTITY_SALT`, now exported by `tools/env.sh` from the keyring and named by `.env.example`. Review APPROVE with two doc fixes.
+
+**What surprised.** The session name is fixed at 72 bytes, so no payer can sit at the graph's 128-byte limit; `ValidSessionName` pins the 128/129 boundary and a 128-byte payer is exercised. `NewKeyer` accepts uppercase hex because it decodes to the same bytes. The per-line construction replaces T0.12's `sha256(line salt + "#" + id)` sketch with one salt over a purpose-tagged, length-prefixed message; T0.12's synthetic per-line hashes do not replay, but its transaction hash does.
+
+**The next agent should not have to work out.** Use `SeedSaltHex` only for rows and sessions carrying the seeded mark; live callers use `MEMENTO_IDENTITY_SALT`. `TxnHash` takes no salt, so rotation moves session names and shopper hashes but not row ids. Nothing calls the package yet: T8.1's deploy naming, T8.2's writer and T9.1's population are first. AGENTS.md now lists the keyring entry.
 
 ### Identity salt created (user, stands)
 
