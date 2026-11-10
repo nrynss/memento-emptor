@@ -100,11 +100,13 @@ requires:   [T5.4, T2.6, T3.6]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/runs/
-status:     claimed:t55-arms
+status:     in-review
 ```
 All three arms on the frozen set, with the repeat count fixed in `FROZEN.md`.
 
 **Done when:** every run is committed, complete, and verified against the frozen hashes.
+
+Worker notes (in-review): 45/45 turns committed under `bench/runs/` (15 per arm, 3 repeats per shopper per arm) plus `scores.json` from the frozen grade command; freeze check green after all runs landed. Driver `bench/runs/cmd/t55/` (run-record scaffolding only: transport, cumulative cap, arm-3 memory fetch; prompts/extraction/schema/grading all frozen imports). Arm 3 served REAL recall per turn (live Lambo 0.10.1, native embedder, throwaway sessions erased after; settle polls committed in run notes). Counts: arm 1 right-size 0/15, arm 2 15/15, arm 3 graded 3/15 — all three are unclear-turn refusals mentioning M, an extractor artifact (no override-to-empty in the frozen rule); true arm-3 recommendations 0/15. Wrong-cause 0 everywhere. Spend $0.082 of $5.00 (incl. one overwritten $0.0018 shakedown turn, disclosed). Full table, spend ledger and deviations in the task report.
 
 ---
 
