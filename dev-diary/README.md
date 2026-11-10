@@ -15,7 +15,7 @@ Each phase document gives an engineer starting cold the complete context for its
 
 **This diary is public.** The repository goes public for submission. Nothing private goes in here: no key, no account detail, no IP address, no personal path beyond `~`, no private repository's name.
 
-**Current status:** P0 to P5 are done as first built, and the pivot in product.md is decided. P7 to P10 carry it out. Ready now: T7.1 (pivot contracts), T7.3 (consent, the user's call), T10.1 (what arm 2 gets) and T10.2 (round 1 relabel). P6 resumes after P9 and P10.
+**Current status:** P0 to P5 are done as first built, and the pivot in product.md is decided. P7 to P10 carry it out. Ready now: T7.1 (pivot contracts), T10.1 (what arm 2 gets) and T10.2 (round 1 relabel). P6 resumes after P9 and P10.
 
 ---
 
@@ -165,7 +165,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
-| P7 | 0 / 3 | Ready (T7.1, T7.3) |
+| P7 | 1 / 3 | Ready (T7.1) |
 | P8 | 0 / 9 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
 | P10 | 0 / 5 | Ready (T10.1, T10.2) |

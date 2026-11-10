@@ -16,7 +16,9 @@ Preferences built only from what people *say* are weak. Payment outcomes alone e
 
 **Memento Emptor is a memory layer, not an agent** (decided 9 Nov). Any shopping agent plugs into it. Evidence arrives from PayPal; the agent asks what applies before it recommends, and reports what the shopper says. One reference shopping agent exists to demonstrate it.
 
-**It is for developers building shopping agents on PayPal's Agent Toolkit** (decided 9 Nov). PayPal already knows what happened after every purchase; Memento Emptor turns that into memory for any agent built on the toolkit. The developer adopts it. The shopper benefits, and is the face of the demo. **Merchants are a second beneficiary** (decided 10 Nov): the same pooled reasons tell them why a SKU comes back, which a refund total never does. They get their own read-only **merchant app**, a separate service that reads the pool only through the layer's `product_fit`, never Elastic directly, so no shopper row can reach it.
+**It is for developers building shopping agents on PayPal's Agent Toolkit** (decided 9 Nov). PayPal already knows what happened after every purchase; Memento Emptor turns that into memory for any agent built on the toolkit. The developer adopts it. The shopper benefits, and is the face of the demo.
+
+**Sellers are the second audience** (decided 10 Nov). The buyer side stays first: developers of shopping agents, with the shopper fronting the demo. Sellers on PayPal adopt the other half: the same pooled reasons tell them why a SKU comes back, which a refund total never does. They get their own read-only **merchant app**, a separate service that reads the pool only through the layer's `product_fit`, never Elastic directly, so no shopper row can reach it.
 
 **Memory belongs to the shopper, not the agent** (decided 10 Nov). It is keyed to the shopper's PayPal identity, so a correction made to one agent reaches every other agent the shopper uses through the layer.
 
@@ -27,6 +29,7 @@ Proposed surface, not final:
 | PayPal webhooks and transaction reads | Refunds, disputes and captures become evidence without the agent doing anything |
 | `recall_for_purchase` | For this shopper and product: the shopper's own evidence and beliefs, the pooled product belief, any correction, and which one applies under the precedence rule. Every item carries its status. **It never refuses**: thin evidence comes back labelled thin |
 | `record_correction` | The shopper's explicit correction, applied at once and declared against the belief it contradicts. **Stands on its own when no belief exists yet** (decided 10 Nov): it is kept as a standing record with no `against`, never promotes, and is applied by the precedence order. When a matching belief appears later, the correction is declared against it then |
+| `set_pooling` | The shopper's opt-out (or opt back in). Opting out stops new fit rows and removes the ones already written |
 | `product_fit` | For a product or brand: the pooled fit belief, its status, and counts by reason category. No shopper identities |
 | `pending_questions` | Refunds still missing a reason, so the agent knows what to ask |
 | `record_reason` | The shopper's answer, tied to that refund and classified |
@@ -64,7 +67,9 @@ Only evidence whose **reason** matches a belief counts toward it. A fit-related 
 
 The evidence path is the same for all three; the reason category decides which belief a piece of evidence counts toward. Cross-brand size mapping, repeat buys as a preference signal, and quality or style preferences are still out.
 
-**Pooling carries reasons, not people** (decided 10 Nov; consent is still open, below). A product-fit belief holds reason categories, sizes and counts. No shopper identity, free text, or order detail leaves the shopper's own memory. `explain_belief` on a pooled belief shows counts, never another shopper's rows.
+**Pooling carries reasons, not people** (decided 10 Nov). A product-fit belief holds reason categories, sizes and counts. No shopper identity, free text, or order detail leaves the shopper's own memory. `explain_belief` on a pooled belief shows counts, never another shopper's rows.
+
+**Pooling is opt-out** (decided 10 Nov). A shopper's classified outcomes count toward the pool unless they say no. Saying no is recorded in their own memory, stops new fit rows for them, and removes the rows already written: their session knows which product lines they bought, so the layer recomputes each per-line hash with the salt and deletes those rows. No link across lines is ever stored to make this possible. The ledger offers the choice, and an agent can record it when the shopper asks.
 
 **Status is a label, never a gate** (decided 10 Nov). Claimed, Building, Earned and Out of true travel with every item recall returns. The agent says how sure it is; the layer never withholds evidence because it hasn't reached Earned yet.
 
@@ -263,5 +268,4 @@ Assumptions this spec rests on, checked before anything is built on them.
 
 ## Open decisions (pivot, 10 Nov)
 
-- **Consent for pooling.** What is pooled is settled: reason categories, sizes and counts, with a per-line shopper hash and no identities. Still open: does the shopper opt in, opt out, or is pooling a term of using the layer?
 - **The headline.** "Right on day one for a new shopper" (the pool), or "the same memory across every agent" (portability). The comparison decides which one holds up; the video leads with that one.

@@ -28,9 +28,9 @@ size:       S · mid
 owns:       web/src/lib/ledger/, web/src/routes/belief/
 status:     not-started
 ```
-The shopper's ledger shows which precedence step decided each recommendation, an overridden step beside the one that won, a standing correction with no belief, and the pooled belief that applies to them as counts with its seeded count. It never shows another shopper's rows. Svelte 5 runes only.
+The shopper's ledger shows which precedence step decided each recommendation, an overridden step beside the one that won, a standing correction with no belief, and the pooled belief that applies to them as counts with its seeded count. It never shows another shopper's rows. The shopper can opt out of pooling here, and back in, through `set_pooling`, with the number of rows removed shown. Svelte 5 runes only.
 
-**Done when:** component tests cover each step, an overridden pair, and a standing correction. The pooled row shows counts only. The gate passes.
+**Done when:** component tests cover each step, an overridden pair, a standing correction, and the opt-out toggle. The pooled row shows counts only. The gate passes.
 
 ---
 

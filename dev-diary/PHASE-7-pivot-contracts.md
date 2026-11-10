@@ -19,6 +19,7 @@ Change the frozen contract to the pivot in product.md, and update every fixture 
 - **`recall_for_purchase`** never refuses. Each item it returns carries its status label (Claimed, Building, Earned, Out of true). The response names the **precedence step** that decided it: correction, own evidence, pool, statement, or nothing. When steps disagree it returns both and marks the lower one overridden, never hidden. `Guidance.Basis` grows to match the five steps. The correction-first rule stays as it is: an overriding correction ships at the top level and inside each contradicted belief.
 - **`record_correction`**: `ContradictsBeliefID` becomes optional. With no belief, the correction is a standing record. Describe in `docs/interface.md` how it is later declared `against` a matching belief.
 - **`product_fit`**, new: for a product line and size, the pooled status, counts by direction and by feedback verdict, the settled denominator, distinct shoppers by direction, and the seeded split. No shopper identity, no row, no free text.
+- **`set_pooling`**, new: the shopper's opt-out or opt back in (pooling is opt-out by default, product.md). The response says how many existing rows were removed.
 - **The fit row** as a domain type: product line (brand, category, fit handle), size, purchase state, reason category, fit direction, per-line shopper hash, transaction hash, seeded mark, event times. The state rank used as the version, with event time breaking ties (product.md). Use T0.12's mapping as recorded.
 - **The pool status rule** as a pure, table-tested function over counts: Building at 3 distinct shoppers, Earned at 8 or more in one direction with a 60% share and at least twice the opposite, Out of true when the last 90 days alone fail it. The thresholds are constants with one definition, named in `docs/interface.md`.
 - **Usual size**: the rule from product.md (most often kept or fits-well, in any brand, else Claimed), as a pure function with its own table test.
@@ -55,11 +56,13 @@ requires:   []
 fixture-ok: yes
 size:       XS · user
 owns:       product.md
-status:     not-started
+status:     done
 ```
 The one pivot decision still open in product.md. What is pooled is settled: reason categories, sizes and counts, with a per-line hash and no identity. The user decides whether the shopper opts in, opts out, or accepts pooling as a term of using the layer. The orchestrator records the decision in product.md. The demo's words (T9.6) and the README (T6.3) follow it.
 
 **Done when:** product.md's "Open decisions" no longer lists consent, and the decision is in the evidence model section.
+
+**Notes.** Decided by the user: opt-out by default. Opting out is recorded in the shopper's own memory, stops new fit rows, and removes existing rows by recomputing each per-line hash from the lines the session knows. `set_pooling` is added to T7.1's contract; T8.2 honours it; T8.5 serves it; T9.2 puts it in the ledger. Also decided: sellers are the second audience, beside the buyer side, which stays first.
 
 ---
 
@@ -67,4 +70,4 @@ The one pivot decision still open in product.md. What is pooled is settled: reas
 
 - [ ] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).
 - [ ] Every stored key is built in one place, with the salt from the keyring (T7.2).
-- [ ] Consent for pooling is decided (T7.3).
+- [x] Consent for pooling is decided: opt-out (T7.3).
