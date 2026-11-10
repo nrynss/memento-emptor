@@ -348,21 +348,22 @@ not a general Serverless project: only `vectordb_document` index mode is
 accepted, `exclude_source_vectors` cannot be false, and billing is storage +
 Search Power + ingest + infrastructure rather than VCU. Structured rows,
 filters, bulk and aggregations all work there anyway. The row is one document
-per `sha256(transaction id)`, whole-document `PUT` at `version = event_seq`
-with `external_gte`: an equal-version webhook retry is a 200 rewrite of one
-row, an older replay is a 409, and the partial `_update` API refuses external
-versioning outright. Over 600 generated purchases (3 lines, sizes S/M/L,
-truth table written by hand), the probe line and size matched every number:
-100 of 120 settled, 40/15 fit returns by direction, 12/5/3 feedback by verdict,
-31/12 distinct shoppers by direction, 88 distinct settled shoppers, and the
-same split by the seeded mark. A captured purchase and a no-reason refund are
-present but count zero under the settled filter. `cardinality` is exact at 588
+per `sha256("txn|" + transaction id)`, whole-document `PUT` at
+`version = event_seq` with `external_gte`: an equal-version webhook retry is a
+200 rewrite of one row, an older replay is a 409, and the partial `_update` API
+refuses external versioning outright. Over 600 generated purchases (3 lines,
+sizes S/M/L, truth table written by hand), the probe line and size matched every
+number the harness checks: 100 of 120 settled, 40/15 fit returns by direction,
+12/5/3 feedback by verdict, 31/12 distinct shoppers by direction, and 88
+distinct settled shoppers; the same query's seeded split is recorded and agrees
+with the generated rows. A captured purchase and a no-reason refund are present
+but count zero under the settled filter. `cardinality` is exact at 588
 with the default 3000 threshold; threshold 100 returned 582, and the exact
 boundary is above 3000 (40000 with the maximum). Warm aggregation is ~236 ms
 wall (1 ms server); cold connection ~6.9 s, so it needs a timeout above the 5 s
 default — 20000 ms, the same treatment as T0.6. Lambo 0.10.1 recalled beside it
-under `t012-lambo` with no shared name, alias or template, fit rows unchanged
-at 600, and the 600-row index was not touched. Every `t012-` index deleted
+under `t012-lambo` with no shared name, alias or template, the fit population
+index still holding its 600 documents. Every `t012-` index deleted
 (empty listing recorded); no model spend; no console reading provided.
 Evidence in `research/elastic-fit.md`, recordings in `testdata/elastic-fit/`.
 

@@ -28,8 +28,8 @@ from a hand-written truth table, not from another project. Recordings:
 
 All four indices this task created carried the `t012-` prefix; none survived
 (check the last section). No index outside that prefix was created, modified or
-deleted. A stale, empty `t012-fit-mapping` index left by the cancelled earlier
-attempt was deleted before the run.
+deleted. The run began from an empty `t012-` listing (`run.json`); the cancelled
+earlier attempt's index was gone.
 
 ## 1. Mapping
 
@@ -78,8 +78,8 @@ Fields later tasks build on:
 
 | Field | Type | Meaning and values |
 |---|---|---|
-| `txn_hash` | keyword | `sha256(transaction id)`; the document `_id` is the same value, so one purchase is one row |
-| `shopper_hash` | keyword | salted hash per (shopper, product line); the line identity is the salt prefix, plus a deployment secret. The same shopper in two lines gets unrelated hashes |
+| `txn_hash` | keyword | `sha256("txn\|" + transaction id)`; the document `_id` is the same value, so one purchase is one row |
+| `shopper_hash` | keyword | salted hash per (shopper, product line): `sha256(<line salt> + "#" + shopper id)`, where the harness's line salt is `brand\|category\|fit_handle` and production adds a deployment secret. The same shopper in two lines gets unrelated hashes |
 | `brand`, `category`, `fit_handle` | keyword | the product line. All three are present on every row; a query for a line filters all three |
 | `size` | keyword | the purchased size, on the product's own label |
 | `purchase_state` | keyword | `captured`, `refunded`, `reason_classified`, `feedback`, `kept`, `contested` |
@@ -150,7 +150,11 @@ extra idempotency state beyond the sequence it already stores.
 
 The partial `_update` API cannot carry external versioning on this deployment
 (check 8), so the writer rewrites the whole row. `event_seq` remains in the row
-as the audit value and the version.
+as the audit value and the version. The recording advanced `_version` on each
+write, while the stored rows kept `event_seq` at 1 except the final contested
+row, which carried 4; the `_version` column above is the sequence actually
+applied. Later tasks should set `event_seq` to the event's own sequence and use
+it as the version.
 
 ## 3. Settled-only aggregations
 
@@ -213,8 +217,11 @@ Truth and response for the probe line, all rows:
 | reason category: fit_too_small / fit_too_large / changed_mind / damaged / not_as_described | 40 / 15 / 8 / 5 / 2 | 40 / 15 / 8 / 5 / 2 |
 | distinct shoppers among settled rows | 88 | 88 |
 
-The server's `took` was 1 ms. Every number matched the hand-written truth, so
-no difference needed explaining.
+The server's `took` was 3 ms for this run (1 ms median across the latency
+samples in check 6). The totals and every per-bucket count the harness asserts
+matched the hand-written truth, so no difference needed explaining. The 88
+distinct settled shoppers are the exact count of the generated rows, checked in
+check 4.
 
 **Unsettled purchases count toward nothing.** A sampled `captured` row and a
 sampled `refunded` row (a refund with no reason yet) are both present with
@@ -231,7 +238,22 @@ counts — which is what makes "14 of 60 came back too small" honest.
 ## 4. Distinct counts
 
 `cardinality` is approximate (HyperLogLog++). Its `precision_threshold`
-defaults to 3000 and the parameter's ceiling is 40000.
+defaults to 3000 and the parameter's ceiling is 40000. Each row below runs the
+check-3 line-and-size filter, adding `settled: true` for the probe rows, or
+`match_all` for the whole index, with one `cardinality` aggregation on
+`shopper_hash`; `precision_threshold` is set only where the table names it. One
+probe sample, with the threshold set:
+
+```json
+POST /t012-fit-pop/_search
+{"size": 0,
+ "query": {"bool": {"filter": [
+   {"term": {"brand": "sunspel"}}, {"term": {"category": "shirt"}},
+   {"term": {"fit_handle": "regular"}}, {"term": {"size": "M"}},
+   {"term": {"settled": true}}]}},
+ "aggs": {"distinct": {"cardinality": {"field": "shopper_hash",
+                                      "precision_threshold": 40000}}}}
+```
 
 | Query | `precision_threshold` | Truth | Value |
 |---|---|---|---|
@@ -245,11 +267,10 @@ defaults to 3000 and the parameter's ceiling is 40000.
 At this population's size the default is exact in practice, as Elastic's docs
 describe: counts are accurate up to the configured threshold, "although not
 guaranteed"; above it the count is an estimate. The default stops being exact
-above **3000 distinct values** in a shard's result set; raising
-`precision_threshold` to its 40000 maximum moves that boundary to **40000**.
-The threshold-100 run shows the estimate in action: 582 for a true 588, about
-1% low. The deployment accepted 100000 and returned the exact count (values
-above the ceiling are clamped), so the practical ceiling is 40000.
+above **3000 distinct values**; raising `precision_threshold` to its 40000
+maximum moves that boundary to **40000**. The threshold-100 run shows the
+estimate in action: 582 for a true 588, about 1% low. The deployment accepted
+100000 and returned the exact count, so 40000 remains the ceiling to rely on.
 
 For the demo's population the default is the right setting. If the seeded pool
 later grows past 3000 distinct shoppers per line, the query should raise the
@@ -271,11 +292,16 @@ The same query's `filters` aggregation, as the ledger shows it:
 | distinct shoppers too_small / too_large | 27 / 11 | 4 / 1 | 31 / 12 |
 | distinct shoppers among settled rows | 75 | 13 | 88 |
 
-Every split number matched the truth table. The population's seeded and live
-shopper sets are disjoint, so 75 + 13 = 88; a real shopper with both seeded and
-live rows would be counted once in the `all` bucket, which is the correct
-behaviour and the reason the ledger shows the counts per bucket rather than
-adding them.
+The harness asserts the per-bucket document and settled counts, the fit-direction
+and verdict counts, and the per-direction shopper counts against the truth
+table, and every one matched. The seeded and live `settled_kind`,
+`reason_category` and settled-shopper splits are not in the truth manifest; the
+response values (60/17/8 and 10/3/2; 35/13/6/4/2 and 5/2/2/1; 75 and 13) agree
+with the rows the generator built, and the 88 total is the exact count checked
+in check 4. The population's seeded and live shopper sets are disjoint, so
+75 + 13 = 88; a real shopper with both seeded and live rows would be counted
+once in the `all` bucket, which is the correct behaviour and the reason the
+ledger shows the counts per bucket rather than adding them.
 
 ## 6. Speed inside recall
 
@@ -291,15 +317,15 @@ All 8 cold samples were over 5 s; no warm sample was. The warm wall time is the
 network round trip plus 1 ms of query work; the aggregation itself is not the
 cost.
 
-**It needs the `timeout_ms` treatment T0.6 found.** The first request after an
-idle period spends about 6.8–7.0 s in the cold connection (the same ~6.8 s T0.6
-measured through reqwest/rustls, against 0.78 s for curl there), so a client
-with the 5 s default would fail the first `recall_for_purchase` aggregation
-after idle. The fit-index client should set a per-request timeout above the
-measured cold maximum — 20000 ms is the value T0.6 settled on for Lambo's
-recall tier and is comfortably above this measurement — and should keep a
-connection pool so normal calls stay in the 236 ms band. This is a transport
-timeout, not a query budget.
+**It needs the `timeout_ms` treatment T0.6 found.** The first request on a cold
+connection spends about 6.8–7.0 s (the same ~6.8 s T0.6 measured through
+reqwest/rustls, against 0.78 s for curl there), so a client with the 5 s default
+would fail the first `recall_for_purchase` aggregation on a cold start. The
+fit-index client should set a per-request timeout above the measured cold
+maximum — 20000 ms is the value T0.6 settled on for Lambo's recall tier and is
+comfortably above this measurement — and should keep a connection pool so
+normal calls stay in the 236 ms band. This is a transport timeout, not a query
+budget.
 
 ## 7. Beside Lambo's recall tier
 
@@ -340,7 +366,7 @@ Coexistence evidence:
 | aliases | none before or after (`[]`) |
 | index templates | 56 before and 56 after, identical list; none matches `t012-*` |
 | component templates | 61 before and 61 after, identical list |
-| fit index untouched | the fit population index held 600 documents before and after |
+| fit index count | the fit population index held 600 documents before and after |
 | Lambo recall | answered with the derived concept |
 
 Lambo's data index is contract-keyed (`-v-<embedding contract hash>`) and its
@@ -351,7 +377,9 @@ and no alias, template or data stream linking it to Lambo's indices.
 ## 8. Serverless limits
 
 This deployment is an **Elasticsearch Vector Database project**. That changes
-what it accepts and how it bills; the responses and the docs agree:
+what it accepts and how it bills; the refusals below are this deployment's
+responses, and the billing description is Elastic's docs (no console reading was
+provided):
 
 - **Only one index mode.** `index.mode: standard` is refused:
   `400 illegal_argument_exception: index mode [standard] is not allowed for
@@ -371,7 +399,8 @@ what it accepts and how it bills; the responses and the docs agree:
   versioning: `400 action_request_validation_exception: internal versioning
   can not be used for optimistic concurrency control. Please use if_seq_no and
   if_primary_term instead`. Plain `_update` (no version) works, and
-  `_update_by_query` answers 200; neither is the ingest path.
+  `_update_by_query` answers 200 with one version conflict and nothing updated;
+  neither is the ingest path.
 - **Bulk.** One 600-document `_bulk` with external versions returned `errors:
   false`, 600 items, all `201`.
 - **Billing differs from Elasticsearch Serverless.** Vector Database projects
@@ -393,7 +422,7 @@ what it accepts and how it bills; the responses and the docs agree:
 
 - Create the index with the mapping in check 1 and nothing else. The deployment
   supplies the mode and settings.
-- Write one row per purchase to `_id = sha256(transaction id)`, whole-document,
+- Write one row per purchase to `_id = sha256("txn|" + transaction id)`, whole-document,
   `version = event_seq`, `version_type=external_gte`. Treat a `409` as an older
   event that must not win; a same-version write is a harmless retry.
 - Set `settled` and `settled_kind` in the writer: settled on a classified
@@ -420,9 +449,10 @@ comparison runs.
 ## Spend and cleanup
 
 No model spend: the fit index has no embeddings. Elastic usage was four
-kilobyte-scale indices, 600 rows, roughly 40 search calls, one 600-row bulk, and
-one probe document inserted and deleted. No billable resource was created
-beyond the existing project, and no console reading was provided.
+kilobyte-scale indices, 600 rows, about 45 `_search` calls plus the `_count` and
+listing reads, one 600-row bulk, and one probe document inserted and deleted. No
+billable resource was created beyond the existing project, and no console reading
+was provided.
 
 Every index this task created was deleted; the empty listing:
 
@@ -438,10 +468,11 @@ Removed: `t012-fit-rows`, `t012-fit-pop`, `t012-lambo-meta`,
 
 Checks 1 to 8 pass. The mapping carries every part of the row with no prose
 field; the row moves through every state in place with one document per
-purchase and a harmless webhook replay; settled-only aggregation matches a
-hand-written truth with every number, including distinct shoppers per direction
-and the seeded split; `cardinality` is exact at this population and its
-approximate boundary is recorded; the line-and-size query is ~236 ms warm but
-needs a timeout above the ~6.9 s cold connection; and the index sits beside
-Lambo's recall tier without aliases, templates or a shared name, while Lambo
-recall still answers. Nothing is blocked.
+purchase and a harmless webhook replay; settled-only aggregation matches the
+hand-written truth on every number the harness asserts, including distinct
+shoppers per direction, and the seeded split is recorded and agrees with the
+generated rows; `cardinality` is exact at this population and its approximate
+boundary is recorded; the line-and-size query is ~236 ms warm but needs a
+timeout above the ~6.9 s cold connection; and the index sits beside Lambo's
+recall tier without aliases, templates or a shared name, while Lambo recall
+still answers. Nothing is blocked.
