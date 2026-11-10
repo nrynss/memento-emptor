@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
-| P5 | 4 / 6 | In progress |
+| P5 | 4 / 7 | In progress |
 | P6 | 0 / 7 | Not started |
 
 ---
