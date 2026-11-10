@@ -152,6 +152,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### R0 review: P0 ground (APPROVE with fix, landed)
+
+Re-verified all ten exit criteria against research + fixtures. Real defect caught and fixed: unredacted shopper emails + Mumbai street address in three capture fixtures (+ one webhook.site UUID), scrubbed per the file's own precedent with new SHOPPER-* placeholders; phase exit boxes checked (were unchecked despite done tasks); T0.6→T0.6b→native-direction coherence pointers added. No structural findings.
+
+### R3 skipped: P3 review deferred (agent phase incomplete)
+
+T3.6 full demo still running at review time. P3 gets its phase review after T3.6 lands (covering T3.1–T3.8 as one arc).
+
 ### R5 review: P5 comparison (APPROVE, landed)
 
 Re-verified both exit criteria with independent runs (6 shoppers × 3 arms, byte-equality, cap math, three-way hidden-answer check incl. a failed attempt to construct a leaking shopper). Fix landed: F1–F4 + extraction rule moved from README handoffs onto the T5.1/T5.2 phase-doc lines where T5.4's freeze author reads them. Findings (advisories for freeze/pilot): arm-2 inputs omit amounts/IDs (define the contract at freeze; ID-cites in arm-2 runs = hallucination signal); pilot needs a two-turn driver + extraction rule in bench/pilot/; T2.6 direction note lives only in README (P2 follow-up, not P5's to fix).
