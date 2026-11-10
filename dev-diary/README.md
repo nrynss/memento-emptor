@@ -142,7 +142,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 5 / 5 | Done |
 | P2 | 10 / 10 | Done |
 | P3 | 5 / 6 | In progress |
-| P4 | 2 / 4 | In progress |
+| P4 | 3 / 4 | In progress |
 | P5 | 1 / 6 | In progress |
 | P6 | 0 / 7 | Not started |
 
@@ -151,6 +151,12 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T4.4: Contesting a belief (done)
+
+**What exists.** `web/src/lib/contest/` (CorrectionButton column, ContestEditor form, correction-path-only transport, state helpers, source-scan + mount tests — 19/19 with reviewer's additions). Edit moves Earned→Out of true, standing kept, row visible; three layers of proof that only `record_correction` fires.
+
+**What surprised.** Review caught a real rendered bug: file-header `//` comments in Svelte compile to visible text nodes (fixed; same pattern pre-exists frozen in T4.2's `LedgerGrid.svelte` — follow-up task to sweep all `.svelte` files, not a silent fix). T4.4's own mount tests needed a client-entry import path (Vitest resolves `svelte` to server build here).
 
 ### T5.1: The harness (done)
 

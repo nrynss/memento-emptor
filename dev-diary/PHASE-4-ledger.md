@@ -56,7 +56,7 @@ requires:   [T4.2, T1.2]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/lib/contest/
-status:     in-review
+status:     done
 notes:      Editable rows in web/src/lib/contest/ (types, decode, client, fixture, state, columns, ContestEditor). Every edit goes through record_correction only; fixture edit moves the L belief to Out of true with standing kept and the row visible. Branch task/t44-contest.
 ```
 Editable rows: a shopper's edit goes through `record_correction`, so it follows the same rule as anything else the shopper says: it wins the decision at once and doesn't rewrite the belief.
