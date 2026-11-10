@@ -156,6 +156,10 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 Re-verified all six exit criteria against code + committed live artifacts; all fail-closed properties hold against constructed counterexamples (override deleted, changed-mind, uncovered fake, approve-first both paths). One new offline test landed (`TestChangedMindClosesQuestionWithoutBelief` — accepted-but-counts-nowhere had writer-level but no service-level coverage). One real honesty gap found: the frozen offline story's third return is mixed-direction (`fit_too_large`) while the live T2.6 run was fixed to all-small — the offline suite and the live run prove different things. Remedy + product question with the user.
 
+### R4 review: P4 ledger (APPROVE with fix + 4 findings, landed)
+
+All four exit criteria re-verified with the reviewer's own runs (96/96 web tests). Real fix landed: the seller why-view showed fits-well feedback as "Counts toward nothing" — now names the kind it counts toward when `counts_toward` is non-null, with regression test. Findings: (1) rendered-comment defect wider than recorded — 4 files incl. both live pages (needs sweep task, frozen T4.2 file untouched); (2) contest UI built but wired to no route — judges can't reach it (needs wiring task); (3) ledger→belief deep links still missing (accurately described, needs ledger-route edit); (4) raw reason codes on why cards (`fit_too_small` verbatim — wording follow-up).
+
 ### R1 review: P1 contracts (APPROVE, landed)
 
 Re-verified all five exit criteria against code, not handoffs. Freeze holds: no post-P1 modification of any frozen path, no redefined enums, `testdata/api/` ↔ contract equality proven by gate test. Seam honesty confirmed (`var _` assertions, identical method sets; `memory.Graph` minus `Recall` is documented and load-free). One doc fix landed (embedder note no longer claims 0.10.1-closed issues still block the native switch). No structural findings; freeze stands.
