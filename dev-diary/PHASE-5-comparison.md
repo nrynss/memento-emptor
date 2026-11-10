@@ -84,7 +84,7 @@ requires:   [T5.4]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/freeze_check.sh, tools/check.sh
-status:     in-review
+status:     done
 ```
 Generate `bench/freeze_check.sh` from the FROZEN.md manifest (single testable place for the manifest-extraction) and invoke it from `tools/check.sh`, so the gate verifies frozen hashes on every run. One-line check.sh change only: call the script, no other gate behavior changes.
 

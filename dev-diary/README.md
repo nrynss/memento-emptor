@@ -192,6 +192,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 
 **What surprised.** Review caught a real rendered bug: file-header `//` comments in Svelte compile to visible text nodes (fixed; same pattern pre-exists frozen in T4.2's `LedgerGrid.svelte` — follow-up task to sweep all `.svelte` files, not a silent fix). T4.4's own mount tests needed a client-entry import path (Vitest resolves `svelte` to server build here).
 
+### T5.4b: Freeze-check script (done)
+
+**What exists.** `bench/freeze_check.sh` (executable, single commented `extract_manifest`, strict `sha256sum -c`, 21-row pin) invoked from `tools/check.sh` right after the tool-PATH loop, failing the whole gate before gofmt. Tamper/missing-file/row-count deviations proven by reversible in-test mutations.
+
+**What surprised.** The `whole-manifest-deleted` edge fails closed but without the friendly message (grep exits 1 under `set -e` before the echo) — message polish only, recorded, deliberately not churned. `shellcheck` isn't installed here (`bash -n` used instead).
+
 ### T5.4: Freeze (done)
 
 **What exists.** `bench/FROZEN.md`: 21-row sha256 manifest (histories, answers-hash-only, seed, harness, grader, extraction, drivers, neutral instrument), pinned model/caps/basis/repeats, publish-everything rule, every follow-up resolved as adopt/defer/owner. Review re-verified hashes, prompt parity, hidden-answer separation byte-level; one doc fix (row count, F2/F3 labels).
