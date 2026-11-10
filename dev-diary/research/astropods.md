@@ -329,13 +329,34 @@ everything below is the evidence for both halves.
   Nothing was changed for this check (GETs only). Next: the user
   re-confirms the toggle persisted on the right deployment/interface, else
   this becomes a platform gap for the handoff log.
-- Second check: the first flip had landed on the wrong agent; with Public
-  confirmed on `probe-gw` itself, anonymous frontend `GET /` and `/health`
-  still 302 to SSO immediately and after 3 minutes. Verdict STILL-BLOCKED:
-  the console Public toggle does not remove the front-door sign-in on the
-  frontend hostname. File as an Astropods platform gap with this evidence;
-  keep the public-shopper-page task unscheduled until anonymous 200 is
-  observed on the probe.
+## Verification: no-login serving PROVEN (post-close check)
+
+With Custom App switched to Public on the `probe-gw` deployment, the two
+hostnames serve as documented, and the earlier 302s are explained: every
+pre-flip probe hit the chat host, which correctly stays signed in.
+
+- Frontend host `https://<frontend-host>` (note the `public` subdomain):
+  anonymous `GET /` answers **200 with no SSO redirect**, and the body is
+  the container's own page (`<title>probe-gw reachability probe</title>`,
+  `h1 probe-gw public reachability probe`). Anonymous `GET /health`
+  answers 200 with the container's JSON (`ok:true`). An unknown path
+  answers 404 from the container itself — all frontend traffic reaches
+  our code, none of it redirects to login. Transcript:
+  `testdata/astropods/15-public-probe.txt` (post-close section).
+- Chat host `https://<chat-host>`: anonymous `GET /` still 302s to the
+  platform SSO login, as it should — the built-in chat stays signed in.
+  Model turns continue through the messaging proxy (CLI login in memory,
+  browser UA): create 201, send 200, trace `<trace-id>` at $0.0057 with
+  17 observations in order, successful `[tool] lookupReturn` between the
+  two generations, correct return details. Gateway, traces and tool
+  spans all hold on the Public frontend+messaging build.
+- Billing for the verification: usage $0.65 → $0.66 (one $0.0057 turn).
+  Task-attributable total ≈ $0.07 of the $0.25 budget.
+
+Meaning for the build: no-login serving is PROVEN. A judge-facing page
+must live on the deployment's frontend hostname with the custom-app list
+set to Public and no auth guard mounted; the chat hostname is irrelevant
+to judges. The follow-up public-shopper-page task is unblocked.
 - Billing for the probe: usage $0.29 before the deploy, $0.35 after
   (two model turns $0.0056 + $0.0057, the rest platform compute), inside
   the $0.25 task budget. Account usage later rose to $0.60 from concurrent

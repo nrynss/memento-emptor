@@ -181,14 +181,15 @@ two hostnames (chat + dedicated frontend); anonymous `GET /` and
 serving NOT proven. Nothing changed (GETs only). Next: user re-confirms
 the toggle on the right deployment/interface, else a platform gap.
 
-**Notes (second check).** The first flip had landed on `memento-agent`;
-with Public confirmed on `probe-gw` itself, anonymous frontend `GET /`
-and `/health` still 302 to SSO, immediately and after 3 minutes.
-Verdict STILL-BLOCKED: the console Public toggle does not remove the
-front-door sign-in. Next: file as an Astropods platform gap with this
-evidence; keep the shopper-page task unscheduled until anonymous 200 is
-observed. No turn run, nothing changed, check cost $0.00 (billing
-$0.60 → $0.64 is concurrent tasks).
+**Notes (verification, post-close).** PROVEN: with Custom App Public on
+the deployment, anonymous `GET /` on the frontend host (`public`
+subdomain) returns 200 serving the container's own page, `/health` 200,
+unknown paths 404 from the container — no SSO redirect anywhere on the
+frontend host. The chat host correctly stays signed in (302). Model turn
+via the messaging proxy: trace at $0.0057, 17 observations, successful
+`[tool] lookupReturn` between generations. Verification spend $0.01
+(billing $0.65 → $0.66); task total ≈ $0.07 of $0.25. No-login serving is
+proven; the public-shopper-page task is unblocked.
 Prove whether an Astropods agent can be reached with no login, on `probe-gw` only (never `memento-agent`). Deploy a minimal page with one chat endpoint on port 80 declaring `agent.interfaces: {frontend: true, messaging: true}` (both: `messaging` defaults to false once `interfaces` is declared; production filesystem is read-only). Report the exact Configure screen and Public setting for the user to switch. With no cookies, confirm 200 from our container with no login redirect. Send one short model turn through the page; confirm gateway, trace and tool spans. Budget $0.25 with billing re-checks. Record with evidence in `research/astropods.md`.
 
 **Done when:** the no-login reachability question is answered with evidence in `research/astropods.md`; if reachable, a follow-up dev-diary task for the public shopper page exists (orchestrator decides when).

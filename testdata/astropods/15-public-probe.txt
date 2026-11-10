@@ -99,3 +99,30 @@ frontend hostname. The no-login question now needs the platform: file the
 gap (Public documented only in the adapter-auth warning, never observed
 working) as an Astropods issue with this evidence, and keep the
 public-shopper-page task unscheduled until anonymous 200 is observed.
+
+## Post-close verification: PROVEN (Custom App Public, correct host)
+
+$ curl anonymous https://<frontend-host>/   # note the public subdomain
+/ -> code=200 redirect= size=260
+body: the container's own page (<title>probe-gw reachability probe</title>,
+h1 "probe-gw public reachability probe", "no sign-in" line) — not a
+platform parking page.
+$ curl anonymous https://<frontend-host>/health
+{"ok":true,"agent":"probe-gw"} /health -> code=200 redirect=
+$ curl anonymous https://<frontend-host>/nope
+/nope -> code=404 redirect=   (from the container; no SSO anywhere)
+$ curl anonymous https://<chat-host>/
+chat host / -> code=302 redirect=https://login.<host>/oauth2/... (stays signed in, correct)
+
+$ python3 drive.py <deployment-id> "Look up the return for order 7XK."
+create -> 201 {"conversation_id": "<id>", "created_at": "<id>"}
+send -> 200 {"message_id": "<id>", "timestamp": "<timestamp>"}
+$ ast agent trace --name probe-gw --limit 2
+<trace-id>  invoke_agent Probe GW  4699ms  $0.0057
+Observations (17): [agent] invoke_agent / MemoryInputFilter /
+MessageHistory / model_generation claude-sonnet-4-6 / agent_step /
+[generation] chat claude-sonnet-4-6 / model_chunk /
+[tool] lookupReturn 96ms default (success) / model_chunk / agent_step /
+[generation] chat claude-sonnet-4-6 / model_chunk / MessageHistory
+Reply: return details for order 7XK (Brand X oxford, size M, too tight
+in the shoulders). Billing $0.65 → $0.66.
