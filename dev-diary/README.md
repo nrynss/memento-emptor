@@ -152,6 +152,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### R2 review: P2 layer (FINDINGS — 1 non-blocking, landed)
+
+Re-verified all six exit criteria against code + committed live artifacts; all fail-closed properties hold against constructed counterexamples (override deleted, changed-mind, uncovered fake, approve-first both paths). One new offline test landed (`TestChangedMindClosesQuestionWithoutBelief` — accepted-but-counts-nowhere had writer-level but no service-level coverage). One real honesty gap found: the frozen offline story's third return is mixed-direction (`fit_too_large`) while the live T2.6 run was fixed to all-small — the offline suite and the live run prove different things. Remedy + product question with the user.
+
 ### R1 review: P1 contracts (APPROVE, landed)
 
 Re-verified all five exit criteria against code, not handoffs. Freeze holds: no post-P1 modification of any frozen path, no redefined enums, `testdata/api/` ↔ contract equality proven by gate test. Seam honesty confirmed (`var _` assertions, identical method sets; `memory.Graph` minus `Recall` is documented and load-free). One doc fix landed (embedder note no longer claims 0.10.1-closed issues still block the native switch). No structural findings; freeze stands.
