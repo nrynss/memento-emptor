@@ -12,11 +12,24 @@ requires:   [T0.11, T7.2]
 fixture-ok: yes
 size:       S · mid
 owns:       deploy/start.sh, deploy/README.md
-status:     claimed:t81-hub
+status:     in-review
 ```
 Move the deploy from one writer for one session (`LAMBO_SESSION`) to the shape T0.11 recommends: one `lambo serve --transport http`, a credential with `session_prefix = "shopper-"` and `create = true`, `max_attached` 16, and sessions named by T7.2. `serve-web` starts with the demo shoppers as its allowlist, until [Lambo issue 241](https://github.com/nrynss/lambo/issues/241) lands. The layer addresses each shopper at `/mcp/s/<session>`.
 
 **Done when:** `start.sh` brings up the hub locally and a test drives two shoppers through it with no cross-read. `deploy/README.md` says how a shopper session is created and how the ledger reader's allowlist is set. The gate passes.
+
+**Notes (in-review).** `deploy/start.sh` now writes the T0.11 `[serve]` table into the same boot config: one pinned session (the seeded demo shopper), `max_attached = 16`, `attach_concurrency = 1`, `idle_detach_secs = 900`, and one `[[serve.credential]]` (`memento`, `token_env = "LAMBO_MCP_TOKEN"`, `session_prefix = "shopper-"`, `create = true`). The hub starts as `serve --transport http --bind 127.0.0.1 --port $LAMBO_MCP_PORT --agent memento-layer --max-sessions 128 --rate-limit-rps 200`, after `provision` and after the seeder returns, so the short-lived stdio writer still owns its session alone. The reader starts beside the hub with `LAMBO_WEB_SESSIONS` (space separated, default the demo shopper) passed as repeatable `--session`, whether or not the seed held: `serve-web` serves an absent allowlisted session as an empty window rather than refusing to start. `deploy/README.md` gains "The shopper hub", "The ledger reader's allowlist" and "A local hub run".
+
+The demo session is T7.2's name for payer id `shopper_01` under `SeedSaltHex`: `shopper-` plus 64 hex, the exact vector `internal/identity`'s session-name test pins. `LAMBO_SESSION` is gone; `LAMBO_DEMO_SESSION` overrides and is refused unless it starts with the credential's prefix and passes the addressed-name rule. `LAMBO_MCP_TOKEN` is taken from the environment or generated per boot, exported to both children and never written or printed; `LAMBO_MCP_URL` is exported for the layer's graph client (T8.5). `LAMBO_EMBEDDER` (native, bge, fixture, none) and `LAMBO_SEED=0` are the new local knobs.
+
+The local drive (fixture embedder, seed skipped, two shopper sessions created on demand) wrote one unique concept per session: each recalled its own marker and not the other's, and each exact-content `inspect` of the other's belief was "no concept matching". The seeded demo session, served at its T7.2 name through the same hub, held none of their markers. No token and a wrong token were both 401; an unprefixed name and a bare 64-hex hash were both 404. The reader answered 200 with `found: true` for the demo shopper and the uniform 404 for a shopper created after it started.
+
+Four things the next agent should not have to rediscover:
+
+- The fixture embedder cannot take the frozen arc to Venerable: it answers in process, so the arc's seven concepts land in the same second, their sweeps coalesce, and `gc_survived` never reaches 3 inside the seeder's six-minute wait; the seed exits 1 having written its concepts. That is why `LAMBO_SEED=0` exists and why the README's local section says the arc needs the deployed embedder's pace. The deployed native path is unchanged.
+- `start.sh` cannot call `internal/identity`, so the demo session name is a pinned constant equal to the identity test vector. If the construction changes, the test vector and this constant move together. T8.1b should assert the deployed demo session's name against the package.
+- The hub's `max_attached` counts the pinned demo session, so 15 shoppers attach at once. The 503-plus-`Retry-After` refusal when all 16 are attached is documented in the README but not exercised locally; T8.1b owns recording it.
+- `--max-sessions 128` and `--rate-limit-rps 200` come from the T0.11 deploy shape and are still unmeasured on the 0.5 CPU starter; T8.1b owns measuring them. The fixture seed's six-minute timeout is a seeder property; T9.6 owns `deploy/seed/`.
 
 ### T8.1b: The Lambo hub, live
 ```yaml
