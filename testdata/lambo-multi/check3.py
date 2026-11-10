@@ -3,7 +3,8 @@
 Case A: eight stdio writers, one session each, one store file, writing at the
 same time. Case B: eight sessions writing at once through one HTTP hub. Both
 wait every receipt, then the committed database is counted directly. Case C:
-a second writer on one held session is refused (one writer per session).
+a second writer on one held session proxies into the holder (one writer per
+session, enforced by the holder's lease).
 
 Run:  LAMBO_BIN=... LAMBO_MULTI_TOKEN=... python3 check3.py
 """

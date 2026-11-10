@@ -29,7 +29,9 @@ tools themselves carry no session argument. The one thing still fixed at
 start is the ledger reader, `serve-web` (check 7): it needs the name on its
 start-time allowlist.
 
-Config the checks generated (`testdata/lambo-multi/lambo-multi.toml`):
+Config the checks generated for the 20-session runs; the committed
+`testdata/lambo-multi/lambo-multi.toml` is the same table at the deploy's
+`max_attached = 16` (check 1b lowers it to 4, check 7 to 8):
 
 ```toml
 [store]
@@ -68,7 +70,8 @@ source tools/env.sh
 export LAMBO_BIN=/tmp/lambo-v0.10.1/target/release/lambo
 export LAMBO_MULTI_TOKEN="$(python3 -c 'import secrets;print(secrets.token_urlsafe(32))')"
 cd testdata/lambo-multi
-python3 check1.py        # and check1b, check2, check3, check5, check6, check7
+python3 check1.py        # then check1b_eviction.py, check2.py, check3.py,
+                         # check5.py, check6.py, check7.py
 python3 check4.py        # live Elastic
 ```
 
@@ -89,7 +92,7 @@ Every transcript and report is in `testdata/lambo-multi/transcripts/` and
 | HTTP guards: 32 live MCP sessions, 50 req/s per credential, burst 2× | `src/mcp/serve/http_guards.rs` |
 | SQLite: WAL, `busy_timeout` 8 s, one pooled connection per process | `src/store/sqlite/mod.rs` |
 | Recall tier: one data index per embedding contract `{prefix}-v-{contract_hash}`, one `{prefix}-meta` marker index; every query filters `session_id`; marker `_id` is SHA-256 of the session id | `src/store/tiered/elastic.rs` |
-| `serve-web` serves an explicit allowlist (repeatable `--session` plus `[web] sessions`) and refuses any other id with the uniform 404 | `src/cli/serve_web/state.rs`, `scope.rs` (`is_pinned`) |
+| `serve-web` serves an explicit allowlist (repeatable `--session` plus `[web] sessions`) and refuses any other id with the uniform 404 | `src/cli/serve_web/state.rs` (the allowlist), `scope.rs` (the refusal), `src/surface/session.rs::is_pinned` |
 
 ## Check 1: one process or many
 
@@ -103,7 +106,8 @@ first request, and every session read back its own write. Transcript:
 | Startup to listening | 0.027 s |
 | First `initialize` after listening | 0.002 s |
 | Baseline RSS (one pinned session) | 21.1 MiB |
-| RSS after 20 attached, 3 concepts each | 26.8 MiB |
+| RSS with 20 attached, before writes | 26.8 MiB |
+| RSS after 3 concepts in each | 28.3 MiB |
 | Open file handles: baseline → 20 attached | 14 → 34 |
 | Marginal per attached session (3 concepts) | ≈ 0.4 MiB |
 | Per concept, measured over 100 added concepts | 29.7 KiB |
@@ -124,26 +128,29 @@ shoppers would be 4 GB as processes and about 100 MiB as attached sessions
 
 **Bounds, measured (`transcripts/check1b.jsonl`).** `max_attached` counts the
 pinned sessions too: with `max_attached = 4` and one pinned session, three
-on-demand sessions filled it, and a fourth got HTTP 503
-`this session is not available on this server right now: retry later` until a
-victim had been idle 2 s. It then evicted the least recently used idle
-session (`reason="evicted"`), and a later request re-attached it and read its
-concept back. With `idle_detach_secs = 2`, the sweeper detached every
-on-demand session with `reason="idle"`; data stayed in SQLite. Pinned
-sessions are never evicted or idle-detached.
+on-demand sessions filled it. The harness let them pass the 2 s minimum idle
+before attaching a fourth, so `shopper-d` attached by evicting the least
+recently used idle session (`reason="evicted"`); a later request re-attached
+`shopper-a` and read its concept back. With `idle_detach_secs = 2`, the
+sweeper detached every on-demand session with `reason="idle"`; data stayed in
+SQLite. Pinned sessions are never evicted or idle-detached.
 
 **How many fit the Render starter (0.5 CPU, 512 MB, one 1 GB disk).** Leaving
 192 MiB for the Go edge, the layer and the OS, 320 MiB fits
 
 - 16 attached demo-sized sessions (16 × 0.4 MiB + 21 MiB ≈ 28 MiB), or
-- 16 sessions of 500 concepts each (16 × 14.5 + 21 ≈ 253 MiB), or
-- 24 sessions of 500 concepts each (24 × 14.9 ≈ 379 MiB, audible headroom left).
+- 16 sessions of 500 concepts each (16 × 14.9 + 21 ≈ 259 MiB), or
+- 20 sessions of 500 concepts each (20 × 14.9 + 21 ≈ 319 MiB), the
+  report's ceiling for that budget.
 
-The default `max_attached = 16` is safe at every session size measured; 24
-is safe only while sessions stay under a few hundred concepts. The real
-bound at that point is the disk, not memory: the store grew to about 8 KiB
-per concept in check 1 (1.3 MB for 160 concepts), so the 1 GB disk holds
-roughly 125k concepts across all shoppers.
+The default `max_attached = 16` is the recommendation and is safe at every
+session size measured. The 320 MiB budget counts only the Go edge, the layer
+and the OS; the deploy also runs the `serve-web` reader, a second Lambo
+process this task did not measure, so 20 sessions of 500 concepts is an
+upper bound, not a safe default. Across all shoppers over time the
+accumulating bound is the disk, not concurrent memory: the store grew to
+about 8 KiB per concept in check 1 (1.3 MB for 160 concepts), so the 1 GB
+disk holds roughly 125k concepts across all shoppers.
 
 ## Check 2: sessions on demand
 
@@ -248,7 +255,8 @@ Transcript `transcripts/check5.jsonl`.
 ## Check 6: promotion per session
 
 Three sessions, one belief each, seeded **interleaved** (one hop of work in
-each session, round after round), with event times ten days apart. One hub
+each session, round after round), with event times three days apart across
+ten days. One hub
 served all three. Transcript `transcripts/check6.jsonl`.
 
 | Session | Status | distinct_interactions | coverage | blast radius |
@@ -305,11 +313,12 @@ disk, one SQLite file:
    `idle_detach_secs = 900`, and one credential whose
    `session_prefix = "shopper-"` and `create = true`, its token from the
    environment (`token_env`). `max_sessions` and `rate_limit_rps` are flags;
-   their defaults (32 MCP sessions, 50 req/s with 2× burst) were tripped by
-   this harness's own burst (HTTP 429), so raise them for ingest bursts.
+   their defaults are 32 MCP sessions and 50 req/s with a 2× burst, and this
+   harness raised both (128 and 1000) so its own concurrent bursts were not
+   throttled. Raise them for ingest bursts.
 2. **Session names**: `shopper-` + the 64-hex salted hash of the payer id
-   (72 bytes). One shopper, one session, one writer at a time; returning
-   shoppers re-attach from SQLite in milliseconds.
+   (72 bytes). One shopper, one session, one writer at a time; a returning
+   shopper re-attaches from SQLite on the next request.
 3. **The layer addresses** `POST /mcp/s/<session>` with the bearer token and
    speaks MCP there; the tools take no session argument. Keep one MCP client
    session per shopper request (or a small pool) so the 128-session ceiling is
@@ -325,7 +334,9 @@ disk, one SQLite file:
    short-lived stdio writer must own its session alone while it runs, so keep
    `start.sh`'s order (seed, then start the hub) or give the seeder a session
    the hub does not pin. The pinned session spends one of the 16
-   `max_attached` places, so 15 shoppers attach at once beside it.
+   `max_attached` places, so 15 shoppers attach at once beside it. While all
+   16 are attached and none is idle, a further request is HTTP 503 with
+   `Retry-After` (the source's attach bound); the layer must retry it.
 
 Do **not** run one writer process per shopper on this instance: 19.7 MiB
 each means about 16 fit 512 MB before the Go services, against 16 attached
@@ -339,14 +350,18 @@ sessions costing 28 MiB in the hub.
 >
 > **Body:** In v0.10.1 `lambo serve-web` serves the ordered union of
 > `--session` and `[web] sessions`; a request for any other session is the
-> uniform 404 (`src/cli/serve_web/scope.rs`, `is_pinned`). A per-shopper
+> uniform 404 (`src/cli/serve_web/scope.rs`, calling
+> `src/surface/session.rs::is_pinned`). A per-shopper
 > deployment names sessions after a hash and creates them while the reader
 > runs, so the portal cannot show a shopper who first appears after boot
-> without restarting it with that name. `[[web.credential]]` scope `"*"`
-> still means the allowlist, not the store. Requested: a
-> `[web] session_prefix` (or credential prefix) that authorizes reads of any
-> **existing** session under it, with the same bounds serve uses for
-> on-demand attach (a cap on loaded views, idle eviction, TTL) and the same
+> without restarting it with that name. A `[[web.credential]]` already
+> accepts a `session_prefix`, and `"*"` still means the allowlist, not the
+> store: a prefix grant still has to pass `is_pinned`, which is the
+> allowlist. Requested: let a configured
+> `[[web.credential]] session_prefix` (or a new `[web] session_prefix`)
+> authorize reads of any
+> **existing** session under it by relaxing that allowlist gate, using the
+> existing loaded-view cap and TTL plus an idle rule, and keeping the same
 > uniform 404 for absent ids. Until then a deployment must restart the reader
 > to add a shopper, which drops the ledger for everyone else for the restart
 > window. Affects the T4 ledger and the T6.1 deploy.
