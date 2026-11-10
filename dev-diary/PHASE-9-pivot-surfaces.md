@@ -135,11 +135,22 @@ requires:   [T9.4]
 fixture-ok: no
 size:       S · mid
 owns:       agent/second/
-status:     claimed:t95-second-agent
+status:     in-review
 ```
 A second Astropods deployment with its own name and prompt and its own traces, recalling through the same layer. It is written fresh: no shared prompt text with the reference agent beyond the layer's tool descriptions, so that its picking up a correction proves the layer carried it, not the prompt. Budget: under $0.50.
 
 **Done when:** a correction made through the reference agent is honoured by the second agent's first recommendation, shown in both agents' traces. Spend is recorded.
+
+**Notes (in-review).** `agent/second/` is the second deployment (`memento-second`, Second Fitting Helper, build `d2ae3104`, gateway `claude-sonnet-4-6` like the reference so turns cost the same). Four files are fresh: `agent/index.ts` (instructions rewritten — zero shared 5-grams with the reference prompt, verified by script), `agent/store.ts` (stand-in layer state with the same demo-shopper values: belief `blf_8f2c41`, correction `corr_3b7e52`, three seeded returns, the Earned-small pool with its seeded split), `agent/tools.ts` (the eleven frozen tools; descriptions are the layer's own frozen words from `internal/api/contract`, the one shared text allowed), `agent/check.ts` (29 offline checks, all green). No ordering tool, no `lookup_return` (reference-only read).
+
+Live, one short turn each, single-message conversations: the reference agent took "I've lost weight — for Brand X oxfords, use M for me" (trace `17688f8f`): `recall_for_purchase` then `record_correction` between the generations, reply recommends M citing the fresh correction over `blf_8f2c41` with both sides and the pool counts shown. The second agent, asked only "I need a Brand X oxford shirt. What size should I take?" with no mention of any correction (trace `3620b1d9`): `recall_for_purchase` first, then its first recommendation is M from the recalled `corr_3b7e52` over `blf_8f2c41`, naming the rung, the Out-of-true label, the three seeded returns and the pool tallies with the 48-seeded/12-live split. The correction travelled through the layer state, not the prompt — the second prompt contains no correction story. Spend $0.13 of $0.50 (push+deploy $0.01, reference turn $0.05, second turn $0.04, one mis-addressed send $0.03).
+
+Four things the next agent should not have to rediscover:
+
+- Both deployments still answer from frozen stand-in state (same as T9.4's standing configuration); T9.6 must point both at the served layer before the demo claims a shared backend. The proof here is structural: the second prompt cannot produce the correction on its own.
+- Drive turns with `agent/second/drive.py` (`DEPLOYMENT=<id> OUT=<dir> python3 drive.py create|send|history`); it needs the CLI's keyring token in process memory like `demo/drive.py`, and a browser UA. Never bake a deployment id into the script — the reference id lives in `demo/drive.py`, the second id stays in the operator's environment.
+- `ast spec validate` passes locally; `ast push -V private -y` then `ast deploy --adapter web --wait`. A fresh blueprint needs an `AGENT.md` beside `astropods.yml` or push warns. The deploy took about a minute to reach Running.
+- The second agent's closing line offered to "lock in" the size on a yes — approval-shaped, no purchase claimed, but the demo script should not take it up on the offer; there is nothing behind it yet.
 
 ---
 
