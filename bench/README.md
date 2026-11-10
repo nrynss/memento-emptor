@@ -17,26 +17,31 @@ anywhere in this document — only the already-published right/wrong tallies.
 ## Round 1, relabelled
 
 The round 1 arm this document called "raw history" is **Memento evidence
-without beliefs**. Its prompt carried the layer's per-purchase rows, so every
-row already held the classified reason, the signal strength and the write kind;
+without beliefs**. Its prompt carried the layer's evidence rows, so every row
+already held the classified reason, the signal strength and the write kind;
 only the beliefs built over those rows were absent. Calling that "raw history"
 overstated what the arm was given and made the baseline's score look like it
 came from transaction data alone. Every mention here uses the honest name; the
-runs, scores and freeze inputs it reports are unchanged.
+runs, scores and freeze inputs it reports are unchanged. The committed run
+files keep `arm_name: "raw-history"` and the prompt's "Memory: raw history"
+line, because they are frozen T5.5 output; the label here is the report's, not
+theirs.
 
 Round 2 is the comparison `product.md` now asks for: four arms, including a
 PayPal history arm that gets exactly what the Agent Toolkit returns and nothing
 the layer made, against Memento shopper-only and Memento full. Its tasks and
-frozen inputs live in `dev-diary/PHASE-10-comparison-round-2.md`; this document
+freeze live in `dev-diary/PHASE-10-comparison-round-2.md`; this document
 remains the round 1 record.
 
 ## Setup
 
-- Frozen inputs: `bench/FROZEN.md` (21 sha256 rows: 5 arm-facing histories,
-  hidden answers by hash only, seed generator, harness prompts, grader, pilot
-  extraction rule + run schema + driver/grade commands, neutral instrument).
+- Frozen inputs: `bench/FROZEN.md` (25 sha256 rows: the 9 arm-facing
+  histories — 5 round 1 shoppers and the 4 the T5.7 hardening added — plus
+  `demo-shopper.json`, hidden answers by hash only, seed generator, harness
+  prompts, grader, pilot extraction rule + run schema + driver/grade commands,
+  neutral instrument).
 - Arms: 1 = no memory, 2 = Memento evidence without beliefs (the layer's
-  per-purchase rows handed to the agent directly: classified reason, signal
+  evidence rows handed to the agent directly: classified reason, signal
   strength and write kind, no beliefs over them),
   3 = Memento layer recall (`recall_for_purchase` + `pending_questions`,
   live layer, real `recall_for_purchase` responses recorded in each run file).
