@@ -187,7 +187,7 @@ requires:   [T2.6, T3.2, T3.3, T3.4, T3.5, T1.3b]
 fixture-ok: no
 size:       M · frontier
 owns:       demo/
-status:     not-started
+status:     claimed:t36-demo
 ```
 Product.md's six demo steps, end to end, live on the real stack, starting from the seeded demo shopper. A reset script returns the demo to its starting state.
 
