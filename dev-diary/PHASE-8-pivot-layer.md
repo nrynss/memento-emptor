@@ -12,7 +12,7 @@ requires:   [T0.11, T7.2]
 fixture-ok: yes
 size:       S · mid
 owns:       deploy/start.sh, deploy/README.md
-status:     in-review
+status:     done
 ```
 Move the deploy from one writer for one session (`LAMBO_SESSION`) to the shape T0.11 recommends: one `lambo serve --transport http`, a credential with `session_prefix = "shopper-"` and `create = true`, `max_attached` 16, and sessions named by T7.2. `serve-web` starts with the demo shoppers as its allowlist, until [Lambo issue 241](https://github.com/nrynss/lambo/issues/241) lands. The layer addresses each shopper at `/mcp/s/<session>`.
 

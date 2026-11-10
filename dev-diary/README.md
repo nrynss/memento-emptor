@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 3 / 11 | In progress |
+| P8 | 4 / 11 | In progress |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.1: One Lambo process for every shopper (done)
+
+**What exists.** `deploy/start.sh` writes the T0.11 `[serve]` table into the boot config (one pinned demo session, `max_attached = 16`, credential `memento` with `session_prefix = "shopper-"` and `create = true`) and starts the hub (`--max-sessions 128 --rate-limit-rps 200`) after provision and seed, then the `serve-web` reader from `LAMBO_WEB_SESSIONS`. The demo session constant equals T7.2's name for the demo payer under the seed salt. Review APPROVE: re-ran the two-shopper drive locally (own marker only, no cross-read, 401/404s correct), fixed a double-shutdown that lost Lambo's write-behind tail (idempotent `stop_all` plus a final `wait`), and corrected the product.md line that still claimed one writer per session.
+
+**What surprised.** Lambo's memory is a write-behind log with no on-disk WAL, so signalling the children twice on TERM lost the unflushed tail every stop until the fix. The fixture embedder cannot converge the frozen arc (sweeps coalesce, seed times out), so `LAMBO_SEED=0` is the local loop. `serve-web` serves an absent allowlisted session as an empty window.
+
+**The next agent should not have to work out.** Keep seed-then-hub order; the seeder's stdio writer must own its session alone. Do not pin shoppers (15 attach beside the demo pin). The demo constant and `internal/identity`'s test vector move together. Owners: T8.1b for the unexercised 503 path and the unmeasured rate flags; T9.6 for the seeder fixture-embedder convergence.
 
 ### T8.6: Authenticated callers (done)
 

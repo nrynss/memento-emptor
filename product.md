@@ -282,7 +282,7 @@ Assumptions this spec rests on, checked before anything is built on them.
 - Astropods' input forms, traces and evals behave as the concept describes, on the free tier.
 - Elastic stays available through 21 Dec (a 14-day trial plus a 30-day extension only just reaches it).
 - Whether Channel3's data says enough about a product's cut to match a new SKU to the returned ones.
-- Whether one Lambo `serve` can write to many shopper sessions, or needs one writer per session. The deploy today runs one writer for one session (`LAMBO_SESSION`, default `demo-shopper`). If Lambo can't multiplex, that's a Lambo issue for the user to file, not a workaround here. (T0.11)
+- ~~Whether one Lambo `serve` can write to many shopper sessions, or needs one writer per session. The deploy today runs one writer for one session (`LAMBO_SESSION`, default `demo-shopper`). If Lambo can't multiplex, that's a Lambo issue for the user to file, not a workaround here. (T0.11)~~ Proved: one `lambo serve --transport http` hub hosts one writer per session and many sessions, attaching on demand (T0.11); the deploy runs that hub (T8.1).
 - The fit index on the Elastic deployment: per-purchase rows updated in place, settled-only aggregations by product line, size, reason category and direction, distinct-shopper counts, and its speed inside recall. (T0.12)
 - What the Agent Toolkit's transaction listing actually returns for a refund, so arm 2 gets exactly that and nothing more.
 
