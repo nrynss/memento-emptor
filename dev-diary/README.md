@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Paused for the pivot |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 1 / 10 | In progress |
-| P9 | 0 / 8 | Waits on P7, P8 |
+| P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.1: Seeded population (done)
+
+**What exists.** `seed/population.go` generates 69 `domain.FitRow` rows across six line-and-size pairs, using `identity.SeedSaltHex` per-line hashes, `identity.TxnHash` row ids and the seeded mark on every row; no raw shopper or transaction id is in the fixture. `GeneratePopulation(asOf)` takes the anchor and `WritePopulation` writes `testdata/seed/population/population.json`. The demo oxford M is **Earned small** (12 distinct too-small shoppers, 63% share, and the recent window earns on its own); oxford L and brand-y are **Building**; brand-z is Building because the 60% share fails; brand-v is **Claimed** below the floor; brand-w is **Out of true** (the recent window flipped to large). Review APPROVE with one fix pinning a settled row's `EventAt` to its `SettledAt`.
+
+**What surprised.** The recent-window rule is strict: an Earned line must have a recent window that earns on its own, so the demo line carries exactly eight recent too-small shoppers; a handful of recent rows would flip it Out of true. The seeding moment must be passed as `asOf` or statuses drift. The population's counts differ from T7.1's illustrative `product_fit` example (22 settled / 19 shoppers here, 60 / 39 there) while the status and direction agree; T7.4 should align or label the example.
+
+**The next agent should not have to work out.** Use `DemoOxfordLine()` / `PopulationLines()` for Go callers; the Svelte ledger and merchant app cannot import Go, so T9.3 takes its line list from `testdata/api` or its own config. The row is `domain.FitRow`; T8.2's writer is the consumer. Live seeding (T9.6) passes the seeding moment as `asOf`.
 
 ### T8.4: Corrections that stand on their own (done)
 

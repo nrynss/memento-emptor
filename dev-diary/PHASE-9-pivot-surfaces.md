@@ -12,7 +12,7 @@ requires:   [T7.1, T7.2]
 fixture-ok: yes
 size:       M · mid
 owns:       seed/population.go, seed/population_test.go, testdata/seed/population/
-status:     in-review
+status:     done
 ```
 A deterministic generator for the shoppers behind the pool, written through the T8.2 row shape with the seeded salt and the seeded mark on every row. It must include the demo brand's oxford with a pooled belief that reaches Earned honestly under the T7.1 rule (product.md's demo step 0), lines that stay Building, and one line that is Out of true. Existing shoppers and their transaction ids stay byte-identical (the T5.7 rule).
 
@@ -66,7 +66,7 @@ size:       M · mid
 owns:       merchant/, tools/check.sh
 status:     not-started
 ```
-A separate, read-only app for the sandbox merchant's product lines. It reads the pool only through the layer's `product_fit`, with the merchant key from T8.6, never Elastic, and holds no Elastic key. One AG Grid table: product line and size, settled purchases, returns by reason category and direction, feedback by verdict, pool status, seeded count. A row opens the "why" for that line and size: the counts behind its status, and the rule it was judged by. The same stack as `web/` (Svelte 5, Chaaya, AG Grid community), with its own package, tests and build, and a step in `tools/check.sh`.
+A separate, read-only app for the sandbox merchant's product lines. It reads the pool only through the layer's `product_fit`, with the merchant key from T8.6, never Elastic, and holds no Elastic key. One AG Grid table: product line and size, settled purchases, returns by reason category and direction, feedback by verdict, pool status, seeded count. A row opens the "why" for that line and size: the counts behind its status, and the rule it was judged by. The same stack as `web/` (Svelte 5, Chaaya, AG Grid community), with its own package, tests and build, and a step in `tools/check.sh`. The Go `DemoOxfordLine()` / `PopulationLines()` helpers are not importable from Svelte; take the seller's line list from `testdata/api` or its own config.
 
 **Done when:** it builds and tests against fixtures from `testdata/api/`. Each status renders with its rule. No component can show a shopper row, and a test proves the app has no Elastic configuration. The gate passes, including the new step.
 
@@ -142,7 +142,7 @@ product.md's demo from step 0 to step 7, live, on the hosted service: the new sh
 
 ## Exit Criteria
 
-- [ ] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
+- [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
 - [ ] The ledger shows the deciding step and the pool, with no other shopper's rows (T9.2).
 - [ ] The merchant app is built and deployed, reading only `product_fit` (T9.3, T9.3d).
 - [ ] The reference agent never refuses on evidence and records standalone corrections (T9.4).
