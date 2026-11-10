@@ -66,7 +66,7 @@ requires:   [T8.2]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/fitindex/
-status:     not-started
+status:     claimed:t82b-live-fit
 ```
 One sandbox purchase through capture, refund and reason, written to a test-prefixed index on the live deployment, with a replayed webhook. No model spend. Test indices deleted afterwards, with an empty listing shown.
 
@@ -80,7 +80,7 @@ requires:   [T7.1, T8.2]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/pool/
-status:     not-started
+status:     claimed:t83-pool-reader
 ```
 `product_fit` over settled rows only, with T0.12's queries: the denominator, fit returns by direction, feedback by verdict, distinct shoppers by direction, and the seeded split. The status comes from T7.1's rule function, never a second copy of it. The connection stays warm, with a 20 s timeout, so a cold TLS handshake (about 6.9 s in T0.12) never lands on a recommendation. When the index can't be reached, the pool says so and recall carries on without it: it never pretends to an empty pool.
 
@@ -161,7 +161,7 @@ requires:   [T2.1, T8.2]
 fixture-ok: no
 size:       M · frontier
 owns:       internal/payments/, internal/ingest/
-status:     not-started
+status:     claimed:t87-webhook-verify
 ```
 The webhook path is public by design, and its only gate is T2.1's verifier, which today replays a fixture: a known event id can write evidence into any shopper's session. Build the real adapter against PayPal's `POST /v1/notifications/verify-webhook-signature` with the transmission id, timestamp, signature and raw body, using the sandbox app's credentials. Reject anything that does not verify, keep the delivery idempotency T2.1 built, and record a good, a tampered, a replayed and an unknown delivery. Budget: no model spend; sandbox calls are free.
 
