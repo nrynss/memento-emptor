@@ -222,6 +222,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 
 **What surprised.** Verify API field is `webhook_event`, not `request_body` (the latter 400s) — noted for whoever next touches `research/paypal.md`. Capture GET's `up` link yields the order id, so the existing T1.3b records sufficed with nothing created; driver catalogs the SKUs and fails on unknown ones.
 
+### T2.7b: Direction rule, live (done)
+
+**What exists.** `tests/live/direction/` driver (no CI tests, `out/` ignored): Venerable on 3 same-direction returns live (blast 3, Swarm), opposing standalone concept stays unattached with no `Contradicts`/warning; recall serves the belief clean while ranking the opposite first; session erased, `t27b*` indices empty. $0 spend.
+
+**What surprised.** Review scoped the claim honestly: the live leg proves graph-level non-interference (no auto-attach/contradict by the daemon), NOT the service path — refusal (`ErrDirectionMismatch`) and unattached-row routing are proved offline in T2.7's tests. Wording fixed accordingly ("byte-identical" → asserted properties; cleanup counts marked transcript-only).
+
 ### T2.7: Direction-aware reason matching (done) ★
 
 **What exists.** Direction is part of the match: `Category.Direction()` vs stored belief direction; mismatch attaches to an existing opposite-direction belief if present, else counts toward nothing visibly (`accepted:false/ask_again:false`, reason kept, unattached in ledger evidence); never auto-`against`. Writer backstops with `ErrDirectionMismatch`. Mixed-direction tests both levels; offline story all-small matching frozen fixtures; contract shape unchanged (F2 prose fixed: accepted:false no longer implies ask_again:true).

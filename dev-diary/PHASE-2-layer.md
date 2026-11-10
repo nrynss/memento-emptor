@@ -281,7 +281,7 @@ requires:   [T2.7]
 fixture-ok: no
 size:       XS · frontier
 owns:       tests/live/direction/
-status:     in-review
+status:     done
 ```
 Re-prove the corrected writer against live Lambo (native embedder, 0.10.1+): same-direction returns earn, an opposite-direction return attaches nowhere, recall reflects it. Throwaway session, deleted after; spend bounded like T2.4b.
 
