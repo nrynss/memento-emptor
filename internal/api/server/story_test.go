@@ -137,6 +137,53 @@ func answerReason(t *testing.T, svc *Service, shopper, eventID, answer string) c
 	return res
 }
 
+// TestChangedMindClosesQuestionWithoutBelief proves a clear answer that
+// counts toward nothing closes its question without writing a belief: the
+// refund stays an outcome with no cause, and no code path turns it into
+// evidence. The writer-level rule has its own test; this one covers the
+// service path that attaches the reason and closes the question.
+func TestChangedMindClosesQuestionWithoutBelief(t *testing.T) {
+	ctx := context.Background()
+	svc, spy := storyHarness(t)
+	shopper := "shopper_01"
+
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-01"); err != nil {
+		t.Fatalf("ingest WH-2EV-01: %v", err)
+	}
+	res := answerReason(t, svc, shopper, "WH-2EV-01", "changed my mind")
+	if res.Accepted || res.AskAgain || res.BeliefID != nil {
+		t.Fatalf("changed mind: accepted %v ask again %v belief %v, want false false nil",
+			res.Accepted, res.AskAgain, res.BeliefID)
+	}
+	if res.Category != domain.CategoryChangedMind {
+		t.Fatalf("changed mind: category %q, want changed_mind", string(res.Category))
+	}
+	if res.CountsToward != nil {
+		t.Fatalf("changed mind counts toward %q, want nothing", string(*res.CountsToward))
+	}
+	pending, err := svc.PendingQuestions(ctx, contract.PendingQuestionsRequest{ShopperID: shopper})
+	if err != nil {
+		t.Fatalf("pending after changed mind: %v", err)
+	}
+	if len(pending.Questions) != 0 {
+		t.Fatalf("pending holds %d questions, want 0: the answer closed it", len(pending.Questions))
+	}
+	ledger, err := svc.LedgerBeliefs(ctx, contract.LedgerBeliefsRequest{ShopperID: shopper})
+	if err != nil {
+		t.Fatalf("ledger beliefs: %v", err)
+	}
+	if len(ledger.Beliefs) != 0 {
+		t.Fatalf("ledger holds %d beliefs, want 0: nothing was earned", len(ledger.Beliefs))
+	}
+	spy.mu.Lock()
+	actions := len(spy.actions)
+	derives := len(spy.derives)
+	spy.mu.Unlock()
+	if actions != 0 || derives != 0 {
+		t.Fatalf("graph saw %d actions and %d derives, want none", actions, derives)
+	}
+}
+
 // TestStoryEndToEnd replays the demo story through the service on the
 // fakes: webhooks in, classified answers, Earned after the third return,
 // a correction that wins at once while the belief stands, a dispute that
