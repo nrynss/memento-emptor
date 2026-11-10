@@ -187,7 +187,7 @@ requires:   [T8.5, T9.6]
 fixture-ok: no
 size:       M · mid
 owns:       cmd/memento/main.go, deploy/start.sh, deploy/Dockerfile
-status:     not-started
+status:     claimed:t96b-image-wiring
 ```
 Build the pool reader + fit writer (live salt, catalog line resolver, standing dir on disk) + hub-backed graph client into the served layer, boot it in `start.sh` before/after the seed, and ship the population fixture in the image. First boot seeds `fit-rows` once via the disk marker (seed through `Refunded` then `Classified`; skip when `LAMBO_EMBEDDER=fixture` or `MEMENTO_FIT_SEED=0`). Register the merchant key entry in the layer's `MEMENTO_MERCHANT_KEYS`. Decide the old-Lambo-arc seed's retirement (its session name collides with the hub's future shopper session).
 
