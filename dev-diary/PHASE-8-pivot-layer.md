@@ -12,7 +12,7 @@ requires:   [T0.11, T7.2]
 fixture-ok: yes
 size:       S · mid
 owns:       deploy/start.sh, deploy/README.md
-status:     not-started
+status:     claimed:t81-hub
 ```
 Move the deploy from one writer for one session (`LAMBO_SESSION`) to the shape T0.11 recommends: one `lambo serve --transport http`, a credential with `session_prefix = "shopper-"` and `create = true`, `max_attached` 16, and sessions named by T7.2. `serve-web` starts with the demo shoppers as its allowlist, until [Lambo issue 241](https://github.com/nrynss/lambo/issues/241) lands. The layer addresses each shopper at `/mcp/s/<session>`.
 
@@ -38,7 +38,7 @@ requires:   [T7.1, T7.2]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/fitindex/, internal/ingest/
-status:     not-started
+status:     claimed:t82-fit-writer
 ```
 Ingest writes a fit row beside every Lambo write, from the same event: capture creates the row, a refund marks it returned, a classified reason gives it a category and direction, fit feedback and kept-past-the-window settle it, and a contested reason updates it. Each write replaces the whole document at the state-rank version with `external_gte` (T0.12: the partial `_update` API refuses external versioning). The index is created from T7.1's mapping. Only the layer's interface to the index is named in domain code (developer rule 6).
 
@@ -104,7 +104,7 @@ requires:   [T7.1, T7.2]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/auth/, deploy/edge/
-status:     not-started
+status:     claimed:t86-auth
 ```
 Today the MCP endpoint has no authentication: anyone who reaches the URL can read any shopper's memory by `shopper_id`. product.md ("How it is consumed") requires every caller to be authenticated before anything with real shoppers goes live.
 
