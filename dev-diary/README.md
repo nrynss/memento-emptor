@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
-| P5 | 6 / 7 | In progress |
+| P5 | 7 / 7 | Done |
 | P6 | 0 / 7 | Not started |
 
 ---
@@ -199,6 +199,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `web/src/lib/contest/` (CorrectionButton column, ContestEditor form, correction-path-only transport, state helpers, source-scan + mount tests — 19/19 with reviewer's additions). Edit moves Earned→Out of true, standing kept, row visible; three layers of proof that only `record_correction` fires.
 
 **What surprised.** Review caught a real rendered bug: file-header `//` comments in Svelte compile to visible text nodes (fixed; same pattern pre-exists frozen in T4.2's `LedgerGrid.svelte` — follow-up task to sweep all `.svelte` files, not a silent fix). T4.4's own mount tests needed a client-entry import path (Vitest resolves `svelte` to server build here).
+
+### T5.6: Results (done)
+
+**What exists.** `bench/README.md`: results as counts with run links, limits up front, three lead-number candidates unchosen. Arm 1 0/15, arm 2 15/15, arm 3 0/15 real recommendations — stated plainly with both numbers wherever the graded artifact appears. Corrections nil (documented, not manufactured).
+
+**What surprised.** Review's only changes were wording precision (no percentages anywhere, all-15-turns cite scope). Counts recomputed independently; hidden-answer absence verified programmatically.
 
 ### T5.5: All arms on the frozen set (done) ★
 
