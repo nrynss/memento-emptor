@@ -341,7 +341,7 @@ requires:   [T8.5, T8.1b, T8.2b, T8.3b]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/precedence/
-status:     not-started
+status:     claimed:t85b-live-layer
 ```
 The live layer through the hub and a test-prefixed fit index: one shopper per precedence step, plus a correction made in one MCP session and read in a fresh one. Budget: under $0.50. Run one case first and check its cost. Test sessions and indices removed afterwards.
 
