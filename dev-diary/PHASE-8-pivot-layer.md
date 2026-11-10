@@ -80,7 +80,7 @@ requires:   [T8.2]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/fitindex/
-status:     in-review
+status:     done
 ```
 One sandbox purchase through capture, refund and reason, written to a test-prefixed index on the live deployment, with a replayed webhook. No model spend. Test indices deleted afterwards, with an empty listing shown.
 
@@ -237,7 +237,7 @@ The live layer through the hub and a test-prefixed fit index: one shopper per pr
 ## Exit Criteria
 
 - [ ] One Lambo process serves every shopper, live (T8.1, T8.1b).
-- [ ] Every purchase writes and updates its fit row at ingest, live (T8.2, T8.2b).
+- [x] Every purchase writes and updates its fit row at ingest, live (T8.2, T8.2b).
 - [ ] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
 - [x] A correction stands on its own (T8.4).
 - [x] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).

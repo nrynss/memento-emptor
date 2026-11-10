@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 4 / 11 | In progress |
+| P8 | 5 / 11 | In progress |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -192,6 +192,73 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** The deployment can start with no key variables and stay `/healthz`-green while refusing every API call — fail-closed, but invisible in Render. Nothing invokes `IssueKey` yet. The webhook's only gate is still T2.1's replay fixture; a known event id can write evidence into any shopper's session (pollution, not disclosure). `/calls` is agent-only because the layer returns every entry unscoped. The guard forwards a body it cannot parse; the layer's strict single-object decoder rejects it today.
 
 **The next agent should not have to work out.** T9.6 wires the three `MEMENTO_*` variables into `deploy/render.yaml`, `.env.example` and `tools/env.sh`, mints keys with T8.5's command, and sets them as Render secrets. T8.5 adds the key command, scopes `/calls`, keeps the MCP decoder strict, and retries a partial opt-out. T8.7 replaces the fixture webhook verifier with a real signature check. T9.2 sends the demo shopper's link token as a bearer header.
+
+### T8.2b: Fit index writer, live (done)
+
+**What exists.** `tests/live/fitindex/` (driver `main.go`, `run.sh`, README, git-ignored `out/`) drives `fitindex.NewHTTPIndex` + `Create` against the live deployment: one recorded sandbox purchase (T0.4 cycle 1) through capture → refund → classified reason, plus a replayed delivery and an older-version retry, then deletes the `t82b-fit-rows` index. Only the index was live; the payment events and classification are the recordings. Review APPROVE with two doc fixes (the answer's event time is the driver's own `refundAt + 20m`, not a recording; the second cycle does have a paired capture+refund, it lacks the order read with line items).
+
+**Live transcript** (verbatim from `bash tests/live/fitindex/run.sh`; index deleted, prefix empty before and after):
+
+```
+$ source tools/env.sh
+$ bash tests/live/fitindex/run.sh
+
+T8.2b live fit index writer
+deployment: <deployment> (elastic, T0.12's project)
+index: t82b-fit-rows
+
+-- prefix listing before: GET /_cat/indices/t82b-* -> []
+-- create: PUT /t82b-fit-rows with the recorded mapping (no settings) -> ok
+-- purchase: capture CAPTURE-ID-US-1, order ORDER-ID-US-1, refund REFUND-ID-US-1, brand-x-001/shirts/regular size M
+-- row id: sha256("txn|"+CAPTURE-ID-US-1) = 5184598358cef128…
+-- shopper hash for the line (live salt): 16e82eb3dda8fbba…
+
+== 1. capture delivery WH-T82B-CAPTURE-1 -> ingest -> writer.Captured
+   ingest: 1 evidence row(s), duplicate=false, pending question filed
+   doc: version=1001794233521 state=captured settled=false kind=- reason=- direction=- verdict=- contested=false seeded=false captured_at=2026-11-09T14:12:01Z refunded_at=- settled_at=- line=brand-x-001/shirts/regular size=M
+
+== 2. refund delivery WH-T82B-REFUND-1 -> ingest -> writer.Refunded
+   ingest: 1 evidence row(s), duplicate=false, pending question=true
+   doc: version=2001794233529 state=refunded settled=false kind=- reason=- direction=- verdict=- contested=false seeded=false captured_at=2026-11-09T14:12:01Z refunded_at=2026-11-09T14:12:09Z settled_at=- line=brand-x-001/shirts/regular size=M
+
+== 3. replay the refund delivery (before the reason): ingest returns the stored rows
+   ingest: 1 evidence row(s), duplicate=true (nothing written)
+   doc: version=3001794233529 state=refunded settled=false
+
+== 4. shopper's answer -> recorded classifier -> writer.Classified
+   answer "too tight in the shoulders" -> category fit_too_small (confidence 1.00, testdata/jev/01-fit-too-small-tight-shoulders.json)
+   doc: version=3001794234729 state=reason_classified settled=true kind=return_reason reason=fit_too_small direction=too_small verdict=- contested=false seeded=false captured_at=2026-11-09T14:12:01Z refunded_at=2026-11-09T14:12:09Z settled_at=2026-11-09T14:32:09Z line=brand-x-001/shirts/regular size=M
+
+== 5. replay the refund delivery (now behind the reason): the newer state stands
+   ingest: duplicate=true (nothing written)
+   doc: version=3001794234729 state=reason_classified settled=true
+
+== 6. retry the fit write with the capture event (an older state, same writer)
+   doc: version=3001794234729 state=reason_classified settled=true
+
+== 7. a fresh writer (a restarted process) hands the index the captured event
+   writer returned nil (an older version is done, not an error); doc: version=3001794234729 state=reason_classified settled=true
+
+== 8. the index refuses a write at the captured rank directly
+   PUT at the captured rank -> 409 version_conflict_engine_exception: current version [3001794234729] is higher than [1001794233521]
+
+== 9. one document per purchase
+   docs for the purchase: 1, docs for the line: 1, docs in t82b-fit-rows: 1
+
+model spend: $0 (no classifier call: the answer and its category are recorded)
+elastic: one kilobyte-scale index, 3 state writes + 3 replayed writes + reads/counts + one delete; nothing billable beyond the existing project
+
+-- cleanup: DELETE /t82b-fit-rows -> 200 {"acknowledged":true}
+-- prefix listing after: GET /_cat/indices/t82b-* -> []
+
+PASS T8.2b live fit index: one purchase, one row, every state, replayed writes harmless, index deleted
+--- cleanup check: the t82b- prefix is empty ---
+[]
+--- leak check: no key or deployment location entered tests/live/fitindex ---
+done: T8.2b live checks pass; index deleted; transcript in tests/live/fitindex/out (git-ignored)
+```
+
+**Spend.** $0 model; one kilobyte-scale index, 3 state writes + 3 replayed writes + reads/counts + one delete on the existing project.
 
 ### T8.2: Fit index writer (done)
 
