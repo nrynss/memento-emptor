@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 7 / 12 | In progress (T8.5 next) |
+| P8 | 8 / 12 | In progress (T8.5 running) |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -200,6 +200,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** A redacted recording cannot verify live — the signature covers the exact bytes, so the byte-exact delivery lives in git-ignored `out/` and only shapes/verdicts are committed. The signature is bound to the subscription id, so multi-subscription discovery tries every candidate unless `PUBLIC_URL` narrows it. The `Client` caches the subscription list for process lifetime (T8.5 owns the refresh decision).
 
 **The next agent should not have to work out.** T8.5 wires the deployed route: read the raw body bounded like the other routes, pass `ingest.Delivery{Header, Body}` to the shopper's service, and resolve the shopper via `custom_id`. Until then the deployed path keeps T2.1's fixture gate while every wired caller of `HandleDelivery` is verified for real. Set `PUBLIC_URL` on the service once the Render subscription exists beside the test-endpoint one.
+
+### T8.3c: Union per-direction shoppers (done)
+
+**What exists.** `internal/pool/` gains a `direction_shoppers` filters aggregation: one bucket per direction, each a union of fit returns that way and fit feedback with that verdict (one shopper counts once). Resolution (a), no contract change — `domain.PoolCounts` already documents each direction as returns and feedback, and narrowing would have contradicted the rule. The old nested cardinality under `fit_returns/direction` is gone from the query and unread. The fixture pins 36/15 union shoppers (was 31/12 returns-only), with a regression case (10 feedback-only small shoppers → Earned). Review APPROVE with one comment fix.
+
+**What surprised.** Feedback rows carry `fit_direction` set from the verdict, but the union's feedback leg filters on `settled_kind + feedback_verdict` instead, so a future verdict row without a direction still counts. The index's `Shoppers.Fit` (all-settled) and the documented Building floor are different counts; the floor uses the fit-classified cardinality.
+
+**The next agent should not have to work out.** Nothing about the served layer changes shape. T8.5 reads the union buckets as served.
 
 ### T8.3: Pool reader (done)
 

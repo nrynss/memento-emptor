@@ -144,7 +144,7 @@ requires:   [T8.3]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/pool/
-status:     in-review
+status:     done
 ```
 T8.3's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the rule's eight-shopper floor: 10 shoppers whose only small evidence is `feedback: too_small` read Building where the documented rule says Earned. Either add a second per-direction filter+cardinality that unions fit returns with fit feedback verdicts (and decide what the recorded fixture then pins), or narrow `domain.PoolCounts`/`ShopperCountsView` to returns-only — the latter is a contract change and the orchestrator's call.
 
