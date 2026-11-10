@@ -12,7 +12,7 @@ requires:   [T0.11, T0.12]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/contract/, internal/domain/, docs/interface.md, docs/architecture.md, testdata/api/
-status:     in-review
+status:     done
 ```
 Change the frozen contract to the pivot in product.md, and update every fixture in `testdata/api/` in the same commit.
 
@@ -75,6 +75,18 @@ The one pivot decision still open in product.md. What is pooled is settled: reas
 
 **Notes.** Decided by the user: opt-out by default. Opting out is recorded in the shopper's own memory, stops new fit rows, and removes existing rows by recomputing each per-line hash from the lines the session knows. `set_pooling` is added to T7.1's contract; T8.2 honours it; T8.5 serves it; T9.2 puts it in the ledger. Also decided: sellers are the second audience, beside the buyer side, which stays first.
 
+### T7.4: Tighten the pivot contract
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/contract/, testdata/api/, docs/interface.md, docs/architecture.md
+status:     not-started
+```
+T7.1 could not make the pivot's core required: `internal/api/server` compares its served JSON to the base fixtures and `testdata/replay/` is frozen, so `pool`, `pool_lookup` and per-item `precedence` are optional and a conforming implementation could never return a pool. Once T8.5 serves the pivot, make them required, add a Claimed and a Building `product_fit` example (all four current pool fixtures are Earned), and update the schemas, Go types, tests and docs in the same commit. Do this before the round 2 freeze (T10.3).
+
+**Done when:** the schemas and Go types require the pool and precedence fields; the Claimed and Building examples validate and are pinned; every fixture and doc block is updated; the gate passes; no other contract behaviour changes.
+
 ---
 
 ## Exit Criteria
@@ -82,3 +94,4 @@ The one pivot decision still open in product.md. What is pooled is settled: reas
 - [ ] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).
 - [ ] Every stored key is built in one place, with the salt from the keyring (T7.2).
 - [x] Consent for pooling is decided: opt-out (T7.3).
+- [ ] The contract requires the pool and per-item precedence once the served layer supports them (T7.4).

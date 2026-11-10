@@ -124,10 +124,10 @@ The middleware sits in `internal/auth/` and in front of every route at the edge.
 requires:   [T8.1, T8.3, T8.4, T8.6]
 fixture-ok: yes
 size:       M · frontier
-owns:       internal/api/server/, internal/precedence/
+owns:       internal/api/server/, internal/precedence/, cmd/memento/main.go
 status:     not-started
 ```
-Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal.
+Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Correct the stale "nine frozen tools" comments in `internal/api/server/` and `cmd/memento/main.go`; the surface is eleven.
 
 **Done when:**
 - A table test covers every step deciding, every pair of disagreeing steps, and the unreachable pool.

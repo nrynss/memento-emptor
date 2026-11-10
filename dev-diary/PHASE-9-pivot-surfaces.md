@@ -25,10 +25,10 @@ A deterministic generator for the shoppers behind the pool, written through the 
 requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
-owns:       web/src/lib/ledger/, web/src/routes/belief/
+owns:       web/src/lib/ledger/, web/src/routes/belief/, web/src/lib/contest/
 status:     not-started
 ```
-The shopper's ledger shows which precedence step decided each recommendation, an overridden step beside the one that won, a standing correction with no belief, and the pooled belief that applies to them as counts with its seeded count. It never shows another shopper's rows. The shopper can opt out of pooling here, and back in, through `set_pooling`, with the number of rows removed shown. Svelte 5 runes only.
+The shopper's ledger shows which precedence step decided each recommendation, an overridden step beside the one that won, a standing correction with no belief, and the pooled belief that applies to them as counts with its seeded count. It never shows another shopper's rows. The shopper can opt out of pooling here, and back in, through `set_pooling`, with the number of rows removed shown. Fix the pre-pivot correction types in `web/src/lib/contest/`: a standing correction is schema-valid now, and the decoder must accept it. Svelte 5 runes only.
 
 **Done when:** component tests cover each step, an overridden pair, a standing correction, and the opt-out toggle. The pooled row shows counts only. The gate passes.
 
@@ -68,7 +68,7 @@ size:       M · frontier
 owns:       agent/runtime/
 status:     not-started
 ```
-The reference agent reads the precedence step and states how sure it is from the label. It never refuses when recall returns evidence, and it says when an answer rests on the pool or on a Claimed statement. It records a standalone correction when recall served no belief (the 7-in-9 gap from T5.9). The existing guarantees stay: recall first, approval before any purchase, double-buy protection. Re-run the T3.5 evals and add one per precedence step. Budget: under $1.00. Run one eval first and check its cost.
+The reference agent reads the precedence step and states how sure it is from the label. It never refuses when recall returns evidence, and it says when an answer rests on the pool or on a Claimed statement. It records a standalone correction when recall served no belief (the 7-in-9 gap from T5.9). The existing guarantees stay: recall first, approval before any purchase, double-buy protection. Correct the stale tool count in `agent/runtime/README.md`; the surface is eleven. Re-run the T3.5 evals and add one per precedence step. Budget: under $1.00. Run one eval first and check its cost.
 
 **Done when:** the evals pass, with traces showing recall first on every turn. The standalone correction is recorded live at least once. Spend is recorded.
 

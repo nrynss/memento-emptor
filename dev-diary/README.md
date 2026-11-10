@@ -15,7 +15,7 @@ Each phase document gives an engineer starting cold the complete context for its
 
 **This diary is public.** The repository goes public for submission. Nothing private goes in here: no key, no account detail, no IP address, no personal path beyond `~`, no private repository's name.
 
-**Current status:** P0 to P5 are done as first built, and the pivot in product.md is decided. P7 to P10 carry it out. Ready now: T7.1 (pivot contracts), T10.1 (what arm 2 gets) and T10.2 (round 1 relabel). P6 resumes after P9 and P10.
+**Current status:** P0 to P5 are done as first built, and the pivot in product.md is decided. P7 to P10 carry it out. T7.1 (pivot contracts) and the round 1 relabel are landed; T10.1 (what arm 2 gets) is in final review; T7.2 waits on the identity salt. P6 resumes after P9 and P10.
 
 ---
 
@@ -166,7 +166,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
-| P7 | 1 / 3 | Ready (T7.1) |
+| P7 | 2 / 4 | Ready (T7.2, needs the identity salt) |
 | P8 | 0 / 10 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
 | P10 | 2 / 6 | In progress (T10.1) |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T7.1: Pivot contracts (done)
+
+**What exists.** `internal/domain/` holds the fit row (`ProductLine`, state rank, settled kind, verdict, `FitRow.Version()` = rank × 1e12 + event Unix seconds), the pool rule (`PoolCounts`, `PoolVerdict`, `DecidePool`, constants 3 / 8 / 60% / 2× / 90 days) and `UsualSizeFor`, each table-tested. `internal/api/contract/` has the five-step precedence (`own_evidence` replaces `belief` on the wire; `GuidanceBelief` aliases it in Go), an optional correction belief, `product_fit` and `set_pooling` (eleven tools). `testdata/api/` has 12 new and 5 changed fixtures; `docs/interface.md` carries 31 blocks; `docs/architecture.md` gains the fit-index write path, the per-shopper hub and the merchant app. Review APPROVE with one medium and four low findings.
+
+**What surprised.** The served layer's fixture comparison forced every pivot field to stay optional and the base recall example to stay pre-pool, because `testdata/replay/` is frozen; a conforming implementation could currently never return a pool. That tightening is T7.4, after T8.5. Below three shoppers the pool reads Claimed; the 90-day window is judged only at or above the floor, so a quiet line keeps its label; the 60% share only bites because fits-well outcomes dilute it. `tools/list` advertises the two new tools before dispatch serves them (no current caller discovers tools), and the wire basis renamed `belief` to `own_evidence`.
+
+**The next agent should not have to work out.** T7.4 owns the contract tightening and the Claimed/Building fixtures; never edit `testdata/replay/` to force the contract. T8.5 owns the stale "nine frozen tools" comments in the server and `cmd/memento/main.go`; T9.2 owns the stale pre-pivot correction types in `web/src/lib/contest/`; T9.4 owns the agent README's tool count.
 
 ### T10.2b: Round 1 corrections reported (done)
 
