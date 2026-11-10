@@ -1,0 +1,347 @@
+{
+  "expected_probe_distinct": 88,
+  "expected_whole_distinct": 588,
+  "samples": {
+    "probe_default": {
+      "request": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "term": {
+                    "brand": "sunspel"
+                  }
+                },
+                {
+                  "term": {
+                    "category": "shirt"
+                  }
+                },
+                {
+                  "term": {
+                    "fit_handle": "regular"
+                  }
+                },
+                {
+                  "term": {
+                    "size": "M"
+                  }
+                },
+                {
+                  "term": {
+                    "settled": true
+                  }
+                }
+              ]
+            }
+          },
+          "aggs": {
+            "distinct": {
+              "cardinality": {
+                "field": "shopper_hash"
+              }
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 100,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          },
+          "aggregations": {
+            "distinct": {
+              "value": 88
+            }
+          }
+        }
+      },
+      "expected": 88,
+      "value": 88
+    },
+    "probe_40000": {
+      "request": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "term": {
+                    "brand": "sunspel"
+                  }
+                },
+                {
+                  "term": {
+                    "category": "shirt"
+                  }
+                },
+                {
+                  "term": {
+                    "fit_handle": "regular"
+                  }
+                },
+                {
+                  "term": {
+                    "size": "M"
+                  }
+                },
+                {
+                  "term": {
+                    "settled": true
+                  }
+                }
+              ]
+            }
+          },
+          "aggs": {
+            "distinct": {
+              "cardinality": {
+                "field": "shopper_hash",
+                "precision_threshold": 40000
+              }
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 100,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          },
+          "aggregations": {
+            "distinct": {
+              "value": 88
+            }
+          }
+        }
+      },
+      "expected": 88,
+      "value": 88
+    },
+    "whole_default": {
+      "request": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "match_all": {}
+          },
+          "aggs": {
+            "distinct": {
+              "cardinality": {
+                "field": "shopper_hash"
+              }
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 600,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          },
+          "aggregations": {
+            "distinct": {
+              "value": 588
+            }
+          }
+        }
+      },
+      "expected": 588,
+      "value": 588
+    },
+    "whole_40000": {
+      "request": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "match_all": {}
+          },
+          "aggs": {
+            "distinct": {
+              "cardinality": {
+                "field": "shopper_hash",
+                "precision_threshold": 40000
+              }
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 600,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          },
+          "aggregations": {
+            "distinct": {
+              "value": 588
+            }
+          }
+        }
+      },
+      "expected": 588,
+      "value": 588
+    },
+    "whole_100": {
+      "request": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "match_all": {}
+          },
+          "aggs": {
+            "distinct": {
+              "cardinality": {
+                "field": "shopper_hash",
+                "precision_threshold": 100
+              }
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 600,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          },
+          "aggregations": {
+            "distinct": {
+              "value": 582
+            }
+          }
+        }
+      },
+      "expected": 588,
+      "value": 582
+    },
+    "whole_100000": {
+      "request": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "match_all": {}
+          },
+          "aggs": {
+            "distinct": {
+              "cardinality": {
+                "field": "shopper_hash",
+                "precision_threshold": 100000
+              }
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 600,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          },
+          "aggregations": {
+            "distinct": {
+              "value": 588
+            }
+          }
+        }
+      },
+      "expected": 588,
+      "value": 588
+    }
+  },
+  "precision_threshold": {
+    "default": 3000,
+    "max": 40000,
+    "exact_below": "counts are accurate up to the configured precision_threshold; the population's whole-index distinct count is below the 3000 default, so it is exact here. Above 3000 distinct values the default count is an HLL++ estimate; raising precision_threshold to its 40000 maximum moves the approximate boundary out to 40000."
+  }
+}

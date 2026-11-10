@@ -1,0 +1,161 @@
+{
+  "settings": {
+    "t012-fit-pop": {
+      "settings": {
+        "index": {
+          "mode": "vectordb_document",
+          "mapping": {
+            "exclude_source_vectors": "true"
+          }
+        }
+      }
+    }
+  },
+  "mode_override": {
+    "status": 400,
+    "response": {
+      "error": {
+        "root_cause": [
+          {
+            "type": "illegal_argument_exception",
+            "reason": "index mode [standard] is not allowed for vectordb projects; only [vectordb_document] is supported"
+          }
+        ],
+        "type": "illegal_argument_exception",
+        "reason": "index mode [standard] is not allowed for vectordb projects; only [vectordb_document] is supported"
+      },
+      "status": 400
+    }
+  },
+  "exclude_source_vectors_override": {
+    "status": 400,
+    "response": {
+      "error": {
+        "root_cause": [
+          {
+            "type": "illegal_argument_exception",
+            "reason": "[index.mapping.exclude_source_vectors] cannot be set to [false] when [index.mode=vectordb_document]"
+          }
+        ],
+        "type": "illegal_argument_exception",
+        "reason": "[index.mapping.exclude_source_vectors] cannot be set to [false] when [index.mode=vectordb_document]"
+      },
+      "status": 400
+    }
+  },
+  "probe_doc": {
+    "status": 201,
+    "response": {
+      "_index": "t012-fit-pop",
+      "_id": "2b99615d25b4b2ace691111caf5362db05157bf6bde6091f81085eaca544ec30",
+      "_version": 1,
+      "result": "created",
+      "forced_refresh": true,
+      "_shards": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0
+      },
+      "_seq_no": 338,
+      "_primary_term": 1
+    }
+  },
+  "update_with_external_version": {
+    "status": 400,
+    "response": {
+      "error": {
+        "root_cause": [
+          {
+            "type": "action_request_validation_exception",
+            "reason": "Validation Failed: 1: internal versioning can not be used for optimistic concurrency control. Please use `if_seq_no` and `if_primary_term` instead;"
+          }
+        ],
+        "type": "action_request_validation_exception",
+        "reason": "Validation Failed: 1: internal versioning can not be used for optimistic concurrency control. Please use `if_seq_no` and `if_primary_term` instead;"
+      },
+      "status": 400
+    }
+  },
+  "update_by_id_plain": {
+    "status": 200,
+    "response": {
+      "_index": "t012-fit-pop",
+      "_id": "2b99615d25b4b2ace691111caf5362db05157bf6bde6091f81085eaca544ec30",
+      "_version": 2,
+      "result": "updated",
+      "_shards": {
+        "total": 1,
+        "successful": 1,
+        "failed": 0
+      },
+      "_seq_no": 339,
+      "_primary_term": 1
+    }
+  },
+  "update_by_query": {
+    "status": 200,
+    "response": {
+      "took": 6,
+      "timed_out": false,
+      "total": 1,
+      "updated": 0,
+      "deleted": 0,
+      "batches": 1,
+      "version_conflicts": 1,
+      "noops": 0,
+      "retries": {
+        "bulk": 0,
+        "search": 0
+      },
+      "throttled_millis": 0,
+      "requests_per_second": -1.0,
+      "throttled_until_millis": 0,
+      "failures": []
+    }
+  },
+  "aggregation": {
+    "status": 200,
+    "response": {
+      "took": 0,
+      "timed_out": false,
+      "_shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+      },
+      "hits": {
+        "total": {
+          "value": 601,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+      },
+      "aggregations": {
+        "n": {
+          "value": 601
+        }
+      }
+    }
+  },
+  "count_api": {
+    "status": 200,
+    "response": {
+      "count": 601,
+      "_shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+      }
+    }
+  },
+  "docs_after_probe_delete": 600,
+  "notes": {
+    "project_type": "The deployment is an Elasticsearch Vector Database project, not a general Elasticsearch Serverless project: `index.mode: standard` is refused with `index mode [standard] is not allowed for vectordb projects; only [vectordb_document] is supported`, and every index is created in `vectordb_document` mode with `index.mapping.exclude_source_vectors: true`.",
+    "update_by_id": "Whole-document PUTs by _id accept external versioning. The partial `_update` API refuses it (`internal versioning can not be used for optimistic concurrency control; use if_seq_no and if_primary_term`), so the writer rewrites the whole row at the event's external version.",
+    "aggregations": "terms, filter, filters and cardinality aggregations all answer inside vectordb_document mode; structured keyword fields and `_source` are stored and returned as usual.",
+    "billing": "Vector Database billing is storage, reserved search capacity (Search Power), ingest volume and an hourly infrastructure fee, not the VCU model of Elasticsearch Serverless projects. Query volume itself does not change the search charge. No console reading was provided; these calls created only kilobyte-scale test indices, all deleted."
+  }
+}

@@ -323,7 +323,7 @@ requires:   [T0.6]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/elastic-fit.md, testdata/elastic-fit/
-status:     claimed:t012-elastic-fit
+status:     in-review
 ```
 **The gate on pooled product fit and the merchant view.** product.md (the evidence model, "Lambo holds the shopper; Elastic holds the pool") settles the row: one document per purchase, keyed by a hash of the transaction ID, updated in place, written at ingest. Only settled rows count: returned with a classified reason, fit feedback, or kept past the return window. The shopper key is a salted hash per (shopper, product line). Seeded and live rows share one index, with the seeded mark on every row. Prove that design on the existing Serverless deployment (`research/elastic.md`):
 
@@ -341,6 +341,30 @@ No embeddings are needed; the fit index has no vector field. Every index this ta
 If 2 or 3 fails, this task is `blocked`, and the orchestrator asks the user with options.
 
 **Done when:** `research/elastic-fit.md` holds each check's request, response and result, the exact mapping, and the aggregation queries later tasks will reuse. Recordings are in `testdata/elastic-fit/` with no key and no deployment URL. Test indices are deleted (empty listing shown).
+
+**Notes.** PASS on all eight checks, live against the existing deployment.
+The deployment turned out to be an Elasticsearch **Vector Database** project,
+not a general Serverless project: only `vectordb_document` index mode is
+accepted, `exclude_source_vectors` cannot be false, and billing is storage +
+Search Power + ingest + infrastructure rather than VCU. Structured rows,
+filters, bulk and aggregations all work there anyway. The row is one document
+per `sha256(transaction id)`, whole-document `PUT` at `version = event_seq`
+with `external_gte`: an equal-version webhook retry is a 200 rewrite of one
+row, an older replay is a 409, and the partial `_update` API refuses external
+versioning outright. Over 600 generated purchases (3 lines, sizes S/M/L,
+truth table written by hand), the probe line and size matched every number:
+100 of 120 settled, 40/15 fit returns by direction, 12/5/3 feedback by verdict,
+31/12 distinct shoppers by direction, 88 distinct settled shoppers, and the
+same split by the seeded mark. A captured purchase and a no-reason refund are
+present but count zero under the settled filter. `cardinality` is exact at 588
+with the default 3000 threshold; threshold 100 returned 582, and the exact
+boundary is above 3000 (40000 with the maximum). Warm aggregation is ~236 ms
+wall (1 ms server); cold connection ~6.9 s, so it needs a timeout above the 5 s
+default — 20000 ms, the same treatment as T0.6. Lambo 0.10.1 recalled beside it
+under `t012-lambo` with no shared name, alias or template, fit rows unchanged
+at 600, and the 600-row index was not touched. Every `t012-` index deleted
+(empty listing recorded); no model spend; no console reading provided.
+Evidence in `research/elastic-fit.md`, recordings in `testdata/elastic-fit/`.
 
 ---
 

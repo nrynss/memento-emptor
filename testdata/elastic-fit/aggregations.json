@@ -1,0 +1,961 @@
+{
+  "query": {
+    "method": "POST",
+    "path": "/t012-fit-pop/_search",
+    "params": {},
+    "request": {
+      "size": 0,
+      "track_total_hits": true,
+      "query": {
+        "bool": {
+          "filter": [
+            {
+              "term": {
+                "brand": "sunspel"
+              }
+            },
+            {
+              "term": {
+                "category": "shirt"
+              }
+            },
+            {
+              "term": {
+                "fit_handle": "regular"
+              }
+            },
+            {
+              "term": {
+                "size": "M"
+              }
+            }
+          ]
+        }
+      },
+      "aggs": {
+        "split": {
+          "filters": {
+            "filters": {
+              "all": {
+                "match_all": {}
+              },
+              "seeded": {
+                "term": {
+                  "seeded": true
+                }
+              },
+              "live": {
+                "term": {
+                  "seeded": false
+                }
+              }
+            }
+          },
+          "aggs": {
+            "settled": {
+              "filter": {
+                "term": {
+                  "settled": true
+                }
+              },
+              "aggs": {
+                "shoppers": {
+                  "cardinality": {
+                    "field": "shopper_hash"
+                  }
+                },
+                "settled_kind": {
+                  "terms": {
+                    "field": "settled_kind"
+                  }
+                },
+                "reason_category": {
+                  "terms": {
+                    "field": "reason_category"
+                  }
+                },
+                "fit_returns": {
+                  "filter": {
+                    "term": {
+                      "settled_kind": "return_reason"
+                    }
+                  },
+                  "aggs": {
+                    "direction": {
+                      "terms": {
+                        "field": "fit_direction"
+                      },
+                      "aggs": {
+                        "shoppers": {
+                          "cardinality": {
+                            "field": "shopper_hash"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "feedback": {
+                  "filter": {
+                    "term": {
+                      "settled_kind": "feedback"
+                    }
+                  },
+                  "aggs": {
+                    "verdict": {
+                      "terms": {
+                        "field": "feedback_verdict"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "status": 200,
+    "response": {
+      "took": 3,
+      "timed_out": false,
+      "_shards": {
+        "total": 2,
+        "successful": 2,
+        "skipped": 0,
+        "failed": 0
+      },
+      "hits": {
+        "total": {
+          "value": 120,
+          "relation": "eq"
+        },
+        "max_score": null,
+        "hits": []
+      },
+      "aggregations": {
+        "split": {
+          "buckets": {
+            "all": {
+              "doc_count": 120,
+              "settled": {
+                "doc_count": 100,
+                "feedback": {
+                  "doc_count": 20,
+                  "verdict": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "fits_well",
+                        "doc_count": 12
+                      },
+                      {
+                        "key": "too_small",
+                        "doc_count": 5
+                      },
+                      {
+                        "key": "too_large",
+                        "doc_count": 3
+                      }
+                    ]
+                  }
+                },
+                "reason_category": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "fit_too_small",
+                      "doc_count": 40
+                    },
+                    {
+                      "key": "fit_too_large",
+                      "doc_count": 15
+                    },
+                    {
+                      "key": "changed_mind",
+                      "doc_count": 8
+                    },
+                    {
+                      "key": "damaged",
+                      "doc_count": 5
+                    },
+                    {
+                      "key": "not_as_described",
+                      "doc_count": 2
+                    }
+                  ]
+                },
+                "shoppers": {
+                  "value": 88
+                },
+                "fit_returns": {
+                  "doc_count": 70,
+                  "direction": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "too_small",
+                        "doc_count": 40,
+                        "shoppers": {
+                          "value": 31
+                        }
+                      },
+                      {
+                        "key": "too_large",
+                        "doc_count": 15,
+                        "shoppers": {
+                          "value": 12
+                        }
+                      }
+                    ]
+                  }
+                },
+                "settled_kind": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "return_reason",
+                      "doc_count": 70
+                    },
+                    {
+                      "key": "feedback",
+                      "doc_count": 20
+                    },
+                    {
+                      "key": "kept",
+                      "doc_count": 10
+                    }
+                  ]
+                }
+              }
+            },
+            "live": {
+              "doc_count": 20,
+              "settled": {
+                "doc_count": 15,
+                "feedback": {
+                  "doc_count": 3,
+                  "verdict": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "fits_well",
+                        "doc_count": 2
+                      },
+                      {
+                        "key": "too_small",
+                        "doc_count": 1
+                      }
+                    ]
+                  }
+                },
+                "reason_category": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "fit_too_small",
+                      "doc_count": 5
+                    },
+                    {
+                      "key": "changed_mind",
+                      "doc_count": 2
+                    },
+                    {
+                      "key": "fit_too_large",
+                      "doc_count": 2
+                    },
+                    {
+                      "key": "damaged",
+                      "doc_count": 1
+                    }
+                  ]
+                },
+                "shoppers": {
+                  "value": 13
+                },
+                "fit_returns": {
+                  "doc_count": 10,
+                  "direction": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "too_small",
+                        "doc_count": 5,
+                        "shoppers": {
+                          "value": 4
+                        }
+                      },
+                      {
+                        "key": "too_large",
+                        "doc_count": 2,
+                        "shoppers": {
+                          "value": 1
+                        }
+                      }
+                    ]
+                  }
+                },
+                "settled_kind": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "return_reason",
+                      "doc_count": 10
+                    },
+                    {
+                      "key": "feedback",
+                      "doc_count": 3
+                    },
+                    {
+                      "key": "kept",
+                      "doc_count": 2
+                    }
+                  ]
+                }
+              }
+            },
+            "seeded": {
+              "doc_count": 100,
+              "settled": {
+                "doc_count": 85,
+                "feedback": {
+                  "doc_count": 17,
+                  "verdict": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "fits_well",
+                        "doc_count": 10
+                      },
+                      {
+                        "key": "too_small",
+                        "doc_count": 4
+                      },
+                      {
+                        "key": "too_large",
+                        "doc_count": 3
+                      }
+                    ]
+                  }
+                },
+                "reason_category": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "fit_too_small",
+                      "doc_count": 35
+                    },
+                    {
+                      "key": "fit_too_large",
+                      "doc_count": 13
+                    },
+                    {
+                      "key": "changed_mind",
+                      "doc_count": 6
+                    },
+                    {
+                      "key": "damaged",
+                      "doc_count": 4
+                    },
+                    {
+                      "key": "not_as_described",
+                      "doc_count": 2
+                    }
+                  ]
+                },
+                "shoppers": {
+                  "value": 75
+                },
+                "fit_returns": {
+                  "doc_count": 60,
+                  "direction": {
+                    "doc_count_error_upper_bound": 0,
+                    "sum_other_doc_count": 0,
+                    "buckets": [
+                      {
+                        "key": "too_small",
+                        "doc_count": 35,
+                        "shoppers": {
+                          "value": 27
+                        }
+                      },
+                      {
+                        "key": "too_large",
+                        "doc_count": 13,
+                        "shoppers": {
+                          "value": 11
+                        }
+                      }
+                    ]
+                  }
+                },
+                "settled_kind": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "return_reason",
+                      "doc_count": 60
+                    },
+                    {
+                      "key": "feedback",
+                      "doc_count": 17
+                    },
+                    {
+                      "key": "kept",
+                      "doc_count": 8
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "expected_all": {
+    "docs": 120,
+    "settled": 100,
+    "settled_kind": {
+      "return_reason": 70,
+      "feedback": 20,
+      "kept": 10
+    },
+    "reason_category": {
+      "fit_too_small": 40,
+      "fit_too_large": 15,
+      "changed_mind": 8,
+      "damaged": 5,
+      "not_as_described": 2
+    },
+    "fit_returns_by_direction": {
+      "too_small": 40,
+      "too_large": 15
+    },
+    "feedback_by_verdict": {
+      "fits_well": 12,
+      "too_small": 5,
+      "too_large": 3
+    },
+    "distinct_shoppers_by_direction": {
+      "too_small": 31,
+      "too_large": 12
+    }
+  },
+  "got_all": {
+    "docs": 120,
+    "settled": 100,
+    "settled_kind": {
+      "return_reason": 70,
+      "feedback": 20,
+      "kept": 10
+    },
+    "reason_category": {
+      "fit_too_small": 40,
+      "fit_too_large": 15,
+      "changed_mind": 8,
+      "damaged": 5,
+      "not_as_described": 2
+    },
+    "fit_returns_by_direction": {
+      "too_small": 40,
+      "too_large": 15
+    },
+    "feedback_by_verdict": {
+      "fits_well": 12,
+      "too_small": 5,
+      "too_large": 3
+    },
+    "distinct_shoppers_by_direction": {
+      "too_small": 31,
+      "too_large": 12
+    },
+    "distinct_shoppers_settled": 88
+  },
+  "expected_seeded": {
+    "docs": 100,
+    "settled": 85,
+    "fit_returns_by_direction": {
+      "too_small": 35,
+      "too_large": 13
+    },
+    "feedback_by_verdict": {
+      "fits_well": 10,
+      "too_small": 4,
+      "too_large": 3
+    },
+    "distinct_shoppers_by_direction": {
+      "too_small": 27,
+      "too_large": 11
+    }
+  },
+  "got_seeded": {
+    "docs": 100,
+    "settled": 85,
+    "settled_kind": {
+      "return_reason": 60,
+      "feedback": 17,
+      "kept": 8
+    },
+    "reason_category": {
+      "fit_too_small": 35,
+      "fit_too_large": 13,
+      "changed_mind": 6,
+      "damaged": 4,
+      "not_as_described": 2
+    },
+    "fit_returns_by_direction": {
+      "too_small": 35,
+      "too_large": 13
+    },
+    "feedback_by_verdict": {
+      "fits_well": 10,
+      "too_small": 4,
+      "too_large": 3
+    },
+    "distinct_shoppers_by_direction": {
+      "too_small": 27,
+      "too_large": 11
+    },
+    "distinct_shoppers_settled": 75
+  },
+  "expected_live": {
+    "docs": 20,
+    "settled": 15,
+    "fit_returns_by_direction": {
+      "too_small": 5,
+      "too_large": 2
+    },
+    "feedback_by_verdict": {
+      "fits_well": 2,
+      "too_small": 1,
+      "too_large": 0
+    },
+    "distinct_shoppers_by_direction": {
+      "too_small": 4,
+      "too_large": 1
+    }
+  },
+  "got_live": {
+    "docs": 20,
+    "settled": 15,
+    "settled_kind": {
+      "return_reason": 10,
+      "feedback": 3,
+      "kept": 2
+    },
+    "reason_category": {
+      "fit_too_small": 5,
+      "changed_mind": 2,
+      "fit_too_large": 2,
+      "damaged": 1
+    },
+    "fit_returns_by_direction": {
+      "too_small": 5,
+      "too_large": 2
+    },
+    "feedback_by_verdict": {
+      "fits_well": 2,
+      "too_small": 1
+    },
+    "distinct_shoppers_by_direction": {
+      "too_small": 4,
+      "too_large": 1
+    },
+    "distinct_shoppers_settled": 13
+  },
+  "unsettled_queries": [
+    {
+      "query": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 5,
+          "_source": [
+            "txn_hash",
+            "purchase_state",
+            "settled",
+            "seeded"
+          ],
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "term": {
+                    "brand": "sunspel"
+                  }
+                },
+                {
+                  "term": {
+                    "category": "shirt"
+                  }
+                },
+                {
+                  "term": {
+                    "fit_handle": "regular"
+                  }
+                },
+                {
+                  "term": {
+                    "size": "M"
+                  }
+                },
+                {
+                  "term": {
+                    "seeded": false
+                  }
+                },
+                {
+                  "term": {
+                    "purchase_state": "captured"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 2,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 2,
+              "relation": "eq"
+            },
+            "max_score": 0.0,
+            "hits": [
+              {
+                "_index": "t012-fit-pop",
+                "_id": "9dfc6ca729506b7126b0d179e58aab5ebc07c2b8f38f636195eb784c3d6220b7",
+                "_score": 0.0,
+                "_source": {
+                  "txn_hash": "9dfc6ca729506b7126b0d179e58aab5ebc07c2b8f38f636195eb784c3d6220b7",
+                  "purchase_state": "captured",
+                  "settled": false,
+                  "seeded": false
+                }
+              },
+              {
+                "_index": "t012-fit-pop",
+                "_id": "dab6f10e0c930f75e301a1dabee65b51be81049f2510c06227cc440b52b66e94",
+                "_score": 0.0,
+                "_source": {
+                  "txn_hash": "dab6f10e0c930f75e301a1dabee65b51be81049f2510c06227cc440b52b66e94",
+                  "purchase_state": "captured",
+                  "settled": false,
+                  "seeded": false
+                }
+              }
+            ]
+          }
+        }
+      },
+      "settled_query": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "bool": {
+                    "filter": [
+                      {
+                        "term": {
+                          "brand": "sunspel"
+                        }
+                      },
+                      {
+                        "term": {
+                          "category": "shirt"
+                        }
+                      },
+                      {
+                        "term": {
+                          "fit_handle": "regular"
+                        }
+                      },
+                      {
+                        "term": {
+                          "size": "M"
+                        }
+                      },
+                      {
+                        "term": {
+                          "seeded": false
+                        }
+                      },
+                      {
+                        "term": {
+                          "purchase_state": "captured"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "term": {
+                    "settled": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 0,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 0,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          }
+        }
+      }
+    },
+    {
+      "query": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 5,
+          "_source": [
+            "txn_hash",
+            "purchase_state",
+            "settled",
+            "seeded"
+          ],
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "term": {
+                    "brand": "sunspel"
+                  }
+                },
+                {
+                  "term": {
+                    "category": "shirt"
+                  }
+                },
+                {
+                  "term": {
+                    "fit_handle": "regular"
+                  }
+                },
+                {
+                  "term": {
+                    "size": "M"
+                  }
+                },
+                {
+                  "term": {
+                    "seeded": false
+                  }
+                },
+                {
+                  "term": {
+                    "purchase_state": "refunded"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 1,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 3,
+              "relation": "eq"
+            },
+            "max_score": 0.0,
+            "hits": [
+              {
+                "_index": "t012-fit-pop",
+                "_id": "545cda833974fff72f42b0a08abac0c60f16e97aabe1cf90892dd93829cd85fd",
+                "_score": 0.0,
+                "_source": {
+                  "txn_hash": "545cda833974fff72f42b0a08abac0c60f16e97aabe1cf90892dd93829cd85fd",
+                  "purchase_state": "refunded",
+                  "settled": false,
+                  "seeded": false
+                }
+              },
+              {
+                "_index": "t012-fit-pop",
+                "_id": "d442bc8c5200e5d7d6eb50684e8d126ac6ed79b8bce5303b0fb55b3fb806dd5c",
+                "_score": 0.0,
+                "_source": {
+                  "txn_hash": "d442bc8c5200e5d7d6eb50684e8d126ac6ed79b8bce5303b0fb55b3fb806dd5c",
+                  "purchase_state": "refunded",
+                  "settled": false,
+                  "seeded": false
+                }
+              },
+              {
+                "_index": "t012-fit-pop",
+                "_id": "02e08dd63c957ff7809c89cff543e1c838937fecae7b6c258877d77c3b1deaaf",
+                "_score": 0.0,
+                "_source": {
+                  "txn_hash": "02e08dd63c957ff7809c89cff543e1c838937fecae7b6c258877d77c3b1deaaf",
+                  "purchase_state": "refunded",
+                  "settled": false,
+                  "seeded": false
+                }
+              }
+            ]
+          }
+        }
+      },
+      "settled_query": {
+        "method": "POST",
+        "path": "/t012-fit-pop/_search",
+        "params": {},
+        "request": {
+          "size": 0,
+          "query": {
+            "bool": {
+              "filter": [
+                {
+                  "bool": {
+                    "filter": [
+                      {
+                        "term": {
+                          "brand": "sunspel"
+                        }
+                      },
+                      {
+                        "term": {
+                          "category": "shirt"
+                        }
+                      },
+                      {
+                        "term": {
+                          "fit_handle": "regular"
+                        }
+                      },
+                      {
+                        "term": {
+                          "size": "M"
+                        }
+                      },
+                      {
+                        "term": {
+                          "seeded": false
+                        }
+                      },
+                      {
+                        "term": {
+                          "purchase_state": "refunded"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "term": {
+                    "settled": true
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "status": 200,
+        "response": {
+          "took": 0,
+          "timed_out": false,
+          "_shards": {
+            "total": 2,
+            "successful": 2,
+            "skipped": 0,
+            "failed": 0
+          },
+          "hits": {
+            "total": {
+              "value": 0,
+              "relation": "eq"
+            },
+            "max_score": null,
+            "hits": []
+          }
+        }
+      }
+    }
+  ],
+  "unsettled": [
+    {
+      "state": "captured",
+      "sample": {
+        "_index": "t012-fit-pop",
+        "_id": "9dfc6ca729506b7126b0d179e58aab5ebc07c2b8f38f636195eb784c3d6220b7",
+        "_score": 0.0,
+        "_source": {
+          "txn_hash": "9dfc6ca729506b7126b0d179e58aab5ebc07c2b8f38f636195eb784c3d6220b7",
+          "purchase_state": "captured",
+          "settled": false,
+          "seeded": false
+        }
+      },
+      "settled_filter": 0
+    },
+    {
+      "state": "refunded",
+      "sample": {
+        "_index": "t012-fit-pop",
+        "_id": "545cda833974fff72f42b0a08abac0c60f16e97aabe1cf90892dd93829cd85fd",
+        "_score": 0.0,
+        "_source": {
+          "txn_hash": "545cda833974fff72f42b0a08abac0c60f16e97aabe1cf90892dd93829cd85fd",
+          "purchase_state": "refunded",
+          "settled": false,
+          "seeded": false
+        }
+      },
+      "settled_filter": 0
+    }
+  ],
+  "population_count": 600,
+  "line_size_count": 120
+}

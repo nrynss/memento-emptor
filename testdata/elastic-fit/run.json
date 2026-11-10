@@ -1,0 +1,18 @@
+{
+  "started_cleanup": {
+    "removed": [],
+    "remaining": [],
+    "listing": {
+      "method": "GET",
+      "path": "/_cat/indices/t012-*?h=index,docs.count,store.size&s=index&format=json",
+      "params": {},
+      "request": null,
+      "status": 200,
+      "response": []
+    }
+  },
+  "errors": {},
+  "engine": "9.7.0",
+  "python": "3.14.9",
+  "requests": "2.34.2"
+}

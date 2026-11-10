@@ -1,0 +1,222 @@
+{
+  "manifest": {
+    "note": "hand-written truth for the probe line and size; the generator builds rows to it",
+    "truth": {
+      "line": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M"
+      },
+      "total_docs": 120,
+      "settled": 100,
+      "unsettled": {
+        "captured": 12,
+        "refunded": 8
+      },
+      "settled_kind": {
+        "return_reason": 70,
+        "feedback": 20,
+        "kept": 10
+      },
+      "fit_returns_by_direction": {
+        "too_small": 40,
+        "too_large": 15
+      },
+      "feedback_by_verdict": {
+        "fits_well": 12,
+        "too_small": 5,
+        "too_large": 3
+      },
+      "distinct_shoppers_by_direction": {
+        "too_small": 31,
+        "too_large": 12
+      },
+      "reason_category": {
+        "fit_too_small": 40,
+        "fit_too_large": 15,
+        "changed_mind": 8,
+        "damaged": 5,
+        "not_as_described": 2
+      },
+      "seeded": {
+        "docs": 100,
+        "settled": 85,
+        "unsettled": {
+          "captured": 10,
+          "refunded": 5
+        },
+        "fit_returns_by_direction": {
+          "too_small": 35,
+          "too_large": 13
+        },
+        "feedback_by_verdict": {
+          "fits_well": 10,
+          "too_small": 4,
+          "too_large": 3
+        },
+        "distinct_shoppers_by_direction": {
+          "too_small": 27,
+          "too_large": 11
+        }
+      },
+      "live": {
+        "docs": 20,
+        "settled": 15,
+        "unsettled": {
+          "captured": 2,
+          "refunded": 3
+        },
+        "fit_returns_by_direction": {
+          "too_small": 5,
+          "too_large": 2
+        },
+        "feedback_by_verdict": {
+          "fits_well": 2,
+          "too_small": 1,
+          "too_large": 0
+        },
+        "distinct_shoppers_by_direction": {
+          "too_small": 4,
+          "too_large": 1
+        }
+      }
+    },
+    "population_rows": 600,
+    "lines": [
+      [
+        "asket",
+        "tee",
+        "slim"
+      ],
+      [
+        "bonobos",
+        "shirt",
+        "regular"
+      ],
+      [
+        "sunspel",
+        "shirt",
+        "regular"
+      ]
+    ],
+    "sizes": [
+      "L",
+      "M",
+      "S"
+    ],
+    "distinct_shoppers_whole_index": 588,
+    "shopper_salt": "line identity plus a synthetic salt in this harness; production adds a secret, so one shopper maps to unrelated hashes across lines"
+  },
+  "create": {
+    "method": "PUT",
+    "path": "/t012-fit-pop",
+    "params": {},
+    "request": {
+      "mappings": {
+        "dynamic": "strict",
+        "properties": {
+          "txn_hash": {
+            "type": "keyword"
+          },
+          "shopper_hash": {
+            "type": "keyword"
+          },
+          "brand": {
+            "type": "keyword"
+          },
+          "category": {
+            "type": "keyword"
+          },
+          "fit_handle": {
+            "type": "keyword"
+          },
+          "size": {
+            "type": "keyword"
+          },
+          "purchase_state": {
+            "type": "keyword"
+          },
+          "settled": {
+            "type": "boolean"
+          },
+          "settled_kind": {
+            "type": "keyword"
+          },
+          "reason_category": {
+            "type": "keyword"
+          },
+          "fit_direction": {
+            "type": "keyword"
+          },
+          "feedback_verdict": {
+            "type": "keyword"
+          },
+          "reason_contested": {
+            "type": "boolean"
+          },
+          "seeded": {
+            "type": "boolean"
+          },
+          "captured_at": {
+            "type": "date"
+          },
+          "refunded_at": {
+            "type": "date"
+          },
+          "settled_at": {
+            "type": "date"
+          },
+          "event_seq": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "status": 200,
+    "response": {
+      "acknowledged": true,
+      "shards_acknowledged": true,
+      "index": "t012-fit-pop"
+    }
+  },
+  "load": {
+    "method": "POST",
+    "path": "/t012-fit-pop/_bulk?refresh=true",
+    "request": {
+      "actions": 600,
+      "version_type": "external_gte",
+      "version": 1,
+      "first_action": {
+        "index": {
+          "_id": "cc210df33d4bfd4f5d80bd8eb45b56c628800c92dc40daf9c8cc16f9a32c7266",
+          "version": 1,
+          "version_type": "external_gte"
+        }
+      },
+      "first_document": {
+        "txn_hash": "cc210df33d4bfd4f5d80bd8eb45b56c628800c92dc40daf9c8cc16f9a32c7266",
+        "shopper_hash": "f0449b0f37ddfbc242e385c63b8805a5cac1a53ce3efa58c4a7164a3eefaf3f4",
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "purchase_state": "captured",
+        "settled": false,
+        "seeded": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 1
+      },
+      "body_omitted": "one NDJSON action + full row per purchase"
+    },
+    "status": 200,
+    "response": {
+      "took": 400,
+      "errors": false,
+      "items": 600,
+      "status_counts": {
+        "201": 600
+      }
+    }
+  }
+}

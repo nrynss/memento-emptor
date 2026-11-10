@@ -1,0 +1,188 @@
+{
+  "create": {
+    "method": "PUT",
+    "path": "/t012-fit-rows",
+    "params": {},
+    "request": {
+      "mappings": {
+        "dynamic": "strict",
+        "properties": {
+          "txn_hash": {
+            "type": "keyword"
+          },
+          "shopper_hash": {
+            "type": "keyword"
+          },
+          "brand": {
+            "type": "keyword"
+          },
+          "category": {
+            "type": "keyword"
+          },
+          "fit_handle": {
+            "type": "keyword"
+          },
+          "size": {
+            "type": "keyword"
+          },
+          "purchase_state": {
+            "type": "keyword"
+          },
+          "settled": {
+            "type": "boolean"
+          },
+          "settled_kind": {
+            "type": "keyword"
+          },
+          "reason_category": {
+            "type": "keyword"
+          },
+          "fit_direction": {
+            "type": "keyword"
+          },
+          "feedback_verdict": {
+            "type": "keyword"
+          },
+          "reason_contested": {
+            "type": "boolean"
+          },
+          "seeded": {
+            "type": "boolean"
+          },
+          "captured_at": {
+            "type": "date"
+          },
+          "refunded_at": {
+            "type": "date"
+          },
+          "settled_at": {
+            "type": "date"
+          },
+          "event_seq": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "status": 200,
+    "response": {
+      "acknowledged": true,
+      "shards_acknowledged": true,
+      "index": "t012-fit-rows"
+    }
+  },
+  "get_mapping": {
+    "method": "GET",
+    "path": "/t012-fit-rows/_mapping",
+    "params": {},
+    "request": null,
+    "status": 200,
+    "response": {
+      "t012-fit-rows": {
+        "mappings": {
+          "dynamic": "strict",
+          "properties": {
+            "brand": {
+              "type": "keyword"
+            },
+            "captured_at": {
+              "type": "date"
+            },
+            "category": {
+              "type": "keyword"
+            },
+            "event_seq": {
+              "type": "integer"
+            },
+            "feedback_verdict": {
+              "type": "keyword"
+            },
+            "fit_direction": {
+              "type": "keyword"
+            },
+            "fit_handle": {
+              "type": "keyword"
+            },
+            "purchase_state": {
+              "type": "keyword"
+            },
+            "reason_category": {
+              "type": "keyword"
+            },
+            "reason_contested": {
+              "type": "boolean"
+            },
+            "refunded_at": {
+              "type": "date"
+            },
+            "seeded": {
+              "type": "boolean"
+            },
+            "settled": {
+              "type": "boolean"
+            },
+            "settled_at": {
+              "type": "date"
+            },
+            "settled_kind": {
+              "type": "keyword"
+            },
+            "shopper_hash": {
+              "type": "keyword"
+            },
+            "size": {
+              "type": "keyword"
+            },
+            "txn_hash": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "method": "GET",
+    "path": "/t012-fit-rows/_settings",
+    "params": {},
+    "request": null,
+    "status": 200,
+    "response": {
+      "t012-fit-rows": {
+        "settings": {
+          "index": {
+            "mode": "vectordb_document",
+            "mapping": {
+              "exclude_source_vectors": "true"
+            }
+          }
+        }
+      }
+    }
+  },
+  "fields": [
+    "brand",
+    "captured_at",
+    "category",
+    "event_seq",
+    "feedback_verdict",
+    "fit_direction",
+    "fit_handle",
+    "purchase_state",
+    "reason_category",
+    "reason_contested",
+    "refunded_at",
+    "seeded",
+    "settled",
+    "settled_at",
+    "settled_kind",
+    "shopper_hash",
+    "size",
+    "txn_hash"
+  ],
+  "no_text_fields": true,
+  "prose_refused": {
+    "status": 400,
+    "error": "strict_dynamic_mapping_exception"
+  }
+}

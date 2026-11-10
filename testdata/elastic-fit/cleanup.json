@@ -1,0 +1,29 @@
+{
+  "removed": [
+    {
+      "index": "t012-fit-pop",
+      "status": 200
+    },
+    {
+      "index": "t012-fit-rows",
+      "status": 200
+    },
+    {
+      "index": "t012-lambo-meta",
+      "status": 200
+    },
+    {
+      "index": "t012-lambo-v-8bb5eef88bb8fc9a",
+      "status": 200
+    }
+  ],
+  "remaining": [],
+  "listing": {
+    "method": "GET",
+    "path": "/_cat/indices/t012-*?h=index,docs.count,store.size&s=index&format=json",
+    "params": {},
+    "request": null,
+    "status": 200,
+    "response": []
+  }
+}

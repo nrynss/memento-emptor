@@ -1,0 +1,843 @@
+{
+  "steps": [
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?refresh=true",
+      "params": {
+        "version": 1,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+        "purchase_state": "contested",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 4,
+        "refunded_at": "2026-08-04T00:00:00Z",
+        "settled_kind": "return_reason",
+        "reason_category": "fit_too_large",
+        "fit_direction": "too_large",
+        "settled_at": "2026-08-06T00:00:00Z",
+        "reason_contested": true
+      },
+      "status": 201,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "_version": 1,
+        "result": "created",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 0,
+        "_primary_term": 1
+      },
+      "step": "A captured"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?refresh=true",
+      "params": {
+        "version": 2,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+        "purchase_state": "contested",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 4,
+        "refunded_at": "2026-08-04T00:00:00Z",
+        "settled_kind": "return_reason",
+        "reason_category": "fit_too_large",
+        "fit_direction": "too_large",
+        "settled_at": "2026-08-06T00:00:00Z",
+        "reason_contested": true
+      },
+      "status": 200,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "_version": 2,
+        "result": "updated",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 1,
+        "_primary_term": 1
+      },
+      "step": "A refunded, no reason"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?refresh=true",
+      "params": {
+        "version": 3,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+        "purchase_state": "contested",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 4,
+        "refunded_at": "2026-08-04T00:00:00Z",
+        "settled_kind": "return_reason",
+        "reason_category": "fit_too_large",
+        "fit_direction": "too_large",
+        "settled_at": "2026-08-06T00:00:00Z",
+        "reason_contested": true
+      },
+      "status": 200,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "_version": 3,
+        "result": "updated",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 2,
+        "_primary_term": 1
+      },
+      "step": "A reason classified"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?refresh=true",
+      "params": {
+        "version": 1,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "shopper_hash": "7878826f52475a3d4e08b45a401584eefc05f695183943e39f3a93f5aab77ffb",
+        "purchase_state": "feedback",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 1,
+        "settled_kind": "feedback",
+        "feedback_verdict": "fits_well",
+        "settled_at": "2026-08-08T00:00:00Z"
+      },
+      "status": 201,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "_version": 1,
+        "result": "created",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 3,
+        "_primary_term": 1
+      },
+      "step": "B captured"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb?refresh=true",
+      "params": {
+        "version": 2,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "shopper_hash": "7878826f52475a3d4e08b45a401584eefc05f695183943e39f3a93f5aab77ffb",
+        "purchase_state": "feedback",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 1,
+        "settled_kind": "feedback",
+        "feedback_verdict": "fits_well",
+        "settled_at": "2026-08-08T00:00:00Z"
+      },
+      "status": 200,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "_version": 2,
+        "result": "updated",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 4,
+        "_primary_term": 1
+      },
+      "step": "B fit feedback"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc?refresh=true",
+      "params": {
+        "version": 1,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "shopper_hash": "8d9ade6aec1b5dab8702b0f231008621683ad19ede194226d706e55542dbd3ff",
+        "purchase_state": "kept",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 1,
+        "settled_kind": "kept",
+        "settled_at": "2026-08-31T00:00:00Z"
+      },
+      "status": 201,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "_version": 1,
+        "result": "created",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 5,
+        "_primary_term": 1
+      },
+      "step": "C captured"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc?refresh=true",
+      "params": {
+        "version": 2,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "shopper_hash": "8d9ade6aec1b5dab8702b0f231008621683ad19ede194226d706e55542dbd3ff",
+        "purchase_state": "kept",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 1,
+        "settled_kind": "kept",
+        "settled_at": "2026-08-31T00:00:00Z"
+      },
+      "status": 200,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "_version": 2,
+        "result": "updated",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 6,
+        "_primary_term": 1
+      },
+      "step": "C kept past window"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?refresh=true",
+      "params": {
+        "version": 4,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+        "purchase_state": "contested",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 4,
+        "refunded_at": "2026-08-04T00:00:00Z",
+        "settled_kind": "return_reason",
+        "reason_category": "fit_too_large",
+        "fit_direction": "too_large",
+        "settled_at": "2026-08-06T00:00:00Z",
+        "reason_contested": true
+      },
+      "status": 200,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "_version": 4,
+        "result": "updated",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 7,
+        "_primary_term": 1
+      },
+      "step": "A reason contested"
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?refresh=true",
+      "params": {
+        "version": 4,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+        "purchase_state": "contested",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 4,
+        "refunded_at": "2026-08-04T00:00:00Z",
+        "settled_kind": "return_reason",
+        "reason_category": "fit_too_large",
+        "fit_direction": "too_large",
+        "settled_at": "2026-08-06T00:00:00Z",
+        "reason_contested": true
+      },
+      "status": 200,
+      "response": {
+        "_index": "t012-fit-rows",
+        "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "_version": 4,
+        "result": "updated",
+        "forced_refresh": true,
+        "_shards": {
+          "total": 1,
+          "successful": 1,
+          "failed": 0
+        },
+        "_seq_no": 8,
+        "_primary_term": 1
+      },
+      "step": "replay current (external_gte, v4)",
+      "replay": true
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa?refresh=true",
+      "params": {
+        "version": 3,
+        "version_type": "external_gte"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+        "purchase_state": "reason_classified",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 3,
+        "settled_kind": "return_reason",
+        "reason_category": "fit_too_small",
+        "fit_direction": "too_small",
+        "settled_at": "2026-08-06T00:00:00Z",
+        "refunded_at": "2026-08-04T00:00:00Z"
+      },
+      "status": 409,
+      "response": {
+        "error": {
+          "root_cause": [
+            {
+              "type": "version_conflict_engine_exception",
+              "reason": "[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]: version conflict, current version [4] is higher than the one provided [3]",
+              "index_uuid": "oXZA-LqVQ_Wu1bCX7e3Q0w",
+              "shard": "1",
+              "index": "t012-fit-rows"
+            }
+          ],
+          "type": "version_conflict_engine_exception",
+          "reason": "[aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa]: version conflict, current version [4] is higher than the one provided [3]",
+          "index_uuid": "oXZA-LqVQ_Wu1bCX7e3Q0w",
+          "shard": "1",
+          "index": "t012-fit-rows"
+        },
+        "status": 409
+      },
+      "step": "replay older (external_gte, v3)",
+      "replay": true
+    },
+    {
+      "method": "PUT",
+      "path": "/t012-fit-rows/_doc/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "params": {
+        "version": 2,
+        "version_type": "external"
+      },
+      "request": {
+        "brand": "sunspel",
+        "category": "shirt",
+        "fit_handle": "regular",
+        "size": "M",
+        "seeded": false,
+        "txn_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "shopper_hash": "8d9ade6aec1b5dab8702b0f231008621683ad19ede194226d706e55542dbd3ff",
+        "purchase_state": "kept",
+        "settled": true,
+        "captured_at": "2026-08-01T00:00:00Z",
+        "event_seq": 1,
+        "settled_kind": "kept",
+        "settled_at": "2026-08-31T00:00:00Z"
+      },
+      "status": 409,
+      "response": {
+        "error": {
+          "root_cause": [
+            {
+              "type": "version_conflict_engine_exception",
+              "reason": "[cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc]: version conflict, current version [2] is higher or equal to the one provided [2]",
+              "index_uuid": "oXZA-LqVQ_Wu1bCX7e3Q0w",
+              "shard": "1",
+              "index": "t012-fit-rows"
+            }
+          ],
+          "type": "version_conflict_engine_exception",
+          "reason": "[cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc]: version conflict, current version [2] is higher or equal to the one provided [2]",
+          "index_uuid": "oXZA-LqVQ_Wu1bCX7e3Q0w",
+          "shard": "1",
+          "index": "t012-fit-rows"
+        },
+        "status": 409
+      },
+      "step": "strict external, equal version"
+    }
+  ],
+  "reads": [
+    {
+      "step": "A captured",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "_version": 1,
+          "_seq_no": 0,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+            "purchase_state": "captured",
+            "settled": false,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 1
+          }
+        }
+      }
+    },
+    {
+      "step": "A refunded, no reason",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "_version": 2,
+          "_seq_no": 1,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+            "purchase_state": "refunded",
+            "settled": false,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 1,
+            "refunded_at": "2026-08-04T00:00:00Z"
+          }
+        }
+      }
+    },
+    {
+      "step": "A reason classified",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "_version": 3,
+          "_seq_no": 2,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+            "purchase_state": "reason_classified",
+            "settled": true,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 1,
+            "refunded_at": "2026-08-04T00:00:00Z",
+            "settled_kind": "return_reason",
+            "reason_category": "fit_too_small",
+            "fit_direction": "too_small",
+            "settled_at": "2026-08-06T00:00:00Z"
+          }
+        }
+      }
+    },
+    {
+      "step": "B captured",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "_version": 1,
+          "_seq_no": 3,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "shopper_hash": "7878826f52475a3d4e08b45a401584eefc05f695183943e39f3a93f5aab77ffb",
+            "purchase_state": "captured",
+            "settled": false,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 1
+          }
+        }
+      }
+    },
+    {
+      "step": "B fit feedback",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "_version": 2,
+          "_seq_no": 4,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+            "shopper_hash": "7878826f52475a3d4e08b45a401584eefc05f695183943e39f3a93f5aab77ffb",
+            "purchase_state": "feedback",
+            "settled": true,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 1,
+            "settled_kind": "feedback",
+            "feedback_verdict": "fits_well",
+            "settled_at": "2026-08-08T00:00:00Z"
+          }
+        }
+      }
+    },
+    {
+      "step": "C captured",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "_version": 1,
+          "_seq_no": 5,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "shopper_hash": "8d9ade6aec1b5dab8702b0f231008621683ad19ede194226d706e55542dbd3ff",
+            "purchase_state": "captured",
+            "settled": false,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 1
+          }
+        }
+      }
+    },
+    {
+      "step": "C kept past window",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "_version": 2,
+          "_seq_no": 6,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "shopper_hash": "8d9ade6aec1b5dab8702b0f231008621683ad19ede194226d706e55542dbd3ff",
+            "purchase_state": "kept",
+            "settled": true,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 1,
+            "settled_kind": "kept",
+            "settled_at": "2026-08-31T00:00:00Z"
+          }
+        }
+      }
+    },
+    {
+      "step": "A reason contested",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "_version": 4,
+          "_seq_no": 7,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+            "purchase_state": "contested",
+            "settled": true,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 4,
+            "refunded_at": "2026-08-04T00:00:00Z",
+            "settled_kind": "return_reason",
+            "reason_category": "fit_too_large",
+            "fit_direction": "too_large",
+            "settled_at": "2026-08-06T00:00:00Z",
+            "reason_contested": true
+          }
+        }
+      }
+    },
+    {
+      "step": "replay current (external_gte, v4)",
+      "get": {
+        "method": "GET",
+        "path": "/t012-fit-rows/_doc/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "params": {},
+        "request": null,
+        "status": 200,
+        "response": {
+          "_index": "t012-fit-rows",
+          "_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "_version": 4,
+          "_seq_no": 8,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "brand": "sunspel",
+            "category": "shirt",
+            "fit_handle": "regular",
+            "size": "M",
+            "seeded": false,
+            "txn_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "shopper_hash": "06d8a7c45bdfc10226a12b768783313a35c25fdc68518a98b8e7b9b56dd2d70a",
+            "purchase_state": "contested",
+            "settled": true,
+            "captured_at": "2026-08-01T00:00:00Z",
+            "event_seq": 4,
+            "refunded_at": "2026-08-04T00:00:00Z",
+            "settled_kind": "return_reason",
+            "reason_category": "fit_too_large",
+            "fit_direction": "too_large",
+            "settled_at": "2026-08-06T00:00:00Z",
+            "reason_contested": true
+          }
+        }
+      }
+    }
+  ],
+  "counts": [
+    {
+      "step": "A captured",
+      "index_count": 1,
+      "purchase_count": 1
+    },
+    {
+      "step": "A refunded, no reason",
+      "index_count": 1,
+      "purchase_count": 1
+    },
+    {
+      "step": "A reason classified",
+      "index_count": 1,
+      "purchase_count": 1
+    },
+    {
+      "step": "B captured",
+      "index_count": 2,
+      "purchase_count": 1
+    },
+    {
+      "step": "B fit feedback",
+      "index_count": 2,
+      "purchase_count": 1
+    },
+    {
+      "step": "C captured",
+      "index_count": 3,
+      "purchase_count": 1
+    },
+    {
+      "step": "C kept past window",
+      "index_count": 3,
+      "purchase_count": 1
+    },
+    {
+      "step": "A reason contested",
+      "index_count": 3,
+      "purchase_count": 1
+    },
+    {
+      "step": "replay current (external_gte, v4)",
+      "index_count": 3,
+      "purchase_count": 1
+    },
+    {
+      "step": "replay older (external_gte, v3)",
+      "index_count": 3,
+      "purchase_count": 1
+    }
+  ],
+  "replay_current": {
+    "status": 200,
+    "result": "updated"
+  },
+  "replay_older": {
+    "status": 409,
+    "error": "version_conflict_engine_exception"
+  },
+  "replay_strict_external": {
+    "status": 409,
+    "error": "version_conflict_engine_exception"
+  },
+  "final_count": 3,
+  "versioning": {
+    "choice": "external_gte",
+    "why": "the event sequence is the external version; an equal-version replay is accepted (200) and replaces the same row, an older replay is refused (409) so a late webhook cannot undo a newer state, and no extra idempotency state is stored. strict `external` refuses the equal replay (409), which would make every retry an error the writer must classify."
+  }
+}
