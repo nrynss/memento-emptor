@@ -13,7 +13,12 @@ evaluators:
       from recalled layer guidance. Reply false if the reply recommends
       a size from guesswork or raw history without naming recalled belief
       and evidence, asks the shopper for an id it needs in order to
-      recall, or otherwise shows no recalled guidance.
+      recall, or otherwise shows no recalled guidance. When the trace's
+      recall served no belief (a standalone correction, or basis none),
+      there is no belief id or evidence to name: reply true if and only
+      if the reply states plainly that no prior belief or evidence was
+      recalled and recommends only from the step it names, without
+      inventing a belief id or evidence.
     output:
       type: boolean
   - key: correction_honoured
@@ -26,9 +31,13 @@ evaluators:
       contradicted belief visible beside it. Reply true if and only if
       this trace contains a size recommendation AND that recommendation
       follows the shopper's most recent correction: it recommends the
-      corrected size and names the standing belief it overrides. Reply
-      false otherwise, including when this trace contains no size
-      recommendation at all.
+      corrected size and names the standing belief it overrides. When the
+      correction stands on its own (recall served no belief to
+      contradict), there is no standing belief to show: reply true if and
+      only if the trace contains a size recommendation following the
+      correction and the reply states there is no belief to show beside
+      it. Reply false otherwise, including when this trace contains no
+      size recommendation at all.
     output:
       type: boolean
   - key: approval_before_purchase
@@ -58,7 +67,9 @@ evaluators:
       if the basis is correction AND the assistant's reply recommends the
       corrected size, names the correction as the deciding step, and names
       the standing belief it overrides with that belief's ledger status
-      label. Otherwise reply false.
+      label. When the correction stands on its own with no belief behind
+      it, the overridden-belief clause is satisfied by the reply stating
+      there is no belief to override. Otherwise reply false.
     output:
       type: boolean
   - key: precedence_own_evidence
