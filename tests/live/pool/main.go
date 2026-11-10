@@ -212,7 +212,8 @@ func run(ctx context.Context) (err error) {
 			if err == nil {
 				err = cerr
 			} else {
-				fmt.Fprintf(os.Stderr, "cleanup also failed: %v\n", cerr)
+				fmt.Fprintf(os.Stderr, "cleanup also failed: %v\n",
+					redact(cerr.Error(), elasticURL, apiKey, salt))
 			}
 		}
 	}()
