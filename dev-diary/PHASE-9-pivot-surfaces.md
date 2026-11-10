@@ -187,11 +187,27 @@ requires:   [T8.5, T9.6]
 fixture-ok: no
 size:       M · mid
 owns:       cmd/memento/main.go, deploy/start.sh, deploy/Dockerfile
-status:     claimed:t96b-image-wiring
+status:     in-review
 ```
 Build the pool reader + fit writer (live salt, catalog line resolver, standing dir on disk) + hub-backed graph client into the served layer, boot it in `start.sh` before/after the seed, and ship the population fixture in the image. First boot seeds `fit-rows` once via the disk marker (seed through `Refunded` then `Classified`; skip when `LAMBO_EMBEDDER=fixture` or `MEMENTO_FIT_SEED=0`). Register the merchant key entry in the layer's `MEMENTO_MERCHANT_KEYS`. Decide the old-Lambo-arc seed's retirement (its session name collides with the hub's future shopper session).
 
 **Done when:** the public URL answers `recall_for_purchase` for the demo shopper with the pool step working, and `product_fit` for the demo oxford reads Earned. The guard reports green. Spend is recorded.
+
+**Notes (worker).** `cmd/memento/main.go` serves the pivoted layer when the hub is wired (`LAMBO_MCP_URL` plus `LAMBO_MCP_TOKEN`; fail closed without the salt). One `Service` per shopper over its own hub session (named by the live keyer), its own evidence store and the shared pool reader, fit writer, static line resolver and standing dir; the default service answers only what names no shopper (`tools/list`, `product_fit`, health, the aggregated call log) over a graph nothing can reach. The hub client speaks MCP at `/mcp/s/<session>` with the bearer token, opens its client session lazily, re-opens it once after a failure, waits every write receipt to applied, and maps `no concept matching` to None. `staticLines` resolves through the seeded population's line list with brand and category from the item itself and the regular fallback for unseeded lines; unknown brand or category refuses. New `session` subcommand prints one shopper's hub session under the live salt for the boot script; the offline path is byte-identical without the hub variables. `deploy/start.sh` pivots on `MEMENTO_IDENTITY_SALT`: the demo session and reader allowlist move to the live name, the standing dir is created, the hub (plus a TCP wait) comes before the layer, the seed runs fit-only under the shared disk marker, and the graph arc is never planted again — it retires with the replay, unread on the same disk. `LAMBO_SEED=0` skips the fit seed; the binary still skips it under fixture or `MEMENTO_FIT_SEED=0`. `deploy/Dockerfile` builds with `seed/` and ships `testdata/seed/population` in the image; the web stage also carries `testdata/api`, which the ledger's fixture imports need (main's image never built after T9.2 without it — pre-existing, fixed here).
+
+**Arc retirement.** The old arc lives at the seed-salt session; the pivoted layer serves the live-salt session, so the arc is orphaned, not colliding, the moment the image lands. Nothing plants it on fresh disks; the existing disk keeps it unread beside the live data. The ledger reader follows the live session; the stale session drops from its allowlist. No contract change: the frozen shape is untouched, and T7.4 stays with the orchestrator.
+
+**Local proof (this task's Done-when).** Final image booted locally with live keys native embedder and `MEMENTO_FIT_INDEX=t96b-proof`: pool and fit wired, memory seed holds, fit seed 69 rows / 187 writes with all six T9.1 verdicts verified back before the marker. `recall_for_purchase` for `shopper_01` on the full demo line: basis correction, pool Earned small consulted (settled 22, seeded 22, live 0), beliefs Out of true / Venerable / contradicted plus the Claimed statement — the frozen story exactly. `product_fit` for the demo oxford: Earned small with the seeded counts. The unknown shopper still gets GuidanceNone, never a refusal, and an unwired `product_fit` refuses rather than report an empty pool (host-level hub run). Restart keeps a live standing correction through the disk journal and the same hub session. Proof index deleted afterwards (`t96b-proof*` listing `[]`); production `fit-rows` untouched. Spend $0.00 of model (no model call; Elastic test-prefix churn only). The gate passes.
+
+**Post-push check (orchestrator, after main lands and Render redeploys).** `curl` the public layer (through the edge with the agent key as bearer): `POST /mcp tools/call recall_for_purchase` for `shopper_01` on the demo line reads basis correction with pool Earned small consulted; `POST /tools/product_fit` for brand-x-001/shirts/regular/M reads Earned small. Then `bash deploy/guard.sh --check` (green at the $16.00 ceiling) and the merchant-key append below.
+
+**Merchant key (operator step, not a repo change).** The entry (digest, in the keyring service `memento-keys` kind `merchant`, already verified present) must be appended to the live service's `MEMENTO_MERCHANT_KEYS` Render secret beside the current entries, then verified with the merchant proxy read. Values never enter the repo; nothing here changed the key variables.
+
+Three things the next agent should not have to rediscover:
+
+- The graph seam carries no shopper, so one service cannot serve two hub sessions: the director is the whole isolation story. The edge's `X-Memento-Shopper` wins routing; a body without one reaches the default service and its frozen error.
+- The marker `seed_fit_only` writes derives to the same fit-marker path the legacy seed used, so the staged live population is honoured on the first pivoted boot instead of reseeded.
+- The hub needs its port to accept before the layer's seed replays: `wait_hub` is the only new boot dependency, and a hub that never answers fails the boot instead of serving half a layer.
 
 ---
 

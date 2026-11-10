@@ -10,7 +10,10 @@
 # Order matters. The seeder's short-lived stdio writer owns its session
 # alone, so it runs before the hub starts; the hub then attaches the
 # seeded session as its one pinned session and every other shopper's
-# session on demand, at /mcp/s/<session>.
+# session on demand, at /mcp/s/<session>. The pivoted layer is the one
+# exception to the order: it replays its seed into the hub, so the hub
+# is up before it boots, and the old graph arc retires with the replay —
+# only the fit population still seeds, through the writer.
 #
 # Lambo is best-effort at boot: when neither embedder answers, the
 # replay service still serves the demo and the supervisor says so
@@ -43,6 +46,29 @@ DEMO_SESSION="${LAMBO_DEMO_SESSION:-shopper-00895719a8a9d1ba88c99984e50dd200a83b
 # reader's list is fixed at start (Lambo issue 241), so a shopper created
 # after boot is not readable here until a restart lists it.
 WEB_SESSIONS="${LAMBO_WEB_SESSIONS:-$DEMO_SESSION}"
+
+# The pivoted layer serves the pool, the fit writer and the hub-backed
+# graph behind one service per shopper. Its hub sessions are named under
+# the live salt, not the seed salt above, so the pinned session and the
+# reader's allowlist move to the live demo name: the layer's own
+# subcommand derives it, and the name is a keyed hash, never a secret.
+# The old graph arc retires with the replay: nothing plants the pre-pivot
+# session again, and the reader stops listing it.
+PIVOTED=0
+STANDING_DIR=""
+if [ -n "${MEMENTO_IDENTITY_SALT:-}" ]; then
+	PIVOTED=1
+	DEMO_SESSION="$("$APP/bin/memento" session --shopper shopper_01)"
+	WEB_SESSIONS="${LAMBO_WEB_SESSIONS:-$DEMO_SESSION}"
+	STANDING_DIR="${MEMENTO_STANDING_DIR:-$DATA/memento-standing}"
+	mkdir -p "$STANDING_DIR"
+	echo "start: pivoted layer on; demo hub session $DEMO_SESSION"
+fi
+
+# The fit index the pool reader and the fit writer share. Production is
+# fit-rows; a proof run points the layer and the seeder at a scratch
+# prefix through MEMENTO_FIT_INDEX and deletes it afterwards.
+FIT_INDEX="${MEMENTO_FIT_INDEX:-fit-rows}"
 
 # The one credential the hub accepts. The deploy generates a token per boot
 # when the environment holds none, so the hub needs no stored secret and the
@@ -183,11 +209,63 @@ start_reader() {
 	pids+=($!)
 }
 
-echo "start: edge and memory layer first (health answers while Lambo seeds)"
+# start_memento runs the memory layer with the frozen demo story loaded.
+# The pivoted layer replays its seed into the hub, so it boots only after
+# the hub answers; the pre-pivot shape keeps the old order and boots
+# first. The standing and fit flags are empty outside the pivot and the
+# layer ignores them there.
+start_memento() {
+	echo "start: memory layer on $MEMENTO_ADDR (seed replays the demo story)"
+	"$APP/bin/memento" -addr "$MEMENTO_ADDR" -seed -shopper shopper_01 \
+		-schema-dir "$APP/testdata/api" -jev-dir "$APP/testdata/jev" \
+		-standing-dir "$STANDING_DIR" -fit-index "$FIT_INDEX" &
+	pids+=($!)
+}
+
+# wait_hub blocks until the hub accepts TCP on its MCP port, so a layer
+# that replays into it never races its startup. A hub that never answers
+# fails the boot loudly instead of serving half a layer.
+wait_hub() {
+	echo "start: waiting for the hub on 127.0.0.1:$MCP_PORT"
+	attempts=0
+	while [ "$attempts" -lt 60 ]; do
+		if timeout 1 bash -c "</dev/tcp/127.0.0.1/$MCP_PORT" 2>/dev/null; then
+			echo "start: hub answers"
+			return 0
+		fi
+		attempts=$((attempts + 1))
+		sleep 1
+	done
+	echo "start: hub never answered on 127.0.0.1:$MCP_PORT" >&2
+	return 1
+}
+
+# seed_fit_only plants the fit population through the writer with the
+# seeding moment as its now, then reads every line back through the pool
+# reader before the disk marker lands. It never plants the pre-pivot
+# graph arc: that session retires with the replay, and the pivoted layer
+# never reads it. LAMBO_SEED=0 skips the seed for a local hub loop; the
+# binary itself skips when the embedder is fixture or MEMENTO_FIT_SEED=0,
+# so the documented key-free loop never touches the live index. The marker
+# shares the disk with the legacy one, so an index the staged seeder
+# already planted is honoured, never rewritten.
+seed_fit_only() {
+	if [ "${LAMBO_SEED:-1}" = "0" ]; then
+		echo "start: LAMBO_SEED=0; the fit population is not planted this boot"
+		return 0
+	fi
+	"$APP/bin/seed" \
+		-lambo "$APP/bin/lambo" \
+		-config "$CONFIG" \
+		-session "$DEMO_SESSION" \
+		-agent "$AGENT" \
+		-marker "$DATA/.seeded-pivoted-v1" \
+		-fit-index "$FIT_INDEX" \
+		-fit-only
+}
+
+echo "start: edge first (health answers while the layer and Lambo boot)"
 MEMENTO_BACKEND="http://$MEMENTO_ADDR" EDGE_STATIC="$APP/web" "$APP/bin/edge" &
-pids+=($!)
-"$APP/bin/memento" -addr "$MEMENTO_ADDR" -seed -shopper shopper_01 \
-	-schema-dir "$APP/testdata/api" -jev-dir "$APP/testdata/jev" &
 pids+=($!)
 
 EMBEDDER="${LAMBO_EMBEDDER:-}"
@@ -222,39 +300,58 @@ case "$EMBEDDER" in
 native | bge | fixture)
 	write_config "$EMBEDDER"
 	"$APP/bin/lambo" --config "$CONFIG" provision
-	seeded=ok
-	if [ "${LAMBO_SEED:-1}" = "0" ]; then
-		echo "start: LAMBO_SEED=0; the frozen demo arc is not planted this boot"
-		seeded=skipped
-		seed_status=0
-	else
+	if [ "$PIVOTED" = "1" ]; then
+		start_hub
+		if ! wait_hub; then
+			exit 1
+		fi
+		start_reader
+		start_memento
 		set +e
-		seed_kind "$EMBEDDER"
+		seed_fit_only
 		seed_status=$?
 		set -e
-		if [ $seed_status -eq 3 ] && [ "$EMBEDDER" = native ] && [ -n "${OPENROUTER_API_KEY:-}" ]; then
-			echo "start: native embedder unreachable, falling back to the spare contract once"
-			write_config bge
-			"$APP/bin/lambo" --config "$CONFIG" provision
+		if [ $seed_status -ne 0 ]; then
+			echo "start: WARNING fit seed failed (status $seed_status); the pool reads what the index holds and the seed retries next deploy"
+		else
+			echo "start: fit seed holds"
+		fi
+	else
+		start_memento
+		seeded=ok
+		if [ "${LAMBO_SEED:-1}" = "0" ]; then
+			echo "start: LAMBO_SEED=0; the frozen demo arc is not planted this boot"
+			seeded=skipped
+			seed_status=0
+		else
 			set +e
-			seed_kind bge
+			seed_kind "$EMBEDDER"
 			seed_status=$?
 			set -e
+			if [ $seed_status -eq 3 ] && [ "$EMBEDDER" = native ] && [ -n "${OPENROUTER_API_KEY:-}" ]; then
+				echo "start: native embedder unreachable, falling back to the spare contract once"
+				write_config bge
+				"$APP/bin/lambo" --config "$CONFIG" provision
+				set +e
+				seed_kind bge
+				seed_status=$?
+				set -e
+			fi
+			if [ $seed_status -ne 0 ]; then
+				seeded=failed
+			fi
 		fi
-		if [ $seed_status -ne 0 ]; then
-			seeded=failed
-		fi
+		case "$seeded" in
+		ok)
+			echo "start: lambo seed holds"
+			;;
+		failed)
+			echo "start: WARNING lambo seed failed (status $seed_status); the graph serves what the store holds and the arc retries next deploy"
+			;;
+		esac
+		start_hub
+		start_reader
 	fi
-	case "$seeded" in
-	ok)
-		echo "start: lambo seed holds"
-		;;
-	failed)
-		echo "start: WARNING lambo seed failed (status $seed_status); the graph serves what the store holds and the arc retries next deploy"
-		;;
-	esac
-	start_hub
-	start_reader
 	;;
 none)
 	echo "start: WARNING no embedder key in the environment; replay serves without the live graph"
