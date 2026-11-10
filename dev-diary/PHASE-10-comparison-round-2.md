@@ -46,7 +46,7 @@ requires:   [T10.2]
 fixture-ok: yes
 size:       XS · light
 owns:       bench/README.md
-status:     in-review
+status:     done
 ```
 The round 1 record reports the correction measure as nil and stops at T5.6, which reads as if corrections were never measured. T5.9 published 27 correction turns (9 shoppers × 3 arms): 27/27 honoured, 0 wrong-cause, and arm 3 routed 2 of 9 through the real `record_correction` path. Add a short "Corrections" subsection to `bench/README.md` with those counts, the mechanism difference, and a pointer to `bench/runs/t59/t59-scores.json`; state plainly that corrections did not discriminate the arms. No other count and no run file changes.
 

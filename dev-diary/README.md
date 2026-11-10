@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 1 / 3 | Ready (T7.1) |
 | P8 | 0 / 10 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
-| P10 | 1 / 6 | In progress (T10.1, T10.2b) |
+| P10 | 2 / 6 | In progress (T10.1) |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T10.2b: Round 1 corrections reported (done)
+
+**What exists.** `bench/README.md` gains a `## Corrections` section: 27 turns (9 shoppers × 3 arms), 27 of 27 honoured (9 of 9 per arm), 0 wrong-cause, and arm 3 routing 2 of 9 through the real `record_correction` path with nothing to declare against in the other 7. Evidence is `bench/runs/t59/t59-scores.json`; the section says plainly that corrections did not discriminate the arms. The frozen 45-turn column stays `nil`, scoped to that set and pointing at the new section. Review APPROVE with two wording fixes (the correction contradicts the first size only where one was given; the unmeasured cases are named correctly).
+
+**What surprised.** `correction_recorded` exists only on arm-3 rows, so 2 of 9 is not 2 of 27; `correction_honoured` is a boolean in the T5.9 scores but `null` in the T5.5 scores — the two columns must never be merged. The highlighted evidence cell `t59-a3-noisy-large` carries the self-quote contamination overrule (the frozen check fired on the run's own `corr_` id); the section makes no contamination claim, but a reader opening the scores may pause there.
+
+**The next agent should not have to work out.** Keep the 45-turn set and T5.9's 27 turns visibly separate. Round 2 still needs a cross-session and cross-agent correction turn; T5.9's are same-session only.
 
 ### T10.2: Round 1 relabelled (done)
 
