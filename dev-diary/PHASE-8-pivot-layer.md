@@ -144,11 +144,23 @@ requires:   [T8.3]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/pool/
-status:     claimed:t83c-union-shoppers
+status:     in-review
 ```
 T8.3's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the rule's eight-shopper floor: 10 shoppers whose only small evidence is `feedback: too_small` read Building where the documented rule says Earned. Either add a second per-direction filter+cardinality that unions fit returns with fit feedback verdicts (and decide what the recorded fixture then pins), or narrow `domain.PoolCounts`/`ShopperCountsView` to returns-only — the latter is a contract change and the orchestrator's call.
 
 **Done when:** the per-direction shopper counts match the documented rule, whichever resolution is chosen; the fixture pins the new numbers; the gate passes.
+
+**Notes (in-review).** Chose resolution (a): the union filter, no contract change. `domain.PoolCounts` already documents each direction as returns *and* feedback (`TooSmall counts settled outcomes pointing small: a return whose reason is that direction, or fit feedback with that verdict`), and the T7.1 table test pins outcome-level union the same way, so narrowing to returns-only would have contradicted the documented rule and needed the orchestrator's call under AGENTS.md rule 1. The reader was the only place that disagreed: its per-direction shopper counts came from the `fit_returns` direction buckets, which see returns only.
+
+`settledAggs` gains a `direction_shoppers` filters aggregation with one bucket per direction. Each bucket's filter is `fit return in that direction OR fit feedback carrying that verdict` (`minimum_should_match: 1`), with a single `shopper_hash` cardinality above it, so a shopper with both kinds of evidence counts once. `countsIn` now reads `Shoppers.TooSmall/TooLarge` from those union buckets and refuses an answer missing them; the `fit_returns` direction buckets keep their doc counts but lost their nested shopper cardinality, which was the source of the bug and is no longer read. `Reader.Fit`, `Result`, `Counts` and every contract shape are unchanged.
+
+The fixture pins the new numbers. The T0.12 recording predates the union bucket, so the test injects it the way T8.3 already injected `fit_shoppers`. The union is exact, not estimated: the harness (`testdata/elastic-fit/harness.py`) gives every feedback row its own shopper id in a namespace disjoint from the return shoppers (`l1m-fb-...` vs `l1m-small-...`/`l1m-large-...`), so the union is the recorded return-distinct count plus the feedback verdict count. All-time small goes 31 → 36 and large 12 → 15; seeded 27 → 31 and 11 → 14; live small 4 → 5, live large stays 1. The verdict message now reads those numbers (45 small of 75 fit outcomes is the 60% floor, 36 shoppers, 45 against 18 more than twice). The query-shape test pins both union clauses and asserts the old nested cardinality is gone; the error table replaces the direction-missing-shoppers case with a union-bucket-missing-shoppers case; `pool_test` gains the exact bug scenario (10 feedback-only small shoppers earn) as a regression case.
+
+Three things the next agent should not have to rediscover:
+
+- Feedback rows also carry `fit_direction` (the harness sets it from the verdict), but the union's feedback leg filters on `settled_kind = feedback` plus `feedback_verdict`, not on `fit_direction`, so a future row with a verdict and no direction still counts.
+- `fit_shoppers` (the Building floor) already unions both settled kinds the same way; the two filters are deliberately parallel.
+- Nothing outside `internal/pool/` changed: `domain`, `contract`, `testdata/api` and `docs` are untouched, so T7.4's tightening is unaffected.
 
 ---
 

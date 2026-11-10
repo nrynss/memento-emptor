@@ -132,8 +132,9 @@ func (h *HTTPIndex) Aggregate(ctx context.Context, q Query) (Result, error) {
 
 // aggregationBody is the one line-and-size query: T0.12's recorded query,
 // with its all-settled shopper cardinality replaced by the fit-classified
-// count the Building floor reads, and a second aggregation over the recent
-// window alone.
+// count the Building floor reads, per-direction shopper counts replaced by
+// the union of fit returns and fit feedback the Earned floor reads, and a
+// second aggregation over the recent window alone.
 func aggregationBody(q Query) map[string]any {
 	filters := lineFilters(q)
 	return map[string]any{
@@ -188,9 +189,12 @@ const (
 )
 
 // settledAggs is the settled part of the query: the denominator, the seeded
-// kinds, the reason categories, the fit returns by direction with their
-// distinct shoppers, the feedback by verdict, and the fit-classified
-// shopper count the Building floor reads.
+// kinds, the reason categories, the fit returns by direction, the feedback
+// by verdict, the fit-classified shopper count the Building floor reads,
+// and the per-direction union shopper count the Earned floor reads. A
+// direction is fit returns that way together with fit feedback carrying
+// that verdict, counted as one distinct-shopper cardinality so a shopper
+// with both kinds of evidence counts once.
 func settledAggs() map[string]any {
 	return map[string]any{
 		"fit_shoppers": map[string]any{
@@ -215,7 +219,6 @@ func settledAggs() map[string]any {
 			"filter": term("settled_kind", indexSettledReturnReason),
 			"aggs": map[string]any{"direction": map[string]any{
 				"terms": map[string]any{"field": "fit_direction"},
-				"aggs":  map[string]any{"shoppers": cardinality("shopper_hash")},
 			}},
 		},
 		"feedback": map[string]any{
@@ -224,7 +227,37 @@ func settledAggs() map[string]any {
 				"terms": map[string]any{"field": "feedback_verdict"},
 			}},
 		},
+		"direction_shoppers": map[string]any{
+			"filters": map[string]any{"filters": map[string]any{
+				indexDirectionTooSmall: directionFilter(indexDirectionTooSmall, string(domain.FitVerdictTooSmall)),
+				indexDirectionTooLarge: directionFilter(indexDirectionTooLarge, string(domain.FitVerdictTooLarge)),
+			}},
+			"aggs": map[string]any{"shoppers": cardinality("shopper_hash")},
+		},
 	}
+}
+
+// directionFilter matches settled rows pointing one way: a fit return in
+// that direction, or fit feedback carrying that verdict. Either clause is
+// enough; the cardinality above counts each shopper once.
+
+// directionFilter matches settled rows pointing one way: a fit return in
+// that direction, or fit feedback carrying that verdict. Either clause is
+// enough; the cardinality above counts each shopper once.
+func directionFilter(direction, verdict string) map[string]any {
+	return map[string]any{"bool": map[string]any{
+		"should": []any{
+			map[string]any{"bool": map[string]any{"filter": []any{
+				term("settled_kind", indexSettledReturnReason),
+				term("fit_direction", direction),
+			}}},
+			map[string]any{"bool": map[string]any{"filter": []any{
+				term("settled_kind", indexSettledFeedback),
+				term("feedback_verdict", verdict),
+			}}},
+		},
+		"minimum_should_match": 1,
+	}}
 }
 
 // term builds one term filter.
@@ -260,12 +293,20 @@ type splitBucket struct {
 
 // settledBucket is the settled aggregation over one bucket of rows.
 type settledBucket struct {
-	DocCount       int          `json:"doc_count"`
-	FitShoppers    *filterCount `json:"fit_shoppers"`
-	SettledKind    *termsCount  `json:"settled_kind"`
-	ReasonCategory *termsCount  `json:"reason_category"`
-	FitReturns     *filterCount `json:"fit_returns"`
-	Feedback       *filterCount `json:"feedback"`
+	DocCount          int               `json:"doc_count"`
+	FitShoppers       *filterCount      `json:"fit_shoppers"`
+	SettledKind       *termsCount       `json:"settled_kind"`
+	ReasonCategory    *termsCount       `json:"reason_category"`
+	FitReturns        *filterCount      `json:"fit_returns"`
+	Feedback          *filterCount      `json:"feedback"`
+	DirectionShoppers *directionBuckets `json:"direction_shoppers"`
+}
+
+// directionBuckets is the per-direction union shopper count: one bucket per
+// direction, each a filter of fit returns that way together with fit
+// feedback carrying that verdict, with its distinct-shopper cardinality.
+type directionBuckets struct {
+	Buckets map[string]*filterCount `json:"buckets"`
 }
 
 // filterCount is a filter aggregation with its own counts. FitReturns and
@@ -352,7 +393,8 @@ func countsIn(name string, bucket *settledBucket) (Counts, error) {
 	}
 	if bucket.SettledKind == nil || bucket.ReasonCategory == nil ||
 		bucket.FitReturns == nil || bucket.FitReturns.Direction == nil ||
-		bucket.Feedback == nil || bucket.Feedback.Verdict == nil {
+		bucket.Feedback == nil || bucket.Feedback.Verdict == nil ||
+		bucket.DirectionShoppers == nil {
 		return Counts{}, fmt.Errorf("%w: the %s settled counts are incomplete", ErrMalformedResponse, name)
 	}
 	counts := Counts{
@@ -371,17 +413,11 @@ func countsIn(name string, bucket *settledBucket) (Counts, error) {
 		counts.Reasons[domain.Category(reason.Key)] = reason.DocCount
 	}
 	for _, direction := range bucket.FitReturns.Direction.Buckets {
-		if direction.Shoppers == nil {
-			return Counts{}, fmt.Errorf("%w: the %s direction %q has no shopper count",
-				ErrMalformedResponse, name, direction.Key)
-		}
 		switch direction.Key {
 		case indexDirectionTooSmall:
 			counts.Returns.TooSmall = direction.DocCount
-			counts.Shoppers.TooSmall = direction.Shoppers.Value
 		case indexDirectionTooLarge:
 			counts.Returns.TooLarge = direction.DocCount
-			counts.Shoppers.TooLarge = direction.Shoppers.Value
 		}
 	}
 	for _, verdict := range bucket.Feedback.Verdict.Buckets {
@@ -393,6 +429,20 @@ func countsIn(name string, bucket *settledBucket) (Counts, error) {
 		case string(domain.FitVerdictTooLarge):
 			counts.Feedback.TooLarge = verdict.DocCount
 		}
+	}
+	for _, direction := range []struct {
+		key   string
+		place *int
+	}{
+		{indexDirectionTooSmall, &counts.Shoppers.TooSmall},
+		{indexDirectionTooLarge, &counts.Shoppers.TooLarge},
+	} {
+		union, ok := bucket.DirectionShoppers.Buckets[direction.key]
+		if !ok || union == nil || union.Shoppers == nil {
+			return Counts{}, fmt.Errorf("%w: the %s direction %q has no union shopper count",
+				ErrMalformedResponse, name, direction.key)
+		}
+		*direction.place = union.Shoppers.Value
 	}
 	return counts, nil
 }

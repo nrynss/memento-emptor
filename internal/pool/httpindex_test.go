@@ -227,14 +227,51 @@ func TestAggregateSendsTheRecordedQuery(t *testing.T) {
 	if got := at(t, fitReturns, "aggs", "direction", "terms", "field"); got != "fit_direction" {
 		t.Errorf("fit returns group by %v, want fit_direction", got)
 	}
-	if got := at(t, fitReturns, "aggs", "direction", "aggs", "shoppers", "cardinality", "field"); got != "shopper_hash" {
-		t.Errorf("direction shoppers count %v, want distinct shopper_hash", got)
+	if _, ok := at(t, fitReturns, "aggs", "direction").(map[string]any)["aggs"]; ok {
+		t.Error("fit returns carry a per-direction shopper count; the union bucket below is the source")
 	}
 
 	feedback := at(t, settled, "feedback")
 	requireTermValue(t, []any{at(t, feedback, "filter")}, "settled_kind", "feedback")
 	if got := at(t, feedback, "aggs", "verdict", "terms", "field"); got != "feedback_verdict" {
 		t.Errorf("feedback groups by %v, want feedback_verdict", got)
+	}
+
+	// The Earned floor reads distinct shoppers pointing each way, and a
+	// direction is fit returns together with fit feedback carrying that
+	// verdict, so each union bucket filters both settled kinds and counts
+	// each shopper once.
+	unions := at(t, settled, "direction_shoppers")
+	if got := at(t, unions, "aggs", "shoppers", "cardinality", "field"); got != "shopper_hash" {
+		t.Errorf("union shoppers count %v, want distinct shopper_hash", got)
+	}
+	for _, want := range []struct {
+		bucket    string
+		direction string
+		verdict   string
+	}{
+		{"too_small", "too_small", "too_small"},
+		{"too_large", "too_large", "too_large"},
+	} {
+		bucketFilters, ok := at(t, unions, "filters", "filters").(map[string]any)[want.bucket]
+		if !ok {
+			t.Errorf("no union bucket %q", want.bucket)
+			continue
+		}
+		clauses := atArray(t, bucketFilters, "bool", "should")
+		if len(clauses) != 2 {
+			t.Errorf("union bucket %q has %d clauses, want 2 (returns and feedback)", want.bucket, len(clauses))
+			continue
+		}
+		if got := at(t, bucketFilters, "bool", "minimum_should_match"); got != float64(1) {
+			t.Errorf("union bucket %q minimum_should_match = %v, want 1", want.bucket, got)
+		}
+		returnClause := atArray(t, clauses[0], "bool", "filter")
+		requireTermValue(t, returnClause, "settled_kind", "return_reason")
+		requireTermValue(t, returnClause, "fit_direction", want.direction)
+		feedbackClause := atArray(t, clauses[1], "bool", "filter")
+		requireTermValue(t, feedbackClause, "settled_kind", "feedback")
+		requireTermValue(t, feedbackClause, "feedback_verdict", want.verdict)
 	}
 }
 
@@ -288,14 +325,18 @@ func fitShoppersIn(t *testing.T, got t012Counts) int {
 	return fit
 }
 
-// recordedAnswer loads the recording, injects the fit-shopper count and the
-// recent window, and returns the answer the fake index serves.
+// recordedAnswer loads the recording, injects the fit-shopper count, the
+// per-direction union shopper counts and the recent window, and returns the
+// answer the fake index serves.
 //
-// The recording predates the two buckets the reader needs. The fit-shopper
-// count is derived from the recorded counts above. The recent window is the
-// recorded settled bucket itself, because every settled row in the
-// population falls inside the 90 days before the pinned clock; that is what
-// makes the population's own settled counts its recent counts.
+// The recording predates the three buckets the reader needs. The
+// fit-shopper count is derived from the recorded counts above. The union
+// counts add each direction's feedback-verdict rows to its return-distinct
+// shoppers, exact because the harness gives feedback rows their own
+// shoppers. The recent window is the recorded settled bucket itself,
+// because every settled row in the population falls inside the 90 days
+// before the pinned clock; that is what makes the population's own settled
+// counts its recent counts.
 func recordedAnswer(t *testing.T) (t012Recording, map[string]any) {
 	t.Helper()
 	var rec t012Recording
@@ -312,13 +353,16 @@ func recordedAnswer(t *testing.T) (t012Recording, map[string]any) {
 		"doc_count": fitOutcomesIn(rec.GotAll),
 		"shoppers":  map[string]any{"value": fitShoppersIn(t, rec.GotAll)},
 	}
+	allSettled["direction_shoppers"] = unionAnswer(t, rec.GotAll, 36, 15)
 	for _, split := range []struct {
-		name   string
-		counts t012Counts
-		want   int
+		name      string
+		counts    t012Counts
+		want      int
+		smallWant int
+		largeWant int
 	}{
-		{"seeded", rec.GotSeeded, 55},
-		{"live", rec.GotLive, 8},
+		{"seeded", rec.GotSeeded, 55, 31, 14},
+		{"live", rec.GotLive, 8, 5, 1},
 	} {
 		if got := fitShoppersIn(t, split.counts); got != split.want {
 			t.Fatalf("derived %s fit shoppers = %d, want %d", split.name, got, split.want)
@@ -328,13 +372,48 @@ func recordedAnswer(t *testing.T) (t012Recording, map[string]any) {
 			"doc_count": fitOutcomesIn(split.counts),
 			"shoppers":  map[string]any{"value": fitShoppersIn(t, split.counts)},
 		}
+		settled["direction_shoppers"] = unionAnswer(t, split.counts, split.smallWant, split.largeWant)
 	}
 	aggs := objectAt(t, answer, "aggregations")
 	aggs["recent"] = mustDecode(t, mustMarshal(t, allSettled))
 	return rec, answer
 }
 
-// objectAt returns the object at one path below root.
+// unionShoppersIn derives the per-direction union shopper count the Earned
+// floor reads: fit returns that way together with fit feedback carrying
+// that verdict. The harness gives every feedback row its own shopper id in
+// a namespace disjoint from the return shoppers (feedback ids are
+// l1m-fb-..., returns are l1m-small-... and l1m-large-...), so the union is
+// the recorded return-distinct count plus the feedback verdict count.
+func unionShoppersIn(got t012Counts, direction, verdict string) int {
+	return got.DistinctShoppersByDirection[direction] + got.FeedbackByVerdict[verdict]
+}
+
+// unionAnswer builds the direction_shoppers bucket the reader needs: one
+// bucket per direction, each with its union doc count and distinct-shopper
+// cardinality. The wants pin the new numbers the fixture then carries: the
+// old 31/12 were fit-return shoppers only, and the union adds the
+// feedback-only shoppers (5 small and 3 large all-time).
+func unionAnswer(t *testing.T, got t012Counts, smallWant, largeWant int) map[string]any {
+	t.Helper()
+	small := unionShoppersIn(got, "too_small", "too_small")
+	large := unionShoppersIn(got, "too_large", "too_large")
+	if small != smallWant || large != largeWant {
+		t.Fatalf("derived union shoppers = %d/%d, want %d/%d", small, large, smallWant, largeWant)
+	}
+	bucket := func(docs, shoppers int) map[string]any {
+		return map[string]any{
+			"doc_count": docs,
+			"shoppers":  map[string]any{"value": shoppers},
+		}
+	}
+	return map[string]any{"buckets": map[string]any{
+		"too_small": bucket(
+			got.FitReturnsByDirection["too_small"]+got.FeedbackByVerdict["too_small"], small),
+		"too_large": bucket(
+			got.FitReturnsByDirection["too_large"]+got.FeedbackByVerdict["too_large"], large),
+	}}
+}
 func objectAt(t *testing.T, root any, path ...string) map[string]any {
 	t.Helper()
 	object, ok := at(t, root, path...).(map[string]any)
@@ -436,7 +515,7 @@ func TestReadsTheRecordedPopulation(t *testing.T) {
 			"damaged":          5,
 			"not_as_described": 2,
 		},
-		shoppers: ShopperCounts{Fit: 63, TooSmall: 31, TooLarge: 12},
+		shoppers: ShopperCounts{Fit: 63, TooSmall: 36, TooLarge: 15},
 	}
 	wantSeeded := wantCounts{
 		settled:  85,
@@ -450,7 +529,7 @@ func TestReadsTheRecordedPopulation(t *testing.T) {
 			"damaged":          4,
 			"not_as_described": 2,
 		},
-		shoppers: ShopperCounts{Fit: 55, TooSmall: 27, TooLarge: 11},
+		shoppers: ShopperCounts{Fit: 55, TooSmall: 31, TooLarge: 14},
 	}
 	wantLive := wantCounts{
 		settled:  15,
@@ -463,7 +542,7 @@ func TestReadsTheRecordedPopulation(t *testing.T) {
 			"changed_mind":  2,
 			"damaged":       1,
 		},
-		shoppers: ShopperCounts{Fit: 8, TooSmall: 4, TooLarge: 1},
+		shoppers: ShopperCounts{Fit: 8, TooSmall: 5, TooLarge: 1},
 	}
 	checkCounts(t, "all", fit.Counts, wantAll)
 	checkCounts(t, "seeded", fit.Seeded, wantSeeded)
@@ -471,7 +550,7 @@ func TestReadsTheRecordedPopulation(t *testing.T) {
 	checkCounts(t, "recent", fit.Recent, wantAll)
 
 	if fit.Verdict.Status != domain.StatusEarned || fit.Verdict.Direction != domain.FitDirectionSmall {
-		t.Errorf("verdict = %s/%q, want Earned/small: 45 small outcomes of 75 fit outcomes is the 60%% floor, 8 shoppers in the direction, and 45 against 18 is more than twice",
+		t.Errorf("verdict = %s/%q, want Earned/small: 45 small outcomes of 75 fit outcomes is the 60%% floor, 36 shoppers in the direction, and 45 against 18 is more than twice",
 			fit.Verdict.Status, fit.Verdict.Direction)
 	}
 	if fit.Line != testLine || fit.Size != "M" {
@@ -482,14 +561,24 @@ func TestReadsTheRecordedPopulation(t *testing.T) {
 // emptyAnswer is a valid aggregation answer for a line with no settled rows:
 // every bucket present and every count zero.
 func emptyAnswer() map[string]any {
+	union := func() map[string]any {
+		bucket := func() map[string]any {
+			return map[string]any{"doc_count": 0, "shoppers": map[string]any{"value": 0}}
+		}
+		return map[string]any{"buckets": map[string]any{
+			"too_small": bucket(),
+			"too_large": bucket(),
+		}}
+	}
 	settled := func() map[string]any {
 		return map[string]any{
-			"doc_count":       0,
-			"fit_shoppers":    map[string]any{"doc_count": 0, "shoppers": map[string]any{"value": 0}},
-			"settled_kind":    map[string]any{"buckets": []any{}},
-			"reason_category": map[string]any{"buckets": []any{}},
-			"fit_returns":     map[string]any{"doc_count": 0, "direction": map[string]any{"buckets": []any{}}},
-			"feedback":        map[string]any{"doc_count": 0, "verdict": map[string]any{"buckets": []any{}}},
+			"doc_count":          0,
+			"fit_shoppers":       map[string]any{"doc_count": 0, "shoppers": map[string]any{"value": 0}},
+			"settled_kind":       map[string]any{"buckets": []any{}},
+			"reason_category":    map[string]any{"buckets": []any{}},
+			"fit_returns":        map[string]any{"doc_count": 0, "direction": map[string]any{"buckets": []any{}}},
+			"feedback":           map[string]any{"doc_count": 0, "verdict": map[string]any{"buckets": []any{}}},
+			"direction_shoppers": union(),
 		}
 	}
 	return map[string]any{
@@ -570,12 +659,12 @@ func TestRefusesAnAnswerItCannotTrust(t *testing.T) {
 			want: ErrMalformedResponse,
 		},
 		{
-			name:   "a direction with no shopper count",
+			name:   "a union direction with no shopper count",
 			status: http.StatusOK,
 			body: func(t *testing.T) map[string]any {
 				answer := emptyAnswer()
-				direction := objectAt(t, settledAt(t, answer, "all"), "fit_returns", "direction")
-				direction["buckets"] = []any{map[string]any{"key": "too_small", "doc_count": 1}}
+				union := objectAt(t, settledAt(t, answer, "all"), "direction_shoppers", "buckets")
+				union["too_small"] = map[string]any{"doc_count": 1}
 				return answer
 			},
 			want: ErrMalformedResponse,

@@ -64,7 +64,9 @@ type VerdictCounts struct {
 
 // ShopperCounts counts distinct shoppers, never identities. Fit is the
 // Building floor and is not the sum of the two directions: a shopper who
-// returned one size each way counts once here.
+// returned one size each way counts once here. Each direction is the union
+// of fit returns and fit feedback pointing that way: a shopper whose only
+// direction evidence is feedback still counts toward the Earned floor.
 type ShopperCounts struct {
 	// Fit counts distinct shoppers with any fit-classified settled outcome.
 	Fit int

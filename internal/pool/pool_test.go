@@ -105,6 +105,16 @@ func TestFitDecidesThroughTheDomainRule(t *testing.T) {
 			way:    domain.FitDirectionSmall,
 		},
 		{
+			name: "feedback-only direction evidence still earns",
+			all: Counts{
+				Settled:  10,
+				Feedback: VerdictCounts{TooSmall: 10},
+				Shoppers: ShopperCounts{Fit: 10, TooSmall: 10},
+			},
+			status: domain.StatusEarned,
+			way:    domain.FitDirectionSmall,
+		},
+		{
 			name:   "a quiet recent window keeps the earned label",
 			all:    Counts{Settled: 24, Returns: DirectionCounts{TooSmall: 16, TooLarge: 8}, Shoppers: ShopperCounts{Fit: 16, TooSmall: 8, TooLarge: 8}},
 			recent: Counts{Settled: 2, Returns: DirectionCounts{TooSmall: 2}, Shoppers: ShopperCounts{Fit: 2, TooSmall: 2}},
