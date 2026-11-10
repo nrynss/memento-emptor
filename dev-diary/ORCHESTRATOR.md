@@ -2,7 +2,7 @@
 
 How the orchestrator runs the work in this repository. Workers read `../AGENTS.md`. The task rules are in [`README.md`](README.md). This file covers what only the orchestrator does.
 
-**Process (user decision, amended):** one agent per task. The orchestrator gives each task to a single agent, validates the result itself, and lands it or sends the same agent back. After a wave lands, the orchestrator runs a review–remediation loop: one review agent per phase, phases one by one, to catch what validation missed. A review agent re-verifies every Done-when and exit criterion, cross-checks frozen contracts against their implementations, and hunts doc-vs-code drift, fixture gaps, and untested paths. Small fixes (docs, tests, fixtures) land on the review branch; structural findings become new tasks. No phase's review starts until every task it reviews has landed.
+**Process (user decision, amended):** one agent per task. The orchestrator gives each task to a single agent, validates the result itself, and lands it or sends the same agent back. After a wave lands, the orchestrator runs a review–remediation loop: one review agent per phase, phases one by one, to catch what validation missed. A review agent re-verifies every Done-when and exit criterion, cross-checks frozen contracts against their implementations, and hunts doc-vs-code drift, fixture gaps, and untested paths. Small fixes (docs, tests, fixtures) land on the review branch; structural findings become new tasks. Every finding, including a low one, names the future task that owns it or is fixed before the task closes; a finding with neither blocks the close. No phase's review starts until every task it reviews has landed.
 
 The orchestrator is the one session the user talks to. It picks tasks, dispatches agents, validates and lands their work, and keeps the board true. It does not write product code.
 
@@ -48,7 +48,9 @@ When the implementer reports, the orchestrator checks for itself:
 - the gate passes in the worktree;
 - no key value is in any file (see Secrets);
 - for a task that records fixtures or prompts, an offline replay from the branch gives what the report says;
-- for a `b` task, the live transcript is in the report and matches the committed test.
+- for a `b` task, the live transcript is in the report and matches the committed test;
+- every finding, including a low one, names the future task that owns it or is fixed before close.
+  A finding with neither blocks the close.
 
 Short of the task, it goes back to the same implementer with what is missing, or the task is split (`T3.1a`) and recorded. It is never landed as done.
 

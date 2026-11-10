@@ -177,6 +177,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### Finding owners (user, stands)
+
+Every finding, including a low one, names the future task that owns it or is fixed before the task closes. A finding with neither blocks the close. The rule is developer rule 11 in AGENTS.md and is in the orchestrator's validation list; review briefs ask for severity **and owner task**. The current owners are recorded in the task texts (T7.4, T8.5, T9.2, T9.3, T9.6, T10.3) and in the handoff entries.
+
 ### Low-finding sweep (docs)
 
 The stale "nine frozen tools" comments in `internal/api/server/mcp.go`, `internal/api/server/server.go` and `cmd/memento/main.go`, and the same count in `agent/runtime/README.md`, are corrected to eleven. The historical round 1 name is annotated in `bench/pilot/README.md` and `PHASE-5-comparison.md`, pointing at `bench/README.md`. Remaining low findings are not doc-only and stay with the task that owns the file: the durable standing-correction journal and its serialisation/repeat-time rules (T8.5), the pre-pivot correction types in `web/src/lib/contest/` (T9.2), the Claimed/Building `product_fit` fixtures and the population-aligned example counts (T7.4), and the 31-day/arm-2 fairness notes (T10.3).

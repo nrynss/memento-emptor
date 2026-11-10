@@ -140,6 +140,9 @@ publishing the video, submitting, or spending past the brief's budget. Ask first
    not work around it here. The user files it.
 10. **Document handoffs.** A task without a handoff entry is unfinished. Record what exists, what
     surprised you, and what the next agent should not have to work out again.
+11. **Every finding has an owner.** A review finding, including a low one, names the future task
+    that will fix it, or it is fixed before the task closes. A finding with neither is a defect in
+    the review.
 
 ## Code and writing
 

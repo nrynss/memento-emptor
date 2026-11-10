@@ -120,7 +120,7 @@ size:       S · mid
 owns:       deploy/render.yaml, deploy/seed/, deploy/guard.sh, deploy/provision.sh
 status:     not-started
 ```
-The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
+The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Add the three auth key variables (`MEMENTO_AGENT_KEYS`, `MEMENTO_SHOPPER_TOKENS`, `MEMENTO_MERCHANT_KEYS`) to `deploy/render.yaml` as `sync: false`, name them in `.env.example`, and read them in `tools/env.sh` from the keyring. Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
 
 **Done when:** the public URL answers `recall_for_purchase` for the demo shopper with the pool step working, and `product_fit` for the demo oxford reads Earned. The guard reports green. Spend is recorded.
 

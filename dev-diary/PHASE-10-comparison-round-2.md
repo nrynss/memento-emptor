@@ -77,7 +77,7 @@ The four cases in product.md, at least two shoppers each, with hidden answers ke
 3. **Noisy refunds:** mixed causes where a refund status with no reason can't tell fit from the rest.
 4. **Correction, then another agent:** a correction to agent A; agent B asks next, with PayPal access but not A's conversation.
 
-Each case states, before any run, why it separates the arms, and is checked for fairness: a perfect reasoner given each arm's input gets the answer whenever that input holds it. Arms: 1 no memory; 2 PayPal history (T10.1); 3 Memento, shopper only (no pool); 4 Memento, full. The same neutral instrument, model and catalog in every arm. Then freeze: `bench/round2/FROZEN.md` with hashes of the shoppers, answers, population, prompts, extraction and grader, and a freeze check the gate runs.
+Each case states, before any run, why it separates the arms, and is checked for fairness: a perfect reasoner given each arm's input gets the answer whenever that input holds it. Arms: 1 no memory; 2 PayPal history (T10.1); 3 Memento, shopper only (no pool); 4 Memento, full. The same neutral instrument, model and catalog in every arm. Arm 2's generated orders set `custom_field`, its refund notes stay fit-neutral, and line items or order ids are supplied to every arm or to none. If any shopper has a multi-item order, decide the fit-row key for it here. Then freeze: `bench/round2/FROZEN.md` with hashes of the shoppers, answers, population, prompts, extraction and grader, and a freeze check the gate runs.
 
 **Done when:** the shoppers, answers and population are generated and tested for fairness. The freeze manifest and check are committed, and the gate runs the check. No arm 3 or 4 run exists before this commit.
 

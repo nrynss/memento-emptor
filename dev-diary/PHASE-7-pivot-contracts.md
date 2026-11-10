@@ -94,9 +94,9 @@ status:     not-started
 ```
 T7.1 could not make the pivot's core required: `internal/api/server` compares its served JSON to the base fixtures and `testdata/replay/` is frozen, so `pool`, `pool_lookup` and per-item `precedence` are optional and a conforming implementation could never return a pool. Once T8.5 serves the pivot, make them required, add a Claimed and a Building `product_fit` example (all four current pool fixtures are Earned), and update the schemas, Go types, tests and docs in the same commit. Do this before the round 2 freeze (T10.3).
 
-Also align the `product_fit` example counts with T9.1's seeded population (or label the example illustrative): its status and direction match, its counts do not.
+Also align the `product_fit` example counts with T9.1's seeded population (or label the example illustrative): its status and direction match, its counts do not. Pin the `docs/interface.md` blocks byte-exactly, not only by parsed JSON.
 
-**Done when:** the schemas and Go types require the pool and precedence fields; the Claimed and Building examples validate and are pinned; every fixture and doc block is updated; the gate passes; no other contract behaviour changes.
+**Done when:** the schemas and Go types require the pool and precedence fields; the Claimed and Building examples validate and are pinned; every fixture and doc block is updated; the docs are byte-pinned; the gate passes; no other contract behaviour changes.
 
 ---
 
