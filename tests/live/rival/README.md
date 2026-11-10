@@ -23,7 +23,7 @@ erases both after.
 
 | Case | Session | Writes |
 |---|---|---|
-| birth | `t28b-rival-birth` | runs-small belief (derive `logic`, day 0); two too-large returns, each its own interaction citing nothing (unattached); third too-large return births the rival (derive + `depends_on` the rival) |
+| birth | `t28b-rival-birth` | runs-small belief (derive `logic`, day 0); two too-large returns land unattached (ledger rows with no graph write); third too-large return births the rival (derive + `depends_on` the rival) |
 | gap | `t28b-rival-gap` | runs-small belief; too-large, too-large (unattached); too-small (attaches, resets the run); too-large (unattached, run at 1) |
 
 The birth case uses the frozen story's events (`WH-2EV-01/02/03/05`);
@@ -77,8 +77,10 @@ The driver asserts each Done-when clause and exits nonzero on failure:
 3. Gap: opposite, opposite, same (attaches to the runs-small belief),
    opposite — all three opposites unattached, 1 fit belief with 2
    rows, 3 unattached too-large rows, nothing contradicted.
-4. Gap, live: inspect of the rival content refuses — no such concept
-   in the session — while the runs-small belief is suggested.
+4. Gap, live: inspect of the rival content admits no rival concept —
+   it refuses (no such concept in the session) or answers without a
+   blast radius — while the runs-small belief stands with its 2 rows,
+   nothing contradicted.
 
 ## Results
 
