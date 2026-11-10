@@ -109,7 +109,7 @@ requires:   [T7.1, T8.2]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/pool/
-status:     in-review
+status:     done
 ```
 `product_fit` over settled rows only, with T0.12's queries: the denominator, fit returns by direction, feedback by verdict, distinct shoppers by direction, and the seeded split. The status comes from T7.1's rule function, never a second copy of it. The connection stays warm, with a 20 s timeout, so a cold TLS handshake (about 6.9 s in T0.12) never lands on a recommendation. When the index can't be reached, the pool says so and recall carries on without it: it never pretends to an empty pool.
 

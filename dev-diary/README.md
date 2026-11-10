@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 5 / 11 | In progress |
+| P8 | 6 / 12 | In progress (T8.7 in review) |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -192,6 +192,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** The deployment can start with no key variables and stay `/healthz`-green while refusing every API call — fail-closed, but invisible in Render. Nothing invokes `IssueKey` yet. The webhook's only gate is still T2.1's replay fixture; a known event id can write evidence into any shopper's session (pollution, not disclosure). `/calls` is agent-only because the layer returns every entry unscoped. The guard forwards a body it cannot parse; the layer's strict single-object decoder rejects it today.
 
 **The next agent should not have to work out.** T9.6 wires the three `MEMENTO_*` variables into `deploy/render.yaml`, `.env.example` and `tools/env.sh`, mints keys with T8.5's command, and sets them as Render secrets. T8.5 adds the key command, scopes `/calls`, keeps the MCP decoder strict, and retries a partial opt-out. T8.7 replaces the fixture webhook verifier with a real signature check. T9.2 sends the demo shopper's link token as a bearer header.
+
+### T8.3: Pool reader (done)
+
+**What exists.** `internal/pool/` reads `product_fit` over settled rows only: the line-and-size aggregation (denominator, returns by direction, feedback by verdict, distinct shoppers by direction, seeded split, recent window over `settled_at`), with the status from `domain.DecidePool` and no second copy of the rule. Keep-alive connection with a 20 s timeout; an unreachable index is `ErrUnavailable` and recall carries on without it. Fixture tests reproduce T0.12's 600-purchase numbers (600 / 120 / 100 settled / 40-15 / 12-5-3 / 31-12, seeded-live split) and land Earned/small exactly at the 60% floor. Review APPROVE with one fix (settled-kind filters now sourced from the domain constants).
+
+**What surprised.** The index's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the eight-shopper floor: 10 shoppers with only `too_small` feedback read Building where the rule says Earned. That is T8.3c (new): union the counts or narrow the rule — the latter is a contract change and the orchestrator's call. The T0.12 recording predates the `fit_shoppers` filter, so the fixture test derives 63/55/8 from the recorded counts. The index predates `settled_at`-window reads; the recent window is a separate top-level aggregation.
+
+**The next agent should not have to work out.** T8.5 builds the reader in the layer, calls `Warm` at boot (a nil return is not "the pool is configured" — a wrong key shows up on the first `Fit`), maps `ErrUnavailable` to `contract.PoolUnavailable`, and maps `Counts.Reasons` to the contract views. T8.3b does the live read. T8.3c resolves the union question before the pool is served.
 
 ### T8.2b: Fit index writer, live (done)
 
