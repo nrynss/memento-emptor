@@ -193,6 +193,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **The next agent should not have to work out.** T9.6 appends the merchant key entry (digest in the T9.3d notes) to the layer's `MEMENTO_MERCHANT_KEYS` and raises `deploy/guard.sh`'s ceiling to the combined shape. **T9.3e** (new) wires the page from the fixture transport to same-origin `/tools/product_fit`. Post-push verify: `curl https://memento-merchant.onrender.com/healthz` → 200, then `/` → 200 HTML, then the layer entry makes live reads return the pool. Until then the proxy answers 502/503 and the app reads its bundled snapshot.
 
+### T9.6b: Image wiring (done, public proof waits on push)
+
+**What exists.** `cmd/memento/main.go` is a per-shopper director (one `Service` per hub session, default shopper-less service); `deploy/start.sh` boots hub → reader → layer → seed-fit-only, pivoting on `MEMENTO_IDENTITY_SALT`; `deploy/Dockerfile` ships the population fixture. Single `fit-rows` seeding via the disk marker, honoring the staged population. Review APPROVE with no fixes.
+
+**What surprised.** One service cannot serve two hub sessions (no shopper on the graph seam), so the director mirrors the T8.5b driver. The web stage now copies `testdata/api` (the ledger fixture needs it). The marker shares the staged seeder's path, so the live `fit-rows` is honoured, never reseeded.
+
+**The next agent should not have to work out.** `MEMENTO_MERCHANT_KEYS` still needs the merchant entry appended on the live service (digest in the T9.3d notes). Post-push check: both reads through the edge, then `bash deploy/guard.sh --check`. The arc retires with the replay (orphaned, not colliding). T9.6 closes on the public-URL proof.
+
 ### T9.6: Staged deploy work (in-review, T9.6b owns the live proof)
 
 **What exists.** `deploy/seed/` seeds the T9.1 population plus the demo graph, each under its own disk marker (`asOf` at the seeding moment; `Refunded` then `Classified`; skips on `MEMENTO_FIT_SEED=0` or fixture embedder; refuses the marker unless the pool reader returns T9.1's table). Auth plumbing: salt + three caller-key vars as `sync: false` in `render.yaml`, keyring rows in `tools/env.sh` (service `memento-keys`), names in `.env.example`; keys minted with `memento key issue`. Guard ceiling raised $8→$16 for the two-service shape ($14.25/mo run-rate, green live). Review APPROVE; the one finding (missing T9.6b task) was stale — T9.6b exists.
