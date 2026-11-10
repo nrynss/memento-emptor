@@ -240,10 +240,6 @@ func settledAggs() map[string]any {
 // directionFilter matches settled rows pointing one way: a fit return in
 // that direction, or fit feedback carrying that verdict. Either clause is
 // enough; the cardinality above counts each shopper once.
-
-// directionFilter matches settled rows pointing one way: a fit return in
-// that direction, or fit feedback carrying that verdict. Either clause is
-// enough; the cardinality above counts each shopper once.
 func directionFilter(direction, verdict string) map[string]any {
 	return map[string]any{"bool": map[string]any{
 		"should": []any{
