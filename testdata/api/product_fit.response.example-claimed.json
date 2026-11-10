@@ -1,0 +1,41 @@
+{
+  "pool": {
+    "line": {"brand_id": "brand-v-004", "category": "shirts", "fit_handle": "relaxed"},
+    "size": "M",
+    "status": "Claimed",
+    "direction": null,
+    "counts": {
+      "settled": 2,
+      "kept": 0,
+      "returns": {"too_small": 1, "too_large": 1},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 1, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 2, "too_small": 1, "too_large": 1}
+    },
+    "seeded": {
+      "settled": 2,
+      "kept": 0,
+      "returns": {"too_small": 1, "too_large": 1},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 1, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 2, "too_small": 1, "too_large": 1}
+    },
+    "live": {
+      "settled": 0,
+      "kept": 0,
+      "returns": {"too_small": 0, "too_large": 0},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 0, "fit_too_large": 0, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 0, "too_small": 0, "too_large": 0}
+    },
+    "recent": {
+      "settled": 2,
+      "kept": 0,
+      "returns": {"too_small": 1, "too_large": 1},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 1, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 2, "too_small": 1, "too_large": 1}
+    },
+    "precedence": null
+  }
+}

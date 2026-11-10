@@ -49,6 +49,7 @@
         "occurred_at": "2026-10-26T10:00:00Z"
       }
     ],
+    "precedence": null,
     "seeded": true,
     "updated_at": "2026-11-05T14:02:11Z"
   },

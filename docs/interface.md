@@ -9,9 +9,11 @@ seller running the merchant app. It says what to call, when, and what
 comes back.
 
 Every example in this document validates against the frozen schemas in
-`testdata/api/`, and the gate checks that. The schemas are final: the
-tool names, the request shapes and the response shapes do not change
-without a new contract task.
+`testdata/api/`, and the gate checks that. Each fenced block marked
+`validate=` is byte-identical to its fixture file, not only equal after
+parsing: a reformatting of either side fails the build. The schemas are
+final: the tool names, the request shapes and the response shapes do not
+change without a new contract task.
 
 ## Calling convention
 
@@ -454,6 +456,7 @@ gap and points the agent at the next question; it does not fail:
 {
   "shopper_id": "shopper_05",
   "beliefs": [],
+  "pool": null,
   "pool_lookup": "consulted",
   "overriding_correction": null,
   "guidance": {
@@ -467,14 +470,17 @@ gap and points the agent at the next question; it does not fail:
 }
 ```
 
-### The fixture the reference service returns today
+### The unwired shape
 
 `testdata/api/recall_for_purchase.response.example.json` is the same
-correction case as the reference service returns it before it consults
-the pool. It validates: `pool` and `pool_lookup` are optional, and
-`precedence` is optional on every belief, so a caller written against the
-earlier shape keeps working while the pool is wired in. The pivot layer
-always sets all three.
+correction case, as a layer without a wired pool index returns it. The
+tightened contract requires the pivot's core on every response: `pool`
+and `pool_lookup` are always present, and every belief carries
+`precedence`. Here the pool is null and the lookup is `unavailable`,
+because no index was consulted; the belief still names its step,
+`own_evidence` overridden by the correction. A null pool is an answer,
+not a refusal: the correction decides, and recall carries on without the
+pool rather than pretend an empty one.
 
 ```json validate=recall_for_purchase.response.example
 {
@@ -530,10 +536,13 @@ always sets all three.
           "occurred_at": "2026-10-26T10:00:00Z"
         }
       ],
+      "precedence": {"step": "own_evidence", "overridden": true, "overridden_by": "correction"},
       "seeded": true,
       "updated_at": "2026-11-05T14:02:11Z"
     }
   ],
+  "pool": null,
+  "pool_lookup": "unavailable",
   "overriding_correction": {
     "correction_id": "corr_3b7e52",
     "text": "I've lost weight, use M",
@@ -570,6 +579,11 @@ A correction wins the recommendation at once, and the belief stays. The
 belief changes only when new evidence earns the change: one "fits well"
 does not promote the rival belief, and the Venerable belief is never
 demoted by it.
+
+`precedence` is always present and null on ledger and explain reads:
+they show the belief, not the step that served it. Recall sets it on
+every belief, and the pool's own block sets it when recall returns one;
+`product_fit` carries null for the same reason the ledger does.
 
 ## record_correction
 
@@ -723,10 +737,18 @@ Response:
       "feedback": {"fits_well": 8, "too_small": 4, "too_large": 1},
       "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 1, "not_arrived": 0, "changed_mind": 2},
       "shoppers": {"fit": 22, "too_small": 18, "too_large": 3}
-    }
+    },
+    "precedence": null
   }
 }
 ```
+
+The counts above are illustrative: the status and direction match the
+seeded population's oxford line at size M, but the counts do not. They
+show the shape and the arithmetic — seeded plus live equals the total on
+every field, and recent never exceeds the total — not the population's
+own rows. The Claimed and Building examples below do carry the seeded
+population's rows for their lines, with no live rows yet.
 
 The counts are settled purchases only. A purchase still inside its
 return window, and a refund with no reason yet, count toward nothing.
@@ -774,16 +796,111 @@ the window, and a line that has gone quiet keeps its label.
 Every pooled row is marked when it is seeded, and the split is shown, so
 a seeded population is never passed off as lived sales.
 
-## set_pooling
+### Below the floor: Claimed
 
-Pooling is opt-out: a shopper's classified outcomes count toward the pool
-unless they say no. Call it when the shopper asks to be left out, or to
-opt back in. Opting out stops new fit rows for them and removes the rows
-already written; the response says how many were removed. Opting back in
-removes nothing.
+Two settled purchases on the relaxed line at size M, one each way. Two
+distinct shoppers are below the Building floor of three, so the pool
+says nothing: status Claimed, direction null. The counts are the seeded
+population's own rows for this line, all seeded, with no live rows yet;
+both events fall inside the recent window, so recent equals the total:
 
-Request:
+```json validate=product_fit.response.example-claimed
+{
+  "pool": {
+    "line": {"brand_id": "brand-v-004", "category": "shirts", "fit_handle": "relaxed"},
+    "size": "M",
+    "status": "Claimed",
+    "direction": null,
+    "counts": {
+      "settled": 2,
+      "kept": 0,
+      "returns": {"too_small": 1, "too_large": 1},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 1, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 2, "too_small": 1, "too_large": 1}
+    },
+    "seeded": {
+      "settled": 2,
+      "kept": 0,
+      "returns": {"too_small": 1, "too_large": 1},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 1, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 2, "too_small": 1, "too_large": 1}
+    },
+    "live": {
+      "settled": 0,
+      "kept": 0,
+      "returns": {"too_small": 0, "too_large": 0},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 0, "fit_too_large": 0, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 0, "too_small": 0, "too_large": 0}
+    },
+    "recent": {
+      "settled": 2,
+      "kept": 0,
+      "returns": {"too_small": 1, "too_large": 1},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 1, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 2, "too_small": 1, "too_large": 1}
+    },
+    "precedence": null
+  }
+}
+```
 
+### Almost there: Building
+
+Eight settled purchases on the slim line at size M: six too-small
+returns, one too-large return, one fits-well. Eight distinct shoppers
+reach the floor, and the small direction leads, but its six shoppers are
+short of the eight the Earned rule needs, so the pool is Building in the
+small direction. Same provenance as above: the seeded population's own
+rows, no live rows yet, and a recent window holding only the five
+too-small returns of the last 90 days:
+
+```json validate=product_fit.response.example-building
+{
+  "pool": {
+    "line": {"brand_id": "brand-y-002", "category": "shirts", "fit_handle": "slim"},
+    "size": "M",
+    "status": "Building",
+    "direction": "small",
+    "counts": {
+      "settled": 8,
+      "kept": 0,
+      "returns": {"too_small": 6, "too_large": 1},
+      "feedback": {"fits_well": 1, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 6, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 8, "too_small": 6, "too_large": 1}
+    },
+    "seeded": {
+      "settled": 8,
+      "kept": 0,
+      "returns": {"too_small": 6, "too_large": 1},
+      "feedback": {"fits_well": 1, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 6, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 8, "too_small": 6, "too_large": 1}
+    },
+    "live": {
+      "settled": 0,
+      "kept": 0,
+      "returns": {"too_small": 0, "too_large": 0},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 0, "fit_too_large": 0, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 0, "too_small": 0, "too_large": 0}
+    },
+    "recent": {
+      "settled": 5,
+      "kept": 0,
+      "returns": {"too_small": 5, "too_large": 0},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 5, "fit_too_large": 0, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 5, "too_small": 5, "too_large": 0}
+    },
+    "precedence": null
+  }
+}
+```
 ```json validate=set_pooling.request.example
 {
   "shopper_id": "shopper_01",
@@ -1011,6 +1128,7 @@ Response:
         "occurred_at": "2026-10-26T10:00:00Z"
       }
     ],
+    "precedence": null,
     "seeded": true,
     "updated_at": "2026-11-05T14:02:11Z"
   },
@@ -1119,6 +1237,7 @@ which is Claimed and never promotes:
             "occurred_at": "2026-10-26T10:00:00Z"
           }
         ],
+        "precedence": null,
         "seeded": true,
         "updated_at": "2026-11-05T14:02:11Z"
       },
@@ -1148,6 +1267,7 @@ which is Claimed and never promotes:
             "occurred_at": "2026-11-08T20:10:00Z"
           }
         ],
+        "precedence": null,
         "seeded": false,
         "updated_at": "2026-11-08T20:10:00Z"
       },
@@ -1177,6 +1297,7 @@ which is Claimed and never promotes:
             "occurred_at": "2026-11-06T11:30:00Z"
           }
         ],
+        "precedence": null,
         "seeded": false,
         "updated_at": "2026-11-06T11:30:00Z"
       },
@@ -1194,6 +1315,7 @@ which is Claimed and never promotes:
         "contradicted": false,
         "contradicted_by": null,
         "evidence": [],
+        "precedence": null,
         "seeded": true,
         "updated_at": "2026-10-14T10:00:00Z"
       },
@@ -1265,6 +1387,7 @@ One row in full:
         "occurred_at": "2026-10-26T10:00:00Z"
       }
     ],
+    "precedence": null,
     "seeded": true,
     "updated_at": "2026-11-05T14:02:11Z"
   },
@@ -1403,9 +1526,12 @@ Seeded means marked. Every seeded row carries the mark, and the ledger
 shows it beside the row and in the seeded notice. The `shopper_01`
 examples show one consistent state: the three October returns are seeded,
 the dispute, the pending refund, the correction and the feedback are
-live. The pooled examples describe the seeded population of the oxford
-line, and their `seeded` split is shown rather than passed off as lived
-sales. Answering the pending question would add a fourth fit row to the
+live. The Earned pooled example is illustrative: its status and
+direction match the seeded population's oxford line at size M, but its
+counts do not. The Claimed and Building pooled examples carry the seeded
+population's own rows for their lines, with no live rows yet, and every
+example's `seeded` split is shown rather than passed off as lived sales.
+Answering the pending question would add a fourth fit row to the
 evidence ledger; the snapshots here predate that answer.
 
 ## What the layer will not do

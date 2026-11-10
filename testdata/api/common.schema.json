@@ -102,7 +102,7 @@
     },
     "Belief": {
       "type": "object",
-      "required": ["belief_id", "kind", "subject", "value", "status", "standing", "contradicted", "contradicted_by", "evidence", "seeded", "updated_at"],
+      "required": ["belief_id", "kind", "subject", "value", "status", "standing", "contradicted", "contradicted_by", "evidence", "precedence", "seeded", "updated_at"],
       "additionalProperties": false,
       "properties": {
         "belief_id": {"type": "string", "minLength": 1},
@@ -241,7 +241,7 @@
     },
     "Pool": {
       "type": "object",
-      "required": ["line", "size", "status", "direction", "counts", "seeded", "live", "recent"],
+      "required": ["line", "size", "status", "direction", "counts", "seeded", "live", "recent", "precedence"],
       "additionalProperties": false,
       "properties": {
         "line": {"$ref": "common.schema.json#/$defs/ProductLine"},

@@ -4,7 +4,7 @@
   "title": "recall_for_purchase response",
   "description": "What applies to this purchase, and it never refuses: the shopper's beliefs and the pooled product fit, each with a status label and the precedence step that produced it, plus any correction that overrides them. When steps disagree both are returned and the lower one is marked overridden. When overriding_correction is present the agent recommends from it first.",
   "type": "object",
-  "required": ["shopper_id", "beliefs", "overriding_correction", "guidance", "pending_count", "trace_id"],
+  "required": ["shopper_id", "beliefs", "pool", "pool_lookup", "overriding_correction", "guidance", "pending_count", "trace_id"],
   "additionalProperties": false,
   "properties": {
     "shopper_id": {"type": "string", "minLength": 1},

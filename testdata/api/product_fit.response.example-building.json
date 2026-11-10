@@ -1,0 +1,41 @@
+{
+  "pool": {
+    "line": {"brand_id": "brand-y-002", "category": "shirts", "fit_handle": "slim"},
+    "size": "M",
+    "status": "Building",
+    "direction": "small",
+    "counts": {
+      "settled": 8,
+      "kept": 0,
+      "returns": {"too_small": 6, "too_large": 1},
+      "feedback": {"fits_well": 1, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 6, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 8, "too_small": 6, "too_large": 1}
+    },
+    "seeded": {
+      "settled": 8,
+      "kept": 0,
+      "returns": {"too_small": 6, "too_large": 1},
+      "feedback": {"fits_well": 1, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 6, "fit_too_large": 1, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 8, "too_small": 6, "too_large": 1}
+    },
+    "live": {
+      "settled": 0,
+      "kept": 0,
+      "returns": {"too_small": 0, "too_large": 0},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 0, "fit_too_large": 0, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 0, "too_small": 0, "too_large": 0}
+    },
+    "recent": {
+      "settled": 5,
+      "kept": 0,
+      "returns": {"too_small": 5, "too_large": 0},
+      "feedback": {"fits_well": 0, "too_small": 0, "too_large": 0},
+      "reasons": {"fit_too_small": 5, "fit_too_large": 0, "damaged_or_defective": 0, "not_arrived": 0, "changed_mind": 0},
+      "shoppers": {"fit": 5, "too_small": 5, "too_large": 0}
+    },
+    "precedence": null
+  }
+}

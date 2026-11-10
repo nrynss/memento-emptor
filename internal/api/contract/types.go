@@ -264,9 +264,10 @@ type BeliefView struct {
 	// Evidence is every piece of evidence that counts toward this belief.
 	Evidence []EvidenceView `json:"evidence"`
 	// Precedence names the precedence step that produced the belief and
-	// whether a stronger step decided instead. Recall sets it; the ledger
-	// reads leave it out.
-	Precedence *PrecedenceView `json:"precedence,omitempty"`
+	// whether a stronger step decided instead. It is always present:
+	// recall sets it, and the ledger reads carry null, because they show
+	// the belief rather than the decision that served it.
+	Precedence *PrecedenceView `json:"precedence"`
 	// Seeded marks generated history. Every seeded row carries the mark.
 	Seeded bool `json:"seeded"`
 	// UpdatedAt is the last change to the belief, RFC 3339.
@@ -384,13 +385,15 @@ type RecallResponse struct {
 	// Beliefs are the shopper's own beliefs that apply, each with its
 	// status, evidence and precedence step.
 	Beliefs []BeliefView `json:"beliefs"`
-	// Pool is the pooled product-fit belief for the product, or absent
-	// when the pool was not consulted or has nothing to say.
-	Pool *PoolView `json:"pool,omitempty"`
+	// Pool is the pooled product-fit belief for the product, or null
+	// when the pool was not consulted or has nothing to say. It is
+	// always present: an absent pool is null, never a missing key.
+	Pool *PoolView `json:"pool"`
 	// PoolLookup says whether recall consulted the pool: consulted when the
-	// index answered, unavailable when it could not be reached. Recall
-	// carries on without a pool and never pretends an empty one.
-	PoolLookup PoolLookup `json:"pool_lookup,omitempty"`
+	// index answered, unavailable when it could not be reached. It is
+	// always present. Recall carries on without a pool and never pretends
+	// an empty one.
+	PoolLookup PoolLookup `json:"pool_lookup"`
 	// OverridingCorrection is the correction the agent must honour
 	// first, or null when none applies.
 	OverridingCorrection *CorrectionView `json:"overriding_correction"`
@@ -736,9 +739,10 @@ type PoolView struct {
 	// of true rule reads.
 	Recent PoolCountsView `json:"recent"`
 	// Precedence names the precedence step when recall returns the pool,
-	// and whether a stronger step decided instead. product_fit leaves it
-	// out.
-	Precedence *PrecedenceView `json:"precedence,omitempty"`
+	// and whether a stronger step decided instead. It is always present:
+	// recall sets it, and product_fit carries null, because the merchant
+	// read shows the pool rather than the decision that served it.
+	Precedence *PrecedenceView `json:"precedence"`
 }
 
 // ProductFitRequest asks for the pooled product fit of one product line and

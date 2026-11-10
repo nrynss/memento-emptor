@@ -35,6 +35,7 @@
       "feedback": {"fits_well": 8, "too_small": 4, "too_large": 1},
       "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 1, "not_arrived": 0, "changed_mind": 2},
       "shoppers": {"fit": 22, "too_small": 18, "too_large": 3}
-    }
+    },
+    "precedence": null
   }
 }

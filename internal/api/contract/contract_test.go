@@ -442,18 +442,26 @@ func TestExamplesMatchGoTypes(t *testing.T) {
 	}
 }
 
+// docExample is one validating example from docs/interface.md: the raw
+// block text and its parsed JSON. The raw text is what the byte pin
+// compares; the parsed form is what the schema check validates.
+type docExample struct {
+	raw   string
+	value any
+}
+
 // docExamples extracts the validating examples from docs/interface.md.
 // A validating example is a fenced block opened with
 // ```json validate=<name>, where <name> is the testdata/api file without
 // its .json suffix.
-func docExamples(t *testing.T) map[string]any {
+func docExamples(t *testing.T) map[string]docExample {
 	t.Helper()
 	path := filepath.Join("..", "..", "..", "docs", "interface.md")
 	raw, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("read docs/interface.md: %v", err)
 	}
-	blocks := map[string]any{}
+	blocks := map[string]docExample{}
 	var current *string
 	var lines []string
 	flush := func() {
@@ -467,7 +475,7 @@ func docExamples(t *testing.T) map[string]any {
 		if _, duplicate := blocks[*current]; duplicate {
 			t.Fatalf("docs/interface.md validates %q twice", *current)
 		}
-		blocks[*current] = value
+		blocks[*current] = docExample{raw: strings.Join(lines, "\n"), value: value}
 		current = nil
 		lines = nil
 	}
@@ -499,8 +507,12 @@ func docExamples(t *testing.T) map[string]any {
 }
 
 // TestInterfaceDocExamples pins the document to the fixtures: every
-// validating example in docs/interface.md equals its testdata/api file,
-// and every example file appears in the document.
+// validating example in docs/interface.md is byte-identical to its
+// testdata/api file, and every example file appears in the document. The
+// comparison is on the raw block text, not the parsed JSON, so a
+// reformatting of either side fails the build. Only the fence's trailing
+// newline is forgiven: the file's single trailing newline has no block
+// line to match it.
 func TestInterfaceDocExamples(t *testing.T) {
 	dir := apiDir(t)
 	blocks := docExamples(t)
@@ -516,17 +528,23 @@ func TestInterfaceDocExamples(t *testing.T) {
 			t.Errorf("docs/interface.md never validates %s", name)
 			continue
 		}
-		filed := loadJSON(t, filepath.Join(dir, name))
-		if !reflect.DeepEqual(block, filed) {
-			t.Errorf("docs/interface.md block %q differs from testdata/api/%s", base, name)
+		raw, err := os.ReadFile(filepath.Join(dir, name))
+		if err != nil {
+			t.Errorf("read %s: %v", name, err)
+			continue
 		}
+		want := strings.TrimSuffix(string(raw), "\n")
+		if block.raw != want {
+			t.Errorf("docs/interface.md block %q differs byte-for-byte from testdata/api/%s", base, name)
+		}
+		filed := block.value
 		schemaName, ok := schemaForExample(name)
 		if !ok {
 			t.Errorf("%s: cannot map example to schema", name)
 			continue
 		}
 		schema := loadJSON(t, filepath.Join(dir, schemaName))
-		if failures := validator.validate(schema, block, "$"); len(failures) > 0 {
+		if failures := validator.validate(schema, filed, "$"); len(failures) > 0 {
 			t.Errorf("docs/interface.md block %q fails %s:\n  %s", base, schemaName, strings.Join(failures, "\n  "))
 		}
 	}
@@ -734,11 +752,20 @@ func checkPoolCounts(t *testing.T, name string, pool PoolView) {
 }
 
 // TestPoolFixturesMatchTheRule checks every pooled example against the
-// domain rule and against its own arithmetic.
+// domain rule and against its own arithmetic. The Earned, Claimed and
+// Building product_fit examples each carry a status the counts earn, and
+// the Claimed and Building counts are the seeded population's own rows
+// for their lines, with no live rows yet.
 func TestPoolFixturesMatchTheRule(t *testing.T) {
-	var fit ProductFitResponse
-	readExample(t, "product_fit.response.example.json", &fit)
-	checkPoolCounts(t, "product_fit", fit.Pool)
+	for _, name := range []string{
+		"product_fit.response.example.json",
+		"product_fit.response.example-claimed.json",
+		"product_fit.response.example-building.json",
+	} {
+		var fit ProductFitResponse
+		readExample(t, name, &fit)
+		checkPoolCounts(t, strings.TrimSuffix(name, ".json"), fit.Pool)
+	}
 
 	for _, name := range []string{
 		"recall_for_purchase.response.example-correction.json",
@@ -751,6 +778,48 @@ func TestPoolFixturesMatchTheRule(t *testing.T) {
 			t.Fatalf("%s: no pool", name)
 		}
 		checkPoolCounts(t, name, *response.Pool)
+	}
+}
+
+// TestRequiredFieldsSerialize pins the tightening: the pool, the pool
+// lookup and every precedence step serialise even when absent, as null,
+// so a missing key is a breach rather than a shape. The schemas require
+// the same keys.
+func TestRequiredFieldsSerialize(t *testing.T) {
+	raw, err := json.Marshal(RecallResponse{Beliefs: []BeliefView{}, Guidance: GuidanceView{Basis: GuidanceNone}})
+	if err != nil {
+		t.Fatalf("marshal empty recall: %v", err)
+	}
+	var wire map[string]any
+	if err := json.Unmarshal(raw, &wire); err != nil {
+		t.Fatalf("parse empty recall: %v", err)
+	}
+	for _, key := range []string{"pool", "pool_lookup"} {
+		if _, present := wire[key]; !present {
+			t.Errorf("serialised recall omits %q", key)
+		}
+	}
+	raw, err = json.Marshal(BeliefView{Evidence: []EvidenceView{}})
+	if err != nil {
+		t.Fatalf("marshal empty belief: %v", err)
+	}
+	wire = map[string]any{}
+	if err := json.Unmarshal(raw, &wire); err != nil {
+		t.Fatalf("parse empty belief: %v", err)
+	}
+	if _, present := wire["precedence"]; !present {
+		t.Error("serialised belief omits precedence")
+	}
+	raw, err = json.Marshal(PoolView{})
+	if err != nil {
+		t.Fatalf("marshal empty pool: %v", err)
+	}
+	wire = map[string]any{}
+	if err := json.Unmarshal(raw, &wire); err != nil {
+		t.Fatalf("parse empty pool: %v", err)
+	}
+	if _, present := wire["precedence"]; !present {
+		t.Error("serialised pool omits precedence")
 	}
 }
 

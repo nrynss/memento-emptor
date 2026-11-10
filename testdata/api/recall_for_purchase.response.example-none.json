@@ -1,6 +1,7 @@
 {
   "shopper_id": "shopper_05",
   "beliefs": [],
+  "pool": null,
   "pool_lookup": "consulted",
   "overriding_correction": null,
   "guidance": {

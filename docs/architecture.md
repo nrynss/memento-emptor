@@ -90,6 +90,19 @@ the evidence store, not a belief in the graph. One purchase is one row.
   research's event-sequence version: the sequence was the stand-in
   before the state rank was decided. (`research/elastic-fit.md` check 2,
   `product.md` "How a fit row is written")
+- **The rank's limit is documented, not moved.** Kept, feedback and
+  contested share rank 4 above reason_classified at rank 3, so a reason
+  classified after a kept, feedback or contested write cannot apply: the
+  writer's merge keeps the higher rank whatever the event times say, and
+  within rank 4 the later event wins. The rank stays as it is — it is
+  frozen with the contract, and renumbering it would renumber every row
+  version. In practice each purchase settles once: the kept path fires
+  only for purchases never refunded, and classification answers the
+  pending question the refund opened. When a classification and a
+  feedback do meet on one row, they point the same way — the shopper's
+  answer and their feedback agree on how the size ran — so the
+  directional counts the status rule reads are unchanged; only the
+  settled-kind attribution differs.
 - **The row carries no prose and no identity.** Product line (brand,
   category, fit handle), size, purchase state, settled kind, reason
   category, fit direction, feedback verdict, the contested mark, a
