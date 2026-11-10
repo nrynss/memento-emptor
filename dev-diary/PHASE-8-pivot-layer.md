@@ -57,9 +57,9 @@ The run passed end to end (transcript in `out/`, kept out of git):
 - The reader started with the demo plus the three test sessions: own beliefs 200 found=true, a cross-window read 200 found=false, the unscoped alias (the demo, first in the allowlist) 200 found=false for a test belief, `/api/sessions` exactly the four names, and a shopper created after the reader started the uniform 404.
 - A second hub with `max_attached = 2` (pinned demo plus one hot shopper, kept hot by a stats loop) refused the newcomer with HTTP 503 in 1.379 ms and `Retry-After="5"`; the hot session still answered.
 - 130 concurrent `initialize` with 5 sessions already live: 123x200, 7x503, zero other errors — 123+5 is exactly the 128 bound engaging.
-- 600 stats calls over 8 workers sharing 4 live sessions: 600 ok, zero 429s, 98 req/s served on this 12-CPU machine — the 200rps ceiling untouched.
+- 600 stats calls over 8 workers sharing 4 live sessions: 600 ok, zero 429s, 98 req/s served on this 12-CPU machine — the 200rps ceiling untouched. The 0.5-CPU starter measurement from the brief stays open: the 128/200 flags and the RSS numbers above are dev-machine numbers, not starter numbers.
 - Hub RSS 22.2 MiB at start, 37.2 MiB with 5 attached sessions (the release binary; T0.11's 0.4 MiB marginal was the same order).
-- Cleanup deleted the 2 `t81b-*` indices (the data index and the meta index), the listing after is `[]`, and the temp run dir (store, configs, child logs) was removed. No key, URL or token entered a file: the leak check is clean.
+- Cleanup deleted the 2 `t81b-*` indices (the data index and the meta index), the listing after is `[]`, and the temp run dir (store, configs, child logs) was removed. No key, URL or token entered the repo: the leak check over `tests/live/hub/` (excluding `out/`) is clean. The deployment URL lives only in the temp hub config under the run dir, which is removed at the end.
 
 Five things the next agent should not have to rediscover:
 

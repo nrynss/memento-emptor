@@ -20,12 +20,12 @@ concepts carrying its own marker word:
 | one shopper first, spend checked | own marker recalled; $0.00, under the $0.20 budget |
 | all three shoppers | each recalls its own marker |
 | cross-recall (6 pairs) | no other session's marker in any recall |
-| cross-inspect (exact belief content) | no concept matching, every pair |
+| cross-inspect (exact belief content) | no concept matching, each session against another's |
 | seeded demo session (pinned, attached) | none of the test markers, none of the test beliefs |
-| ledger reader started with the three sessions | each own belief 200 found=true |
+| ledger reader started with the demo plus the three sessions | each own belief 200 found=true |
 | cross-window read | 200 found=false |
 | unscoped alias (the default session is the demo) | 200 found=false for a test belief |
-| `GET /api/sessions` | exactly the three allowlisted sessions |
+| `GET /api/sessions` | exactly the four allowlisted sessions |
 | a shopper created after the reader started | the uniform 404 (allowlist is start-time state, Lambo issue 241) |
 | second hub with `max_attached = 2`, every place full | HTTP 503 with `Retry-After`; the hot session still answers |
 | 130 concurrent `initialize` | more than 32 held (the old default no longer binds; the flag is 128) |
