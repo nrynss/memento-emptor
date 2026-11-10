@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 0 / 10 | Waits on P7 |
+| P8 | 1 / 10 | In progress |
 | P9 | 0 / 8 | Waits on P7, P8 |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.4: Corrections that stand on their own (done)
+
+**What exists.** `internal/memory/correction.go` adds `Correction`, `Belief`, `StandingCorrections` (`Record`, `Declare`, `Len`, `Standing`) and `EnsureBeliefDeclaring` beside the unchanged `RecordCorrection`. A standing correction derives as a note (never promotes); a later matching belief gets one `against` declaration dated by the correction; a second matching belief or a later correction never repeats it. `SameSubject` matches subject kind and id, fit↔brand / seller↔seller, and line fields only where both sides set them; size is carried, not gated. Review found no defect in the task; four small fixes committed.
+
+**What surprised.** The journal is per-shopper caller memory, not graph state: Lambo can inspect a concept by exact content but cannot enumerate a session's concepts or store structured attributes, so a restart would lose the ability to declare. T8.5 must persist the journal (it now owns `internal/standing/`) and serialise writes when two agents speak for one shopper. An identical repeated correction keeps its first event time; T8.5 must decide whether a repeat refreshes it.
+
+**The next agent should not have to work out.** T8.5 wires the standing branch (an empty belief id is not an error), calls `EnsureBeliefDeclaring` on every belief write, holds one journal per shopper, and persists it across restarts. Issue text for the user: **Lambo: no way to enumerate a session's concepts or store structured attributes beside one.** `lambo_inspect` needs the exact content and recall is query-based, so the layer cannot rebuild a set of standing corrections after a restart. Requested: a session-scoped list of concepts with type and event time (optionally filtered by type or key), and/or structured attributes beside a concept.
 
 ### T10.1: What arm 2 actually gets (done)
 

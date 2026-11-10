@@ -90,7 +90,7 @@ requires:   [T7.1]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/memory/
-status:     in-review
+status:     done
 ```
 A correction with no belief is written as a standing record with no `against`, and never promotes. When a matching belief is later written for the same subject, the standing correction is declared `against` it, once. A correction against an existing belief keeps today's path. The belief is never deleted (developer rule 4).
 
@@ -132,10 +132,10 @@ The middleware sits in `internal/auth/` and in front of every route at the edge.
 requires:   [T8.1, T8.3, T8.4, T8.6]
 fixture-ok: yes
 size:       M · frontier
-owns:       internal/api/server/, internal/precedence/, cmd/memento/main.go
+owns:       internal/api/server/, internal/precedence/, internal/standing/, cmd/memento/main.go
 status:     not-started
 ```
-Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Correct the stale "nine frozen tools" comments in `internal/api/server/` and `cmd/memento/main.go`; the surface is eleven.
+Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Hold one `StandingCorrections` per shopper, serialised (two agents may speak for one shopper), and make the journal survive a restart: a layer-owned store or a Lambo enumeration/structured-attributes mechanism. A restart must not lose the ability to declare a standing correction against a later belief. Decide whether an identical repeated correction refreshes its event time, since precedence keys on recency. The standing branch of `record_correction` accepts an empty belief id, and every belief write calls `EnsureBeliefDeclaring`. Correct the stale "nine frozen tools" comments in `internal/api/server/` and `cmd/memento/main.go`; the surface is eleven.
 
 **Done when:**
 - A table test covers every step deciding, every pair of disagreeing steps, and the unreachable pool.
@@ -162,6 +162,6 @@ The live layer through the hub and a test-prefixed fit index: one shopper per pr
 - [ ] One Lambo process serves every shopper, live (T8.1, T8.1b).
 - [ ] Every purchase writes and updates its fit row at ingest, live (T8.2, T8.2b).
 - [ ] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
-- [ ] A correction stands on its own (T8.4).
+- [x] A correction stands on its own (T8.4).
 - [ ] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).
 - [ ] Recall never refuses, and says which step decided, live (T8.5, T8.5b).
