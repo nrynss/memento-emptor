@@ -108,7 +108,7 @@ requires:   [T7.4]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/fakes/, testdata/replay/
-status:     not-started
+status:     claimed:t75-replay
 ```
 T7.4 requires the pivot's pool and precedence fields, but the replay builds contract Go values directly, so its marshaled output already emits the new null keys while frozen `testdata/replay/p3-turns.json` and `p4-ledger.json` do not have them. Update the fakes to emit the required fields where they do not already, and refresh the two frozen replay fixtures to the tightened shape in the same commit (orchestrator's call under rule 1; the freeze manifest gains no new files). Do not change what the replay proves — only the wire shape.
 
