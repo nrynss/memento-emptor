@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 12 / 13 | In progress (T8.5c) |
-| P9 | 1 / 8 | In progress |
+| P9 | 2 / 8 | In progress (T9.2, T9.4) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.3: Merchant app (done)
+
+**What exists.** `merchant/` is a separate read-only Svelte 5 + Chaaya + AG Grid app: one pool table (line and size, settled purchases, returns by reason and direction, feedback by verdict, status, seeded count) with a why-panel (counts behind the status, the judged rule). It reads only through the layer's `product_fit` with the merchant key; a test proves no Elastic configuration exists, and the client rejects any non-pool read before the transport. `tools/check.sh` runs a shared frontend step for web then merchant. Review APPROVE with one fix (client-side request validation now covers the HTTP transport too).
+
+**What surprised.** The `Out of true` fixture needs a recent window that is itself judged (≥3 fit shoppers) yet fails the Earned bar — the 3-to-7 recent-shopper band can never earn, so a quiet Earned line reads Out of true. The page loads through the fixture transport; the HTTP transport wiring is T9.3d's config task.
+
+**The next agent should not have to work out.** `toProductFitRequest` strips the display-only `label`; seller lines come from `testdata/api` or the app's own config. Authz still belongs to the layer; the client validation is syntactic. T9.3d wires the HTTP transport (base URL + merchant key, key never in a file).
 
 ### T8.1: One Lambo process for every shopper (done)
 
