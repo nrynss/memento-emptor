@@ -7,7 +7,7 @@ mechanism on constructed cases, not real-world accuracy. Five fictional
 shoppers (`cmp-broken`, `cmp-changed-mind`, `cmp-never-arrived`,
 `cmp-size-changed`, `cmp-unclear`), one hidden right size each, three live
 turns per shopper per arm. A count like 15/15 means "right on all 15 frozen
-turns", not "right 100% of the time in general". Nothing here transfers to
+turns", not "right on every future shopper". Nothing here transfers to
 real shoppers, real catalogs, or any other model.
 
 No arm read the hidden answers. The grader (`bench/grader/`) scored each run
@@ -151,7 +151,7 @@ built); anything about cost beyond the recorded trace spend.
 
 1. **"15 of 15 vs 0 of 15: raw history got the size right every time; the layer refused rather than guess."** Exact counts: arm 2 right-size 15 of 15 runs (`bench/runs/t55-a2-*.json`); arm 3 true recommendations 0 of 15 (`bench/runs/t55-a3-*.json`, 12 outright + 3 informed refusals). Proves the baseline is strong on clean histories and the layer is conservative by design. Does not prove the layer is better — on this set it is worse at naming sizes.
 2. **"0 wrong-cause errors in 45 runs — neither arm ever blamed the wrong reason for a size."** Exact counts: `wrong_cause` 0 on all 45 rows of `bench/runs/scores.json` (15 per arm). Proves the causal-exclusion behavior held for both memory conditions on these cases. Does not prove it holds on noisy or multi-brand histories.
-3. **"6 of 40 raw-history cites actually support the size; the layer's 12 refusals cite nothing instead of citing loosely."** Exact counts: arm 2 `supported_cites` 6 of `cited` 40 in `bench/runs/scores.json` (all 6 in `t55-a2-size-changed-r{1,2,3}.json`); arm 3 cited 0 across 15 runs. Proves arm-2 justifications mostly lean on non-fit rows even when the size is right, while the layer withholds rather than over-cites. Does not prove shoppers prefer refusal — that is a product judgement, not a measured one.
+3. **"6 of 40 raw-history cites actually support the size; the layer's 15 turns cite nothing instead of citing loosely."** Exact counts: arm 2 `supported_cites` 6 of `cited` 40 in `bench/runs/scores.json` (all 6 in `t55-a2-size-changed-r{1,2,3}.json`); arm 3 cited 0 across all 15 runs (12 outright + 3 informed refusals). Proves arm-2 justifications mostly lean on non-fit rows even when the size is right, while the layer withholds rather than over-cites. Does not prove shoppers prefer refusal — that is a product judgement, not a measured one.
 
 ## LEAD NUMBER: [user picks]
 
