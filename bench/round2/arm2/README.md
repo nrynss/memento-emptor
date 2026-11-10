@@ -24,26 +24,27 @@ The sandbox app's token carried 37 scopes, including
 `https://uri.paypal.com/services/payments/orders/client_sdk_orders_api`.
 Transaction Search is what lets `list_transactions` answer at all.
 
-Each of the four listed calls was made with `tools/call` over stdio. The MCP
+Each tool call listed below was made with `tools/call` over stdio. The MCP
 server stringifies the function result into `content[0].text`; the tool itself
 returns the PayPal REST response body unchanged. So each committed recording is
 the REST body the tool wrapped, in the JSON text the model would receive.
-`probe-mcp-result.json` is one untouched JSON-RPC result: the envelope
-(`result.content[0].type = "text"`) and the text it carries.
+`probe-mcp-result.json` and `probe-mcp-get-order.json` are untouched JSON-RPC
+results: each envelope (`result.content[0].type = "text"`) and the text it
+carries.
 
-`probe-tools-used.json` is that session's `tools/list`: four tools,
-`list_transactions`, `get_refund`, `list_disputes` and `get_dispute`. `get_order`
-is a toolkit tool, but it is not in that listing and no JSON-RPC envelope for
-the three order calls was kept. Those three bodies carry the order GET shape
-T0.4 recorded from REST (`testdata/paypal/order-get-approved-line-items.json`),
-the endpoint `get_order` wraps and returns unchanged, so their provenance as
-tool output rests on that shape rather than on a recorded tool listing.
+`probe-tools-list.json` is the complete `tools/list` from the session that made
+the `get_order` call: 28 tools, `get_order` among them. `probe-tools-used.json`
+extracts the five this directory uses: `list_transactions`, `get_order`,
+`get_refund`, `list_disputes` and `get_dispute`. `get_order` was called in that
+same session for `ORDER-ID-US-1`; the envelope's text is the order body, and it
+matches `get-order-1.json` field for field. The other two order bodies came from
+the same tool and endpoint, and are kept as recorded.
 
 | Tool | REST call it wraps | Recordings |
 |---|---|---|
 | `list_transactions` | `GET /v1/reporting/transactions` | `list-transactions-succeeded.json` (`transaction_status=S`, the tool default), `list-transactions-pending.json` (`transaction_status=P`) |
-| `get_order` | `GET /v2/checkout/orders/{id}` | `get-order-1.json`, `get-order-2.json`, `get-order-3.json` |
-| `get_refund` | `GET /v2/payments/refunds/{id}` | `get-refund-1.json`, `get-refund-2.json` |
+| `get_order` | `GET /v2/checkout/orders/{id}` | `get-order-1.json`, `get-order-2.json`, `get-order-3.json`; `probe-mcp-get-order.json` (envelope for `-1`) |
+| `get_refund` | `GET /v2/payments/refunds/{id}` | `get-refund-1.json`, `get-refund-2.json`; `probe-mcp-result.json` (envelope for `-1`) |
 | `list_disputes` | `GET /v1/customer/disputes` | `probe-list-disputes.json` |
 | `get_dispute` | `GET /v1/customer/disputes/{id}` | `get-dispute-1.json` |
 
@@ -53,8 +54,10 @@ longer range returns `400 INVALID_REQUEST`.
 
 The three order ids came from a REST `GET /v2/payments/captures/{id}` reading
 `supplementary_data.related_ids.order_id`, a lookup outside the toolkit used
-only to address `get_order`. The three order responses are the body `get_order`
-returns for those ids, unchanged; the capture read is not arm input.
+only to address `get_order`. The call for `ORDER-ID-US-1` is recorded as an
+untouched JSON-RPC envelope (`probe-mcp-get-order.json`); the other two bodies
+are the same tool's output for the other two ids, kept as recorded. The capture
+read is not arm input.
 
 ## What the toolkit actually returns
 
@@ -222,5 +225,6 @@ npx -y @paypal/mcp --tools=all --paypal-environment=sandbox
 The token travels in `PAYPAL_ACCESS_TOKEN`; it is never printed or written.
 Then call `list_transactions` for the window, `get_order` for known order ids,
 `get_refund` for each refund id and `get_dispute` for each dispute id. The
-probe files show the tool list and the `fields` attempt. Sandbox calls are
-free, and this task made no model call.
+probe files show the full tool list, the five-tool subset, the `get_order` and
+refund envelopes, and the `fields` attempt. Sandbox calls are free, and this
+task made no model call.

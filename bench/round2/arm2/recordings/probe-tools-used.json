@@ -1,6 +1,28 @@
 {
   "tools": [
     {
+      "name": "get_order",
+      "description": "\nRetrieves the order details from PayPal for a given order ID.\n\nThis tool is used to retrieve details of an existing order in PayPal. It provides information about the order, including items, amounts, status, and other relevant details.\n",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{17,32}$",
+            "description": "The order id generated during create call"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
       "name": "list_disputes",
       "description": "\nList disputes from PayPal.\n\nThis function retrieves a list of disputes with optional pagination and filtering parameters.\n",
       "inputSchema": {
@@ -112,12 +134,12 @@
           "start_date": {
             "type": "string",
             "description": "Filters the transactions in the response by a start date and time, in ISO8601 date and time format. Seconds are required. Fractional seconds are optional.",
-            "default": "2026-10-10T17:17:00.402Z"
+            "default": "2026-10-10T17:28:04.439Z"
           },
           "end_date": {
             "type": "string",
             "description": "Filters the transactions in the response by an end date and time, in ISO8601 date and time format. Seconds are required. Fractional seconds are optional. The maximum supported range is 31 days.",
-            "default": "2026-11-10T17:17:00.402Z"
+            "default": "2026-11-10T17:28:04.439Z"
           },
           "search_months": {
             "type": "number",
