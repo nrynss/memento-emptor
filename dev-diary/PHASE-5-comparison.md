@@ -68,7 +68,7 @@ requires:   [T5.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/FROZEN.md
-status:     not-started
+status:     claimed:t54-freeze
 ```
 Record the commit and a hash of every shopper, catalog entry, prompt and grader file.
 
