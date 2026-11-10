@@ -213,7 +213,7 @@ requires:   [T2.1, T8.2]
 fixture-ok: no
 size:       M · frontier
 owns:       internal/payments/, internal/ingest/
-status:     in-review
+status:     done
 ```
 The webhook path is public by design, and its only gate is T2.1's verifier, which today replays a fixture: a known event id can write evidence into any shopper's session. Build the real adapter against PayPal's `POST /v1/notifications/verify-webhook-signature` with the transmission id, timestamp, signature and raw body, using the sandbox app's credentials. Reject anything that does not verify, keep the delivery idempotency T2.1 built, and record a good, a tampered, a replayed and an unknown delivery. Budget: no model spend; sandbox calls are free.
 
@@ -286,5 +286,5 @@ The live layer through the hub and a test-prefixed fit index: one shopper per pr
 - [ ] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
 - [x] A correction stands on its own (T8.4).
 - [x] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).
-- [ ] Webhook deliveries are verified against PayPal's signature, not a fixture (T8.7).
+- [x] Webhook deliveries are verified against PayPal's signature, not a fixture (T8.7).
 - [ ] Recall never refuses, and says which step decided, live (T8.5, T8.5b).

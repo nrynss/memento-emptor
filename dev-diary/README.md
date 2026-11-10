@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 6 / 12 | In progress (T8.7 in review) |
+| P8 | 7 / 12 | In progress (T8.5 next) |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -192,6 +192,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** The deployment can start with no key variables and stay `/healthz`-green while refusing every API call — fail-closed, but invisible in Render. Nothing invokes `IssueKey` yet. The webhook's only gate is still T2.1's replay fixture; a known event id can write evidence into any shopper's session (pollution, not disclosure). `/calls` is agent-only because the layer returns every entry unscoped. The guard forwards a body it cannot parse; the layer's strict single-object decoder rejects it today.
 
 **The next agent should not have to work out.** T9.6 wires the three `MEMENTO_*` variables into `deploy/render.yaml`, `.env.example` and `tools/env.sh`, mints keys with T8.5's command, and sets them as Render secrets. T8.5 adds the key command, scopes `/calls`, keeps the MCP decoder strict, and retries a partial opt-out. T8.7 replaces the fixture webhook verifier with a real signature check. T9.2 sends the demo shopper's link token as a bearer header.
+
+### T8.7: Verified webhook deliveries (done)
+
+**What exists.** `internal/payments/` verifies deliveries against `POST /v1/notifications/verify-webhook-signature` with the transmission fields, subscription id and exact body bytes; only SUCCESS passes, everything else refuses fail-closed with no credential in the error. `internal/ingest/delivery.go` adds `HandleDelivery`, which verifies before T2.1's idempotency check; tests inject a fake verifier. Recorded live: good→one row + pending, tampered→identical refusal, replayed→duplicate, unknown→identical refusal; a byte-exact delivery re-verifies live. Committed fixture `internal/ingest/testdata/recorded-deliveries.json` replays all four offline. Review APPROVE with one fix (ordering wording; the route gap now names T8.5).
+
+**What surprised.** A redacted recording cannot verify live — the signature covers the exact bytes, so the byte-exact delivery lives in git-ignored `out/` and only shapes/verdicts are committed. The signature is bound to the subscription id, so multi-subscription discovery tries every candidate unless `PUBLIC_URL` narrows it. The `Client` caches the subscription list for process lifetime (T8.5 owns the refresh decision).
+
+**The next agent should not have to work out.** T8.5 wires the deployed route: read the raw body bounded like the other routes, pass `ingest.Delivery{Header, Body}` to the shopper's service, and resolve the shopper via `custom_id`. Until then the deployed path keeps T2.1's fixture gate while every wired caller of `HandleDelivery` is verified for real. Set `PUBLIC_URL` on the service once the Render subscription exists beside the test-endpoint one.
 
 ### T8.3: Pool reader (done)
 
