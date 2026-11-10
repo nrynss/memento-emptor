@@ -94,7 +94,7 @@ requires:   [T9.3, T6.1]
 fixture-ok: no
 size:       S · mid
 owns:       deploy/merchant/
-status:     not-started
+status:     claimed:t93d-merchant-deploy
 ```
 Its own Render service, following T6.1's provision and guard pattern. It reaches the layer's `product_fit` and nothing else. The user has pre-approved new services for the pivot: record the service's monthly cost in the brief and the handoff log, and keep the guard, but do not stop for a second approval.
 
@@ -126,7 +126,7 @@ requires:   [T9.4]
 fixture-ok: no
 size:       S · mid
 owns:       agent/second/
-status:     not-started
+status:     claimed:t95-second-agent
 ```
 A second Astropods deployment with its own name and prompt and its own traces, recalling through the same layer. It is written fresh: no shared prompt text with the reference agent beyond the layer's tool descriptions, so that its picking up a correction proves the layer carried it, not the prompt. Budget: under $0.50.
 
@@ -140,7 +140,7 @@ requires:   [T8.5b, T9.1, T7.3]
 fixture-ok: no
 size:       S · mid
 owns:       deploy/render.yaml, deploy/seed/, deploy/guard.sh, deploy/provision.sh, .env.example, tools/env.sh
-status:     not-started
+status:     claimed:t96-live-layer
 ```
 The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. Measure `--max-sessions 128` and `--rate-limit-rps 200` on the 0.5 CPU starter; the T8.1b numbers are from a 12-CPU machine and do not stand for the starter. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Add the three auth key variables (`MEMENTO_AGENT_KEYS`, `MEMENTO_SHOPPER_TOKENS`, `MEMENTO_MERCHANT_KEYS`) to `deploy/render.yaml` as `sync: false`, name them in `.env.example`, and read them in `tools/env.sh` from the keyring; mint the keys with T8.5's command, never invent them. If seeding through the writer, call `Refunded` then `Classified` so a reason-bearing seed refund settles, and measure the forced-refresh cost at population scale. The fixture embedder cannot converge the frozen arc; keep `LAMBO_SEED=0` for the local loop. Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
 
