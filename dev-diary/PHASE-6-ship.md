@@ -104,6 +104,18 @@ After the deadline, submissions are locked. Don't edit the repository, video or 
 
 ---
 
+### T6.8: Builder docs site
+```yaml
+requires:   [T6.3]
+fixture-ok: yes
+size:       S · mid
+owns:       docs-site/
+status:     not-started
+```
+An Astro Starlight site publishing the builder documentation: what the layer is, the interface reference from `docs/interface.md`, the architecture from `docs/architecture.md`, the submission summary, and links to the demo, ledger, and repo. Separate from the ledger web app; static build.
+
+**Done when:** the site builds statically; every page a judge or builder needs is reachable from its front page.
+
 ## Exit Criteria
 
 - [ ] Public demo running, and survives a restart (T6.1).
@@ -112,3 +124,4 @@ After the deadline, submissions are locked. Don't edit the repository, video or 
 - [ ] Repository public with a visible licence (T6.5).
 - [ ] Submitted (T6.6).
 - [ ] Kept running until winners are announced (T6.7).
+- [ ] Builder docs site live (T6.8).
