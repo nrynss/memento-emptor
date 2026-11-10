@@ -1,9 +1,13 @@
 // Package pilot runs the T5.3 baseline pilot: the first live measurement
 // in the comparison, arms 1 and 2 only, never arm 3.
 //
-// The pilot drives the deployed reference agent (gateway Sonnet, the T3.1
-// model) through the platform messaging proxy, one fresh conversation per
-// run. The user message of each run is the harness prompt for that shopper
+// The pilot drives one fresh conversation per run through the platform
+// messaging proxy. The first two turns went through the deployed reference
+// agent and proved it cannot implement the arms: its shopper default made
+// it recall the demo shopper's memory on comparison prompts (kept as
+// discarded evidence). The ten graded runs drive the neutral instrument
+// pilot-baseline instead (same gateway Sonnet model, no tools, no memory
+// beyond the user message); see README.md and agent/. The user message of each run is the harness prompt for that shopper
 // and arm, verbatim: arms differ only in the memory block they carry, the
 // same property the harness proves offline. The agent's own recall-first
 // behaviour is constant across arms; for comparison shoppers it returns no
