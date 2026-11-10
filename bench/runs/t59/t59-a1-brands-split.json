@@ -1,0 +1,111 @@
+{
+  "run_id": "t59-a1-brands-split",
+  "shopper_id": "cmp-brands-split",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "source_run_id": "t58-a1-brands-split-r1",
+  "first": {
+    "prompt": "Shopper: cmp-brands-split\nCandidate: a new Reef Oxford Shirt from Brand R (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+    "reply": "Without any size history or body measurements provided, I cannot make a data-driven recommendation—please share your usual size or measurements so I can give a reliable suggestion.",
+    "size": "",
+    "cites": [],
+    "prompt_words": 65,
+    "reply_words": 27,
+    "trace_cost_usd": 0.001218
+  },
+  "first_trace_cost_usd": 0.001218,
+  "correction": {
+    "text": "Actually I take L now",
+    "want_size": "L",
+    "first_effective": "",
+    "rule": "first-effective \"\" → want \"L\": L-correction flips to M, everything else (M, S, refusal) takes L"
+  },
+  "second": {
+    "prompt": "Shopper: cmp-brands-split\nCandidate: a new Reef Oxford Shirt from Brand R (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.\n\nYour recommendation in reply to the above was:\nWithout any size history or body measurements provided, I cannot make a data-driven recommendation—please share your usual size or measurements so I can give a reliable suggestion.\n\nShopper correction: Actually I take L now\nGiven that correction, what size do you recommend for the candidate? Cite only what you were given.",
+    "arm_memory_tool": " (reused; no new fetch on the correction turn)",
+    "arm_memory_response": "first-turn memory reused byte-for-byte (65 prompt words verified by prefix)",
+    "agent_tool_spans": [
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 11
+      },
+      {
+        "name": "invoke_agent Pilot Baseline",
+        "type": "agent",
+        "latency_ms": 987
+      },
+      {
+        "name": "model_generation claude-sonnet-4-6",
+        "type": "span",
+        "latency_ms": 982
+      },
+      {
+        "name": "processor_run Unsupported File Handler",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "agent_step Pilot Baseline",
+        "type": "span",
+        "latency_ms": 969
+      },
+      {
+        "name": "chat claude-sonnet-4-6",
+        "type": "generation",
+        "latency_ms": 966
+      },
+      {
+        "name": "model_chunk Pilot Baseline",
+        "type": "span",
+        "latency_ms": 321
+      },
+      {
+        "name": "processor_run MemoryInputFilter",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "processor_run Provider History Compat",
+        "type": "span",
+        "latency_ms": 1
+      }
+    ],
+    "recall_observed": false,
+    "reply": "**L** — the shopper has stated they take L.",
+    "contaminated": false,
+    "trace_cost_usd": 0.001149,
+    "prompt_words": 124,
+    "reply_words": 9,
+    "capped": false,
+    "sent_at": "2026-11-10T13:34:57Z",
+    "trace_at": "2026-11-10T13:35:06Z",
+    "extraction": {
+      "size": "L",
+      "size_rule": "standalone-token",
+      "size_quote": "**L** — the shopper has stated they take L.",
+      "id_refs": null
+    }
+  },
+  "score": {
+    "ShopperID": "cmp-brands-split",
+    "RightSize": false,
+    "WrongCause": 0,
+    "CorrectionHonoured": true,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 92,
+    "TokensSecond": 133,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

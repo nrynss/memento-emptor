@@ -166,11 +166,13 @@ requires:   [T5.8]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/runs/
-status:     claimed:t59-correction
+status:     in-review
 ```
 Every shopper, every arm, one correction turn: after the arm's first recommendation (or refusal), the shopper says "Actually I take L now" (uniform text naming an explicit size that differs from what the arm just gave; where the arm already recommended L, the text names M instead so the correction always contradicts). Then re-ask once. Grade with the frozen grader: honoured-on-next-turn, belief/state kept (arm 3: prior belief retained beside the correction, per the decision-vs-belief rule), history intact (arm 2), no fabrication. This is the signature move raw history has no mechanism for — run it honestly and report whatever happens, including arm 2 honouring it too.
 
 **Done when:** 27 correction turns committed (9 shoppers × 3 arms), graded, and verified against the freeze; any new input files hashed into the manifest by amendment in the same commit.
+
+Worker notes (in-review): 27/27 turns committed under `bench/runs/t59/` (one per cell, first turns reused byte-for-byte from the committed T5.5 r1 / T5.8 r1 files, never re-run) plus `t59-scores.json` from the new grade mode over the frozen grader; no frozen file touched, freeze check green, gate green. Driver `bench/runs/cmd/t59/` (drive + grade modes, T5.8 shape; uniform rule: effective-L → "Actually I take M now", everything else → "Actually I take L now", documented per run). Counts: corrections honoured 9/9 in every arm (27/27), wrong-cause 0 everywhere — corrections do not discriminate the arms; arm 2 honours corrections just as well as arm 3, stated plainly. The arms differ in mechanism, not outcome: arm 3 recorded a real `record_correction` in only 2/9 cells (the noisy pair, Venerable beliefs kept with standing + evidence intact, contradicted with the override beside them, correction-basis guidance — asserted in code per turn); in 7/9 cells recall served no belief so no `record_correction` call exists on the agent-visible surface and none was made (recorded per run; the correction travelled in conversation text only, like arm 1). One frozen-check false positive overruled with a recorded machine-verifiable exception (a3-noisy-large quotes its own live `corr_000001` from its prompt memory block). Spend: see handoff report (4 orphaned traces from platform stalls disclosed, all honoured, none graded). No new input files, so the freeze manifest gains no rows.
 
 ---
 

@@ -1,0 +1,210 @@
+{
+  "run_id": "t59-a3-unclear",
+  "shopper_id": "cmp-unclear",
+  "arm": 3,
+  "arm_name": "memento",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "source_run_id": "t55-a3-unclear-r1",
+  "first": {
+    "prompt": "Shopper: cmp-unclear\nCandidate: a new Slim Oxford Shirt from Brand G (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: Memento layer. Live recall for this shopper and brand, served by the layer:\nRecall request: {\"brand_id\":\"BRG\",\"shopper_id\":\"cmp-unclear\",\"trace_id\":\"t55-a3-unclear-r1\"}\nRecall response:\n{\n  \"shopper_id\": \"cmp-unclear\",\n  \"beliefs\": [],\n  \"overriding_correction\": null,\n  \"guidance\": {\n    \"text\": \"No recommendation yet: too little evidence.\",\n    \"basis\": \"none\",\n    \"correction_id\": null,\n    \"belief_id\": null\n  },\n  \"pending_count\": 1,\n  \"trace_id\": \"t55-a3-unclear-r1\"\n}\nPending questions request: {\"shopper_id\": \"cmp-unclear\"}\nPending questions response:\n{\n  \"shopper_id\": \"cmp-unclear\",\n  \"questions\": [\n    {\n      \"question_id\": \"q_000001\",\n      \"outcome\": {\n        \"kind\": \"refund\",\n        \"status\": \"COMPLETED\",\n        \"amount_minor\": 3600,\n        \"currency\": \"USD\"\n      },\n      \"item\": {\n        \"brand_id\": \"BRG\",\n        \"brand_name\": \"Brand G\",\n        \"line_name\": \"Slim Oxford Shirt\",\n        \"sku\": \"BRG-OXF-M\",\n        \"size\": \"M\",\n        \"category\": \"dress-shirts\"\n      },\n      \"link\": {\n        \"order_id\": \"ORD-seed-7-cmp-unclear-017-ade0\",\n        \"capture_id\": \"CAP-seed-7-cmp-unclear-017-ade0\",\n        \"refund_id\": \"RFD-seed-7-cmp-unclear-017-ade0\",\n        \"custom_id\": \"seed-7-cmp-unclear-017\",\n        \"event_id\": \"EVT-seed-7-cmp-unclear-017-ade0\"\n      },\n      \"seeded\": true,\n      \"asked_count\": 0,\n      \"last_asked_at\": null,\n      \"awaiting_since\": \"2026-01-06T00:00:00Z\"\n    }\n  ]\n}",
+    "reply": "I cannot make a confident size recommendation because the only signal available is a completed refund on size M, and the reason for that refund is unknown.",
+    "size": "M",
+    "cites": [],
+    "prompt_words": 166,
+    "reply_words": 27,
+    "trace_cost_usd": 0.002805
+  },
+  "first_trace_cost_usd": 0.002805,
+  "correction": {
+    "text": "Actually I take L now",
+    "want_size": "L",
+    "first_effective": "M",
+    "rule": "first-effective \"M\" → want \"L\": L-correction flips to M, everything else (M, S, refusal) takes L"
+  },
+  "arm3": {
+    "session": "t59-cmp-unclear-1794319110",
+    "settle_note": "no beliefs seeded; nothing to settle",
+    "pre_recall": {
+      "shopper_id": "cmp-unclear",
+      "beliefs": [],
+      "overriding_correction": null,
+      "guidance": {
+        "text": "No recommendation yet: too little evidence.",
+        "basis": "none",
+        "correction_id": null,
+        "belief_id": null
+      },
+      "pending_count": 1,
+      "trace_id": "t59-a3-unclear-pre"
+    },
+    "pre_pending": {
+      "shopper_id": "cmp-unclear",
+      "questions": [
+        {
+          "question_id": "q_000001",
+          "outcome": {
+            "kind": "refund",
+            "status": "COMPLETED",
+            "amount_minor": 3600,
+            "currency": "USD"
+          },
+          "item": {
+            "brand_id": "BRG",
+            "brand_name": "Brand G",
+            "line_name": "Slim Oxford Shirt",
+            "sku": "BRG-OXF-M",
+            "size": "M",
+            "category": "dress-shirts"
+          },
+          "link": {
+            "order_id": "ORD-seed-7-cmp-unclear-017-ade0",
+            "capture_id": "CAP-seed-7-cmp-unclear-017-ade0",
+            "refund_id": "RFD-seed-7-cmp-unclear-017-ade0",
+            "custom_id": "seed-7-cmp-unclear-017",
+            "event_id": "EVT-seed-7-cmp-unclear-017-ade0"
+          },
+          "seeded": true,
+          "asked_count": 0,
+          "last_asked_at": null,
+          "awaiting_since": "2026-01-06T00:00:00Z"
+        }
+      ]
+    },
+    "correction_recorded": false,
+    "no_belief_reason": "pre-correction recall served no belief for the brand, so no ContradictsBeliefID exists on the agent-visible surface; no record_correction call (nothing to declare against); the correction travels in conversation text only",
+    "post_recall": {
+      "shopper_id": "cmp-unclear",
+      "beliefs": [],
+      "overriding_correction": null,
+      "guidance": {
+        "text": "No recommendation yet: too little evidence.",
+        "basis": "none",
+        "correction_id": null,
+        "belief_id": null
+      },
+      "pending_count": 1,
+      "trace_id": "t59-a3-unclear-post"
+    },
+    "post_pending": {
+      "shopper_id": "cmp-unclear",
+      "questions": [
+        {
+          "question_id": "q_000001",
+          "outcome": {
+            "kind": "refund",
+            "status": "COMPLETED",
+            "amount_minor": 3600,
+            "currency": "USD"
+          },
+          "item": {
+            "brand_id": "BRG",
+            "brand_name": "Brand G",
+            "line_name": "Slim Oxford Shirt",
+            "sku": "BRG-OXF-M",
+            "size": "M",
+            "category": "dress-shirts"
+          },
+          "link": {
+            "order_id": "ORD-seed-7-cmp-unclear-017-ade0",
+            "capture_id": "CAP-seed-7-cmp-unclear-017-ade0",
+            "refund_id": "RFD-seed-7-cmp-unclear-017-ade0",
+            "custom_id": "seed-7-cmp-unclear-017",
+            "event_id": "EVT-seed-7-cmp-unclear-017-ade0"
+          },
+          "seeded": true,
+          "asked_count": 0,
+          "last_asked_at": null,
+          "awaiting_since": "2026-01-06T00:00:00Z"
+        }
+      ]
+    },
+    "belief_kept": "vacuous: no served belief before or after; no graph write, nothing dropped"
+  },
+  "second": {
+    "prompt": "Shopper: cmp-unclear\nCandidate: a new Slim Oxford Shirt from Brand G (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: Memento layer. Live recall for this shopper and brand, served by the layer:\nRecall request: {\"brand_id\":\"BRG\",\"shopper_id\":\"cmp-unclear\",\"trace_id\":\"t59-a3-unclear-post\"}\nRecall response:\n{\n  \"shopper_id\": \"cmp-unclear\",\n  \"beliefs\": [],\n  \"overriding_correction\": null,\n  \"guidance\": {\n    \"text\": \"No recommendation yet: too little evidence.\",\n    \"basis\": \"none\",\n    \"correction_id\": null,\n    \"belief_id\": null\n  },\n  \"pending_count\": 1,\n  \"trace_id\": \"t59-a3-unclear-post\"\n}\nPending questions request: {\"shopper_id\": \"cmp-unclear\"}\nPending questions response:\n{\n  \"shopper_id\": \"cmp-unclear\",\n  \"questions\": [\n    {\n      \"question_id\": \"q_000001\",\n      \"outcome\": {\n        \"kind\": \"refund\",\n        \"status\": \"COMPLETED\",\n        \"amount_minor\": 3600,\n        \"currency\": \"USD\"\n      },\n      \"item\": {\n        \"brand_id\": \"BRG\",\n        \"brand_name\": \"Brand G\",\n        \"line_name\": \"Slim Oxford Shirt\",\n        \"sku\": \"BRG-OXF-M\",\n        \"size\": \"M\",\n        \"category\": \"dress-shirts\"\n      },\n      \"link\": {\n        \"order_id\": \"ORD-seed-7-cmp-unclear-017-ade0\",\n        \"capture_id\": \"CAP-seed-7-cmp-unclear-017-ade0\",\n        \"refund_id\": \"RFD-seed-7-cmp-unclear-017-ade0\",\n        \"custom_id\": \"seed-7-cmp-unclear-017\",\n        \"event_id\": \"EVT-seed-7-cmp-unclear-017-ade0\"\n      },\n      \"seeded\": true,\n      \"asked_count\": 0,\n      \"last_asked_at\": null,\n      \"awaiting_since\": \"2026-01-06T00:00:00Z\"\n    }\n  ]\n}\n\nYour recommendation in reply to the layer memory above was:\nI cannot make a confident size recommendation because the only signal available is a completed refund on size M, and the reason for that refund is unknown.\n\nShopper correction: Actually I take L now\nGiven that correction, what size do you recommend for the candidate? Cite only what you were given.",
+    "arm_memory_tool": "recall_for_purchase shopper_id=cmp-unclear brand_id=BRG (served no belief: no record_correction call) + pending_questions shopper_id=cmp-unclear",
+    "arm_memory_response": "pre-correction recall_for_purchase response (no belief served):\n{\"shopper_id\":\"cmp-unclear\",\"beliefs\":[],\"overriding_correction\":null,\"guidance\":{\"text\":\"No recommendation yet: too little evidence.\",\"basis\":\"none\",\"correction_id\":null,\"belief_id\":null},\"pending_count\":1,\"trace_id\":\"t59-a3-unclear-pre\"}\npost-correction recall_for_purchase response (unchanged, no correction recorded):\n{\"shopper_id\":\"cmp-unclear\",\"beliefs\":[],\"overriding_correction\":null,\"guidance\":{\"text\":\"No recommendation yet: too little evidence.\",\"basis\":\"none\",\"correction_id\":null,\"belief_id\":null},\"pending_count\":1,\"trace_id\":\"t59-a3-unclear-post\"}",
+    "agent_tool_spans": [
+      {
+        "name": "agent_step Pilot Baseline",
+        "type": "span",
+        "latency_ms": 1254
+      },
+      {
+        "name": "chat claude-sonnet-4-6",
+        "type": "generation",
+        "latency_ms": 1250
+      },
+      {
+        "name": "processor_run Provider History Compat",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "processor_run Unsupported File Handler",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "processor_run MemoryInputFilter",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "invoke_agent Pilot Baseline",
+        "type": "agent",
+        "latency_ms": 1271
+      },
+      {
+        "name": "model_generation claude-sonnet-4-6",
+        "type": "span",
+        "latency_ms": 1267
+      },
+      {
+        "name": "model_chunk Pilot Baseline",
+        "type": "span",
+        "latency_ms": 274
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 11
+      }
+    ],
+    "recall_observed": false,
+    "reply": "**L** — the shopper explicitly stated they take L now.",
+    "contaminated": false,
+    "trace_cost_usd": 0.002775,
+    "prompt_words": 227,
+    "reply_words": 10,
+    "capped": false,
+    "sent_at": "2026-11-10T14:02:08Z",
+    "trace_at": "2026-11-10T14:02:16Z",
+    "extraction": {
+      "size": "L",
+      "size_rule": "standalone-token",
+      "size_quote": "**L** — the shopper explicitly stated they take L now.",
+      "id_refs": null
+    }
+  },
+  "score": {
+    "ShopperID": "cmp-unclear",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": true,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 193,
+    "TokensSecond": 237,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

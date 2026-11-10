@@ -1,0 +1,137 @@
+{
+  "run_id": "t59-a2-broken",
+  "shopper_id": "cmp-broken",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "source_run_id": "t55-a2-broken-r1",
+  "first": {
+    "prompt": "Shopper: cmp-broken\nCandidate: a new Everyday Oxford Shirt from Brand C (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-broken: 3 rows over 6 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand C Everyday Oxford Shirt SKU BRC-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand C Everyday Oxford Shirt SKU BRC-OXF-M size M (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand C oxford size M, no feedback\nday 4 | refund COMPLETED | signal classified_outcome | source payment | Brand C Everyday Oxford Shirt SKU BRC-OXF-M size M (dress-shirts) | reason damaged_or_defective \"arrived with a torn seam\" conf 1.00 | write record_action | seeded | Refund: Brand C oxford size M; arrived with a torn seam\n",
+    "reply": "**M** — The shopper states they are usually size M, previously kept a size M Brand C Everyday Oxford Shirt, and the only return was due to a defect (torn seam), not a fit issue.",
+    "size": "M",
+    "cites": [
+      "usually size M",
+      "Kept past the window",
+      "torn seam"
+    ],
+    "prompt_words": 199,
+    "reply_words": 35,
+    "trace_cost_usd": 0.002151
+  },
+  "first_trace_cost_usd": 0.002151,
+  "correction": {
+    "text": "Actually I take L now",
+    "want_size": "L",
+    "first_effective": "M",
+    "rule": "first-effective \"M\" → want \"L\": L-correction flips to M, everything else (M, S, refusal) takes L"
+  },
+  "second": {
+    "prompt": "Shopper: cmp-broken\nCandidate: a new Everyday Oxford Shirt from Brand C (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-broken: 3 rows over 6 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand C Everyday Oxford Shirt SKU BRC-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand C Everyday Oxford Shirt SKU BRC-OXF-M size M (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand C oxford size M, no feedback\nday 4 | refund COMPLETED | signal classified_outcome | source payment | Brand C Everyday Oxford Shirt SKU BRC-OXF-M size M (dress-shirts) | reason damaged_or_defective \"arrived with a torn seam\" conf 1.00 | write record_action | seeded | Refund: Brand C oxford size M; arrived with a torn seam\n\n\nYour recommendation in reply to the above was:\n**M** — The shopper states they are usually size M, previously kept a size M Brand C Everyday Oxford Shirt, and the only return was due to a defect (torn seam), not a fit issue.\n\nShopper correction: Actually I take L now\nGiven that correction, what size do you recommend for the candidate? Cite only what you were given.",
+    "arm_memory_tool": "read_history (reused; no new fetch on the correction turn)",
+    "arm_memory_response": "first-turn memory reused byte-for-byte (199 prompt words verified by prefix)",
+    "agent_tool_spans": [
+      {
+        "name": "chat claude-sonnet-4-6",
+        "type": "generation",
+        "latency_ms": 1246
+      },
+      {
+        "name": "model_generation claude-sonnet-4-6",
+        "type": "span",
+        "latency_ms": 1264
+      },
+      {
+        "name": "invoke_agent Pilot Baseline",
+        "type": "agent",
+        "latency_ms": 1269
+      },
+      {
+        "name": "processor_run Provider History Compat",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 1
+      },
+      {
+        "name": "processor_run MemoryInputFilter",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "processor_run Unsupported File Handler",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "agent_step Pilot Baseline",
+        "type": "span",
+        "latency_ms": 1250
+      },
+      {
+        "name": "model_chunk Pilot Baseline",
+        "type": "span",
+        "latency_ms": 285
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 12
+      }
+    ],
+    "recall_observed": false,
+    "reply": "**L** — The shopper has explicitly stated they now take size L.",
+    "contaminated": false,
+    "trace_cost_usd": 0.001959,
+    "prompt_words": 266,
+    "reply_words": 12,
+    "capped": false,
+    "sent_at": "2026-11-10T14:07:56Z",
+    "trace_at": "2026-11-10T14:08:06Z",
+    "extraction": {
+      "size": "L",
+      "size_rule": "explicit-size",
+      "size_quote": "**L** — The shopper has explicitly stated they now take size L.",
+      "id_refs": null
+    }
+  },
+  "score": {
+    "ShopperID": "cmp-broken",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": true,
+    "Supported": 0,
+    "Cited": 3,
+    "Cites": [
+      {
+        "Ref": "usually size M",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "Kept past the window",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "torn seam",
+        "Resolved": true,
+        "Kind": "seller_reliability",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward seller_reliability, not fit"
+      }
+    ],
+    "TokensFirst": 234,
+    "TokensSecond": 278,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

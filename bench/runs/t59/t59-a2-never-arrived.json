@@ -1,0 +1,129 @@
+{
+  "run_id": "t59-a2-never-arrived",
+  "shopper_id": "cmp-never-arrived",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "source_run_id": "t55-a2-never-arrived-r1",
+  "first": {
+    "prompt": "Shopper: cmp-never-arrived\nCandidate: a new Washed Oxford Shirt from Brand D (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-never-arrived: 3 rows over 8 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size L\nday 2 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand D oxford size L, no feedback\nday 6 | dispute OPEN | signal classified_outcome | source payment | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand D parcel never arrived; tracking stuck for weeks\n",
+    "reply": "**L** — The shopper self-reports as usually size L and previously kept a Brand D Washed Oxford Shirt in size L.",
+    "size": "L",
+    "cites": [
+      "usually size L",
+      "Kept past the window"
+    ],
+    "prompt_words": 195,
+    "reply_words": 21,
+    "trace_cost_usd": 0.001929
+  },
+  "first_trace_cost_usd": 0.001929,
+  "correction": {
+    "text": "Actually I take M now",
+    "want_size": "M",
+    "first_effective": "L",
+    "rule": "first-effective \"L\" → want \"M\": L-correction flips to M, everything else (M, S, refusal) takes L"
+  },
+  "second": {
+    "prompt": "Shopper: cmp-never-arrived\nCandidate: a new Washed Oxford Shirt from Brand D (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-never-arrived: 3 rows over 8 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size L\nday 2 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand D oxford size L, no feedback\nday 6 | dispute OPEN | signal classified_outcome | source payment | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand D parcel never arrived; tracking stuck for weeks\n\n\nYour recommendation in reply to the above was:\n**L** — The shopper self-reports as usually size L and previously kept a Brand D Washed Oxford Shirt in size L.\n\nShopper correction: Actually I take M now\nGiven that correction, what size do you recommend for the candidate? Cite only what you were given.",
+    "arm_memory_tool": "read_history (reused; no new fetch on the correction turn)",
+    "arm_memory_response": "first-turn memory reused byte-for-byte (195 prompt words verified by prefix)",
+    "agent_tool_spans": [
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 1
+      },
+      {
+        "name": "processor_run Provider History Compat",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "processor_run MemoryInputFilter",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "invoke_agent Pilot Baseline",
+        "type": "agent",
+        "latency_ms": 953
+      },
+      {
+        "name": "processor_run Unsupported File Handler",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "model_chunk Pilot Baseline",
+        "type": "span",
+        "latency_ms": 226
+      },
+      {
+        "name": "model_generation claude-sonnet-4-6",
+        "type": "span",
+        "latency_ms": 949
+      },
+      {
+        "name": "agent_step Pilot Baseline",
+        "type": "span",
+        "latency_ms": 935
+      },
+      {
+        "name": "chat claude-sonnet-4-6",
+        "type": "generation",
+        "latency_ms": 933
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 11
+      }
+    ],
+    "recall_observed": false,
+    "reply": "**M** — The shopper has explicitly corrected their size preference to M.",
+    "contaminated": false,
+    "trace_cost_usd": 0.001956,
+    "prompt_words": 248,
+    "reply_words": 12,
+    "capped": false,
+    "sent_at": "2026-11-10T13:19:57Z",
+    "trace_at": "2026-11-10T13:20:06Z",
+    "extraction": {
+      "size": "M",
+      "size_rule": "standalone-token",
+      "size_quote": "**M** — The shopper has explicitly corrected their size preference to M.",
+      "id_refs": null
+    }
+  },
+  "score": {
+    "ShopperID": "cmp-never-arrived",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": true,
+    "Supported": 0,
+    "Cited": 2,
+    "Cites": [
+      {
+        "Ref": "usually size L",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "Kept past the window",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      }
+    ],
+    "TokensFirst": 216,
+    "TokensSecond": 260,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

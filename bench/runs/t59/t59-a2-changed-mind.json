@@ -1,0 +1,137 @@
+{
+  "run_id": "t59-a2-changed-mind",
+  "shopper_id": "cmp-changed-mind",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "source_run_id": "t55-a2-changed-mind-r1",
+  "first": {
+    "prompt": "Shopper: cmp-changed-mind\nCandidate: a new Classic Oxford Shirt from Brand E (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-changed-mind: 3 rows over 7 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand E oxford size M, no feedback\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason changed_mind \"changed my mind\" conf 1.00 | write record_action | seeded | Refund: Brand E oxford size M; shopper changed their mind\n",
+    "reply": "**M**\nThe shopper self-identifies as \"usually size M\" and their only recorded purchase of this exact shirt was size M, with the refund attributed to changed mind rather than any fit issue.",
+    "size": "M",
+    "cites": [
+      "usually size M",
+      "Kept past the window",
+      "changed their mind"
+    ],
+    "prompt_words": 196,
+    "reply_words": 32,
+    "trace_cost_usd": 0.002079
+  },
+  "first_trace_cost_usd": 0.002079,
+  "correction": {
+    "text": "Actually I take L now",
+    "want_size": "L",
+    "first_effective": "M",
+    "rule": "first-effective \"M\" → want \"L\": L-correction flips to M, everything else (M, S, refusal) takes L"
+  },
+  "second": {
+    "prompt": "Shopper: cmp-changed-mind\nCandidate: a new Classic Oxford Shirt from Brand E (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-changed-mind: 3 rows over 7 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand E oxford size M, no feedback\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason changed_mind \"changed my mind\" conf 1.00 | write record_action | seeded | Refund: Brand E oxford size M; shopper changed their mind\n\n\nYour recommendation in reply to the above was:\n**M**\nThe shopper self-identifies as \"usually size M\" and their only recorded purchase of this exact shirt was size M, with the refund attributed to changed mind rather than any fit issue.\n\nShopper correction: Actually I take L now\nGiven that correction, what size do you recommend for the candidate? Cite only what you were given.",
+    "arm_memory_tool": "read_history (reused; no new fetch on the correction turn)",
+    "arm_memory_response": "first-turn memory reused byte-for-byte (196 prompt words verified by prefix)",
+    "agent_tool_spans": [
+      {
+        "name": "invoke_agent Pilot Baseline",
+        "type": "agent",
+        "latency_ms": 896
+      },
+      {
+        "name": "processor_run MemoryInputFilter",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "chat claude-sonnet-4-6",
+        "type": "generation",
+        "latency_ms": 874
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "model_generation claude-sonnet-4-6",
+        "type": "span",
+        "latency_ms": 891
+      },
+      {
+        "name": "agent_step Pilot Baseline",
+        "type": "span",
+        "latency_ms": 878
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 10
+      },
+      {
+        "name": "processor_run Unsupported File Handler",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "model_chunk Pilot Baseline",
+        "type": "span",
+        "latency_ms": 196
+      },
+      {
+        "name": "processor_run Provider History Compat",
+        "type": "span",
+        "latency_ms": 0
+      }
+    ],
+    "recall_observed": false,
+    "reply": "**L**\nThe shopper has explicitly stated they now take L.",
+    "contaminated": false,
+    "trace_cost_usd": 0.00192,
+    "prompt_words": 260,
+    "reply_words": 10,
+    "capped": false,
+    "sent_at": "2026-11-10T13:18:53Z",
+    "trace_at": "2026-11-10T13:19:01Z",
+    "extraction": {
+      "size": "L",
+      "size_rule": "standalone-token",
+      "size_quote": "**L**",
+      "id_refs": null
+    }
+  },
+  "score": {
+    "ShopperID": "cmp-changed-mind",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": true,
+    "Supported": 0,
+    "Cited": 3,
+    "Cites": [
+      {
+        "Ref": "usually size M",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "Kept past the window",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "changed their mind",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      }
+    ],
+    "TokensFirst": 228,
+    "TokensSecond": 270,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

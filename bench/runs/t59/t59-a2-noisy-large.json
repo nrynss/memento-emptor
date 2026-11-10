@@ -1,0 +1,137 @@
+{
+  "run_id": "t59-a2-noisy-large",
+  "shopper_id": "cmp-noisy-large",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "source_run_id": "t58-a2-noisy-large-r1",
+  "first": {
+    "prompt": "Shopper: cmp-noisy-large\nCandidate: a new Inlet Oxford Shirt from Brand I (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-noisy-large: 13 rows over 28 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand L Lagoon Tee SKU BRL-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand L lagoon tee size M, no feedback\nday 3 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand M Mooring Cap SKU BRM-CAP-OS size OS (hats) | reason none | write observe | seeded | Kept past the window: Brand M mooring cap, no feedback\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"swims on the shopper\" conf 1.00 | write record_action | seeded | Fit return 1: Brand I oxford size M refunded; swims on the shopper\nday 7 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason damaged_or_defective \"buttons arrived cracked\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; buttons arrived cracked\nday 9 | dispute OPEN | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand I parcel never arrived; carrier lost it\nday 11 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"too loose across the chest\" conf 1.00 | write record_action | seeded | Fit return 2: Brand I oxford size M refunded; too loose across the chest\nday 13 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand I Inlet Tee SKU BRI-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand I inlet tee size M, no feedback\nday 15 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason changed_mind \"ordered two colours, kept the other\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; ordered two colours, kept the other\nday 17 | capture COMPLETED | signal fit_feedback | source shopper | Brand L Lagoon Tee SKU BRL-TEE-M size M (t-shirts) | reason none | write record_action | seeded | Fit feedback: Brand L lagoon tee size M fits well, tied to this purchase\nday 19 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason unclear \"did not love it\" conf 0.94 | write record_action | seeded | Refund: Brand I oxford size M; shopper answer too vague to classify, ask again\nday 21 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason damaged_or_defective \"arrived with a loose hem\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; arrived with a loose hem\nday 23 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"sleeves too long in M\" conf 1.00 | write record_action | seeded | Fit return 3: Brand I oxford size M refunded; sleeves too long in M\n",
+    "reply": "**S**\n\nThree separate fit-too-large returns on Brand I Inlet Oxford Shirt size M (\"swims on the shopper,\" \"too loose across the chest,\" \"sleeves too long in M\") consistently indicate M runs large, so S is the logical next size down.",
+    "size": "S",
+    "cites": [
+      "swims on the shopper",
+      "too loose across the chest",
+      "sleeves too long in M"
+    ],
+    "prompt_words": 670,
+    "reply_words": 40,
+    "trace_cost_usd": 0.004895999999
+  },
+  "first_trace_cost_usd": 0.004895999999,
+  "correction": {
+    "text": "Actually I take L now",
+    "want_size": "L",
+    "first_effective": "S",
+    "rule": "first-effective \"S\" → want \"L\": L-correction flips to M, everything else (M, S, refusal) takes L"
+  },
+  "second": {
+    "prompt": "Shopper: cmp-noisy-large\nCandidate: a new Inlet Oxford Shirt from Brand I (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-noisy-large: 13 rows over 28 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand L Lagoon Tee SKU BRL-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand L lagoon tee size M, no feedback\nday 3 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand M Mooring Cap SKU BRM-CAP-OS size OS (hats) | reason none | write observe | seeded | Kept past the window: Brand M mooring cap, no feedback\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"swims on the shopper\" conf 1.00 | write record_action | seeded | Fit return 1: Brand I oxford size M refunded; swims on the shopper\nday 7 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason damaged_or_defective \"buttons arrived cracked\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; buttons arrived cracked\nday 9 | dispute OPEN | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand I parcel never arrived; carrier lost it\nday 11 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"too loose across the chest\" conf 1.00 | write record_action | seeded | Fit return 2: Brand I oxford size M refunded; too loose across the chest\nday 13 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand I Inlet Tee SKU BRI-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand I inlet tee size M, no feedback\nday 15 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason changed_mind \"ordered two colours, kept the other\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; ordered two colours, kept the other\nday 17 | capture COMPLETED | signal fit_feedback | source shopper | Brand L Lagoon Tee SKU BRL-TEE-M size M (t-shirts) | reason none | write record_action | seeded | Fit feedback: Brand L lagoon tee size M fits well, tied to this purchase\nday 19 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason unclear \"did not love it\" conf 0.94 | write record_action | seeded | Refund: Brand I oxford size M; shopper answer too vague to classify, ask again\nday 21 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason damaged_or_defective \"arrived with a loose hem\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; arrived with a loose hem\nday 23 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"sleeves too long in M\" conf 1.00 | write record_action | seeded | Fit return 3: Brand I oxford size M refunded; sleeves too long in M\n\n\nYour recommendation in reply to the above was:\n**S**\n\nThree separate fit-too-large returns on Brand I Inlet Oxford Shirt size M (\"swims on the shopper,\" \"too loose across the chest,\" \"sleeves too long in M\") consistently indicate M runs large, so S is the logical next size down.\n\nShopper correction: Actually I take L now\nGiven that correction, what size do you recommend for the candidate? Cite only what you were given.",
+    "arm_memory_tool": "read_history (reused; no new fetch on the correction turn)",
+    "arm_memory_response": "first-turn memory reused byte-for-byte (670 prompt words verified by prefix)",
+    "agent_tool_spans": [
+      {
+        "name": "chat claude-sonnet-4-6",
+        "type": "generation",
+        "latency_ms": 1032
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 12
+      },
+      {
+        "name": "processor_run Unsupported File Handler",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "model_generation claude-sonnet-4-6",
+        "type": "span",
+        "latency_ms": 1049
+      },
+      {
+        "name": "model_chunk Pilot Baseline",
+        "type": "span",
+        "latency_ms": 318
+      },
+      {
+        "name": "invoke_agent Pilot Baseline",
+        "type": "agent",
+        "latency_ms": 1054
+      },
+      {
+        "name": "agent_step Pilot Baseline",
+        "type": "span",
+        "latency_ms": 1035
+      },
+      {
+        "name": "processor_run Provider History Compat",
+        "type": "span",
+        "latency_ms": 0
+      },
+      {
+        "name": "memory_operation MessageHistory",
+        "type": "span",
+        "latency_ms": 1
+      },
+      {
+        "name": "processor_run MemoryInputFilter",
+        "type": "span",
+        "latency_ms": 0
+      }
+    ],
+    "recall_observed": false,
+    "reply": "**L**\n\nThe shopper has directly stated they take L now.",
+    "contaminated": false,
+    "trace_cost_usd": 0.004533,
+    "prompt_words": 742,
+    "reply_words": 10,
+    "capped": false,
+    "sent_at": "2026-11-10T13:24:29Z",
+    "trace_at": "2026-11-10T13:24:36Z",
+    "extraction": {
+      "size": "L",
+      "size_rule": "standalone-token",
+      "size_quote": "**L**",
+      "id_refs": null
+    }
+  },
+  "score": {
+    "ShopperID": "cmp-noisy-large",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": true,
+    "Supported": 3,
+    "Cited": 3,
+    "Cites": [
+      {
+        "Ref": "swims on the shopper",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "too loose across the chest",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "sleeves too long in M",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      }
+    ],
+    "TokensFirst": 710,
+    "TokensSecond": 752,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}
