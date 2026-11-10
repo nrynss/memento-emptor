@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 1 / 3 | Ready (T7.1) |
 | P8 | 0 / 10 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
-| P10 | 0 / 5 | Ready (T10.1, T10.2) |
+| P10 | 1 / 6 | In progress (T10.1, T10.2b) |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T10.2: Round 1 relabelled (done)
+
+**What exists.** `bench/README.md` now names round 1's second arm **Memento evidence without beliefs**, states why (its prompt carried the layer's evidence rows: classified reason, signal strength, write kind, with no beliefs over them), and points at round 2. No count, run file or frozen input changed; the frozen run files keep `arm_name: "raw-history"` and the old prompt line deliberately. Review APPROVE with fixes: the stale "21 sha256 rows / 5 histories" line now reads 25 / 9, and "per-purchase rows" became "evidence rows".
+
+**What surprised.** The old name survives in `bench/pilot/README.md` and `dev-diary/PHASE-5-comparison.md`; those are historical records, not rewritten. The round 1 record still reports corrections as nil and never points at T5.9's 27 published turns — a medium completeness gap, queued as T10.2b rather than fixed here because T10.2 forbids count changes.
+
+**The next agent should not have to work out.** Do not push the new label into frozen run files or `bench/harness/`: the manifest pins them. T10.2b owns the correction pointer; it must not touch any other count.
 
 ### PayPal Transaction Search enabled (user, stands)
 

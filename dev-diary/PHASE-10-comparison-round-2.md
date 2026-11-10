@@ -28,7 +28,7 @@ requires:   []
 fixture-ok: yes
 size:       XS · light
 owns:       bench/README.md
-status:     in-review
+status:     done
 ```
 In `bench/README.md`, the round 1 arm called "raw history" is renamed **Memento evidence without beliefs**, with one paragraph saying why: its rows carried the layer's classified reasons, signal strength and write kind. No count changes, and no run file is touched. A pointer to round 2 is added.
 
@@ -39,6 +39,18 @@ Worker notes (in-review): `bench/README.md` gains a "Round 1, relabelled" sectio
 Surprises for the next agent: the committed round 1 run files keep `arm_name: "raw-history"` and the prompt line "Memory: raw history", because they are frozen T5.5 output and the manifest pins `bench/harness/harness.go`; the report label cannot be pushed into them, so a reader comparing this document to a run file will meet both names and should change neither. `bench/pilot/README.md` (the T5.3 record) and `dev-diary/PHASE-5-comparison.md` (its header and T5.9's task text) still say raw history; both are outside this task's owns. Separately, this round 1 record still reports the correction measure as nil and does not point at T5.9's 27 correction turns (9 of 9 honoured in every arm, `bench/runs/t59/t59-scores.json`); fixing that adds counts, which this task forbids, so it needs a follow-up task owning `bench/README.md` to add the correction-round pointer.
 
 Review fixes: the Setup bullet's manifest description was stale since T5.6 — it said 21 sha256 rows and 5 arm-facing histories while `bench/freeze_check.sh` pins 25 and the T5.7 amendment added 4 histories — so it now reads 25 and 9. The relabel paragraph and the Setup arms bullet say "evidence rows" rather than "per-purchase rows" (some rows are shopper statements), and the relabel paragraph states that the frozen run files keep the old `arm_name` and prompt line, so the report is not mistaken for a rewrite of them. The round 2 pointer says "tasks and freeze" rather than "frozen inputs", because no round 2 freeze exists yet (T10.3 owns it). The gate and the freeze check were re-run green at the review tip.
+
+### T10.2b: Round 1 corrections, reported
+```yaml
+requires:   [T10.2]
+fixture-ok: yes
+size:       XS · light
+owns:       bench/README.md
+status:     not-started
+```
+The round 1 record reports the correction measure as nil and stops at T5.6, which reads as if corrections were never measured. T5.9 published 27 correction turns (9 shoppers × 3 arms): 27/27 honoured, 0 wrong-cause, and arm 3 routed 2 of 9 through the real `record_correction` path. Add a short "Corrections" subsection to `bench/README.md` with those counts, the mechanism difference, and a pointer to `bench/runs/t59/t59-scores.json`; state plainly that corrections did not discriminate the arms. No other count and no run file changes.
+
+**Done when:** the T5.9 counts are in the record with their evidence file; `bench/freeze_check.sh` and the gate pass; no run file or frozen input changed.
 
 ---
 
@@ -94,7 +106,7 @@ The results as counts, each linked to its runs, with the limits first: we wrote 
 ## Exit Criteria
 
 - [ ] Arm 2 gets exactly what the Agent Toolkit returns, and nothing the layer made (T10.1).
-- [ ] Round 1 is relabelled honestly (T10.2).
+- [x] Round 1 is relabelled honestly (T10.2).
 - [ ] Four fair cases frozen before any arm 3 or 4 run (T10.3).
 - [ ] Every run published and graded (T10.4).
 - [ ] Results as counts, the headline picked by the user (T10.5).
