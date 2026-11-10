@@ -68,9 +68,11 @@ requires:   [T5.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/FROZEN.md
-status:     claimed:t54-freeze
+status:     in-review
 ```
 Record the commit and a hash of every shopper, catalog entry, prompt and grader file.
+
+Freeze record: `bench/FROZEN.md` (22 sha256 rows: 6 histories, hidden answers by hash only, seed generator, harness prompt template, grader, pilot extraction rule + run schema + driver/grade commands, neutral instrument). Catalog: no Channel3 entry is an arm input (synthetic candidate). Instrument: neutral `pilot-baseline` for all three arms; reference agent rejected. Repeats fixed: 3 per shopper per arm. Deviation recorded in-file: verifier is a manifest + procedure, no gate-run script fits in owns (needs an orchestrator follow-up).
 
 **Done when:** a script verifies the hashes and the gate runs it; no arm 3 run exists before this commit.
 
