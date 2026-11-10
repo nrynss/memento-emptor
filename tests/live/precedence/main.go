@@ -27,8 +27,9 @@
 //
 // A sixth shopper pins the dangling-view behaviour the T8.5 review found:
 // a declared correction survives a layer restart with its stale belief id
-// and degrades to unscoped, and rebuilding the belief does not re-link
-// it. The fix (re-linking by content match) needs internal/api/server/,
+// and matches nothing afterwards, so the correction drops out of recall
+// entirely; rebuilding the belief declares nothing and only coincides by
+// id. The fix (re-linking by content match) needs internal/api/server/,
 // outside this task's owns, so the driver pins the behaviour and names
 // T8.5 as the owner.
 //
