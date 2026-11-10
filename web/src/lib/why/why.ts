@@ -50,9 +50,11 @@ export function kindWord(kind: BeliefKind): string {
 
 /**
  * Why one evidence row does not count toward a belief it does not support.
- * Same-kind rows behind another belief say so; every other row follows the
- * frozen reason table: fit reasons count toward sizing, damage and
- * non-arrival count against the seller, everything else toward nothing.
+ * Rows that count toward a belief of some kind say which kind and that they
+ * support another belief; rows that count toward this belief's own kind say
+ * so explicitly. Every other row follows the frozen reason table: fit
+ * reasons count toward sizing, damage and non-arrival count against the
+ * seller, and reasonless rows with no counts_toward count toward nothing.
  */
 export function notCountedReason(evidence: EvidenceView, belief: BeliefView): string {
 	if (evidence.counts_toward === belief.kind) {
@@ -66,6 +68,9 @@ export function notCountedReason(evidence: EvidenceView, belief: BeliefView): st
 		case 'not_arrived':
 			return 'Counts against the seller, never toward sizing.';
 		default:
+			if (evidence.counts_toward !== null) {
+				return `Counts toward ${kindWord(evidence.counts_toward)}, but supports another belief, not this one.`;
+			}
 			return 'Counts toward nothing.';
 	}
 }

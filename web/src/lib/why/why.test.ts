@@ -110,6 +110,16 @@ describe('why view for the seller belief', () => {
 			expect(row.why_not).toMatch(/never against the seller/);
 		}
 	});
+
+	it('names the kind the fits-well feedback counts toward, not nothing', async () => {
+		const view = await whyAt(9, sellerId);
+		const feedback = view.not_counted.find(
+			(row) => row.evidence.evidence_id === 'ev_51c2d8'
+		);
+		expect(feedback?.evidence.counts_toward).toBe('fit');
+		expect(feedback?.why_not).toMatch(/another belief/);
+		expect(feedback?.why_not).not.toMatch(/nothing/);
+	});
 });
 
 describe('why view across replay steps', () => {
