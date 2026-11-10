@@ -57,8 +57,8 @@ evaluators:
       recall tool result and its guidance.basis. Reply true if and only
       if the basis is correction AND the assistant's reply recommends the
       corrected size, names the correction as the deciding step, and names
-      the standing belief it overrides with that belief's label (Earned,
-      Building, Claimed or Out of true). Otherwise reply false.
+      the standing belief it overrides with that belief's ledger status
+      label. Otherwise reply false.
     output:
       type: boolean
   - key: precedence_own_evidence
