@@ -214,6 +214,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **What surprised.** Search and detail share one wire shape, so one decoder covers both. No dependency gaps.
 
+### T3.7: Public reachability probe (done — negative: platform gap)
+
+**What exists.** `testdata/astropods/15-public-probe.txt` + research section: minimal page + chat endpoint on `probe-gw` port 80 with `frontend:true, messaging:true`. Anonymous GETs to BOTH the chat host and the dedicated frontend host 302 to the platform SSO login — before the flip, and twice after Public was switched ON (3-minute propagation waits, access-list unchanged, CLI shows no Public flag). Model turn via messaging proxy works ($0.0057, 17 obs, tool span) — the platform path is fine; only the front door ignores Public. Total $0.06 of $0.25.
+
+**What surprised.** The deployment exposes two hostnames (chat + frontend); both 302 anonymously. `ast agent access set` offers `anyone` (= any signed-in user) but no public option. Public is documented only in an adapter-auth warning and has never been observed working — platform gap, not config. The earlier flip landed on `memento-agent` by mistake (user-confirmed; its posture is the user's call).
+
+**The next agent should know.** No-login serving on Astropods is BLOCKED pending the platform. The public-shopper-page follow-up stays unscheduled. Judges' access to the demo is now a P6/demo decision (Render-hosted page vs signed-in access), not an agent task.
+
 ### T3.4: Asking the shopper (done) ★
 
 **What exists.** `agent/loops/` policy: ask-one-first-pending, strict explicit-yes gate, approve-then-mirror (local record and transport agree before capture), correction-wins recommendation, transaction-tied feedback; 9 tests incl. fail-closed capture and replay pin to `p3-turns.json`. Live: 6 deployed turns, one conversation — pending poll → reason (fit-too-small accepted) → correction (`corr_live01`, precedence) → honoured next turn → yes-approval (purchase honestly declined, no purchase tool) → fits-well feedback. Traces `879c8752/35598171/cef908ae/fad137db/839514c8/d6e19c5a`; spend $0.19 total (billing $0.08 → $0.27), max turn under the $0.10 guard.

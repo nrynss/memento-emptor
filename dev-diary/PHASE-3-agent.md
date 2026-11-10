@@ -156,7 +156,7 @@ requires:   [T0.8]
 fixture-ok: no
 size:       S · mid
 owns:       dev-diary/research/astropods.md, testdata/astropods/
-status:     in-review
+status:     done
 ```
 
 Prove whether an Astropods agent can be reached with no login, on `probe-gw` only (never `memento-agent`). Deploy a minimal page with one chat endpoint on port 80 declaring `agent.interfaces: {frontend: true, messaging: true}` (both: `messaging` defaults to false once `interfaces` is declared; production filesystem is read-only). Report the exact Configure screen and Public setting for the user to switch themselves. With no cookies, confirm 200 from our container with no login redirect. Send one short model turn through the page; confirm gateway, trace and tool spans. Budget $0.25 with billing re-checks. Record with evidence in `research/astropods.md`.
