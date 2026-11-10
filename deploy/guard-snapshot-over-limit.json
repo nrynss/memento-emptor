@@ -1,0 +1,18 @@
+{
+  "_note": "Recorded-shape example for guard.sh --snapshot (dry-run trip only). Ids are placeholders, never real resources.",
+  "services": [
+    {
+      "id": "svc-TESTSETTLED00000001",
+      "name": "memento-emptor",
+      "type": "web_service",
+      "serviceDetails": {"plan": "starter", "region": "virginia", "runtime": "docker"}
+    },
+    {
+      "id": "svc-TESTDRIFT000000002",
+      "name": "memento-emptor-staging-oops",
+      "type": "web_service",
+      "serviceDetails": {"plan": "standard", "region": "virginia", "runtime": "docker"}
+    }
+  ],
+  "disks": [{"id": "dsk-TEST000000000001", "sizeGB": 1}]
+}

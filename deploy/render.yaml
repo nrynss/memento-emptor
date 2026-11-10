@@ -1,0 +1,30 @@
+# Settled shape from research/hosting.md: one web service on the
+# smallest paid plan plus a 1 GB disk, Hobby workspace ($0), against
+# the $50 credit: $7.00 + $0.25 = $7.25/month. Use this file for the
+# dashboard blueprint path; the API call in README.md provisions the
+# same shape repeatably.
+services:
+  - type: web
+    name: memento-emptor
+    runtime: docker
+    plan: starter # dashboard name for 0.5c-512mb
+    region: virginia # nearest Render region to the Elastic deployment
+    dockerfilePath: ./deploy/Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    disk:
+      name: lambo-data
+      mountPath: /var/lambo-data
+      sizeGB: 1
+    envVars:
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: LAMBO_ES_API_KEY
+        sync: false
+      - key: ELASTIC_URL
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false

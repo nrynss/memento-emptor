@@ -12,11 +12,13 @@ requires:   [T2.6, T3.6, T0.9]
 fixture-ok: no
 size:       M · mid
 owns:       deploy/
-status:     claimed:t61-deploy
+status:     in-review
 ```
 The service, the ledger and Lambo, on the hosting T0.9 chose. PayPal webhooks point at the public endpoint. Lambo's data persists across a restart. A budget guard protects the credits while the demo is public.
 
 **Done when:** the full demo runs against the public URL from a clean browser; a restart loses nothing; the guard is shown to stop at its limit.
+
+**Notes (worker, T6.1).** `deploy/` holds the whole shape, verified end to end in Docker against the final image: edge (same-origin SPA + API proxy + `/webhooks/paypal` → `/webhooks/payment` shim), memory layer seeded from `testdata/replay`, Lambo 0.10.1 sidecar seeded once per contract (Venerable sizing belief, seller-only dispute, declared correction; marker-idempotent on the disk), `render.yaml` + `provision.sh` replay the settled plan/disk/region, `guard.sh` audits run-rate and inventory (dry-run trip: $32.25 fixture vs $8 ceiling, exit 2, nothing called), `paypal-webhook.sh` subscribes the three proved event types idempotently. One recorded deviation: runtime docker, not go (frozen service cannot serve the SPA; $0 cost delta). Restart proof: inspect byte-identical (Venerable, blast 3, Contradicts) across a container restart with the seed skipped. FINDING for the orchestrator: the live Render create is blocked on repo access — the API refuses the private repo as unfetchable with no GitHub connection (nothing billable created; guard still reads $0.00/mo). Unblock: connect GitHub on the dashboard or run `provision.sh` after T6.5 makes the repo public, then the webhook script; first green deploy auto-follows the land.
 
 ---
 
