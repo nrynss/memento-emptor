@@ -1,0 +1,12 @@
+{
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"id\":\"REFUND-ID-US-1\",\"amount\":{\"currency_code\":\"USD\",\"value\":\"34.00\"},\"note_to_payer\":\"T04 sandbox evidence, fit return\",\"seller_payable_breakdown\":{\"gross_amount\":{\"currency_code\":\"USD\",\"value\":\"34.00\"},\"paypal_fee\":{\"currency_code\":\"USD\",\"value\":\"0.00\"},\"net_amount\":{\"currency_code\":\"USD\",\"value\":\"34.00\"},\"total_refunded_amount\":{\"currency_code\":\"USD\",\"value\":\"34.00\"}},\"custom_id\":\"shopper-demo-001\",\"status\":\"COMPLETED\",\"create_time\":\"2026-11-09T06:12:09-08:00\",\"update_time\":\"2026-11-09T06:12:09-08:00\",\"payer\":{\"email_address\":\"MERCHANT-EMAIL-REDACTED\",\"merchant_id\":\"MERCHANT-ID-REDACTED\"},\"links\":[{\"href\":\"https://api.sandbox.paypal.com/v2/payments/refunds/REFUND-ID-US-1\",\"rel\":\"self\",\"method\":\"GET\"},{\"href\":\"https://api.sandbox.paypal.com/v2/payments/captures/CAPTURE-ID-US-1\",\"rel\":\"up\",\"method\":\"GET\"}]}"
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 2
+}

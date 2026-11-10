@@ -1,0 +1,170 @@
+{
+  "tools": [
+    {
+      "name": "list_disputes",
+      "description": "\nList disputes from PayPal.\n\nThis function retrieves a list of disputes with optional pagination and filtering parameters.\n",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "disputed_transaction_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{12,255}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "dispute_state": {
+            "type": "string",
+            "enum": [
+              "REQUIRED_ACTION",
+              "REQUIRED_OTHER_PARTY_ACTION",
+              "UNDER_PAYPAL_REVIEW",
+              "RESOLVED",
+              "OPEN_INQUIRIES",
+              "APPEALABLE"
+            ],
+            "description": "OPEN_INQUIRIES"
+          },
+          "page_size": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 10
+          },
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 1
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_dispute",
+      "description": "\nGet details for a specific dispute from PayPal.\n\nThis tool is used to lists disputes with a summary set of details, which shows the dispute_id, reason, status, dispute_state, dispute_life_cycle_stage, dispute_channel, dispute_amount, create_time and update_time fields.\n",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "dispute_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,255}$",
+            "description": "The order id generated during create call"
+          }
+        },
+        "required": [
+          "dispute_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "list_transactions",
+      "description": "\nList transactions from PayPal.\n\nThis tool is used to list transactions with optional filtering parameters within a date range of 31 days. This tool can also be used to list details of a transaction given the transaction ID.\n\n- The start_date and end_date should be specified in ISO8601 date and time format. Example dates: 1996-12-19T16:39:57-08:00, 1985-04-12T23:20:50.52Z, 1990-12-31T23:59:60Z\n- The transaction_status accepts the following 4 values:\n    1. \"D\" - represents denied transactions.\n    2. \"P\" - represents pending transactions.\n    3. \"S\" - represents successful transactions.\n    4. \"V\" - represents transactions that were reversed.\n- The transaction_id is the unique identifier for the transaction.\n",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transaction_id": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "not": {}
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9_-]{12,255}$"
+                  }
+                ],
+                "description": "The ID of the transaction to retrieve."
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The ID of the transaction to retrieve.",
+            "default": null
+          },
+          "transaction_status": {
+            "type": "string",
+            "enum": [
+              "D",
+              "P",
+              "S",
+              "V"
+            ],
+            "default": "S"
+          },
+          "start_date": {
+            "type": "string",
+            "description": "Filters the transactions in the response by a start date and time, in ISO8601 date and time format. Seconds are required. Fractional seconds are optional.",
+            "default": "2026-10-10T17:17:00.402Z"
+          },
+          "end_date": {
+            "type": "string",
+            "description": "Filters the transactions in the response by an end date and time, in ISO8601 date and time format. Seconds are required. Fractional seconds are optional. The maximum supported range is 31 days.",
+            "default": "2026-11-10T17:17:00.402Z"
+          },
+          "search_months": {
+            "type": "number",
+            "description": "Number of months to search back for a transaction by ID. Default is 12 months.",
+            "default": 12
+          },
+          "page_size": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "page": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 10000,
+            "default": 1
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_refund",
+      "description": "\nRetrieve detailed information about a PayPal payment refund.\nIf you have an order ID instead of a refund ID, first use the get order tool to obtain the refund ID from the order details. \nThis function returns comprehensive details about a refund, including its current status (completed, pending, cancelled), refunded amount, and processing information.\nWhen multiple refunds exist for an order or capture, request clarification on which specific refund to retrieve. \nResponse details include:\n- Refund status and ID\n- Refunded amount and currency\n- Reason for refund (if provided)\n- Source transaction details\n",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "refund_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{15,32}$",
+            "description": "The ID of the refund to get details for."
+          }
+        },
+        "required": [
+          "refund_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "result": {
+    "protocolVersion": "2024-11-05",
+    "capabilities": {
+      "tools": {
+        "listChanged": true
+      }
+    },
+    "serverInfo": {
+      "name": "PayPal",
+      "version": "1.11.0"
+    }
+  },
+  "jsonrpc": "2.0",
+  "id": 1
+}

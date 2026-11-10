@@ -1,0 +1,138 @@
+{
+  "transaction_details": [
+    {
+      "transaction_info": {
+        "paypal_account_id": "PAYER-ID-REDACTED",
+        "transaction_id": "CAPTURE-ID-US-1",
+        "paypal_reference_id": "REFERENCE-ID-US-1",
+        "paypal_reference_id_type": "TXN",
+        "transaction_event_code": "T0006",
+        "transaction_initiation_date": "2026-11-09T14:12:01Z",
+        "transaction_updated_date": "2026-11-09T14:12:01Z",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "34.00"
+        },
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-2.19"
+        },
+        "transaction_status": "S",
+        "transaction_subject": "Brand X oxford shirt, size M (demo line item)",
+        "custom_field": "shopper-demo-001",
+        "protection_eligibility": "01",
+        "instrument_type": "PayPal",
+        "instrument_sub_type": "PayPal Wallet"
+      }
+    },
+    {
+      "transaction_info": {
+        "paypal_account_id": "PAYER-ID-REDACTED",
+        "transaction_id": "REFUND-ID-US-1",
+        "paypal_reference_id": "CAPTURE-ID-US-1",
+        "paypal_reference_id_type": "TXN",
+        "transaction_event_code": "T1107",
+        "transaction_initiation_date": "2026-11-09T14:12:09Z",
+        "transaction_updated_date": "2026-11-09T14:12:09Z",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-34.00"
+        },
+        "transaction_status": "S",
+        "transaction_subject": "T04 sandbox evidence, fit return",
+        "transaction_note": "T04 sandbox evidence, fit return",
+        "custom_field": "shopper-demo-001",
+        "protection_eligibility": "02",
+        "instrument_type": "PayPal",
+        "instrument_sub_type": "PayPal Wallet"
+      }
+    },
+    {
+      "transaction_info": {
+        "paypal_account_id": "PAYER-ID-REDACTED",
+        "transaction_id": "CAPTURE-ID-US-2",
+        "paypal_reference_id": "REFERENCE-ID-US-2",
+        "paypal_reference_id_type": "TXN",
+        "transaction_event_code": "T0006",
+        "transaction_initiation_date": "2026-11-09T14:17:22Z",
+        "transaction_updated_date": "2026-11-09T14:17:22Z",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "34.00"
+        },
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-1.68"
+        },
+        "transaction_status": "S",
+        "transaction_subject": "Brand X oxford shirt, size M (demo line item)",
+        "custom_field": "shopper-demo-001",
+        "protection_eligibility": "01",
+        "instrument_type": "PayPal",
+        "instrument_sub_type": "PayPal Wallet"
+      }
+    },
+    {
+      "transaction_info": {
+        "paypal_account_id": "PAYER-ID-REDACTED",
+        "transaction_id": "REFUND-ID-US-2",
+        "paypal_reference_id": "CAPTURE-ID-US-2",
+        "paypal_reference_id_type": "TXN",
+        "transaction_event_code": "T1107",
+        "transaction_initiation_date": "2026-11-09T14:18:52Z",
+        "transaction_updated_date": "2026-11-09T14:18:52Z",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-34.00"
+        },
+        "transaction_status": "S",
+        "transaction_subject": "T04 sandbox evidence, second cycle",
+        "transaction_note": "T04 sandbox evidence, second cycle",
+        "custom_field": "shopper-demo-001",
+        "protection_eligibility": "02",
+        "instrument_type": "PayPal",
+        "instrument_sub_type": "PayPal Wallet"
+      }
+    },
+    {
+      "transaction_info": {
+        "paypal_account_id": "PAYER-ID-REDACTED",
+        "transaction_id": "CAPTURE-ID-US-3",
+        "paypal_reference_id": "BUYER-TRANSACTION-ID-SANDBOX-1",
+        "paypal_reference_id_type": "TXN",
+        "transaction_event_code": "T0006",
+        "transaction_initiation_date": "2026-11-09T14:24:28Z",
+        "transaction_updated_date": "2026-11-09T14:24:28Z",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "34.00"
+        },
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-1.68"
+        },
+        "transaction_status": "S",
+        "transaction_subject": "Brand X oxford shirt, size M (demo line item)",
+        "custom_field": "shopper-demo-001",
+        "protection_eligibility": "01",
+        "instrument_type": "PayPal",
+        "instrument_sub_type": "PayPal Wallet"
+      }
+    }
+  ],
+  "account_number": "MERCHANT-ID-REDACTED",
+  "start_date": "2026-10-11T07:00:00Z",
+  "end_date": "2026-11-10T14:59:59Z",
+  "last_refreshed_datetime": "2026-11-10T14:59:59Z",
+  "page": 1,
+  "total_items": 18,
+  "total_pages": 1,
+  "links": [
+    {
+      "href": "https://api.sandbox.paypal.com/v1/reporting/transactions?start_date=2026-10-11T00%3A00%3A00-0700&start_date=2026-10-11T00%3A00%3A00-0700&transaction_status=S&transaction_status=S&end_date=2026-11-10T23%3A59%3A59-0700&end_date=2026-11-10T23%3A59%3A59-0700&page_size=100&page=1",
+      "rel": "self",
+      "method": "GET",
+      "encType": "application/json"
+    }
+  ]
+}

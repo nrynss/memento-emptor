@@ -14,11 +14,13 @@ requires:   []
 fixture-ok: no
 size:       S · mid
 owns:       bench/round2/arm2/
-status:     claimed:t101-arm2
+status:     in-review
 ```
 Record exactly what the Agent Toolkit returns for a shopper's history: transaction listing, line items, refund and dispute status, dispute reason codes. Start from T0.4's recordings (`research/paypal.md`) and fill any gap with sandbox reads. Transaction Search is enabled on the sandbox app and the token carries `https://uri.paypal.com/services/reporting/search/read`; the reporting read must use a date range of 31 days or less (`400` otherwise). Stop if the scope disappears before the run. Write the extraction that turns that, and only that, into arm 2's prompt input: no refund reason, no classification, no signal strength, nothing the layer produced. No model spend.
 
 **Done when:** the recorded responses and the extraction, with a test, are in `bench/round2/arm2/`. A test proves the extraction's output has no field the Agent Toolkit didn't return.
+
+Notes: the toolkit was run, not only read. `@paypal/mcp` 1.8.1 on `@paypal/agent-toolkit` 1.11.0 served the four tools over stdio with an access token and no model key, and the committed recordings are the tool output. What it returns is narrower than the product wording suggests: `list_transactions` wraps the reporting API with no `fields` parameter, so the default projection is `transaction_info` only — no line items, no payer info — and the tool schema drops a `fields` argument. Line items therefore come from `get_order` (recorded for the three demo orders), which needs an order id the caller already holds. The tool's default `transaction_status` is `S`, so a pending dispute hold appears only on a second call with `P`. Refunds are a `T1107` row plus `get_refund`; disputes are `list_disputes` plus `get_dispute`, whose `reason` is PayPal's code. The extraction (`bench/round2/arm2`) filters by the seller's `custom_id` (the only per-shopper key in the listing), emits a JSON array of the returned records it needs, and adds no field: the test finds each output record's source response and fails on any path or value that response did not carry. Sandbox calls only; no model spend, no key in any file.
 
 ---
 

@@ -1,0 +1,46 @@
+{
+  "items": [
+    {
+      "dispute_id": "DISPUTE-ID-SANDBOX-1",
+      "create_time": "2026-11-09T15:12:04.280Z",
+      "update_time": "2026-11-09T15:15:23.988Z",
+      "disputed_transactions": [
+        {
+          "buyer_transaction_id": "BUYER-TRANSACTION-ID-SANDBOX-1",
+          "buyer": {
+            "payer_id": "PAYER-ID-REDACTED"
+          },
+          "seller": {
+            "merchant_id": "MERCHANT-ID-REDACTED"
+          }
+        }
+      ],
+      "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+      "status": "WAITING_FOR_SELLER_RESPONSE",
+      "dispute_state": "REQUIRED_ACTION",
+      "dispute_amount": {
+        "currency_code": "USD",
+        "value": "34.00"
+      },
+      "dispute_life_cycle_stage": "INQUIRY",
+      "dispute_channel": "INTERNAL",
+      "seller_response_due_date": "2026-11-29T15:12:04.280Z",
+      "links": [
+        {
+          "href": "https://api.sandbox.paypal.com/v1/customer/disputes/DISPUTE-ID-SANDBOX-1",
+          "rel": "self",
+          "method": "GET",
+          "encType": "application/json"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "href": "https://api.sandbox.paypal.com/v1/customer/disputes?page_size=50&page=1&page_size=50&page=1",
+      "rel": "self",
+      "method": "GET",
+      "encType": "application/json"
+    }
+  ]
+}
