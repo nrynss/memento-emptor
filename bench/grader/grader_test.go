@@ -310,8 +310,12 @@ func TestRunValidation(t *testing.T) {
 
 func TestHiddenAnswersShape(t *testing.T) {
 	_, answers := loadFixtures(t)
-	if len(answers) != 5 {
-		t.Fatalf("hidden answers = %d shoppers, want 5", len(answers))
+	// T5.7 amendment: the hardened set adds four shoppers to the same
+	// hidden file (5 + cmp-noisy-small, cmp-noisy-large,
+	// cmp-brands-steady, cmp-brands-split). This pin moves with the
+	// freeze manifest; it guards the shape, never the comparison.
+	if len(answers) != 9 {
+		t.Fatalf("hidden answers = %d shoppers, want 9", len(answers))
 	}
 	if answers["cmp-broken"].RightSize != "M" {
 		t.Errorf("cmp-broken RightSize = %q, want M", answers["cmp-broken"].RightSize)

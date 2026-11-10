@@ -1,0 +1,423 @@
+{
+  "ShopperID": "cmp-noisy-large",
+  "SessionDays": 28,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 1,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2700,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRL",
+        "BrandName": "Brand L",
+        "LineName": "Lagoon Tee",
+        "SKU": "BRL-TEE-M",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-030-41bf",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-030-41bf",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-030",
+        "EventID": "EVT-seed-7-cmp-noisy-large-030-41bf"
+      },
+      "Note": "Kept past the window: Brand L lagoon tee size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 3,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRM",
+        "BrandName": "Brand M",
+        "LineName": "Mooring Cap",
+        "SKU": "BRM-CAP-OS",
+        "Size": "OS",
+        "Category": "hats"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-031-dde9",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-031-dde9",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-031",
+        "EventID": "EVT-seed-7-cmp-noisy-large-031-dde9"
+      },
+      "Note": "Kept past the window: Brand M mooring cap, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 5,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_large",
+        "Text": "swims on the shopper",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-032-526b",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-032-526b",
+        "RefundID": "RFD-seed-7-cmp-noisy-large-032-526b",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-032",
+        "EventID": "EVT-seed-7-cmp-noisy-large-032-526b"
+      },
+      "Note": "Fit return 1: Brand I oxford size M refunded; swims on the shopper",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 7,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "damaged_or_defective",
+        "Text": "buttons arrived cracked",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-033-89b1",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-033-89b1",
+        "RefundID": "RFD-seed-7-cmp-noisy-large-033-89b1",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-033",
+        "EventID": "EVT-seed-7-cmp-noisy-large-033-89b1"
+      },
+      "Note": "Refund: Brand I oxford size M; buttons arrived cracked",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 9,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "not_arrived",
+        "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-034-21f6",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-034-21f6",
+        "RefundID": "",
+        "DisputeID": "DSP-seed-7-cmp-noisy-large-034-21f6",
+        "CustomID": "seed-7-cmp-noisy-large-034",
+        "EventID": "EVT-seed-7-cmp-noisy-large-034-21f6"
+      },
+      "Note": "Dispute opened: Brand I parcel never arrived; carrier lost it",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 11,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_large",
+        "Text": "too loose across the chest",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-035-4b27",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-035-4b27",
+        "RefundID": "RFD-seed-7-cmp-noisy-large-035-4b27",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-035",
+        "EventID": "EVT-seed-7-cmp-noisy-large-035-4b27"
+      },
+      "Note": "Fit return 2: Brand I oxford size M refunded; too loose across the chest",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 13,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2400,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Tee",
+        "SKU": "BRI-TEE-M",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-036-450a",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-036-450a",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-036",
+        "EventID": "EVT-seed-7-cmp-noisy-large-036-450a"
+      },
+      "Note": "Kept past the window: Brand I inlet tee size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 15,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "changed_mind",
+        "Text": "ordered two colours, kept the other",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-037-ce69",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-037-ce69",
+        "RefundID": "RFD-seed-7-cmp-noisy-large-037-ce69",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-037",
+        "EventID": "EVT-seed-7-cmp-noisy-large-037-ce69"
+      },
+      "Note": "Refund: Brand I oxford size M; ordered two colours, kept the other",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 17,
+      "Signal": "fit_feedback",
+      "Source": "shopper",
+      "Outcome": {
+        "Kind": "capture",
+        "Status": "COMPLETED",
+        "AmountMinor": 2700,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRL",
+        "BrandName": "Brand L",
+        "LineName": "Lagoon Tee",
+        "SKU": "BRL-TEE-M",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-038-999a",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-038-999a",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-038",
+        "EventID": "EVT-seed-7-cmp-noisy-large-038-999a"
+      },
+      "Note": "Fit feedback: Brand L lagoon tee size M fits well, tied to this purchase",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 19,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "unclear",
+        "Text": "did not love it",
+        "Confidence": 0.94
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-039-b230",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-039-b230",
+        "RefundID": "RFD-seed-7-cmp-noisy-large-039-b230",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-039",
+        "EventID": "EVT-seed-7-cmp-noisy-large-039-b230"
+      },
+      "Note": "Refund: Brand I oxford size M; shopper answer too vague to classify, ask again",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 21,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "damaged_or_defective",
+        "Text": "arrived with a loose hem",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-040-a1d0",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-040-a1d0",
+        "RefundID": "RFD-seed-7-cmp-noisy-large-040-a1d0",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-040",
+        "EventID": "EVT-seed-7-cmp-noisy-large-040-a1d0"
+      },
+      "Note": "Refund: Brand I oxford size M; arrived with a loose hem",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 23,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 5100,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRI",
+        "BrandName": "Brand I",
+        "LineName": "Inlet Oxford Shirt",
+        "SKU": "BRI-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_large",
+        "Text": "sleeves too long in M",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-large-041-3d78",
+        "CaptureID": "CAP-seed-7-cmp-noisy-large-041-3d78",
+        "RefundID": "RFD-seed-7-cmp-noisy-large-041-3d78",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-large-041",
+        "EventID": "EVT-seed-7-cmp-noisy-large-041-3d78"
+      },
+      "Note": "Fit return 3: Brand I oxford size M refunded; sleeves too long in M",
+      "SeedMark": "seeded"
+    }
+  ]
+}

@@ -23,5 +23,25 @@
     "ShopperID": "cmp-unclear",
     "RightSize": "M",
     "Why": "The vague refund sits below the confidence floor and stays a pending question with no reason, so it counts toward nothing and the kept size M stands."
+  },
+  {
+    "ShopperID": "cmp-noisy-small",
+    "RightSize": "L",
+    "Why": "Three classified too-small returns in M accumulate to size up to L; the changed-mind, vague and unrecognised-charge rows count toward nothing, the torn-seam refund and the lost parcel count toward the seller, the kept rows are weak inference only, and the Brand J fits-well is another brand's cut."
+  },
+  {
+    "ShopperID": "cmp-noisy-large",
+    "RightSize": "S",
+    "Why": "Three classified too-large returns in M accumulate to size down to S; the kept colour, vague answer and cracked-button and loose-hem refunds count toward nothing or the seller, and the Brand L fits-well is another brand's cut."
+  },
+  {
+    "ShopperID": "cmp-brands-steady",
+    "RightSize": "M",
+    "Why": "Brand Q is true to size for this shopper: kept M plus fits-well M and no fit evidence against it. Brand P's two too-small returns are that brand's cut and never leak into Brand Q, so the right size stays M."
+  },
+  {
+    "ShopperID": "cmp-brands-split",
+    "RightSize": "S",
+    "Why": "Brand R runs large twice in M, so the right size for Brand R is S; Brand T's kept M and too-small M are that brand's opposite cut and never leak into Brand R."
   }
 ]

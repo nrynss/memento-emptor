@@ -1,0 +1,223 @@
+{
+  "ShopperID": "cmp-brands-steady",
+  "SessionDays": 9,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRQ",
+        "BrandName": "Brand Q",
+        "LineName": "Quay Oxford Shirt",
+        "SKU": "BRQ-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 1,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 4600,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRQ",
+        "BrandName": "Brand Q",
+        "LineName": "Quay Oxford Shirt",
+        "SKU": "BRQ-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-steady-042-c901",
+        "CaptureID": "CAP-seed-7-cmp-brands-steady-042-c901",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-steady-042",
+        "EventID": "EVT-seed-7-cmp-brands-steady-042-c901"
+      },
+      "Note": "Kept past the window: Brand Q quay oxford size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 3,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRP",
+        "BrandName": "Brand P",
+        "LineName": "Pier Oxford Shirt",
+        "SKU": "BRP-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight in the shoulders",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-steady-043-c833",
+        "CaptureID": "CAP-seed-7-cmp-brands-steady-043-c833",
+        "RefundID": "RFD-seed-7-cmp-brands-steady-043-c833",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-steady-043",
+        "EventID": "EVT-seed-7-cmp-brands-steady-043-c833"
+      },
+      "Note": "Fit return 1: Brand P pier oxford size M refunded; too tight in the shoulders",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 5,
+      "Signal": "fit_feedback",
+      "Source": "shopper",
+      "Outcome": {
+        "Kind": "capture",
+        "Status": "COMPLETED",
+        "AmountMinor": 4600,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRQ",
+        "BrandName": "Brand Q",
+        "LineName": "Quay Oxford Shirt",
+        "SKU": "BRQ-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-steady-044-88e6",
+        "CaptureID": "CAP-seed-7-cmp-brands-steady-044-88e6",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-steady-044",
+        "EventID": "EVT-seed-7-cmp-brands-steady-044-88e6"
+      },
+      "Note": "Fit feedback: Brand Q quay oxford size M fits well, tied to this purchase",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 6,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRP",
+        "BrandName": "Brand P",
+        "LineName": "Pier Oxford Shirt",
+        "SKU": "BRP-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight across the chest",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-steady-045-45da",
+        "CaptureID": "CAP-seed-7-cmp-brands-steady-045-45da",
+        "RefundID": "RFD-seed-7-cmp-brands-steady-045-45da",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-steady-045",
+        "EventID": "EVT-seed-7-cmp-brands-steady-045-45da"
+      },
+      "Note": "Fit return 2: Brand P pier oxford size M refunded; too tight across the chest",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 8,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2300,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRQ",
+        "BrandName": "Brand Q",
+        "LineName": "Quay Tee",
+        "SKU": "BRQ-TEE-M",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-steady-046-db31",
+        "CaptureID": "CAP-seed-7-cmp-brands-steady-046-db31",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-steady-046",
+        "EventID": "EVT-seed-7-cmp-brands-steady-046-db31"
+      },
+      "Note": "Kept past the window: Brand Q quay tee size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 9,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 4600,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRQ",
+        "BrandName": "Brand Q",
+        "LineName": "Quay Oxford Shirt",
+        "SKU": "BRQ-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "not_arrived",
+        "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-steady-047-a656",
+        "CaptureID": "CAP-seed-7-cmp-brands-steady-047-a656",
+        "RefundID": "",
+        "DisputeID": "DSP-seed-7-cmp-brands-steady-047-a656",
+        "CustomID": "seed-7-cmp-brands-steady-047",
+        "EventID": "EVT-seed-7-cmp-brands-steady-047-a656"
+      },
+      "Note": "Dispute opened: Brand Q parcel never arrived; tracking stuck for weeks",
+      "SeedMark": "seeded"
+    }
+  ]
+}

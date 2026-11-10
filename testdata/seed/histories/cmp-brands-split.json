@@ -1,0 +1,197 @@
+{
+  "ShopperID": "cmp-brands-split",
+  "SessionDays": 9,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRR",
+        "BrandName": "Brand R",
+        "LineName": "Reef Oxford Shirt",
+        "SKU": "BRR-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 2,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4700,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRR",
+        "BrandName": "Brand R",
+        "LineName": "Reef Oxford Shirt",
+        "SKU": "BRR-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_large",
+        "Text": "too loose across the chest",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-split-048-b402",
+        "CaptureID": "CAP-seed-7-cmp-brands-split-048-b402",
+        "RefundID": "RFD-seed-7-cmp-brands-split-048-b402",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-split-048",
+        "EventID": "EVT-seed-7-cmp-brands-split-048-b402"
+      },
+      "Note": "Fit return 1: Brand R reef oxford size M refunded; too loose across the chest",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 4,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 4200,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRT",
+        "BrandName": "Brand T",
+        "LineName": "Tide Oxford Shirt",
+        "SKU": "BRT-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-split-049-df4a",
+        "CaptureID": "CAP-seed-7-cmp-brands-split-049-df4a",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-split-049",
+        "EventID": "EVT-seed-7-cmp-brands-split-049-df4a"
+      },
+      "Note": "Kept past the window: Brand T tide oxford size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 5,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4200,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRT",
+        "BrandName": "Brand T",
+        "LineName": "Tide Oxford Shirt",
+        "SKU": "BRT-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight in the shoulders",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-split-050-0cca",
+        "CaptureID": "CAP-seed-7-cmp-brands-split-050-0cca",
+        "RefundID": "RFD-seed-7-cmp-brands-split-050-0cca",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-split-050",
+        "EventID": "EVT-seed-7-cmp-brands-split-050-0cca"
+      },
+      "Note": "Fit return 1: Brand T tide oxford size M refunded; too tight in the shoulders",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 7,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4700,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRR",
+        "BrandName": "Brand R",
+        "LineName": "Reef Oxford Shirt",
+        "SKU": "BRR-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_large",
+        "Text": "sleeves too long in M",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-split-051-2445",
+        "CaptureID": "CAP-seed-7-cmp-brands-split-051-2445",
+        "RefundID": "RFD-seed-7-cmp-brands-split-051-2445",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-brands-split-051",
+        "EventID": "EVT-seed-7-cmp-brands-split-051-2445"
+      },
+      "Note": "Fit return 2: Brand R reef oxford size M refunded; sleeves too long in M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 9,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 4700,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRR",
+        "BrandName": "Brand R",
+        "LineName": "Reef Oxford Shirt",
+        "SKU": "BRR-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "not_arrived",
+        "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-brands-split-052-40f5",
+        "CaptureID": "CAP-seed-7-cmp-brands-split-052-40f5",
+        "RefundID": "",
+        "DisputeID": "DSP-seed-7-cmp-brands-split-052-40f5",
+        "CustomID": "seed-7-cmp-brands-split-052",
+        "EventID": "EVT-seed-7-cmp-brands-split-052-40f5"
+      },
+      "Note": "Dispute opened: Brand R parcel never arrived; carrier lost it",
+      "SeedMark": "seeded"
+    }
+  ]
+}

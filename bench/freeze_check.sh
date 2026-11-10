@@ -30,7 +30,7 @@ extract_manifest() {
 # FROZEN.md section 1 pins exactly this many rows. A count mismatch means
 # the manifest itself was edited (rows added or dropped), which is itself a
 # freeze break: fail before hashing anything.
-expected_rows=21
+expected_rows=25
 manifest=$(extract_manifest)
 actual_rows=$(printf '%s\n' "$manifest" | grep -c '  ')
 [ "$actual_rows" -eq "$expected_rows" ] || {
@@ -46,4 +46,4 @@ printf '%s\n' "$manifest" | sha256sum -c - || {
 	exit 1
 }
 
-echo "OK freeze hashes match (21 rows)"
+echo "OK freeze hashes match (25 rows)"

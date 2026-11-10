@@ -134,11 +134,13 @@ requires:   [T5.4, T1.3]
 fixture-ok: yes
 size:       M · frontier
 owns:       seed/, testdata/seed/, bench/FROZEN.md
-status:     claimed:t57-harden
+status:     in-review
 ```
 Arm 2 scored a perfect 15/15 on the current set by correct causal algebra over clean histories — so per product.md, harden with cases a real history would contain: LONG NOISY histories (many mixed-signal rows where raw context drowns and beliefs must carry) and MULTI-BRAND histories (same shopper, several brands, cross-brand cut matching). Design 4 new shoppers (2 per class) with hidden answers, generate through the T1.3 generator path (new hidden answers, same seeded-marking + determinism rules; NO edits to existing shoppers or answers), and AMEND the freeze: append the new rows to FROZEN.md with fresh hashes (freeze amendment, same commit as the fixtures).
 
 **Done when:** 4 new deterministic shoppers with hidden answers validate like T1.3's set (deterministic, marked, answers separated and unguessable from arm inputs); the freeze manifest covers them; all gates pass.
+
+Worker notes (in-review): `seed/seed.go` gains four builders under the same GoldenSeed 7, appended after the existing six so every existing transaction id is byte-identical (proven: `git status` shows no modification to existing history files). New shoppers: `cmp-noisy-small` (13 rows over 30 days, three too-small in M buried in changed-mind/vague/fraud/damage/lost-parcel/kept/fits-well noise, answer L), `cmp-noisy-large` (13 rows over 28 days, three too-large in M amid seller-fault/kept-colour/vague noise plus another brand's fits-well, answer S), `cmp-brands-steady` (candidate Brand Q kept M + fits-well M with nothing against it while Brand P runs small twice, answer M), `cmp-brands-split` (candidate Brand R runs large twice while Brand T runs small once beside a kept M, answer S). `TestHardenedShoppersAreFair` pins event-time order + session extent, 10-row/3-fit/0.3-coverage on the noisy pair, per-brand single-direction fit evidence on the multi-brand pair, and never-fit on every non-fit classified row. A throwaway perfect-reasoner check through the frozen grader (deleted before commit) scored all four right with 0 wrong-cause and decisive answers. FROZEN.md manifest amended 21 to 25 rows (4 new histories, re-pinned answers + seed.go) with a plain amendment note; `bench/freeze_check.sh` count 21 to 25 (owns-boundary, see report); `bench/grader/grader_test.go` shape pin 5 to 9 (owns-boundary, see report). `./tools/check.sh` green, freeze-check green, $0 spend.
 
 ---
 

@@ -133,6 +133,10 @@ func Generate(seed uint64) Bundle {
 		b.changedMindShopper(),
 		b.sizeChangedShopper(),
 		b.unclearShopper(),
+		b.noisySmallShopper(),
+		b.noisyLargeShopper(),
+		b.brandsSteadyShopper(),
+		b.brandsSplitShopper(),
 	}
 	return Bundle{
 		Seed:      seed,
@@ -162,6 +166,26 @@ func Generate(seed uint64) Bundle {
 				ShopperID: "cmp-unclear",
 				RightSize: "M",
 				Why:       "The vague refund sits below the confidence floor and stays a pending question with no reason, so it counts toward nothing and the kept size M stands.",
+			},
+			{
+				ShopperID: "cmp-noisy-small",
+				RightSize: "L",
+				Why:       "Three classified too-small returns in M accumulate to size up to L; the changed-mind, vague and unrecognised-charge rows count toward nothing, the torn-seam refund and the lost parcel count toward the seller, the kept rows are weak inference only, and the Brand J fits-well is another brand's cut.",
+			},
+			{
+				ShopperID: "cmp-noisy-large",
+				RightSize: "S",
+				Why:       "Three classified too-large returns in M accumulate to size down to S; the kept colour, vague answer and cracked-button and loose-hem refunds count toward nothing or the seller, and the Brand L fits-well is another brand's cut.",
+			},
+			{
+				ShopperID: "cmp-brands-steady",
+				RightSize: "M",
+				Why:       "Brand Q is true to size for this shopper: kept M plus fits-well M and no fit evidence against it. Brand P's two too-small returns are that brand's cut and never leak into Brand Q, so the right size stays M.",
+			},
+			{
+				ShopperID: "cmp-brands-split",
+				RightSize: "S",
+				Why:       "Brand R runs large twice in M, so the right size for Brand R is S; Brand T's kept M and too-small M are that brand's opposite cut and never leak into Brand R.",
 			},
 		},
 	}
@@ -479,6 +503,131 @@ func (b *builder) unclearShopper() History {
 			b.statement(shopper, 0, item("M"), "Shopper says they are usually size M"),
 			b.kept(shopper, 1, item("M"), 3600, "Kept past the window: Brand G oxford size M, no feedback"),
 			b.refund(shopper, 5, item("M"), 3600, "not great", domain.CategoryUnclear, 0.94, "Refund: Brand G oxford size M; shopper answer too vague to classify, ask again"),
+		},
+	}
+}
+
+// noisySmallShopper is a long noisy wardrobe: thirteen rows where three
+// classified too-small returns in M accumulate to L while damage, a lost
+// parcel, a changed mind, a vague answer and an unrecognised charge tempt
+// the wrong cause and kept rows plus another brand's fits-well add clutter.
+// A perfect reasoner sorts every row by its reason category and sizes up;
+// raw context alone drowns the three fit rows in the other ten.
+func (b *builder) noisySmallShopper() History {
+	const shopper = "cmp-noisy-small"
+	oxford := func(size string) domain.Item {
+		return domain.Item{BrandID: "BRH", BrandName: "Brand H", LineName: "Harbor Oxford Shirt", SKU: "BRH-OXF-" + size, Size: size, Category: "dress-shirts"}
+	}
+	tee := domain.Item{BrandID: "BRH", BrandName: "Brand H", LineName: "Harbor Tee", SKU: "BRH-TEE-M", Size: "M", Category: "t-shirts"}
+	otherTee := domain.Item{BrandID: "BRJ", BrandName: "Brand J", LineName: "Jetty Tee", SKU: "BRJ-TEE-M", Size: "M", Category: "t-shirts"}
+	beanie := domain.Item{BrandID: "BRK", BrandName: "Brand K", LineName: "Kelpie Beanie", SKU: "BRK-BEA-OS", Size: "OS", Category: "hats"}
+	return History{
+		ShopperID:   shopper,
+		SessionDays: 30,
+		Rows: []Row{
+			b.statement(shopper, 0, oxford("M"), "Shopper says they are usually size M"),
+			b.kept(shopper, 1, otherTee, 2600, "Kept past the window: Brand J jetty tee size M, no feedback"),
+			b.kept(shopper, 2, beanie, 2800, "Kept past the window: Brand K kelpie beanie, no feedback"),
+			b.refund(shopper, 4, oxford("M"), 4900, "changed my mind about the colour", domain.CategoryChangedMind, 1, "Refund: Brand H oxford size M; shopper changed their mind about the colour"),
+			b.refund(shopper, 6, oxford("M"), 4900, "too tight in the shoulders", domain.CategoryFitTooSmall, 1, "Fit return 1: Brand H oxford size M refunded; too tight in the shoulders"),
+			b.dispute(shopper, 8, oxford("M"), 4900, domain.DisputeMerchandiseNotReceived, domain.CategoryNotArrived, "Dispute opened: Brand H parcel never arrived; tracking stuck for weeks"),
+			b.refund(shopper, 10, oxford("M"), 4900, "arrived with a torn seam", domain.CategoryDamagedOrDefective, 1, "Refund: Brand H oxford size M; arrived with a torn seam"),
+			b.refund(shopper, 12, oxford("M"), 4900, "not great", domain.CategoryUnclear, 0.94, "Refund: Brand H oxford size M; shopper answer too vague to classify, ask again"),
+			b.kept(shopper, 14, tee, 2500, "Kept past the window: Brand H harbor tee size M, no feedback"),
+			b.refund(shopper, 16, oxford("M"), 4900, "too tight across the chest", domain.CategoryFitTooSmall, 1, "Fit return 2: Brand H oxford size M refunded; too tight across the chest"),
+			b.feedback(shopper, 18, otherTee, 2600, "Fit feedback: Brand J jetty tee size M fits well, tied to this purchase"),
+			b.dispute(shopper, 20, oxford("M"), 4900, domain.DisputeUnauthorizedTransaction, domain.CategoryNone, "Dispute opened: Brand H charge the shopper does not recognise; account-takeover review"),
+			b.refund(shopper, 24, oxford("M"), 4900, "sleeves too short in M", domain.CategoryFitTooSmall, 1, "Fit return 3: Brand H oxford size M refunded; sleeves too short in M"),
+		},
+	}
+}
+
+// noisyLargeShopper mirrors the small noisy wardrobe in the other
+// direction: three classified too-large returns in M accumulate to S amid
+// seller-fault refunds, a lost parcel, a kept colour, a vague answer and
+// another brand's fits-well. Same phenomenon, opposite size move, so a
+// hardened set that only ever sizes up cannot pass it.
+func (b *builder) noisyLargeShopper() History {
+	const shopper = "cmp-noisy-large"
+	oxford := func(size string) domain.Item {
+		return domain.Item{BrandID: "BRI", BrandName: "Brand I", LineName: "Inlet Oxford Shirt", SKU: "BRI-OXF-" + size, Size: size, Category: "dress-shirts"}
+	}
+	tee := domain.Item{BrandID: "BRI", BrandName: "Brand I", LineName: "Inlet Tee", SKU: "BRI-TEE-M", Size: "M", Category: "t-shirts"}
+	otherTee := domain.Item{BrandID: "BRL", BrandName: "Brand L", LineName: "Lagoon Tee", SKU: "BRL-TEE-M", Size: "M", Category: "t-shirts"}
+	cap := domain.Item{BrandID: "BRM", BrandName: "Brand M", LineName: "Mooring Cap", SKU: "BRM-CAP-OS", Size: "OS", Category: "hats"}
+	return History{
+		ShopperID:   shopper,
+		SessionDays: 28,
+		Rows: []Row{
+			b.statement(shopper, 0, oxford("M"), "Shopper says they are usually size M"),
+			b.kept(shopper, 1, otherTee, 2700, "Kept past the window: Brand L lagoon tee size M, no feedback"),
+			b.kept(shopper, 3, cap, 2900, "Kept past the window: Brand M mooring cap, no feedback"),
+			b.refund(shopper, 5, oxford("M"), 5100, "swims on the shopper", domain.CategoryFitTooLarge, 1, "Fit return 1: Brand I oxford size M refunded; swims on the shopper"),
+			b.refund(shopper, 7, oxford("M"), 5100, "buttons arrived cracked", domain.CategoryDamagedOrDefective, 1, "Refund: Brand I oxford size M; buttons arrived cracked"),
+			b.dispute(shopper, 9, oxford("M"), 5100, domain.DisputeMerchandiseNotReceived, domain.CategoryNotArrived, "Dispute opened: Brand I parcel never arrived; carrier lost it"),
+			b.refund(shopper, 11, oxford("M"), 5100, "too loose across the chest", domain.CategoryFitTooLarge, 1, "Fit return 2: Brand I oxford size M refunded; too loose across the chest"),
+			b.kept(shopper, 13, tee, 2400, "Kept past the window: Brand I inlet tee size M, no feedback"),
+			b.refund(shopper, 15, oxford("M"), 5100, "ordered two colours, kept the other", domain.CategoryChangedMind, 1, "Refund: Brand I oxford size M; ordered two colours, kept the other"),
+			b.feedback(shopper, 17, otherTee, 2700, "Fit feedback: Brand L lagoon tee size M fits well, tied to this purchase"),
+			b.refund(shopper, 19, oxford("M"), 5100, "did not love it", domain.CategoryUnclear, 0.94, "Refund: Brand I oxford size M; shopper answer too vague to classify, ask again"),
+			b.refund(shopper, 21, oxford("M"), 5100, "arrived with a loose hem", domain.CategoryDamagedOrDefective, 1, "Refund: Brand I oxford size M; arrived with a loose hem"),
+			b.refund(shopper, 23, oxford("M"), 5100, "sleeves too long in M", domain.CategoryFitTooLarge, 1, "Fit return 3: Brand I oxford size M refunded; sleeves too long in M"),
+		},
+	}
+}
+
+// brandsSteadyShopper is a two-brand wardrobe with distinct cuts: Brand P
+// runs small twice in M while the candidate Brand Q holds a kept M and a
+// fits-well M with nothing against it. The tempting error is sizing up in
+// Brand Q on Brand P's evidence; a perfect reasoner keeps the beliefs
+// per brand and stays at M for Brand Q.
+func (b *builder) brandsSteadyShopper() History {
+	const shopper = "cmp-brands-steady"
+	narrow := func(size string) domain.Item {
+		return domain.Item{BrandID: "BRP", BrandName: "Brand P", LineName: "Pier Oxford Shirt", SKU: "BRP-OXF-" + size, Size: size, Category: "dress-shirts"}
+	}
+	regular := func(size string) domain.Item {
+		return domain.Item{BrandID: "BRQ", BrandName: "Brand Q", LineName: "Quay Oxford Shirt", SKU: "BRQ-OXF-" + size, Size: size, Category: "dress-shirts"}
+	}
+	tee := domain.Item{BrandID: "BRQ", BrandName: "Brand Q", LineName: "Quay Tee", SKU: "BRQ-TEE-M", Size: "M", Category: "t-shirts"}
+	return History{
+		ShopperID:   shopper,
+		SessionDays: 9,
+		Rows: []Row{
+			b.statement(shopper, 0, regular("M"), "Shopper says they are usually size M"),
+			b.kept(shopper, 1, regular("M"), 4600, "Kept past the window: Brand Q quay oxford size M, no feedback"),
+			b.refund(shopper, 3, narrow("M"), 4500, "too tight in the shoulders", domain.CategoryFitTooSmall, 1, "Fit return 1: Brand P pier oxford size M refunded; too tight in the shoulders"),
+			b.feedback(shopper, 5, regular("M"), 4600, "Fit feedback: Brand Q quay oxford size M fits well, tied to this purchase"),
+			b.refund(shopper, 6, narrow("M"), 4500, "too tight across the chest", domain.CategoryFitTooSmall, 1, "Fit return 2: Brand P pier oxford size M refunded; too tight across the chest"),
+			b.kept(shopper, 8, tee, 2300, "Kept past the window: Brand Q quay tee size M, no feedback"),
+			b.dispute(shopper, 9, regular("M"), 4600, domain.DisputeMerchandiseNotReceived, domain.CategoryNotArrived, "Dispute opened: Brand Q parcel never arrived; tracking stuck for weeks"),
+		},
+	}
+}
+
+// brandsSplitShopper is a two-brand wardrobe with opposite cuts: the
+// candidate Brand R runs large twice in M while Brand T runs small once in
+// M beside a kept M. The tempting errors are holding M on Brand T's
+// evidence or sizing up on it; a perfect reasoner follows Brand R's own
+// evidence down to S.
+func (b *builder) brandsSplitShopper() History {
+	const shopper = "cmp-brands-split"
+	relaxed := func(size string) domain.Item {
+		return domain.Item{BrandID: "BRR", BrandName: "Brand R", LineName: "Reef Oxford Shirt", SKU: "BRR-OXF-" + size, Size: size, Category: "dress-shirts"}
+	}
+	slim := func(size string) domain.Item {
+		return domain.Item{BrandID: "BRT", BrandName: "Brand T", LineName: "Tide Oxford Shirt", SKU: "BRT-OXF-" + size, Size: size, Category: "dress-shirts"}
+	}
+	return History{
+		ShopperID:   shopper,
+		SessionDays: 9,
+		Rows: []Row{
+			b.statement(shopper, 0, relaxed("M"), "Shopper says they are usually size M"),
+			b.refund(shopper, 2, relaxed("M"), 4700, "too loose across the chest", domain.CategoryFitTooLarge, 1, "Fit return 1: Brand R reef oxford size M refunded; too loose across the chest"),
+			b.kept(shopper, 4, slim("M"), 4200, "Kept past the window: Brand T tide oxford size M, no feedback"),
+			b.refund(shopper, 5, slim("M"), 4200, "too tight in the shoulders", domain.CategoryFitTooSmall, 1, "Fit return 1: Brand T tide oxford size M refunded; too tight in the shoulders"),
+			b.refund(shopper, 7, relaxed("M"), 4700, "sleeves too long in M", domain.CategoryFitTooLarge, 1, "Fit return 2: Brand R reef oxford size M refunded; sleeves too long in M"),
+			b.dispute(shopper, 9, relaxed("M"), 4700, domain.DisputeMerchandiseNotReceived, domain.CategoryNotArrived, "Dispute opened: Brand R parcel never arrived; carrier lost it"),
 		},
 	}
 }

@@ -1,0 +1,423 @@
+{
+  "ShopperID": "cmp-noisy-small",
+  "SessionDays": 30,
+  "Rows": [
+    {
+      "Day": 0,
+      "Signal": "general_statement",
+      "Source": "shopper",
+      "Outcome": null,
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "",
+        "CaptureID": "",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "",
+        "EventID": ""
+      },
+      "Note": "Shopper says they are usually size M",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 1,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2600,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRJ",
+        "BrandName": "Brand J",
+        "LineName": "Jetty Tee",
+        "SKU": "BRJ-TEE-M",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-018-de5c",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-018-de5c",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-018",
+        "EventID": "EVT-seed-7-cmp-noisy-small-018-de5c"
+      },
+      "Note": "Kept past the window: Brand J jetty tee size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 2,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2800,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRK",
+        "BrandName": "Brand K",
+        "LineName": "Kelpie Beanie",
+        "SKU": "BRK-BEA-OS",
+        "Size": "OS",
+        "Category": "hats"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-019-d69b",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-019-d69b",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-019",
+        "EventID": "EVT-seed-7-cmp-noisy-small-019-d69b"
+      },
+      "Note": "Kept past the window: Brand K kelpie beanie, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 4,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "changed_mind",
+        "Text": "changed my mind about the colour",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-020-589c",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-020-589c",
+        "RefundID": "RFD-seed-7-cmp-noisy-small-020-589c",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-020",
+        "EventID": "EVT-seed-7-cmp-noisy-small-020-589c"
+      },
+      "Note": "Refund: Brand H oxford size M; shopper changed their mind about the colour",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 6,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight in the shoulders",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-021-0038",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-021-0038",
+        "RefundID": "RFD-seed-7-cmp-noisy-small-021-0038",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-021",
+        "EventID": "EVT-seed-7-cmp-noisy-small-021-0038"
+      },
+      "Note": "Fit return 1: Brand H oxford size M refunded; too tight in the shoulders",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 8,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "not_arrived",
+        "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-022-8965",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-022-8965",
+        "RefundID": "",
+        "DisputeID": "DSP-seed-7-cmp-noisy-small-022-8965",
+        "CustomID": "seed-7-cmp-noisy-small-022",
+        "EventID": "EVT-seed-7-cmp-noisy-small-022-8965"
+      },
+      "Note": "Dispute opened: Brand H parcel never arrived; tracking stuck for weeks",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 10,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "damaged_or_defective",
+        "Text": "arrived with a torn seam",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-023-e226",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-023-e226",
+        "RefundID": "RFD-seed-7-cmp-noisy-small-023-e226",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-023",
+        "EventID": "EVT-seed-7-cmp-noisy-small-023-e226"
+      },
+      "Note": "Refund: Brand H oxford size M; arrived with a torn seam",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 12,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "unclear",
+        "Text": "not great",
+        "Confidence": 0.94
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-024-e54f",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-024-e54f",
+        "RefundID": "RFD-seed-7-cmp-noisy-small-024-e54f",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-024",
+        "EventID": "EVT-seed-7-cmp-noisy-small-024-e54f"
+      },
+      "Note": "Refund: Brand H oxford size M; shopper answer too vague to classify, ask again",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 14,
+      "Signal": "kept_past_window",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "kept",
+        "Status": "PAST_WINDOW",
+        "AmountMinor": 2500,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Tee",
+        "SKU": "BRH-TEE-M",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-025-df6a",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-025-df6a",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-025",
+        "EventID": "EVT-seed-7-cmp-noisy-small-025-df6a"
+      },
+      "Note": "Kept past the window: Brand H harbor tee size M, no feedback",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 16,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "too tight across the chest",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-026-20ba",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-026-20ba",
+        "RefundID": "RFD-seed-7-cmp-noisy-small-026-20ba",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-026",
+        "EventID": "EVT-seed-7-cmp-noisy-small-026-20ba"
+      },
+      "Note": "Fit return 2: Brand H oxford size M refunded; too tight across the chest",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 18,
+      "Signal": "fit_feedback",
+      "Source": "shopper",
+      "Outcome": {
+        "Kind": "capture",
+        "Status": "COMPLETED",
+        "AmountMinor": 2600,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRJ",
+        "BrandName": "Brand J",
+        "LineName": "Jetty Tee",
+        "SKU": "BRJ-TEE-M",
+        "Size": "M",
+        "Category": "t-shirts"
+      },
+      "Reason": null,
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-027-bc9f",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-027-bc9f",
+        "RefundID": "",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-027",
+        "EventID": "EVT-seed-7-cmp-noisy-small-027-bc9f"
+      },
+      "Note": "Fit feedback: Brand J jetty tee size M fits well, tied to this purchase",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 20,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "dispute",
+        "Status": "OPEN",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "none",
+        "Text": "UNAUTHORIZED_TRANSACTION",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-028-f5c3",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-028-f5c3",
+        "RefundID": "",
+        "DisputeID": "DSP-seed-7-cmp-noisy-small-028-f5c3",
+        "CustomID": "seed-7-cmp-noisy-small-028",
+        "EventID": "EVT-seed-7-cmp-noisy-small-028-f5c3"
+      },
+      "Note": "Dispute opened: Brand H charge the shopper does not recognise; account-takeover review",
+      "SeedMark": "seeded"
+    },
+    {
+      "Day": 24,
+      "Signal": "classified_outcome",
+      "Source": "payment",
+      "Outcome": {
+        "Kind": "refund",
+        "Status": "COMPLETED",
+        "AmountMinor": 4900,
+        "Currency": "USD"
+      },
+      "Item": {
+        "BrandID": "BRH",
+        "BrandName": "Brand H",
+        "LineName": "Harbor Oxford Shirt",
+        "SKU": "BRH-OXF-M",
+        "Size": "M",
+        "Category": "dress-shirts"
+      },
+      "Reason": {
+        "Category": "fit_too_small",
+        "Text": "sleeves too short in M",
+        "Confidence": 1
+      },
+      "Link": {
+        "OrderID": "ORD-seed-7-cmp-noisy-small-029-f28a",
+        "CaptureID": "CAP-seed-7-cmp-noisy-small-029-f28a",
+        "RefundID": "RFD-seed-7-cmp-noisy-small-029-f28a",
+        "DisputeID": "",
+        "CustomID": "seed-7-cmp-noisy-small-029",
+        "EventID": "EVT-seed-7-cmp-noisy-small-029-f28a"
+      },
+      "Note": "Fit return 3: Brand H oxford size M refunded; sleeves too short in M",
+      "SeedMark": "seeded"
+    }
+  ]
+}

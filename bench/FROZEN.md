@@ -18,14 +18,18 @@ pinned by hash only: a hash reveals nothing about the content, but any later
 change to the key is detectable.
 
 ```manifest
+86666254582db384c8b708fed9ba9099745da0135661c57c1be4b50709e7e35f  testdata/seed/histories/cmp-brands-split.json
+35cb183bd772bd238afff279ea68fef67b942cee60ce81d21e09e03545b40cac  testdata/seed/histories/cmp-brands-steady.json
 f0fb60fa45af71e60e1ac03b019737b08c8f4e0d91ad2542f5f02f67546fae8e  testdata/seed/histories/cmp-broken.json
 af2052991ebda1db85fe1e6838cd240daef1b272cc6582d65323382cc9700b6f  testdata/seed/histories/cmp-changed-mind.json
 db9853b5841a6109da424f92fb4bdad3d7462b6187b81ca8b32cd507264e147d  testdata/seed/histories/cmp-never-arrived.json
+95047af4a1d41a3d83c4a84a3616ca7f043fca664c82af3fb257594f48180d4c  testdata/seed/histories/cmp-noisy-large.json
+396337bf6836c0cb7956d2157e0412a3b5240313fe08377e1a9349c7b77d7264  testdata/seed/histories/cmp-noisy-small.json
 e0c3ecf47e0bb0020195cfb3370649ee78a18d5c9bcbdcbfa41d17108457b8db  testdata/seed/histories/cmp-size-changed.json
 e5c0a426fadf63e2d5927b2aa33c1d514b72912790eca3d73f6f7fb9791ec7c2  testdata/seed/histories/cmp-unclear.json
 5b19b45c2eb9136ce294fc0da9c03d92f17485cae6f89d5008be1bbfd05b7063  testdata/seed/histories/demo-shopper.json
-b8a80cf744ec15897b06ee248de00fbcea428a8d284d0e2f6ce5fb19f1dee467  testdata/seed/hidden/answers.json
-552f6aa67d0570b2f85882aa96dc88206f10f772a0de87637d2e10e447b6e9cc  seed/seed.go
+d8cd202153eacd8f7c8f0fc6bcb9ad7c73ba92dada81eed7fc0cd6e7e1983ef0  testdata/seed/hidden/answers.json
+8364e3506ea8bb3f9682b77eb4f03293774be07ec6acd8dfc7c043d8ec17b701  seed/seed.go
 264900cfb53002d836109e9714c32c0910154e42daaec1307ae626f8ff06a926  bench/harness/harness.go
 b1fb55d443bd3245e1ed73311e8372add7a2a251d814a4b8dee477d700db0df1  bench/harness/doc.go
 2772f032e0b753981aa0f6696022ef1ef67b52af60d7a479e4cea3139d1b7c3d  bench/grader/grader.go
@@ -63,6 +67,19 @@ sha256sum -c <(sed -n '/^```manifest$/,/^```$/p' bench/FROZEN.md | grep '  ')
 ```
 
 Or file by file: `sha256sum <path>` must equal the row above.
+
+Amendment (T5.7 hardened shoppers): the manifest above now carries 25 rows.
+The original 21 rows are unchanged in meaning; two of them are re-pinned
+with fresh hashes because their content grew (`hidden/answers.json` gains
+four hidden answers, `seed/seed.go` gains four builders), and four rows are
+appended for the new arm-facing histories (`cmp-noisy-small`,
+`cmp-noisy-large`, `cmp-brands-steady`, `cmp-brands-split`). The `(5)` in
+the table above is the T5.5 set; the hardened set adds 4 for T5.8, still
+through the T1.3 generator path under the same GoldenSeed 7, still
+seeded-marked with event times inside each session extent. No existing
+shopper, answer, harness, grader, pilot, or run file changed. The
+comparison brands now span BRC-BRG plus BRH-BRM and BRP-BRT; all remain
+fictional and match nothing in `testdata/channel3/`, so section 2 stands.
 
 ## 2. Catalog: no Channel3 entry is an arm input
 

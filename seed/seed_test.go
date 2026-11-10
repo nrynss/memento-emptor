@@ -182,6 +182,108 @@ func TestComparisonRowsNeverCountTheWrongCauseTowardFit(t *testing.T) {
 	}
 }
 
+// TestHardenedShoppersAreFair pins the T5.7 hardening contract: the long
+// noisy histories bury their fit evidence in at least ten mixed-signal
+// rows with the fit rows spread honestly across the session, the
+// multi-brand histories carry distinct cuts per brand, every non-fit
+// classified row counts toward the seller or nothing (never fit), and each
+// history's event times stay ordered inside its session extent.
+func TestHardenedShoppersAreFair(t *testing.T) {
+	bundle := fixtureBundle(t)
+	byID := map[string]History{}
+	for _, h := range bundle.Histories {
+		byID[h.ShopperID] = h
+	}
+	for _, id := range []string{"cmp-noisy-small", "cmp-noisy-large", "cmp-brands-steady", "cmp-brands-split"} {
+		h, ok := byID[id]
+		if !ok {
+			t.Fatalf("no %s history in the bundle", id)
+		}
+		if len(h.Rows) == 0 {
+			t.Fatalf("%s has no rows", id)
+		}
+		for i := 1; i < len(h.Rows); i++ {
+			if h.Rows[i].Day < h.Rows[i-1].Day {
+				t.Errorf("%s row %d (day %.0f) precedes row %d (day %.0f): history must stay in event-time order",
+					id, i, h.Rows[i].Day, i-1, h.Rows[i-1].Day)
+			}
+		}
+		for i, row := range h.Rows {
+			if row.Day < 0 || row.Day > h.SessionDays {
+				t.Errorf("%s row %d: day %.0f outside session extent %.0f", id, i, row.Day, h.SessionDays)
+			}
+			if ev := row.SeededEvidence(time.Now().UTC()); ev.CountsToward() == domain.BeliefKindFit &&
+				row.Signal == domain.SignalClassifiedOutcome && row.Reason == nil {
+				t.Errorf("%s row %d: fit-counting row carries no reason", id, i)
+			}
+			if row.Signal == domain.SignalClassifiedOutcome && row.Reason != nil &&
+				row.Reason.Category.CountsToward() != domain.BeliefKindFit &&
+				row.SeededEvidence(time.Now().UTC()).CountsToward() == domain.BeliefKindFit {
+				t.Errorf("%s row %q: non-fit reason %q counts toward fit", id, row.Note, row.Reason.Category)
+			}
+		}
+	}
+	for _, id := range []string{"cmp-noisy-small", "cmp-noisy-large"} {
+		h := byID[id]
+		if len(h.Rows) < 10 {
+			t.Errorf("%s has %d rows, want at least 10 mixed-signal rows", id, len(h.Rows))
+		}
+		var first, last float64
+		fitDays := map[float64]bool{}
+		fitCount := 0
+		for _, row := range h.Rows {
+			ev := row.SeededEvidence(time.Now().UTC())
+			if ev.CountsToward() != domain.BeliefKindFit {
+				continue
+			}
+			if row.Signal != domain.SignalClassifiedOutcome {
+				t.Errorf("%s fit row %q uses signal %q, want classified outcome", id, row.Note, row.Signal)
+			}
+			if fitCount == 0 {
+				first = row.Day
+			}
+			last = row.Day
+			fitDays[row.Day] = true
+			fitCount++
+		}
+		if fitCount < 3 {
+			t.Errorf("%s has %d fit rows, want at least 3 accumulated beliefs", id, fitCount)
+		}
+		if len(fitDays) != fitCount {
+			t.Errorf("%s shares an event day across fit rows; each needs its own interaction", id)
+		}
+		if fitCount > 0 && (last-first)/h.SessionDays < 0.3 {
+			t.Errorf("%s fit coverage = %.3f, want at least 0.3 over the session extent", id, (last-first)/h.SessionDays)
+		}
+	}
+	for _, id := range []string{"cmp-brands-steady", "cmp-brands-split"} {
+		h := byID[id]
+		brands := map[string]bool{}
+		fitDirByBrand := map[string]domain.FitDirection{}
+		for _, row := range h.Rows {
+			if row.Item.BrandID != "" {
+				brands[row.Item.BrandID] = true
+			}
+			ev := row.SeededEvidence(time.Now().UTC())
+			if ev.CountsToward() != domain.BeliefKindFit || row.Reason == nil {
+				continue
+			}
+			dir := row.Reason.Category.Direction()
+			if prev, seen := fitDirByBrand[row.Item.BrandID]; seen && prev != dir {
+				t.Errorf("%s brand %s points both %q and %q: one cut, one direction",
+					id, row.Item.BrandID, prev, dir)
+			}
+			fitDirByBrand[row.Item.BrandID] = dir
+		}
+		if len(brands) < 2 {
+			t.Errorf("%s spans %d brands, want at least 2 distinct cuts", id, len(brands))
+		}
+		if len(fitDirByBrand) == 0 {
+			t.Errorf("%s has no brand-keyed fit evidence to separate", id)
+		}
+	}
+}
+
 func TestHiddenAnswersStayOffTheArmPath(t *testing.T) {
 	bundle := fixtureBundle(t)
 	historyFiles, err := filepath.Glob(filepath.Join(historiesDir, "*.json"))
