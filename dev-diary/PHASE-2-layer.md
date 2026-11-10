@@ -211,7 +211,7 @@ requires:   [T2.5, T2.1b, T2.2b, T2.3b, T2.4b]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/layer/
-status:     in-review
+status:     done
 ```
 
 Notes (worker t26-live). `tests/live/layer/` holds the live driver

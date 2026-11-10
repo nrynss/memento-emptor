@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 9 / 10 | In progress |
+| P2 | 10 / 10 | Done |
 | P3 | 4 / 6 | In progress |
 | P4 | 2 / 4 | In progress |
 | P5 | 0 / 6 | Not started |
@@ -173,6 +173,12 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What exists.** `tests/live/ingest/` driver (reads only — zero new sandbox records): token, webhook config, 20-entry ledger, two deliveries re-fetched and re-verified (`SUCCESS`, SHA256withRSA), refund→capture→order and dispute→capture→order chains. Refund row nil-reason → pending; dispute `not_arrived` 1.0 → seller; redeliveries duplicate-safe. A T0.4-recorded body against the current webhook id correctly returns FAILURE — the crypto is really checked.
 
 **What surprised.** Verify API field is `webhook_event`, not `request_body` (the latter 400s) — noted for whoever next touches `research/paypal.md`. Capture GET's `up` link yields the order id, so the existing T1.3b records sufficed with nothing created; driver catalogs the SKUs and fails on unknown ones.
+
+### T2.6: The layer end to end, live (done) ★
+
+**What exists.** `tests/live/layer/` scripted driver (no CI tests, `out/` ignored): full demo arc against real PayPal reads, live Jev (4 calls, $0.000085596, pinned build, per-call guard), live Lambo 0.10.1 native, throwaway indices deleted, session erased. Refund→pending→reason→Earned, correction wins with standing kept, feedback tied, dispute seller-only, recall-before-correction under trace-R.
+
+**What surprised.** Review caught a real defect pre-land: the third live answer was opposite-direction (`fit_too_large`) while fixtures use three `fit_too_small` — fixed to the exact fixture wording, re-run live, Venerable intact; per-call costs now quoted recomputably. Tombstoned Lambo sessions never serve again (documented). Design note for P2 consumers: `beliefForReason` attaches any fit-kind reason to the most-supported fit belief with no direction check — fine under the frozen fixtures (all same-direction), but a mixed-direction world would need an explicit rule; recorded, not changed.
 
 ### T2.5: The interface calls (done) ★
 
