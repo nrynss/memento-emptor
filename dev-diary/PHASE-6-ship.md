@@ -50,7 +50,7 @@ size:       S · frontier
 owns:       README.md, docs/submission.md
 status:     not-started
 ```
-The README is written for a developer on PayPal's Agent Toolkit, opening with the description line in product.md. It covers how to plug in, setup a judge can follow, the architecture, and what is simulated and seeded. `docs/submission.md` drafts the form's text: the description; each tool and how it was used; what changed in Lambo during the hackathon, since it is an existing dependency.
+The README is written for a developer on PayPal's Agent Toolkit, opening with the description line in product.md. It follows product.md's "How it is consumed": a seller or platform runs the layer beside its PayPal app. It covers how to plug in (keys included), setup a judge can follow, the architecture, and what is simulated and seeded. `docs/submission.md` drafts the form's text: the description; each tool and how it was used; what changed in Lambo during the hackathon, since it is an existing dependency. The README closes with where the product could go next: a network across sellers, as product.md describes it, clearly marked as not built.
 
 **Done when:** a clean clone follows the setup steps to a running system; every sponsor tool's use is described from what was built.
 

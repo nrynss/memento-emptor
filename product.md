@@ -20,9 +20,29 @@ Preferences built only from what people *say* are weak. Payment outcomes alone e
 
 **Sellers are the second audience** (decided 10 Nov). The buyer side stays first: developers of shopping agents, with the shopper fronting the demo. Sellers on PayPal adopt the other half: the same pooled reasons tell them why a SKU comes back, which a refund total never does. They get their own read-only **merchant app**, a separate service that reads the pool only through the layer's `product_fit`, never Elastic directly, so no shopper row can reach it.
 
-**Memory belongs to the shopper, not the agent** (decided 10 Nov). It is keyed to the shopper's PayPal identity, so a correction made to one agent reaches every other agent the shopper uses through the layer.
+**Memory belongs to the shopper, not the agent** (decided 10 Nov). It is keyed to the shopper's PayPal identity, so a correction made to one agent reaches every other agent that plugs into **the same layer**. A different seller's layer never sees it.
 
-Proposed surface, not final:
+## How it is consumed
+
+Decided 10 Nov. The evidence belongs to the seller: refunds, disputes and captures are read under the merchant's PayPal token, webhooks go to the merchant's PayPal app, and the Agent Toolkit runs on a merchant's REST credentials (`research/paypal.md`). So **a seller or a platform runs one Memento layer beside its PayPal app**: a store, or a marketplace with a shopping assistant.
+
+| Who | How they use it |
+|---|---|
+| **The seller's shopping agents** | Call the layer over MCP with their own key: recall before recommending, then report reasons, feedback and corrections. Orders stay on the Agent Toolkit; the layer never moves money |
+| **PayPal** | Delivers the seller's refund, dispute and capture webhooks to the layer, which turns them into evidence with no agent involved |
+| **The seller's shoppers** | Sign in to the ledger to see, contest and correct what the agents believe, and to opt out of pooling. Each sees only their own memory |
+| **The seller** | Reads the merchant app: why its products come back, by reason and size |
+
+Two limits follow, and the product says them plainly:
+
+- **Memory carries across agents within one layer**, such as a store's chat assistant and its checkout agent. It does not follow the shopper to another seller.
+- **The pool covers one layer's sales.** "Runs small" means across this seller's or platform's buyers, not all of PayPal. A marketplace has plenty of buyers; a small shop's lines may stay Building.
+
+**Every caller is authenticated** (decided 10 Nov). An agent calls with a key issued to it, and reads only the shoppers its seller serves. A shopper reads only their own ledger. The webhook path accepts only verified PayPal deliveries, as today. Nothing reachable from the public URL returns a shopper's memory without one of these.
+
+**Not built: a network across sellers.** Many sellers feeding one shared layer would let memory and the pool follow the shopper everywhere. It needs consent and trust at the seller level, and it is a different product. The README describes it as where this could go next.
+
+Surface (the pivot's shapes are settled in T7.1):
 
 | Interface | What it does |
 |---|---|

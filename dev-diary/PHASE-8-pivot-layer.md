@@ -98,9 +98,30 @@ A correction with no belief is written as a standing record with no `against`, a
 
 ---
 
+### T8.6: Authenticated callers ★
+```yaml
+requires:   [T7.1, T7.2]
+fixture-ok: yes
+size:       M · frontier
+owns:       internal/auth/, deploy/edge/
+status:     not-started
+```
+Today the MCP endpoint has no authentication: anyone who reaches the URL can read any shopper's memory by `shopper_id`. product.md ("How it is consumed") requires every caller to be authenticated before anything with real shoppers goes live.
+
+- **Agents:** a key per agent, issued by the seller running the layer, sent as a bearer token. A key is bound to that seller's shoppers; a call for any other `shopper_id` gets the same refusal as an unknown key, so the endpoint can't be used to find out who exists. Keys are stored hashed, can be revoked, and come from the keyring or Render secrets, never a file.
+- **Shoppers:** the ledger reads and `set_pooling` act only for the signed-in shopper. For the hackathon, sign-in can be a per-shopper link token issued by the seller (the demo shopper's is a sandbox credential, safe to publish on the judges' page). Record the choice and its limits.
+- **Merchant app:** its own key, good only for `product_fit`.
+- **Webhooks:** unchanged. Verified PayPal deliveries only, as T2.1 built.
+
+The middleware sits in `internal/auth/` and in front of every route at the edge. The tools' contract doesn't change: auth travels in headers, not in tool arguments.
+
+**Done when:** table tests cover each caller kind with a good key, a wrong key, a revoked key, and a good key asking for another seller's shopper, with the refusals identical where they must be. A test proves no route but `/healthz` and the webhook answers without a key. The gate passes.
+
+---
+
 ### T8.5: Recall never refuses ★
 ```yaml
-requires:   [T8.1, T8.3, T8.4]
+requires:   [T8.1, T8.3, T8.4, T8.6]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/server/, internal/precedence/
@@ -134,4 +155,5 @@ The live layer through the hub and a test-prefixed fit index: one shopper per pr
 - [ ] Every purchase writes and updates its fit row at ingest, live (T8.2, T8.2b).
 - [ ] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
 - [ ] A correction stands on its own (T8.4).
+- [ ] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).
 - [ ] Recall never refuses, and says which step decided, live (T8.5, T8.5b).

@@ -59,7 +59,8 @@ After the pivot:
 ```text
   T0.11 + T0.12 ─▶ T7.1 contracts ─▶ T7.2 keys ─┬─▶ T8.1 hub ────────────────┐
                                                ├─▶ T8.2 fit writer ─▶ T8.3 pool ─┼─▶ T8.5 recall ─▶ T8.5b live
-                                               ├─▶ T8.4 corrections ─────────────┘
+                                               ├─▶ T8.4 corrections ─────────────┤
+                                               ├─▶ T8.6 auth ────────────────────┘
                                                └─▶ T9.1 population
   T8.3 ─▶ T9.3 merchant app ─▶ T9.3d deployed
   T8.5 ─▶ T9.2 ledger, T9.4 agent ─▶ T9.5 second agent
@@ -166,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
 | P7 | 1 / 3 | Ready (T7.1) |
-| P8 | 0 / 9 | Waits on P7 |
+| P8 | 0 / 10 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
 | P10 | 0 / 5 | Ready (T10.1, T10.2) |
 

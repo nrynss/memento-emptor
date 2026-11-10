@@ -36,13 +36,13 @@ The shopper's ledger shows which precedence step decided each recommendation, an
 
 ### T9.3: The merchant app ★
 ```yaml
-requires:   [T8.3]
+requires:   [T8.3, T8.6]
 fixture-ok: yes
 size:       M · mid
 owns:       merchant/, tools/check.sh
 status:     not-started
 ```
-A separate, read-only app for the sandbox merchant's product lines. It reads the pool only through the layer's `product_fit`, never Elastic, and holds no Elastic key. One AG Grid table: product line and size, settled purchases, returns by reason category and direction, feedback by verdict, pool status, seeded count. A row opens the "why" for that line and size: the counts behind its status, and the rule it was judged by. The same stack as `web/` (Svelte 5, Chaaya, AG Grid community), with its own package, tests and build, and a step in `tools/check.sh`.
+A separate, read-only app for the sandbox merchant's product lines. It reads the pool only through the layer's `product_fit`, with the merchant key from T8.6, never Elastic, and holds no Elastic key. One AG Grid table: product line and size, settled purchases, returns by reason category and direction, feedback by verdict, pool status, seeded count. A row opens the "why" for that line and size: the counts behind its status, and the rule it was judged by. The same stack as `web/` (Svelte 5, Chaaya, AG Grid community), with its own package, tests and build, and a step in `tools/check.sh`.
 
 **Done when:** it builds and tests against fixtures from `testdata/api/`. Each status renders with its rule. No component can show a shopper row, and a test proves the app has no Elastic configuration. The gate passes, including the new step.
 
