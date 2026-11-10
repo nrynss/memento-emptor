@@ -141,7 +141,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
 | P2 | 12 / 12 | Done |
-| P3 | 5 / 6 | In progress |
+| P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 2 / 6 | In progress |
 | P6 | 0 / 7 | Not started |
@@ -299,6 +299,14 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What surprised.** The deployment exposes two hostnames (chat + frontend); both 302 anonymously. `ast agent access set` offers `anyone` (= any signed-in user) but no public option. Public is documented only in an adapter-auth warning and has never been observed working — platform gap, not config. The earlier flip landed on `memento-agent` by mistake (user-confirmed; its posture is the user's call).
 
 **The next agent should know.** No-login serving on Astropods is PROVEN on the public frontend host (dedicated `agents.public.astropods.ai` hostname; chat host correctly stays signed-in): anonymous 200 with our page body, model turn $0.0057 with tool spans. Follow-up T3.8 (public shopper page) added to the phase doc, parked until the full demo exists (requires T3.6). memento-agent's own Public posture is the user's call.
+
+### T3.6: The full demo (done) ★
+
+**What exists.** `demo/` scripted driver + reset script + two committed run records: all six steps live (T1.3b read-backs, live Jev, live Lambo Venerable/erased, Channel3 details, 3 deployed-agent turns/run, one real sandbox purchase per run through the orders machine, dispute seller-only, byte-identical recall) — run 2 from reset repeats run 1 (trace ids and reply wording the only differences; turn-1 pending-ask shape differs run-to-run and is tabled, not hidden).
+
+**What surprised.** Review held the run records to honesty: recording twins named, fake-backed agent ids marked fixture state everywhere, pre-correction L served by live recall (not agent-consumed), capture REFUNDED-by-design (not all-COMPLETED), placeholder claims qualified. Standing finding for the video script (T6.4): the agent never consumes the live layer in either run — it demonstrates correction-honoured-M against a fixture twin with the same words. The video must NEVER narrate "the live layer told the agent."
+
+**The next agent should know.** T3.8 (public shopper page, parked) serves the real demo once built; memento-agent is back to invite-only (user confirmed).
 
 ### T3.5: Evals (done)
 
