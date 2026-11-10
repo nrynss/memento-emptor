@@ -25,10 +25,14 @@ var ErrPoolUnavailable = errors.New("server: pool index unavailable")
 // assembleRecall builds the recall response from its parts. A contradicted
 // belief is unrepresentable without its override: when one applies and no
 // correction carries it, assembly fails instead of serving the belief
-// alone. A present pool rides with a consulted lookup, and an absent pool
-// rides with none. Every handler builds recall through here, so no code
-// path can return the belief without the correction beside it, or a pool
-// without saying whether it was consulted.
+// alone. A present pool rides with a consulted lookup; an absent pool rides
+// with whatever the lookup says — none when the pool is unwired or the
+// request names no full line, consulted when the wired pool answered empty
+// (Claimed), unavailable when the index could not be reached — so a
+// full-line recall on an empty line serves the consulted lookup instead of
+// failing. Every handler builds recall through here, so no code path can
+// return the belief without the correction beside it, or a pool without
+// saying whether it was consulted.
 func assembleRecall(shopper string, beliefs []contract.BeliefView, poolView *contract.PoolView, lookup contract.PoolLookup, overriding *contract.CorrectionView, guidance contract.GuidanceView, pending int, trace *string) (contract.RecallResponse, error) {
 	for _, belief := range beliefs {
 		if belief.Precedence == nil {
@@ -47,7 +51,7 @@ func assembleRecall(shopper string, beliefs []contract.BeliefView, poolView *con
 	if overriding != nil && guidance.Basis != contract.GuidanceCorrection {
 		return contract.RecallResponse{}, fmt.Errorf("%w: override present without correction guidance", ErrOverrideMissing)
 	}
-	if poolView == nil && lookup != "" && lookup != contract.PoolUnavailable {
+	if poolView == nil && lookup != "" && lookup != contract.PoolConsulted && lookup != contract.PoolUnavailable {
 		return contract.RecallResponse{}, fmt.Errorf("server: recall: pool absent with lookup %q", string(lookup))
 	}
 	if poolView != nil && lookup != contract.PoolConsulted {

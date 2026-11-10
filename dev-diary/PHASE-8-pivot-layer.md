@@ -377,11 +377,18 @@ requires:   [T8.5, T8.5b]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     claimed:t85c-relink
+status:     in-review
 ```
 T8.5b pinned two defects live, both needing `internal/api/server/`: a restored declared view matches no precedence class after restart (beliefs get fresh ids, the stale `ContradictsBeliefID` matches nothing), so the correction loses all force and the pool decides; and a wired pool consulted on an empty line returns Claimed with a `(nil, consulted)` lookup the assembler rejects. Re-link declared views by content match on restore, and decide the consulted-empty guard (serve it or refuse it loudly). Tripwires for both live in `tests/live/precedence/`.
 
 **Done when:** a restarted layer re-links a declared correction to the rewritten belief by content; the consulted-empty case is decided and tested; the gate passes.
+
+**Notes (in-review).** Both fixes are in `internal/api/server/`, fixture only, no contract or store change.
+
+- Consulted-empty: serve it. The frozen `example-none` shape is already pool-absent with lookup `consulted`, and the contract suite pins `consulted with an empty pool` — the assembler's rejection contradicted the contract. `assembleRecall` now accepts a nil pool with a `consulted` lookup (unwired/skipped still ride none, unreachable still rides unavailable; a present pool still requires consulted). `TestRecallConsultedEmptyPoolServes` pins it: a wired pool answering Claimed on a full line serves no pool object, lookup consulted, guidance none.
+- Re-link: `persistStanding` now journals every entry with its against cleared, plus a synthesized cover entry (words, live belief's subject, size, time) for each declared view with no same-words/same-subject journal entry — direct-against-belief corrections never journalled, so without the cover they could never re-link. `restoreStanding` re-records them as standings, so the rewritten belief re-declares them by subject match. `backfillDeclaration` re-links a restored view by content match on the correction's words when its citation is stale: unknown id, or an id the restart reused for an unrelated belief, detected by asking whether any same-words journal entry names the cited belief's subject. A citation explained that way is left alone, so the same words declared against two subjects never cross-link.
+- `TestDeclaredCorrectionRelinksAfterRestart` (direct path) and `TestStandingDeclaredRelinksAfterRestart` (standing-then-declared path) prove it with a divergent mint order: the restarted layer ingests a dispute first, so the rewritten fit belief cannot reuse its old id, and the correction still decides citing the new id. Both fail on the old code with the defect's exact shape (correction silent, own evidence decides). The gate passes.
+- The live tripwires in `tests/live/precedence/` still pin the defects and are outside this task's `owns`, so they are untouched: the next live run will surface both as stale pins (the consulted-empty probe succeeds where it pinned a failure; the dangling view still overrides after restart where it pinned loss of force). Flipping those assertions to pin the fix needs a driver update with live Elastic and the hub binary, which this task cannot run offline.
 
 ---
 

@@ -800,3 +800,161 @@ func TestWebhookRouteVerifiesDelivery(t *testing.T) {
 		t.Fatalf("delivery naming no shopper status %d, want 400", status)
 	}
 }
+
+// TestRecallConsultedEmptyPoolServes proves the consulted-empty decision:
+// a wired pool consulted on an empty line answers Claimed, which recall
+// serves as an absent pool with a consulted lookup — the frozen
+// example-none shape — instead of failing. The pool decides nothing; with
+// no other memory the guidance says so.
+func TestRecallConsultedEmptyPoolServes(t *testing.T) {
+	ctx := context.Background()
+	poolIdx := &fakePoolIndex{result: pool.Result{}}
+	svc, _ := pivotHarness(t, poolIdx, &fakeFitIndex{}, "")
+	recall, err := svc.Recall(ctx, contract.RecallRequest{
+		ShopperID: "empty_line_shopper", BrandID: "brand-n-001",
+		Category: "shirts", FitHandle: "regular", SizeConsidered: "M",
+	})
+	if err != nil {
+		t.Fatalf("recall on an empty line: %v", err)
+	}
+	if recall.Pool != nil {
+		t.Fatalf("empty pool serves %+v, want no pool object", recall.Pool)
+	}
+	if recall.PoolLookup != contract.PoolConsulted {
+		t.Fatalf("pool lookup %q, want consulted with an empty pool", recall.PoolLookup)
+	}
+	if recall.Guidance.Basis != contract.GuidanceNone {
+		t.Fatalf("guidance %+v, want none deciding", recall.Guidance)
+	}
+	poolIdx.mu.Lock()
+	queries := len(poolIdx.queries)
+	poolIdx.mu.Unlock()
+	if queries != 1 {
+		t.Fatalf("pool consulted %d times, want once", queries)
+	}
+}
+
+// earnSmallBelief ingests three too-small refunds and answers them, so the
+// shopper holds one Earned runs-small belief, and returns its id.
+func earnSmallBelief(t *testing.T, svc *Service, shopper string) string {
+	t.Helper()
+	ctx := context.Background()
+	for _, event := range []string{"WH-2EV-01", "WH-2EV-02", "WH-2EV-03"} {
+		if _, err := svc.IngestWebhook(ctx, shopper, event); err != nil {
+			t.Fatalf("ingest %s: %v", event, err)
+		}
+		if res := answerReason(t, svc, shopper, event, "too tight in the shoulders"); !res.Accepted {
+			t.Fatalf("too-small answer for %s was not accepted", event)
+		}
+	}
+	recall, err := svc.Recall(ctx, contract.RecallRequest{ShopperID: shopper, BrandID: "brand-x-001"})
+	if err != nil {
+		t.Fatalf("recall after three returns: %v", err)
+	}
+	if len(recall.Beliefs) != 1 {
+		t.Fatalf("recall serves %d beliefs, want the 1 earned sizing belief", len(recall.Beliefs))
+	}
+	return recall.Beliefs[0].BeliefID
+}
+
+// assertCorrectionDecides proves a recall is decided by the correction
+// declared against the served belief, and reports the belief id it cites.
+func assertCorrectionDecides(t *testing.T, svc *Service, shopper string) string {
+	t.Helper()
+	recall, err := svc.Recall(context.Background(), contract.RecallRequest{
+		ShopperID: shopper, BrandID: "brand-x-001",
+		Category: "shirts", FitHandle: "regular", SizeConsidered: "M",
+	})
+	if err != nil {
+		t.Fatalf("recall: %v", err)
+	}
+	if recall.OverridingCorrection == nil || recall.Guidance.Basis != contract.GuidanceCorrection {
+		t.Fatalf("correction does not decide: %+v", recall.Guidance)
+	}
+	if len(recall.Beliefs) != 1 || !recall.Beliefs[0].Contradicted {
+		t.Fatalf("recall serves %d beliefs contradicted %v, want the 1 contradicted belief",
+			len(recall.Beliefs), len(recall.Beliefs) == 1 && recall.Beliefs[0].Contradicted)
+	}
+	cited := recall.OverridingCorrection.ContradictsBeliefID
+	if cited == "" || cited != recall.Beliefs[0].BeliefID {
+		t.Fatalf("correction cites %q, want the served belief %q", cited, recall.Beliefs[0].BeliefID)
+	}
+	return cited
+}
+
+// restartDiverged rebuilds the service over the same standing directory
+// with a divergent mint order: the dispute first takes blf_000001 for a
+// seller belief, so the rebuilt fit belief cannot reuse its old id. A
+// re-link by id coincidence would leave the stale view dangling; only a
+// re-link by content match keeps the correction in force.
+func restartDiverged(t *testing.T, dir, shopper string) *Service {
+	t.Helper()
+	ctx := context.Background()
+	svc, _ := pivotHarness(t, nil, nil, dir)
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-04"); err != nil {
+		t.Fatalf("ingest dispute: %v", err)
+	}
+	for _, event := range []string{"WH-2EV-01", "WH-2EV-02", "WH-2EV-03"} {
+		if _, err := svc.IngestWebhook(ctx, shopper, event); err != nil {
+			t.Fatalf("re-ingest %s: %v", event, err)
+		}
+		if res := answerReason(t, svc, shopper, event, "too tight in the shoulders"); !res.Accepted {
+			t.Fatalf("too-small answer for %s was not accepted", event)
+		}
+	}
+	return svc
+}
+
+// TestDeclaredCorrectionRelinksAfterRestart proves a restarted layer
+// re-links a directly declared correction to the rewritten belief by
+// content match: the restored view cites a stale belief id that matches
+// nothing, the rewritten belief has a new id, and the correction still
+// decides with the new id cited.
+func TestDeclaredCorrectionRelinksAfterRestart(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	svc, _ := pivotHarness(t, nil, nil, dir)
+	shopper := "relink_shopper"
+	beliefID := earnSmallBelief(t, svc, shopper)
+	if _, err := svc.RecordCorrection(ctx, contract.RecordCorrectionRequest{
+		ShopperID: shopper, Text: "I've lost weight, use M", ContradictsBeliefID: beliefID,
+	}); err != nil {
+		t.Fatalf("record declared correction: %v", err)
+	}
+	if got := assertCorrectionDecides(t, svc, shopper); got != beliefID {
+		t.Fatalf("correction cites %q before the restart, want %q", got, beliefID)
+	}
+	restarted := restartDiverged(t, dir, shopper)
+	got := assertCorrectionDecides(t, restarted, shopper)
+	if got == beliefID {
+		t.Fatalf("correction still cites %q: re-linked by id coincidence, want the rewritten belief", beliefID)
+	}
+}
+
+// TestStandingDeclaredRelinksAfterRestart proves the same re-link for a
+// correction that stood first and was declared when its belief arrived:
+// the journal entry survives the restart, re-declares against the
+// rewritten belief, and the restored view follows it to the new id.
+func TestStandingDeclaredRelinksAfterRestart(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	svc, _ := pivotHarness(t, nil, nil, dir)
+	shopper := "standing_relink_shopper"
+	if _, err := svc.Recall(ctx, contract.RecallRequest{ShopperID: shopper, BrandID: "brand-x-001"}); err != nil {
+		t.Fatalf("first recall: %v", err)
+	}
+	if _, err := svc.RecordCorrection(ctx, contract.RecordCorrectionRequest{
+		ShopperID: shopper, Text: "I've lost weight, use M",
+	}); err != nil {
+		t.Fatalf("record standing correction: %v", err)
+	}
+	beliefID := earnSmallBelief(t, svc, shopper)
+	if got := assertCorrectionDecides(t, svc, shopper); got != beliefID {
+		t.Fatalf("standing correction cites %q after its belief, want %q", got, beliefID)
+	}
+	restarted := restartDiverged(t, dir, shopper)
+	got := assertCorrectionDecides(t, restarted, shopper)
+	if got == beliefID {
+		t.Fatalf("correction still cites %q: re-linked by id coincidence, want the rewritten belief", beliefID)
+	}
+}

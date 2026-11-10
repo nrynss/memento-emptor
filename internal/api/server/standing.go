@@ -14,11 +14,12 @@ import (
 
 // restoreStanding loads one shopper's durable state into a fresh
 // partition: the pooling choice, the correction views recall serves, and
-// the undeclared journal entries a later belief may declare against. The
-// journal entries are re-recorded, so the graph holds their notes again;
-// declared corrections need no re-declaration because the restart forgot
-// the beliefs they were declared against too. A shopper with no snapshot
-// starts from the defaults: pooling on, no corrections, an empty journal.
+// the journal entries a later belief may declare against. The journal
+// entries are re-recorded as standings, so the graph holds their notes
+// again; declared views keep their stale belief ids until a rewritten
+// belief declares the matching entry and re-links them by content match.
+// A shopper with no snapshot starts from the defaults: pooling on, no
+// corrections, an empty journal.
 func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper string) error {
 	snap, found, err := s.standing.Load(ctx, shopper)
 	if err != nil {
@@ -49,10 +50,14 @@ func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper
 }
 
 // persistStanding saves one shopper's durable state after a mutation: the
-// pooling choice, the correction views, and the undeclared journal
-// entries. Declared entries are history and travel with the views that
-// cite them; only standings that a later belief may declare against are
-// journalled.
+// pooling choice, the correction views, and the journal entries a later
+// belief may declare against. Declared entries are saved as standings (with
+// no against): the restart forgot the beliefs they were declared against,
+// so they wait for the rewritten belief to declare them again. A declared
+// view with no journal entry — a correction recorded straight against its
+// belief — gains a synthesized cover entry from the live belief's subject,
+// or it could never re-link after a restart. Entries are deduplicated by
+// their words and subject, so a cover never doubles a journal entry.
 func (s *Service) persistStanding(ctx context.Context, st *shopperState, shopper string) error {
 	views := make([]contract.CorrectionView, 0, len(st.corrOrder))
 	for _, id := range st.corrOrder {
@@ -62,15 +67,43 @@ func (s *Service) persistStanding(ctx context.Context, st *shopperState, shopper
 	}
 	journal := []memory.Correction{}
 	for _, entry := range st.journal.Standing() {
-		if entry.Against == "" {
+		entry.Against = ""
+		if !journalCoversTextSubject(journal, entry.Text, entry.Subject) {
 			journal = append(journal, entry)
 		}
+	}
+	for _, id := range st.corrOrder {
+		rec, ok := st.corrections[id]
+		if !ok || rec.view.ContradictsBeliefID == "" {
+			continue
+		}
+		belief, ok := st.beliefs[rec.view.ContradictsBeliefID]
+		if !ok || journalCoversTextSubject(journal, rec.view.Text, belief.subject) {
+			continue
+		}
+		journal = append(journal, memory.Correction{
+			Text:       rec.view.Text,
+			Subject:    belief.subject,
+			Size:       lastSize(rec.view.Text),
+			RecordedAt: rec.at,
+		})
 	}
 	snap := standing.Snapshot{Pooling: st.pooling.Load(), Corrections: views, Journal: journal}
 	if err := s.standing.Save(ctx, shopper, snap); err != nil {
 		return fmt.Errorf("server: persist standing for %q: %w", shopper, err)
 	}
 	return nil
+}
+
+// journalCoversTextSubject reports whether any journal entry — standing or
+// declared — carries the same words about the same subject.
+func journalCoversTextSubject(journal []memory.Correction, text string, subject domain.Subject) bool {
+	for _, entry := range journal {
+		if entry.Text == text && entry.Subject == subject {
+			return true
+		}
+	}
+	return false
 }
 
 // standingCorrection builds the journal entry for a standing correction:
@@ -113,7 +146,12 @@ func memoryBelief(rec *beliefRecord) memory.Belief {
 // backfillDeclaration links the correction views to a declaration the
 // journal just made: every journal entry declared against the belief's
 // content names the belief in the matching view, the belief is touched,
-// and its timeline gains the correction row. The caller holds the lock.
+// and its timeline gains the correction row. A restored declared view
+// whose belief id matches nothing is re-linked here by content match on
+// the correction's words: the journal entry declares against the rewritten
+// belief, and the stale view follows it instead of losing all force. A
+// view naming a belief the layer still holds is left alone. The caller
+// holds the lock.
 func (s *Service) backfillDeclaration(st *shopperState, belief *beliefRecord, now time.Time) {
 	for _, entry := range st.journal.Standing() {
 		if entry.Against != belief.content {
@@ -121,8 +159,21 @@ func (s *Service) backfillDeclaration(st *shopperState, belief *beliefRecord, no
 		}
 		for _, id := range st.corrOrder {
 			rec := st.corrections[id]
-			if rec == nil || rec.view.ContradictsBeliefID != "" || rec.view.Text != entry.Text {
+			if rec == nil || rec.view.Text != entry.Text {
 				continue
+			}
+			if rec.view.ContradictsBeliefID != "" {
+				// A view naming a belief the layer still holds is left
+				// alone when its citation is explained: a journal entry
+				// with the same words about that belief's subject means
+				// the citation came from this entry's lineage. A stale id
+				// — or an id the restart reused for an unrelated belief
+				// of another subject — is re-linked by content match on
+				// the correction's words instead of losing all force.
+				if cited, ok := st.beliefs[rec.view.ContradictsBeliefID]; ok &&
+					journalCoversTextSubject(st.journal.Standing(), rec.view.Text, cited.subject) {
+					continue
+				}
 			}
 			rec.view.ContradictsBeliefID = belief.id
 			rec.at = entry.RecordedAt
