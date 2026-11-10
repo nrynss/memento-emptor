@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 11 / 12 | In progress |
+| P2 | 12 / 12 | Done |
 | P3 | 5 / 6 | In progress |
 | P4 | 4 / 4 | Done |
 | P5 | 2 / 6 | In progress |
@@ -227,6 +227,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `tests/live/direction/` driver (no CI tests, `out/` ignored): Venerable on 3 same-direction returns live (blast 3, Swarm), opposing standalone concept stays unattached with no `Contradicts`/warning; recall serves the belief clean while ranking the opposite first; session erased, `t27b*` indices empty. $0 spend.
 
 **What surprised.** Review scoped the claim honestly: the live leg proves graph-level non-interference (no auto-attach/contradict by the daemon), NOT the service path — refusal (`ErrDirectionMismatch`) and unattached-row routing are proved offline in T2.7's tests. Wording fixed accordingly ("byte-identical" → asserted properties; cleanup counts marked transcript-only).
+
+### T2.8: Rival-belief birth rule (done) ★
+
+**What exists.** `OppositeStreak` streak state (in-memory service state, never the graph) with `RivalBirthThreshold = 3` in one place: 3 consecutive opposite-direction returns birth an unpromoted same-kind rival via the existing mint path; below 3 they land unattached (T2.7); any same-direction return or shopper correction resets; no auto-against, existing belief untouched, no second rival (4th joins the newborn — pinned by review-added test).
+
+**What surprised.** Review proved the backstop question: `ErrDirectionMismatch` still fires as defense-in-depth behind paths that now always offer matching direction — correct to keep, guards `attachRow`/seed against future callers.
 
 ### T2.7: Direction-aware reason matching (done) ★
 
