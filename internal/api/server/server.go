@@ -6,14 +6,19 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/nrynss/memento-emptor/internal/api/contract"
 	"github.com/nrynss/memento-emptor/internal/domain"
 	"github.com/nrynss/memento-emptor/internal/evidence"
 	"github.com/nrynss/memento-emptor/internal/fakes"
+	"github.com/nrynss/memento-emptor/internal/fitindex"
+	"github.com/nrynss/memento-emptor/internal/identity"
 	"github.com/nrynss/memento-emptor/internal/ingest"
 	"github.com/nrynss/memento-emptor/internal/memory"
+	"github.com/nrynss/memento-emptor/internal/pool"
+	"github.com/nrynss/memento-emptor/internal/standing"
 )
 
 // The service's sentinel conditions. Callers branch on these with errors.Is
@@ -37,6 +42,10 @@ var (
 	// ErrMissingShopper answers a call with no shopper id. Every call is
 	// scoped to one shopper, so an unscoped call answers nothing.
 	ErrMissingShopper = errors.New("server: missing shopper id")
+	// ErrPoolUnwired answers a pooled read or write while the pool is not
+	// wired: no index, no identity salt or no line resolver. The layered
+	// half answers nothing rather than guess a line or a hash.
+	ErrPoolUnwired = errors.New("server: pool is not wired")
 )
 
 // graphAdapter implements the memory seam over the evidence-graph seam,
@@ -79,6 +88,14 @@ func (a graphAdapter) Inspect(ctx context.Context, content string) (memory.Insig
 // The SchemaDir holds the frozen request schemas served on tools/list; the
 // service fails closed at construction when one is missing. Clock stamps
 // live writes; tests pin it for deterministic times.
+//
+// The pivot's second half is optional: Pool, FitRows, IdentitySalt and
+// Lines wire the pooled reads and writes, and StandingDir persists the
+// per-shopper journals. With them absent the service keeps the pre-pool
+// shape — no pool fields, no fit rows, journals in memory — so the frozen
+// base fixtures still describe it exactly. A verifier replaces the
+// delivery gate on the webhook route; tests inject a fake so the suite
+// stays offline.
 type Deps struct {
 	// Payments replays the webhook deliveries and transaction reads.
 	Payments fakes.PaymentSource
@@ -92,6 +109,25 @@ type Deps struct {
 	SchemaDir string
 	// Clock stamps live writes. A nil clock reads the current UTC time.
 	Clock func() time.Time
+	// Pool is the fit index the pool reader aggregates. Nil leaves pool
+	// reads off: recall omits the pool fields and product_fit refuses.
+	Pool pool.Index
+	// FitRows is the fit index the per-shopper writers update. Nil leaves
+	// fit writes off.
+	FitRows fitindex.Index
+	// IdentitySalt is the keyring salt (64 hex characters) the writers
+	// hash with. Empty leaves fit writes off.
+	IdentitySalt string
+	// Lines resolves an order item to its product line. Nil leaves fit
+	// writes off: without the catalog the layer cannot key a row.
+	Lines fitindex.Lines
+	// StandingDir persists per-shopper journals under one file per
+	// shopper. Empty keeps them in memory: a restart then loses the
+	// ability to declare a standing correction against a later belief.
+	StandingDir string
+	// Verifier checks raw webhook deliveries on the deployed route. Nil
+	// keeps the payment source's default gate.
+	Verifier ingest.Verifier
 }
 
 // CallEntry is one logged interface call: the tool, the shopper, and the
@@ -162,7 +198,13 @@ type correctionRecord struct {
 }
 
 // shopperState partitions every row by shopper. One shopper's beliefs
-// never leak into another's recall.
+// never leak into another's recall. The journal holds the standing
+// corrections a later belief may declare against, and the writer holds
+// the shopper's fit rows; both are per-shopper because the per-line hash
+// is salted over this shopper. The service lock serialises every access:
+// two agents speaking for one shopper are ordered by it. Pooling is
+// atomic because the writer's consent check reads it from the writer's
+// own lock, which must never wait on the service lock.
 type shopperState struct {
 	ingest      *ingest.Service
 	beliefs     map[string]*beliefRecord
@@ -173,8 +215,13 @@ type shopperState struct {
 	timelines   map[string][]contract.TimelineEvent
 	notices     map[string]string
 	captures    map[string][]string
+	webhooks    map[string]bool
 	seq         map[string]int
 	streaks     map[streakKey]*domain.OppositeStreak
+	journal     *memory.StandingCorrections
+	writer      *fitindex.Writer
+	pooling     atomic.Bool
+	lastBrand   domain.Subject
 }
 
 // streakKey scopes one opposite-direction run to the beliefs it could
@@ -202,6 +249,17 @@ func (st *shopperState) streakFor(kind domain.BeliefKind, subjectID string) *dom
 // Service is the running memory layer: eleven frozen tools plus webhook
 // ingest and the call log, over one HTTP handler. It is safe for
 // concurrent use.
+//
+// The pivot rides beside the frozen paths: the pool reader answers
+// product_fit when Deps wired a pool index, one fit writer per shopper
+// records the pooled rows when the identity salt, the fit index and a
+// line resolver are all present, and the standing store keeps each
+// shopper's journal across restarts when a directory was configured.
+// The service trusts the edge's X-Memento-* headers and never re-reads
+// Authorization: anything reaching this handler directly bypasses the
+// key check, so the port stays on loopback. The call log is agent-only
+// for the same reason: it carries every shopper's entries and the layer
+// does not scope it per shopper.
 type Service struct {
 	deps     Deps
 	graph    memory.Graph
@@ -209,6 +267,10 @@ type Service struct {
 	shoppers map[string]*shopperState
 	calls    []CallEntry
 	schemas  map[string]string
+	pool     *pool.Reader
+	keyer    *identity.Keyer
+	lines    fitindex.Lines
+	standing standing.Store
 }
 
 // NewService builds the service over its deps. It fails closed when a
@@ -238,20 +300,50 @@ func NewService(deps Deps) (*Service, error) {
 		}
 		schemas[string(tool.Name)] = raw
 	}
-	return &Service{
+	svc := &Service{
 		deps:     deps,
 		graph:    graphAdapter{inner: deps.Graph},
 		shoppers: map[string]*shopperState{},
 		schemas:  schemas,
-	}, nil
+		lines:    deps.Lines,
+	}
+	if deps.Pool != nil {
+		reader, err := pool.NewReader(deps.Pool)
+		if err != nil {
+			return nil, fmt.Errorf("server: pool reader: %w", err)
+		}
+		svc.pool = reader
+	}
+	if deps.IdentitySalt != "" {
+		keyer, err := identity.NewKeyer(deps.IdentitySalt)
+		if err != nil {
+			return nil, fmt.Errorf("server: identity keyer: %w", err)
+		}
+		svc.keyer = keyer
+	}
+	if deps.StandingDir != "" {
+		store, err := standing.NewDirStore(deps.StandingDir)
+		if err != nil {
+			return nil, fmt.Errorf("server: standing store: %w", err)
+		}
+		svc.standing = store
+	} else {
+		svc.standing = standing.NewMemStore()
+	}
+	return svc, nil
 }
 
-// state returns the shopper's partition, creating it on first use.
-func (s *Service) state(shopper string) *shopperState {
+// state returns the shopper's partition, creating it on first use. The
+// journal is restored from the standing store when one exists: undeclared
+// standings are re-recorded so a later belief declares them, and the
+// pooling choice and correction views come back with them. A caller that
+// fails the restore fails the call: starting empty would silently lose
+// the ability to declare.
+func (s *Service) state(ctx context.Context, shopper string) (*shopperState, error) {
 	st, ok := s.shoppers[shopper]
 	if !ok {
 		st = &shopperState{
-			ingest:      ingest.NewService(s.deps.Payments),
+			ingest:      ingest.NewService(s.deps.Payments, ingest.WithVerifier(s.deps.Verifier)),
 			beliefs:     map[string]*beliefRecord{},
 			evidence:    map[string]*evidenceRecord{},
 			pending:     map[string]*pendingRecord{},
@@ -259,12 +351,26 @@ func (s *Service) state(shopper string) *shopperState {
 			timelines:   map[string][]contract.TimelineEvent{},
 			notices:     map[string]string{},
 			captures:    map[string][]string{},
+			webhooks:    map[string]bool{},
 			seq:         map[string]int{},
 			streaks:     map[streakKey]*domain.OppositeStreak{},
+			journal:     &memory.StandingCorrections{},
+		}
+		st.pooling.Store(true)
+		if s.deps.FitRows != nil && s.keyer != nil && s.lines != nil {
+			writer, err := fitindex.NewWriter(s.deps.FitRows, s.keyer, shopper, s.lines,
+				fitindex.WithPooling(st.pooling.Load))
+			if err != nil {
+				return nil, fmt.Errorf("server: fit writer for %q: %w", shopper, err)
+			}
+			st.writer = writer
+		}
+		if err := s.restoreStanding(ctx, st, shopper); err != nil {
+			return nil, err
 		}
 		s.shoppers[shopper] = st
 	}
-	return st
+	return st, nil
 }
 
 // mint returns the next wire id under one prefix, deterministic in call
@@ -287,7 +393,9 @@ func (s *Service) log(tool, shopper string, trace *string) {
 }
 
 // Calls returns the call log in arrival order, optionally narrowed to one
-// host trace. The returned entries are copies.
+// host trace. The returned entries are copies. The log is agent-only: it
+// carries every shopper's entries, and narrowing it to one shopper is the
+// HTTP route's job, reading the edge's X-Memento-Shopper header.
 func (s *Service) Calls(trace string) []CallEntry {
 	s.mu.Lock()
 	defer s.mu.Unlock()

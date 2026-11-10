@@ -13,6 +13,8 @@ import (
 
 	"github.com/nrynss/keel/wire"
 	"github.com/nrynss/memento-emptor/internal/api/contract"
+	"github.com/nrynss/memento-emptor/internal/auth"
+	"github.com/nrynss/memento-emptor/internal/ingest"
 	"github.com/nrynss/memento-emptor/internal/version"
 )
 
@@ -51,28 +53,51 @@ func (s *Service) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]bool{"ok": true})
 }
 
-// webhookRequest is the ingest body: the shopper the delivery belongs to
-// and the payment source's event id.
-type webhookRequest struct {
-	// ShopperID scopes the delivery to one shopper.
-	ShopperID string `json:"shopper_id"`
-	// EventID is the payment source's event id.
-	EventID string `json:"event_id"`
-}
-
-// handleWebhook ingests one verified delivery.
+// handleWebhook ingests one raw payment-source delivery. The body is the
+// exact bytes the source posted, bounded like every other route: the
+// signature covers those bytes, so they are never re-encoded. The
+// delivery's custom id is the shopper join — the reference agent sets it
+// to the shopper at order creation — and a delivery without one is
+// refused. Verification runs inside HandleDelivery before the
+// idempotency check, so a forged body naming a stored event id is
+// refused, never answered as a duplicate.
 func (s *Service) handleWebhook(w http.ResponseWriter, r *http.Request) {
-	var req webhookRequest
-	if err := decodeBody(r, &req); err != nil {
+	raw, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
+	if err != nil {
+		writeWireError(w, http.StatusBadRequest, wire.CodeInvalidRequest, "unreadable body")
+		return
+	}
+	shopper, err := webhookShopper(raw)
+	if err != nil {
 		writeWireError(w, http.StatusBadRequest, wire.CodeInvalidRequest, err.Error())
 		return
 	}
-	res, err := s.IngestWebhook(r.Context(), req.ShopperID, req.EventID)
+	header := r.Header.Clone()
+	header.Del("Authorization")
+	res, err := s.IngestDelivery(r.Context(), shopper, ingest.Delivery{Header: header, Body: raw})
 	if err != nil {
 		writeServiceError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, res)
+}
+
+// webhookShopper resolves the shopper one delivery belongs to from the
+// body's resource custom id. The body's shape is the payment source's:
+// unknown fields are the source's business and never fail the join.
+func webhookShopper(raw []byte) (string, error) {
+	var body struct {
+		Resource struct {
+			CustomID string `json:"custom_id"`
+		} `json:"resource"`
+	}
+	if err := json.Unmarshal(raw, &body); err != nil {
+		return "", fmt.Errorf("bad delivery: %w", err)
+	}
+	if strings.TrimSpace(body.Resource.CustomID) == "" {
+		return "", errors.New("delivery names no shopper")
+	}
+	return body.Resource.CustomID, nil
 }
 
 // callsResponse wraps the call log for the ledger.
@@ -81,10 +106,33 @@ type callsResponse struct {
 	Calls []CallEntry `json:"calls"`
 }
 
+// callsFilter narrows the agent-only call log to one shopper when the
+// edge scoped the request: the X-Memento-Shopper header carries the
+// shopper the guard checked, and the layer trusts it without re-reading
+// Authorization.
+func callsFilter(calls []CallEntry, shopper string) []CallEntry {
+	if shopper == "" {
+		return calls
+	}
+	out := make([]CallEntry, 0, len(calls))
+	for _, entry := range calls {
+		if entry.ShopperID == shopper {
+			out = append(out, entry)
+		}
+	}
+	return out
+}
+
 // handleCalls serves the call log, optionally narrowed to one host trace
-// so the ledger can show that a recommendation followed a recall.
+// so the ledger can show that a recommendation followed a recall. The log
+// is agent-only: it carries every shopper's entries and the served layer
+// does not scope it per shopper — the edge admits only agent keys. When
+// the guard scoped the request to a shopper it says so in the
+// X-Memento-Shopper header, and the layer honours it; the layer never
+// re-reads Authorization, which the guard already removed.
 func (s *Service) handleCalls(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, callsResponse{Calls: s.Calls(r.URL.Query().Get("trace_id"))})
+	calls := callsFilter(s.Calls(r.URL.Query().Get("trace_id")), r.Header.Get(auth.HeaderShopper))
+	writeJSON(w, http.StatusOK, callsResponse{Calls: calls})
 }
 
 // handleTool serves one frozen tool over plain HTTP for clients without
@@ -134,10 +182,12 @@ func isNotFound(err error) bool {
 	return errors.Is(err, ErrUnknownBelief) || errors.Is(err, ErrUnknownQuestion) || errors.Is(err, ErrUnknownPurchase)
 }
 
-// isInvalid reports the refused-value conditions.
+// isInvalid reports the refused-value conditions. A delivery that fails
+// verification is the caller's body, not the layer's fault.
 func isInvalid(err error) bool {
 	return errors.Is(err, ErrQuestionClosed) || errors.Is(err, ErrFeedbackMismatch) ||
-		errors.Is(err, ErrEmptyCorrection) || errors.Is(err, ErrMissingShopper) || errors.Is(err, ErrAlreadySeeded)
+		errors.Is(err, ErrEmptyCorrection) || errors.Is(err, ErrMissingShopper) || errors.Is(err, ErrAlreadySeeded) ||
+		errors.Is(err, ingest.ErrBadSignature) || errors.Is(err, ingest.ErrMalformedEvent)
 }
 
 // writeWireError writes the shared error envelope.
@@ -243,9 +293,7 @@ func (s *Service) handleMCP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var req jsonRPCRequest
-	decoder := json.NewDecoder(bytes.NewReader(raw))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&req); err != nil {
+	if err := decodeSingle(raw, &req, "mcp"); err != nil {
 		writeRPC(w, nil, nil, rpcError(-32700, "bad request"))
 		return
 	}
@@ -266,7 +314,7 @@ func (s *Service) handleMCP(w http.ResponseWriter, r *http.Request) {
 		writeRPC(w, req.ID, map[string]any{"tools": s.describeTools()}, nil)
 	case "tools/call":
 		var call mcpToolCall
-		if err := json.Unmarshal(req.Params, &call); err != nil || call.Name == "" {
+		if err := decodeSingle(req.Params, &call, "tools/call"); err != nil || call.Name == "" {
 			writeRPC(w, req.ID, nil, rpcError(-32602, "bad tools/call params"))
 			return
 		}

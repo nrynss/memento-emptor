@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"sort"
 	"strings"
@@ -10,7 +11,9 @@ import (
 	"github.com/nrynss/memento-emptor/internal/api/contract"
 	"github.com/nrynss/memento-emptor/internal/domain"
 	"github.com/nrynss/memento-emptor/internal/evidence"
+	"github.com/nrynss/memento-emptor/internal/ingest"
 	"github.com/nrynss/memento-emptor/internal/memory"
+	"github.com/nrynss/memento-emptor/internal/precedence"
 	"github.com/nrynss/memento-emptor/internal/reasons"
 )
 
@@ -34,6 +37,11 @@ type WebhookResult struct {
 // idempotent on the payment source's event id. Refunds file a pending
 // question; disputes arrive classified and write to the seller belief at
 // once; captures store for the feedback join. Every delivery is logged.
+// Purchases that touch the pool write their fit rows before anything is
+// stored, from the same event, so a failed fit write fails the delivery
+// and the retry writes both. A redelivery after a failed first attempt
+// repairs the fit rows idempotently; a redelivery of a stored event
+// writes nothing new.
 func (s *Service) IngestWebhook(ctx context.Context, shopper, eventID string) (WebhookResult, error) {
 	if strings.TrimSpace(shopper) == "" {
 		return WebhookResult{}, fmt.Errorf("server: ingest: %w", ErrMissingShopper)
@@ -41,15 +49,56 @@ func (s *Service) IngestWebhook(ctx context.Context, shopper, eventID string) (W
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log("webhook_ingest", shopper, nil)
-	st := s.state(shopper)
+	st, err := s.state(ctx, shopper)
+	if err != nil {
+		return WebhookResult{}, fmt.Errorf("server: partition for %q: %w", shopper, err)
+	}
 	res, err := st.ingest.Handle(ctx, eventID)
 	if err != nil {
 		return WebhookResult{}, fmt.Errorf("server: ingest webhook %q: %w", eventID, err)
 	}
+	return s.storeIngestResult(ctx, st, shopper, eventID, res)
+}
+
+// IngestDelivery verifies one raw webhook delivery and stores its
+// evidence rows, idempotent on the payment source's event id. This is
+// the deployed route's path: verification runs before the idempotency
+// check, so a forged body naming a stored event id is refused, never
+// answered as a duplicate.
+func (s *Service) IngestDelivery(ctx context.Context, shopper string, delivery ingest.Delivery) (WebhookResult, error) {
+	if strings.TrimSpace(shopper) == "" {
+		return WebhookResult{}, fmt.Errorf("server: ingest: %w", ErrMissingShopper)
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.log("webhook_ingest", shopper, nil)
+	st, err := s.state(ctx, shopper)
+	if err != nil {
+		return WebhookResult{}, fmt.Errorf("server: partition for %q: %w", shopper, err)
+	}
+	res, err := st.ingest.HandleDelivery(ctx, delivery)
+	if err != nil {
+		return WebhookResult{}, fmt.Errorf("server: ingest delivery: %w", err)
+	}
+	var envelope struct {
+		ID string `json:"id"`
+	}
+	if err := json.Unmarshal(delivery.Body, &envelope); err != nil || strings.TrimSpace(envelope.ID) == "" {
+		return WebhookResult{}, fmt.Errorf("server: ingest delivery: %w", ingest.ErrMalformedEvent)
+	}
+	return s.storeIngestResult(ctx, st, shopper, envelope.ID, res)
+}
+
+// storeIngestResult stores one delivery's rows in the shopper's partition
+// after the fit rows are written. The caller holds the service lock.
+func (s *Service) storeIngestResult(ctx context.Context, st *shopperState, shopper, eventID string, res ingest.Result) (WebhookResult, error) {
 	out := WebhookResult{EventID: eventID, Rows: len(res.Rows), Duplicate: res.Duplicate}
-	if res.Duplicate {
+	if res.Duplicate && st.webhooks[eventID] {
 		out.Pending = res.Pending != nil
 		return out, nil
+	}
+	if err := s.recordFitRows(ctx, st, res.Rows); err != nil {
+		return WebhookResult{}, err
 	}
 	for _, row := range res.Rows {
 		rec := &evidenceRecord{id: st.mint("ev"), row: row, counts: row.CountsToward()}
@@ -76,6 +125,16 @@ func (s *Service) IngestWebhook(ctx context.Context, shopper, eventID string) (W
 			awaitingSince: question.OccurredAt,
 		}
 		out.Pending = true
+	}
+	for _, row := range res.Rows {
+		if strings.TrimSpace(row.Item.BrandID) != "" {
+			st.lastBrand = domain.Subject{Kind: domain.SubjectBrand, ID: row.Item.BrandID, Name: row.Item.BrandName}
+			break
+		}
+	}
+	st.webhooks[eventID] = true
+	if err := s.persistIfJournal(ctx, st, shopper); err != nil {
+		return WebhookResult{}, err
 	}
 	return out, nil
 }
@@ -171,9 +230,17 @@ func (s *Service) ensureSellerBelief(ctx context.Context, st *shopperState, item
 
 // newBelief derives one belief in the graph and stores its record. The
 // event time travels with the write so honestly spread history promotes.
+// Every belief written this way declares the matching standing
+// corrections against it, once each, so a correction recorded before its
+// belief still contradicts it when the belief arrives.
 func (s *Service) newBelief(ctx context.Context, st *shopperState, kind domain.BeliefKind, subject domain.Subject, value string, direction domain.FitDirection, seeded bool, at time.Time) (*beliefRecord, error) {
 	content := beliefContent(kind, subject, value)
-	if err := memory.EnsureBelief(ctx, s.graph, content, at); err != nil {
+	declared, err := memory.EnsureBeliefDeclaring(ctx, s.graph, st.journal, memory.Belief{
+		Content: content,
+		Kind:    kind,
+		Subject: subject,
+	}, at)
+	if err != nil {
 		return nil, fmt.Errorf("server: ensure belief: %w", err)
 	}
 	id := st.mint("blf")
@@ -189,13 +256,19 @@ func (s *Service) newBelief(ctx context.Context, st *shopperState, kind domain.B
 		content:   content,
 	}
 	st.beliefs[id] = rec
+	if declared > 0 {
+		s.backfillDeclaration(st, rec, at)
+	}
 	return rec, nil
 }
 
-// Recall returns the beliefs that apply to a purchase, each with its
-// status and evidence, plus any correction that overrides them. The
+// Recall returns what applies to a purchase: the shopper's own beliefs
+// with their status and precedence step, the pooled product fit when the
+// pool has something to say, and any correction that overrides them. The
 // correction ships both at the top level and inline, with the guidance
 // pointing at it, so an agent cannot recommend from the belief alone.
+// Recall never refuses: thin evidence comes back labelled thin, and an
+// unreachable pool leaves the pool fields out rather than an empty pool.
 func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contract.RecallResponse, error) {
 	if strings.TrimSpace(req.ShopperID) == "" {
 		return contract.RecallResponse{}, fmt.Errorf("server: recall: %w", ErrMissingShopper)
@@ -203,7 +276,13 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolRecallForPurchase), req.ShopperID, traceOf(req.TraceID))
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.RecallResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
+	if strings.TrimSpace(req.BrandID) != "" {
+		st.lastBrand = domain.Subject{Kind: domain.SubjectBrand, ID: req.BrandID, Name: brandName(st, req.BrandID)}
+	}
 	views := []contract.BeliefView{}
 	for _, rec := range st.beliefs {
 		view, err := s.beliefView(ctx, st, rec)
@@ -213,44 +292,102 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 		views = append(views, view)
 	}
 	served := recallBeliefs(views, req.BrandID)
-	var overriding *contract.CorrectionView
+	usual := usualSize(st, served)
+	poolView, lookup := s.lookupPool(ctx, req, usual)
+	overriding := overridingCorrection(st, served, req.BrandID)
+	presence := precedence.Presence{
+		Correction: overriding != nil,
+		Pool:       poolView != nil,
+	}
 	for _, view := range served {
-		if view.ContradictedBy != nil {
-			latest := *view.ContradictedBy
-			if overriding == nil || latest.RecordedAt > overriding.RecordedAt {
-				overriding = &latest
-			}
+		if beliefStep(view) == contract.GuidanceOwnEvidence {
+			presence.OwnEvidence = true
+		} else {
+			presence.Statement = true
 		}
 	}
+	outcome := precedence.Decide(presence)
+	for i := range served {
+		step := beliefStep(served[i])
+		view := precedence.View(step, outcome.Winner)
+		served[i].Precedence = &view
+	}
+	if poolView != nil {
+		view := precedence.View(contract.GuidancePool, outcome.Winner)
+		poolView.Precedence = &view
+	}
+	name := brandName(st, req.BrandID)
+	if strings.TrimSpace(req.BrandID) != "" && name == "" {
+		name = req.BrandID
+	}
 	var guidance contract.GuidanceView
-	switch {
-	case overriding != nil:
-		belief := servedBelief(served, overriding.ContradictsBeliefID)
-		guidance = guidanceForCorrection(*overriding, belief)
-	case len(served) > 0:
-		belief := servedBelief(served, served[0].BeliefID)
-		guidance = guidanceForBelief(belief)
+	switch outcome.Winner {
+	case contract.GuidanceCorrection:
+		guidance = guidanceForCorrection(*overriding, correctionBrand(st, overriding), correctionBelief(overriding))
+	case contract.GuidanceOwnEvidence:
+		guidance = guidanceForOwnEvidence(strongestOwn(served), poolView != nil && outcome.Overridden[contract.GuidancePool] == contract.GuidanceOwnEvidence)
+	case contract.GuidancePool:
+		guidance = guidanceForPool(*poolView, name)
+	case contract.GuidanceStatement:
+		guidance = guidanceForStatement(strongestStatement(served))
 	default:
 		guidance = noGuidance()
 	}
-	return assembleRecall(req.ShopperID, served, overriding, guidance, len(st.pending), traceOf(req.TraceID))
+	return assembleRecall(req.ShopperID, served, poolView, lookup, overriding, guidance, len(st.pending), traceOf(req.TraceID))
 }
 
-// servedBelief finds the stored record behind one served view. The caller
-// serves only beliefs from its own state, so the record always exists.
-func servedBelief(served []contract.BeliefView, id string) *beliefRecord {
-	for _, view := range served {
-		if view.BeliefID == id {
-			return &beliefRecord{id: view.BeliefID, subject: view.Subject, value: view.Value}
+// correctionBrand names the subject a correction was recorded about: the
+// contradicted belief's subject for a declared correction, the journal
+// entry's subject for a named standing, and empty for an unscoped one.
+func correctionBrand(st *shopperState, correction *contract.CorrectionView) string {
+	if correction.ContradictsBeliefID != "" {
+		if belief, ok := st.beliefs[correction.ContradictsBeliefID]; ok {
+			return belief.subject.Name
 		}
 	}
-	return &beliefRecord{id: id}
+	return string(journalSubject(st, correction.Text).Name)
+}
+
+// correctionBelief identifies the belief a correction contradicts, or nil
+// while the correction stands on its own.
+func correctionBelief(correction *contract.CorrectionView) *string {
+	if correction.ContradictsBeliefID == "" {
+		return nil
+	}
+	id := correction.ContradictsBeliefID
+	return &id
+}
+
+// strongestOwn returns the strongest served own-evidence belief: the
+// first served, which the serving order already ranked.
+func strongestOwn(served []contract.BeliefView) contract.BeliefView {
+	for _, view := range served {
+		if beliefStep(view) == contract.GuidanceOwnEvidence {
+			return view
+		}
+	}
+	return contract.BeliefView{}
+}
+
+// strongestStatement returns the first served general statement.
+func strongestStatement(served []contract.BeliefView) contract.BeliefView {
+	for _, view := range served {
+		if beliefStep(view) == contract.GuidanceStatement {
+			return view
+		}
+	}
+	return contract.BeliefView{}
 }
 
 // RecordCorrection records the shopper's explicit correction at once,
-// declared against the belief it contradicts. The same words against the
-// same belief return the stored correction: a repeated correction is one
-// correction, not new evidence.
+// declared against the belief it contradicts. With no belief id the
+// correction is a standing record: it is journalled under the shopper's
+// most recent brand context, declared against a matching belief when one
+// appears later, and honoured in recall until then. An unscoped standing
+// — recorded before the layer knows any brand — applies to every brand
+// and is never declared. The same words about the same subject return the
+// stored correction: a repeated correction is one correction, not new
+// evidence, and it does not refresh its event time.
 func (s *Service) RecordCorrection(ctx context.Context, req contract.RecordCorrectionRequest) (contract.RecordCorrectionResponse, error) {
 	if strings.TrimSpace(req.ShopperID) == "" {
 		return contract.RecordCorrectionResponse{}, fmt.Errorf("server: record correction: %w", ErrMissingShopper)
@@ -261,10 +398,16 @@ func (s *Service) RecordCorrection(ctx context.Context, req contract.RecordCorre
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolRecordCorrection), req.ShopperID, traceOf(req.TraceID))
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.RecordCorrectionResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	// A correction is shopper-driven and resets every opposite-direction
 	// run for the shopper: the shopper's word breaks all streaks.
 	clear(st.streaks)
+	if strings.TrimSpace(req.ContradictsBeliefID) == "" {
+		return s.recordStanding(ctx, st, req)
+	}
 	belief, ok := st.beliefs[req.ContradictsBeliefID]
 	if !ok {
 		return contract.RecordCorrectionResponse{}, fmt.Errorf("server: record correction: %w %q", ErrUnknownBelief, req.ContradictsBeliefID)
@@ -299,7 +442,100 @@ func (s *Service) RecordCorrection(ctx context.Context, req contract.RecordCorre
 		Summary: fmt.Sprintf("Shopper correction: %s.", req.Text),
 		RefID:   id,
 	})
+	if err := s.persistStanding(ctx, st, req.ShopperID); err != nil {
+		return contract.RecordCorrectionResponse{}, err
+	}
 	return s.correctionResponse(ctx, st, belief, rec, traceOf(req.TraceID))
+}
+
+// recordStanding records a correction with no belief as a standing
+// record. A correction naming the shopper's brand context is journalled
+// and declared against a matching belief at once when one already
+// exists; an unscoped one waits in the views alone. Either way the
+// correction applies in recall from this call on.
+func (s *Service) recordStanding(ctx context.Context, st *shopperState, req contract.RecordCorrectionRequest) (contract.RecordCorrectionResponse, error) {
+	now := s.deps.Clock()
+	size := lastSize(req.Text)
+	subject := correctionSubject(st)
+	for _, id := range st.corrOrder {
+		existing := st.corrections[id]
+		if existing == nil || existing.view.ContradictsBeliefID != "" || existing.view.Text != req.Text {
+			continue
+		}
+		if journalSubject(st, req.Text) != subject {
+			continue
+		}
+		return standingResponse(st, existing, traceOf(req.TraceID)), nil
+	}
+	id := st.mint("corr")
+	rec := &correctionRecord{
+		view: contract.CorrectionView{
+			CorrectionID:    id,
+			Text:            req.Text,
+			RecordedAt:      now.Format(time.RFC3339),
+			TakesPrecedence: true,
+		},
+		at: now,
+	}
+	st.corrections[id] = rec
+	st.corrOrder = append(st.corrOrder, id)
+	if namesSubject(subject) {
+		entry := standingCorrection(req.Text, subject, size, now)
+		if err := st.journal.Record(ctx, s.graph, entry); err != nil {
+			return contract.RecordCorrectionResponse{}, fmt.Errorf("server: record standing correction: %w", err)
+		}
+		// A matching belief may already exist: the agent recorded the
+		// correction without naming it. Declare the standing against
+		// every match now, so the warning renders at once.
+		for _, belief := range st.beliefs {
+			if !memory.SameSubject(entry, memoryBelief(belief)) {
+				continue
+			}
+			if _, err := st.journal.Declare(ctx, s.graph, memoryBelief(belief)); err != nil {
+				return contract.RecordCorrectionResponse{}, fmt.Errorf("server: declare standing correction: %w", err)
+			}
+			rec.view.ContradictsBeliefID = belief.id
+			rec.at = now
+			belief.touch(now)
+			st.timeline(belief.id, contract.TimelineEvent{
+				At:      now.Format(time.RFC3339),
+				Kind:    contract.TimelineCorrection,
+				Summary: fmt.Sprintf("Shopper correction: %s.", req.Text),
+				RefID:   id,
+			})
+		}
+	}
+	if err := s.persistStanding(ctx, st, req.ShopperID); err != nil {
+		return contract.RecordCorrectionResponse{}, err
+	}
+	if rec.view.ContradictsBeliefID != "" {
+		belief := st.beliefs[rec.view.ContradictsBeliefID]
+		return s.correctionResponse(ctx, st, belief, rec, traceOf(req.TraceID))
+	}
+	return standingResponse(st, rec, traceOf(req.TraceID)), nil
+}
+
+// namesSubject reports whether a subject names the layer's brand or
+// seller scope for a standing correction's journal entry.
+func namesSubject(subject domain.Subject) bool {
+	if strings.TrimSpace(subject.ID) == "" {
+		return false
+	}
+	return subject.Kind == domain.SubjectBrand || subject.Kind == domain.SubjectSeller
+}
+
+// standingResponse renders the confirmation for a correction that stands
+// on its own: no belief is contradicted yet, so there is no belief to
+// report, and the guidance recommends from the correction alone.
+func standingResponse(st *shopperState, rec *correctionRecord, trace *string) contract.RecordCorrectionResponse {
+	return contract.RecordCorrectionResponse{
+		Correction:   rec.view,
+		Contradicted: false,
+		Status:       domain.StatusClaimed,
+		Standing:     domain.GraphNone,
+		Guidance:     guidanceForCorrection(rec.view, string(journalSubject(st, rec.view.Text).Name), nil),
+		TraceID:      trace,
+	}
 }
 
 // correctionResponse renders the confirmation that a correction applies at
@@ -309,13 +545,14 @@ func (s *Service) correctionResponse(ctx context.Context, st *shopperState, beli
 	if err != nil {
 		return contract.RecordCorrectionResponse{}, fmt.Errorf("server: read belief: %w", err)
 	}
+	beliefID := belief.id
 	return contract.RecordCorrectionResponse{
 		Correction:   rec.view,
 		BeliefID:     belief.id,
 		Status:       reading.Status,
 		Standing:     reading.Standing,
 		Contradicted: true,
-		Guidance:     guidanceForCorrection(rec.view, belief),
+		Guidance:     guidanceForCorrection(rec.view, belief.subject.Name, &beliefID),
 		TraceID:      trace,
 	}, nil
 }
@@ -330,7 +567,10 @@ func (s *Service) PendingQuestions(ctx context.Context, req contract.PendingQues
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolPendingQuestions), req.ShopperID, nil)
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.PendingQuestionsResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	questions := make([]contract.QuestionView, 0, len(st.pending))
 	for _, rec := range st.pending {
 		item := domain.Item{}
@@ -396,7 +636,10 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolRecordReason), req.ShopperID, traceOf(req.TraceID))
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.RecordReasonResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	question, ok := st.pending[req.QuestionID]
 	if !ok {
 		return contract.RecordReasonResponse{}, fmt.Errorf("server: record reason: %w %q", ErrUnknownQuestion, req.QuestionID)
@@ -444,6 +687,16 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 		rec.row.Reason = reason
 		rec.counts = counts
 	}
+	// Every classified answer settles its purchase's fit row, whether or
+	// not a belief claims it: the pool counts settled purchases, not
+	// beliefs. An unclear answer never reaches here; it stays pending.
+	if err := s.classifyFitRows(ctx, st, rows, reason.Category, now); err != nil {
+		return contract.RecordReasonResponse{}, err
+	}
+	if len(question.items) > 0 && strings.TrimSpace(question.items[0].BrandID) != "" {
+		item := question.items[0]
+		st.lastBrand = domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName}
+	}
 	if counts == domain.BeliefKindNone {
 		markUnattached(rows)
 		delete(st.pending, question.id)
@@ -471,6 +724,9 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 		// declared: contradictions stay shopper-driven.
 		markUnattached(rows)
 		delete(st.pending, question.id)
+		if err := s.persistIfJournal(ctx, st, req.ShopperID); err != nil {
+			return contract.RecordReasonResponse{}, err
+		}
 		return contract.RecordReasonResponse{
 			ReasonID:     id,
 			QuestionID:   question.id,
@@ -496,6 +752,9 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 	}
 	delete(st.pending, question.id)
 	beliefID := belief.id
+	if err := s.persistIfJournal(ctx, st, req.ShopperID); err != nil {
+		return contract.RecordReasonResponse{}, err
+	}
 	return contract.RecordReasonResponse{
 		ReasonID:     id,
 		QuestionID:   question.id,
@@ -603,7 +862,10 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolRecordFeedback), req.ShopperID, traceOf(req.TraceID))
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.RecordFeedbackResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	ids := st.captures[req.CustomID]
 	var matched *evidenceRecord
 	for _, id := range ids {
@@ -645,6 +907,16 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 	if err != nil {
 		return contract.RecordFeedbackResponse{}, err
 	}
+	// Fit feedback settles its purchase's fit row, from the same words
+	// that wrote the belief. Seller verdicts never reach here: a damaged
+	// or missing item is about the seller, not the fit.
+	if err := s.feedbackFitRow(ctx, st, matched, verdict, now); err != nil {
+		return contract.RecordFeedbackResponse{}, err
+	}
+	if strings.TrimSpace(matched.row.Item.BrandID) != "" {
+		item := matched.row.Item
+		st.lastBrand = domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName}
+	}
 	docID, err := s.indexEvidence(ctx, matched.row, "")
 	if err != nil {
 		return contract.RecordFeedbackResponse{}, err
@@ -672,6 +944,9 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 		RefID:   id,
 	})
 	beliefID := belief.id
+	if err := s.persistIfJournal(ctx, st, req.ShopperID); err != nil {
+		return contract.RecordFeedbackResponse{}, err
+	}
 	return contract.RecordFeedbackResponse{
 		FeedbackID:   id,
 		Verdict:      verdict,
@@ -722,7 +997,10 @@ func (s *Service) ExplainBelief(ctx context.Context, req contract.ExplainBeliefR
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolExplainBelief), req.ShopperID, nil)
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.ExplainBeliefResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	rec, ok := st.beliefs[req.BeliefID]
 	if !ok {
 		return contract.ExplainBeliefResponse{}, fmt.Errorf("server: explain belief: %w %q", ErrUnknownBelief, req.BeliefID)
@@ -775,7 +1053,10 @@ func (s *Service) LedgerBeliefs(ctx context.Context, req contract.LedgerBeliefsR
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolLedgerBeliefs), req.ShopperID, nil)
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.LedgerBeliefsResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	rows := []contract.LedgerBeliefRow{}
 	for _, rec := range st.beliefs {
 		if !req.IncludeSeeded && rec.seeded {
@@ -823,7 +1104,10 @@ func (s *Service) LedgerBelief(ctx context.Context, req contract.LedgerBeliefReq
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolLedgerBelief), req.ShopperID, nil)
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.LedgerBeliefResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	rec, ok := st.beliefs[req.BeliefID]
 	if !ok {
 		return contract.LedgerBeliefResponse{}, fmt.Errorf("server: ledger belief: %w %q", ErrUnknownBelief, req.BeliefID)
@@ -864,7 +1148,10 @@ func (s *Service) LedgerEvidence(ctx context.Context, req contract.LedgerEvidenc
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolLedgerEvidence), req.ShopperID, nil)
-	st := s.state(req.ShopperID)
+	st, err := s.state(ctx, req.ShopperID)
+	if err != nil {
+		return contract.LedgerEvidenceResponse{}, fmt.Errorf("server: partition for %q: %w", req.ShopperID, err)
+	}
 	rows := []contract.LedgerEvidenceRow{}
 	for _, rec := range st.evidence {
 		if len(rec.beliefIDs) == 0 && rec.row.Reason == nil {

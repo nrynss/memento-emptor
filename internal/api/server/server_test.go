@@ -195,8 +195,80 @@ func compareExample(t *testing.T, svc *Service, tool, reqFile, respFile string, 
 		delete(actualMap, field)
 		delete(wantMap, field)
 	}
+	if tool == "recall_for_purchase" {
+		// The frozen base fixture predates the pivot: T7.1 kept it in
+		// the pre-pool shape, and requiring the pool fields is T7.4's
+		// call. The served layer emits them now, and serves the
+		// shopper's general statement beside the contradicted belief,
+		// so the comparison strips them here and asserts them
+		// separately instead.
+		assertRecallPivot(t, actualMap)
+		delete(actualMap, "pool")
+		delete(actualMap, "pool_lookup")
+		if beliefs, ok := actualMap["beliefs"].([]any); ok {
+			kept := beliefs[:0]
+			for _, belief := range beliefs {
+				view, ok := belief.(map[string]any)
+				if !ok {
+					continue
+				}
+				delete(view, "precedence")
+				if view["belief_id"] == "blf_77c310" {
+					continue
+				}
+				kept = append(kept, belief)
+			}
+			actualMap["beliefs"] = kept
+		}
+	}
 	if !reflect.DeepEqual(actualMap, wantMap) {
 		t.Fatalf("%s with %s differs from %s:\nactual:   %s\nwant: %s", tool, reqFile, respFile, pretty(actualMap), pretty(wantMap))
+	}
+}
+
+// assertRecallPivot asserts the pivot fields the served recall carries
+// beside the frozen base shape: every belief names its precedence step,
+// with the overridden beliefs pointing at the correction that won. The
+// seeded recall serves the contradicted sizing belief and the shopper's
+// general statement, both overridden by the correction; the pool is
+// absent because no pool index is wired.
+func assertRecallPivot(t *testing.T, actual map[string]any) {
+	t.Helper()
+	beliefs, ok := actual["beliefs"].([]any)
+	if !ok || len(beliefs) != 2 {
+		t.Fatalf("seeded recall carries %v beliefs, want the sizing belief and the statement", len(beliefs))
+	}
+	steps := map[string]map[string]any{}
+	for _, belief := range beliefs {
+		view, ok := belief.(map[string]any)
+		if !ok {
+			t.Fatalf("recall belief is not an object: %v", belief)
+		}
+		id, _ := view["belief_id"].(string)
+		precedence, ok := view["precedence"].(map[string]any)
+		if !ok {
+			t.Fatalf("recall belief %v names no precedence step", id)
+		}
+		steps[id] = precedence
+		if id == "blf_77c310" {
+			if view["value"] != "shopper says they are usually size M" {
+				t.Fatalf("statement belief value %v, want the usual-size statement", view["value"])
+			}
+		}
+	}
+	sizing, ok := steps["blf_8f2c41"]
+	if !ok || sizing["step"] != "own_evidence" || sizing["overridden"] != true || sizing["overridden_by"] != "correction" {
+		t.Fatalf("sizing belief precedence %+v, want own_evidence overridden by correction", sizing)
+	}
+	statement, ok := steps["blf_77c310"]
+	if !ok || statement["step"] != "statement" || statement["overridden"] != true || statement["overridden_by"] != "correction" {
+		t.Fatalf("statement precedence %+v, want statement overridden by correction", statement)
+	}
+	if _, ok := actual["pool"]; ok {
+		t.Fatalf("recall without a wired pool carries a pool object")
+	}
+	if _, ok := actual["pool_lookup"]; ok {
+		t.Fatalf("recall without a wired pool carries a pool lookup")
 	}
 }
 

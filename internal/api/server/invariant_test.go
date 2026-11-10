@@ -9,6 +9,9 @@ import (
 	"github.com/nrynss/memento-emptor/internal/domain"
 )
 
+// guidanceStep names the step that overrode the assembler's test belief.
+var guidanceStep = contract.GuidanceCorrection
+
 // contradictedView builds a contradicted belief view for the assembler.
 func contradictedView() contract.BeliefView {
 	correction := contract.CorrectionView{
@@ -28,6 +31,7 @@ func contradictedView() contract.BeliefView {
 		Contradicted:   true,
 		ContradictedBy: &correction,
 		Evidence:       []contract.EvidenceView{},
+		Precedence:     &contract.PrecedenceView{Step: contract.GuidanceOwnEvidence, Overridden: true, OverriddenBy: &guidanceStep},
 		UpdatedAt:      "2026-11-05T14:02:11Z",
 	}
 }
@@ -46,22 +50,22 @@ func TestRecallWithoutOverrideIsUnrepresentable(t *testing.T) {
 		BeliefID:     &belief.BeliefID,
 	}
 
-	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, nil, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, nil, "", nil, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
 		t.Errorf("contradicted belief without override assembles: %v", err)
 	}
 
 	other := overriding
 	other.CorrectionID = "corr_other"
-	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, &other, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, nil, "", &other, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
 		t.Errorf("contradicted belief with a foreign override assembles: %v", err)
 	}
 
-	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, &overriding,
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, nil, "", &overriding,
 		contract.GuidanceView{Basis: contract.GuidanceBelief}, 0, nil); !errors.Is(err, ErrOverrideMissing) {
 		t.Errorf("override without correction guidance assembles: %v", err)
 	}
 
-	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, &overriding, guidance, 0, nil); err != nil {
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{belief}, nil, "", &overriding, guidance, 0, nil); err != nil {
 		t.Errorf("valid recall with override fails: %v", err)
 	}
 
@@ -70,7 +74,9 @@ func TestRecallWithoutOverrideIsUnrepresentable(t *testing.T) {
 	plain.ContradictedBy = nil
 	plain.Status = domain.StatusEarned
 	plain.Standing = domain.GraphVenerable
-	if _, err := assembleRecall("shopper_01", []contract.BeliefView{plain}, nil,
+	won := contract.PrecedenceView{Step: contract.GuidanceOwnEvidence}
+	plain.Precedence = &won
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{plain}, nil, "", nil,
 		contract.GuidanceView{Basis: contract.GuidanceBelief}, 0, nil); err != nil {
 		t.Errorf("uncontradicted recall fails: %v", err)
 	}

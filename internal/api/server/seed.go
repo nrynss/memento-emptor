@@ -158,7 +158,10 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	st := s.state(seed.ShopperID)
+	st, err := s.state(ctx, seed.ShopperID)
+	if err != nil {
+		return fmt.Errorf("server: load seed: %w", err)
+	}
 	if len(st.beliefs) > 0 {
 		return fmt.Errorf("server: load seed for %q: %w", seed.ShopperID, ErrAlreadySeeded)
 	}
@@ -210,7 +213,11 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 			if err := memory.RecordStatement(ctx, s.graph, content, earliest); err != nil {
 				return fmt.Errorf("server: load seed: record statement: %w", err)
 			}
-		} else if err := memory.EnsureBelief(ctx, s.graph, content, earliest); err != nil {
+		} else if _, err := memory.EnsureBeliefDeclaring(ctx, s.graph, st.journal, memory.Belief{
+			Content: content,
+			Kind:    rec.kind,
+			Subject: rec.subject,
+		}, earliest); err != nil {
 			return fmt.Errorf("server: load seed: ensure belief: %w", err)
 		}
 		st.beliefs[rec.id] = rec

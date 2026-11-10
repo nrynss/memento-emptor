@@ -1,12 +1,14 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sort"
 
 	"github.com/nrynss/memento-emptor/internal/api/contract"
 	"github.com/nrynss/memento-emptor/internal/domain"
+	"github.com/nrynss/memento-emptor/internal/pool"
 )
 
 // ErrOverrideMissing is returned when a recall would serve a contradicted
@@ -14,13 +16,24 @@ import (
 // letting an agent recommend from a belief the shopper has overruled.
 var ErrOverrideMissing = errors.New("server: contradicted belief has no overriding correction")
 
+// ErrPoolUnavailable is returned by product_fit when the pool index cannot
+// be reached. Recall never returns this: it carries on without the pool.
+// product_fit has no recall to carry on with, so it refuses instead of
+// reporting an empty pool.
+var ErrPoolUnavailable = errors.New("server: pool index unavailable")
+
 // assembleRecall builds the recall response from its parts. A contradicted
 // belief is unrepresentable without its override: when one applies and no
 // correction carries it, assembly fails instead of serving the belief
-// alone. Every handler builds recall through here, so no code path can
-// return the belief without the correction beside it.
-func assembleRecall(shopper string, beliefs []contract.BeliefView, overriding *contract.CorrectionView, guidance contract.GuidanceView, pending int, trace *string) (contract.RecallResponse, error) {
+// alone. A present pool rides with a consulted lookup, and an absent pool
+// rides with none. Every handler builds recall through here, so no code
+// path can return the belief without the correction beside it, or a pool
+// without saying whether it was consulted.
+func assembleRecall(shopper string, beliefs []contract.BeliefView, poolView *contract.PoolView, lookup contract.PoolLookup, overriding *contract.CorrectionView, guidance contract.GuidanceView, pending int, trace *string) (contract.RecallResponse, error) {
 	for _, belief := range beliefs {
+		if belief.Precedence == nil {
+			return contract.RecallResponse{}, fmt.Errorf("server: recall: belief %q has no precedence step", belief.BeliefID)
+		}
 		if !belief.Contradicted {
 			continue
 		}
@@ -34,25 +47,40 @@ func assembleRecall(shopper string, beliefs []contract.BeliefView, overriding *c
 	if overriding != nil && guidance.Basis != contract.GuidanceCorrection {
 		return contract.RecallResponse{}, fmt.Errorf("%w: override present without correction guidance", ErrOverrideMissing)
 	}
+	if poolView == nil && lookup != "" && lookup != contract.PoolUnavailable {
+		return contract.RecallResponse{}, fmt.Errorf("server: recall: pool absent with lookup %q", string(lookup))
+	}
+	if poolView != nil && lookup != contract.PoolConsulted {
+		return contract.RecallResponse{}, fmt.Errorf("server: recall: pool present with lookup %q", string(lookup))
+	}
 	if beliefs == nil {
 		beliefs = []contract.BeliefView{}
 	}
-	return contract.RecallResponse{
+	out := contract.RecallResponse{
 		ShopperID:            shopper,
 		Beliefs:              beliefs,
 		OverridingCorrection: overriding,
 		Guidance:             guidance,
 		PendingCount:         pending,
 		TraceID:              trace,
-	}, nil
+	}
+	if poolView != nil || lookup != "" {
+		out.Pool = poolView
+		out.PoolLookup = lookup
+	}
+	return out, nil
 }
 
 // recallBeliefs selects the beliefs a recall serves for one brand: the
-// earned fit beliefs, strongest first. Building beliefs stay on the
-// ledger until the evidence earns them; seller beliefs surface through
-// the ledger and explain reads, never through a sizing recall. A
-// contradicted belief is served with its warning inline, never alone:
-// the assembler beside this function enforces the override.
+// fit beliefs the evidence is earning or earned (Candidate and above),
+// strongest first, plus the shopper's general statements (evidenceless
+// Claimed notes), which decide only when nothing stronger does. A lone
+// return stays on the ledger until a second moves the belief to Building:
+// recall never withholds, but one return is a question, not an answer.
+// Seller beliefs surface through the ledger and explain reads, never
+// through a sizing recall. A contradicted belief is served with its
+// warning inline, never alone: the assembler beside this function
+// enforces the override.
 func recallBeliefs(views []contract.BeliefView, brandID string) []contract.BeliefView {
 	out := []contract.BeliefView{}
 	for _, view := range views {
@@ -62,7 +90,10 @@ func recallBeliefs(views []contract.BeliefView, brandID string) []contract.Belie
 		if brandID != "" && view.Subject.ID != brandID {
 			continue
 		}
-		if view.Standing != domain.GraphVenerable {
+		switch {
+		case view.Standing == domain.GraphVenerable, view.Standing == domain.GraphCandidate:
+		case view.Standing == domain.GraphNone && len(view.Evidence) == 0:
+		default:
 			continue
 		}
 		out = append(out, view)
@@ -74,4 +105,238 @@ func recallBeliefs(views []contract.BeliefView, brandID string) []contract.Belie
 		return out[i].BeliefID < out[j].BeliefID
 	})
 	return out
+}
+
+// beliefStep names the precedence step one served belief came from: own
+// evidence when the shopper's history backs it, the general statement
+// otherwise.
+func beliefStep(view contract.BeliefView) contract.GuidanceBasis {
+	if len(view.Evidence) > 0 {
+		return contract.GuidanceOwnEvidence
+	}
+	return contract.GuidanceStatement
+}
+
+// overridingCorrection returns the correction recall must honour first:
+// the latest correction declared against a served belief; else the
+// latest named standing matching the brand, whose belief has not been
+// written yet; else the latest unscoped standing, which applies to every
+// brand until one is known. Specificity wins over recency: a correction
+// naming this brand beats a newer correction naming none.
+func overridingCorrection(st *shopperState, served []contract.BeliefView, brandID string) *contract.CorrectionView {
+	servedIDs := map[string]bool{}
+	for _, view := range served {
+		servedIDs[view.BeliefID] = true
+	}
+	var best *correctionRecord
+	bestClass := 3
+	for _, id := range st.corrOrder {
+		rec := st.corrections[id]
+		if rec == nil {
+			continue
+		}
+		class := 3
+		switch {
+		case rec.view.ContradictsBeliefID != "" && servedIDs[rec.view.ContradictsBeliefID]:
+			class = 0
+		case rec.view.ContradictsBeliefID == "" && brandID != "" && journalSubject(st, rec.view.Text).ID == brandID:
+			class = 1
+		case rec.view.ContradictsBeliefID == "" && isUnscoped(st, rec.view.Text):
+			class = 2
+		default:
+			continue
+		}
+		if best == nil || class < bestClass || (class == bestClass && !rec.at.Before(best.at)) {
+			best, bestClass = rec, class
+		}
+	}
+	if best == nil {
+		return nil
+	}
+	out := best.view
+	return &out
+}
+
+// journalSubject returns the journal entry's subject for one correction
+// text, or the zero subject when the correction is unscoped.
+func journalSubject(st *shopperState, text string) domain.Subject {
+	for _, entry := range st.journal.Standing() {
+		if entry.Text == text {
+			return entry.Subject
+		}
+	}
+	return domain.Subject{}
+}
+
+// isUnscoped reports whether one correction text has no journal entry:
+// an unscoped standing, recorded before the layer knew any brand.
+func isUnscoped(st *shopperState, text string) bool {
+	for _, entry := range st.journal.Standing() {
+		if entry.Text == text {
+			return false
+		}
+	}
+	return true
+}
+
+// usualSize computes the size recall adjusts the pool from: the size the
+// shopper most often kept or said fits well, in any brand, else the size
+// their general statement names. Kept rows and fits-well feedback feed
+// the tallies; a classified refund never does.
+func usualSize(st *shopperState, served []contract.BeliefView) domain.UsualSize {
+	tallies := map[string]*domain.SizeTally{}
+	for _, rec := range st.evidence {
+		size := rec.row.Item.Size
+		if size == "" {
+			continue
+		}
+		tally, ok := tallies[size]
+		if !ok {
+			tally = &domain.SizeTally{Size: size}
+			tallies[size] = tally
+		}
+		switch {
+		case rec.row.Outcome.Kind == domain.OutcomeKept:
+			tally.Kept++
+		case rec.row.Reason != nil && verdictForFeedback(rec.row.Reason.Text) == contract.FeedbackFitsWell:
+			tally.FitsWell++
+		}
+	}
+	list := make([]domain.SizeTally, 0, len(tallies))
+	for _, tally := range tallies {
+		if tally.Kept+tally.FitsWell > 0 {
+			list = append(list, *tally)
+		}
+	}
+	stated := ""
+	for _, view := range served {
+		if len(view.Evidence) == 0 {
+			if size := lastSize(view.Value); size != "" {
+				stated = size
+				break
+			}
+		}
+	}
+	return domain.UsualSizeFor(list, stated)
+}
+
+// poolQuery resolves the pool read for one recall: the line from the
+// request, and the size from the usual size when one is known, else the
+// size under consideration. It reports false when the request does not
+// name a full line and size, and recall then skips the pool.
+func poolQuery(req contract.RecallRequest, usual domain.UsualSize) (domain.ProductLine, string, bool) {
+	if req.BrandID == "" || req.Category == "" || req.FitHandle == "" {
+		return domain.ProductLine{}, "", false
+	}
+	size := usual.Size
+	if size == "" {
+		size = req.SizeConsidered
+	}
+	if size == "" {
+		return domain.ProductLine{}, "", false
+	}
+	return domain.ProductLine{Brand: req.BrandID, Category: req.Category, FitHandle: req.FitHandle}, size, true
+}
+
+// lookupPool reads the pooled product fit for one recall. A missing pool
+// index, or a request without a full line and size, consults nothing and
+// reports neither field, so the frozen base shape is untouched. Any index
+// error answers unavailable: recall carries on without the pool and never
+// pretends an empty one. A Claimed pool says nothing and is consulted but
+// absent.
+func (s *Service) lookupPool(ctx context.Context, req contract.RecallRequest, usual domain.UsualSize) (*contract.PoolView, contract.PoolLookup) {
+	if s.pool == nil {
+		return nil, ""
+	}
+	line, size, ok := poolQuery(req, usual)
+	if !ok {
+		return nil, ""
+	}
+	fit, err := s.pool.Fit(ctx, line, size)
+	if err != nil {
+		return nil, contract.PoolUnavailable
+	}
+	if fit.Verdict.Status == domain.StatusClaimed {
+		return nil, contract.PoolConsulted
+	}
+	view := poolViewOf(fit)
+	return &view, contract.PoolConsulted
+}
+
+// poolViewOf maps one pool read to its wire form. The precedence step is
+// left out: recall sets it, and product_fit never carries it.
+func poolViewOf(fit pool.Fit) contract.PoolView {
+	var direction *domain.FitDirection
+	if fit.Verdict.Direction != domain.FitDirectionNone {
+		dir := fit.Verdict.Direction
+		direction = &dir
+	}
+	return contract.PoolView{
+		Line:      contract.ProductLineView{BrandID: fit.Line.Brand, Category: fit.Line.Category, FitHandle: fit.Line.FitHandle},
+		Size:      fit.Size,
+		Status:    fit.Verdict.Status,
+		Direction: direction,
+		Counts:    poolCountsView(fit.Counts),
+		Seeded:    poolCountsView(fit.Seeded),
+		Live:      poolCountsView(fit.Live),
+		Recent:    poolCountsView(fit.Recent),
+	}
+}
+
+// poolCountsView maps one bucket of settled counts to its wire form. The
+// reasons arrive in the index's labels, which predate the domain's words
+// for the two non-fit causes, so both spellings count to the same field.
+func poolCountsView(counts pool.Counts) contract.PoolCountsView {
+	return contract.PoolCountsView{
+		Settled: counts.Settled,
+		Kept:    counts.Kept,
+		Returns: contract.DirectionCountsView{
+			TooSmall: counts.Returns.TooSmall,
+			TooLarge: counts.Returns.TooLarge,
+		},
+		Feedback: contract.VerdictCountsView{
+			FitsWell: counts.Feedback.FitsWell,
+			TooSmall: counts.Feedback.TooSmall,
+			TooLarge: counts.Feedback.TooLarge,
+		},
+		Reasons: reasonCountsView(counts.Reasons),
+		Shoppers: contract.ShopperCountsView{
+			Fit:      counts.Shoppers.Fit,
+			TooSmall: counts.Shoppers.TooSmall,
+			TooLarge: counts.Shoppers.TooLarge,
+		},
+	}
+}
+
+// reasonCountsView folds the settled returns by reason category. Unknown
+// categories are dropped: the merchant's "why it comes back" names only
+// the frozen set.
+func reasonCountsView(reasons map[domain.Category]int) contract.ReasonCountsView {
+	out := contract.ReasonCountsView{}
+	for category, n := range reasons {
+		switch category {
+		case domain.CategoryFitTooSmall:
+			out.FitTooSmall += n
+		case domain.CategoryFitTooLarge:
+			out.FitTooLarge += n
+		case domain.CategoryDamagedOrDefective, "damaged":
+			out.DamagedOrDefective += n
+		case domain.CategoryNotArrived, "not_as_described":
+			out.NotArrived += n
+		case domain.CategoryChangedMind:
+			out.ChangedMind += n
+		}
+	}
+	return out
+}
+
+// brandName names the brand for guidance: the subject name from the
+// shopper's own beliefs when one names it, else the brand id.
+func brandName(st *shopperState, brandID string) string {
+	for _, rec := range st.beliefs {
+		if rec.subject.ID == brandID && rec.subject.Name != "" {
+			return rec.subject.Name
+		}
+	}
+	return brandID
 }

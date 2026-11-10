@@ -296,7 +296,7 @@ requires:   [T8.1, T8.3, T8.3c, T8.4, T8.6]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/server/, internal/precedence/, internal/standing/, cmd/memento/main.go
-status:     claimed:t85-recall
+status:     in-review
 ```
 Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Hold one `StandingCorrections` per shopper, serialised (two agents may speak for one shopper), and make the journal survive a restart: a layer-owned store or a Lambo enumeration/structured-attributes mechanism. A restart must not lose the ability to declare a standing correction against a later belief. Decide whether an identical repeated correction refreshes its event time, since precedence keys on recency. The standing branch of `record_correction` accepts an empty belief id, and every belief write calls `EnsureBeliefDeclaring`. Scope `/calls` to the caller's shopper (or document it agent-only). Also:
 - resolve a purchase's line from one source for every writer call, so a caller cannot pool a row under the wrong product;
@@ -311,6 +311,29 @@ Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's 
 - Today's story test still passes, with the correction first.
 - New story tests pass for: a new shopper decided by the pool; a shopper unlike the crowd decided by their own evidence; a standalone correction honoured, then still in force in a later session.
 - The gate passes.
+
+**Notes (in-review).** `internal/precedence/` is the pure order: `Decide` over presence (correction, own evidence, pool, statement), the winner plus which present steps ride overridden, with the table test covering every step deciding, every disagreeing pair, the three-way case and the unreachable pool. `internal/standing/` is the layer-owned journal store: one file per shopper with the pooling choice, the correction views and the undeclared journal entries, written atomically after every mutation and restored when the partition is created.
+
+The served layer serves the pivot when the pivot half is wired (pool index, fit index, identity salt, line resolver, standing directory); with them absent it keeps the pre-pool shape, so the frozen base fixtures still describe it. Recall serves fit beliefs at Candidate and above plus general statements, resolves the usual size from kept and fits-well tallies with the statement as fallback, consults the pool at the usual size or the size under consideration, and marks every item with its step. Any index error answers unavailable and never an empty pool. `record_correction` with no belief id records a standing: named under the most recent brand context and journalled, declared against an existing match at once and against a later match when the belief is written; unscoped while the layer knows no brand, applied spanning every brand and never declared. Every belief write goes through `EnsureBeliefDeclaring`. `product_fit` maps the reader's counts with both index spellings of the non-fit reasons folded; `set_pooling` records the choice in the shopper's own memory, calls `Forget` with the session's full line list, and retries an incomplete delete before it reports not done. The deployed webhook route reads the raw body bounded, resolves the shopper from the custom id and passes `ingest.Delivery` to the shopper's service. `/calls` stays agent-only and honours the guard's `X-Memento-Shopper` header; the MCP decoder takes one object with unknown fields rejected. `memento key issue` mints one caller key with `auth.IssueKey`, printing the token once. The nine-tools comments were already eleven on main (sweep d0f71f3), so nothing here renamed them.
+
+Decisions the next agent should not have to re-make:
+
+- **Serving line.** A lone return (Claimed, no promotion) stays on the ledger until a second moves the belief to Building. This keeps today's story test green and matches all four pivot fixtures; read literally, product.md's "at any status" would also serve the lone return. If the product wants that, the story's one-return assertion and the seeded recall comparison move with it.
+- **Standing durability.** Beliefs, evidence and views are still in-memory, so a restart forgets them; the standing file keeps the pooling choice, the views and the undeclared journal, which is re-recorded on restore and re-declared as beliefs are rewritten. Declared entries are not re-declared on restore, which avoids duplicate against edges for forgotten beliefs.
+- **Repeat correction.** An identical repeat returns the stored correction and never refreshes its event time, in the journal (T8.4's dedup) and on the served path. A later correction with different words is a new entry and wins recency. A repeat under a changed brand context is its own entry, because the subject is part of the identity.
+- **Contested rows.** The served `record_correction` never calls the writer's `Contested`: a size correction names no reason category, and misclassifying it into the pool would corrupt counts. Reason contests still arrive through classified answers.
+- **Transaction key.** Every writer call resolves the transaction id from the row's own link (capture id, else order id), so both legs of one purchase key the same row whenever the records agree. When they disagree the writer's documented two-row hazard applies.
+- **Restart and captured_at.** The writer rebuilds purchase facts from the events it sees after a restart, so `captured_at` is unknown until a capture arrives. Versions still order safely: post-restart events carry newer event times, and a redelivered old event meets the index's newer version and is swallowed as `ErrOlderEvent`.
+- **Statement source.** General statements exist only through the seed today: no tool writes one live. The serving rule and the usual-size fallback already honour them when present.
+
+Six things the next agent should not have to rediscover:
+
+- The seeded recall comparison strips the pivot fields and the usual-size statement (pinned separately in `assertRecallPivot`): the base fixture predates the pivot by T7.1's design, and requiring the fields is T7.4's call.
+- The guidance texts match the pivot fixture formats: pool "Size up to L ... 29 of the 47 ...", own-evidence with "ahead of the pool" only when the pool disagrees, none verbatim from the example-none fixture. A deciding statement's text is new ("the shopper's usual size").
+- `IngestWebhook` (event id, fixture gate) stays for the programmatic path; the route is the verified `IngestDelivery` path. Delivery verification failures map to 400.
+- The fake pool counts mirror the fixture numbers, including the `damaged` and `not_as_described` index spellings, which the view folds into the domain's reason fields.
+- `state()` now takes the caller's context and fails the call when the standing restore fails, rather than starting empty and silently losing the declare ability.
+- No test in this task touches the network: the pool, fit and verifier seams are fakes, and the standing store is memory or a temporary directory.
 
 ### T8.5b: The layer end to end, live ★
 ```yaml

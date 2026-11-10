@@ -110,35 +110,136 @@ func lastSize(text string) string {
 
 // guidanceForCorrection tells the agent what to recommend from the
 // shopper's correction: the named size for the contradicted belief's
-// subject. The correction wins immediately, without waiting for evidence.
-func guidanceForCorrection(correction contract.CorrectionView, belief *beliefRecord) contract.GuidanceView {
+// subject, or the size alone while the correction stands on its own. The
+// correction wins immediately, without waiting for evidence.
+func guidanceForCorrection(correction contract.CorrectionView, subjectName string, beliefID *string) contract.GuidanceView {
 	size := lastSize(correction.Text)
-	text := fmt.Sprintf("Take size %s for %s", size, belief.subject.Name)
-	if size == "" {
-		text = fmt.Sprintf("Follow the shopper's correction for %s", belief.subject.Name)
+	text := "Follow the shopper's correction"
+	switch {
+	case size != "" && subjectName != "":
+		text = fmt.Sprintf("Take size %s for %s", size, subjectName)
+	case size != "":
+		text = fmt.Sprintf("Take size %s", size)
+	case subjectName != "":
+		text = fmt.Sprintf("Follow the shopper's correction for %s", subjectName)
 	}
 	correctionID := correction.CorrectionID
-	beliefID := belief.id
 	return contract.GuidanceView{
 		Text:         text,
 		Basis:        contract.GuidanceCorrection,
 		CorrectionID: &correctionID,
-		BeliefID:     &beliefID,
+		BeliefID:     beliefID,
 	}
 }
 
-// guidanceForBelief tells the agent what to recommend from the strongest
-// belief: the size its value recommends, for its subject.
-func guidanceForBelief(rec *beliefRecord) contract.GuidanceView {
-	size := lastSize(rec.value)
-	text := fmt.Sprintf("Take size %s for %s", size, rec.subject.Name)
-	if size == "" {
-		text = fmt.Sprintf("Follow the earned belief for %s", rec.subject.Name)
+// guidanceForOwnEvidence tells the agent what to recommend from the
+// shopper's own fit evidence: the size its value recommends, for its
+// subject. When the pooled product fit disagrees, the guidance says so
+// and cites the shopper's evidence count, so the agent can see why their
+// history beat the crowd.
+func guidanceForOwnEvidence(view contract.BeliefView, poolDisagrees bool) contract.GuidanceView {
+	size := lastSize(view.Value)
+	name := view.Subject.Name
+	if name == "" {
+		name = view.Subject.ID
 	}
-	beliefID := rec.id
+	text := fmt.Sprintf("Take size %s for %s", size, name)
+	if size == "" {
+		text = fmt.Sprintf("Follow the earned belief for %s", name)
+	} else if poolDisagrees {
+		direction := "runs small"
+		if domain.DirectionForValue(view.Value) == domain.FitDirectionLarge {
+			direction = "runs large"
+		}
+		text = fmt.Sprintf("%s: your own %s say it %s, ahead of the pool.", text, evidenceCount(len(view.Evidence)), direction)
+	}
+	beliefID := view.BeliefID
 	return contract.GuidanceView{
 		Text:     text,
-		Basis:    contract.GuidanceBelief,
+		Basis:    contract.GuidanceOwnEvidence,
+		BeliefID: &beliefID,
+	}
+}
+
+// evidenceCount states how many evidence rows back a recommendation, in
+// the words the guidance uses.
+func evidenceCount(n int) string {
+	switch n {
+	case 1:
+		return "one return"
+	case 2:
+		return "two returns"
+	default:
+		return fmt.Sprintf("%d returns", n)
+	}
+}
+
+// guidanceForPool tells the agent what to recommend from the pooled
+// product fit, adjusted from the shopper's usual size: up when the pool
+// says the product runs small, down when it runs large. The counts ride
+// along, so the agent cites the pool instead of the shopper.
+func guidanceForPool(view contract.PoolView, brand string) contract.GuidanceView {
+	size := view.Size
+	direction := domain.FitDirectionNone
+	if view.Direction != nil {
+		direction = *view.Direction
+	}
+	small := view.Counts.Returns.TooSmall + view.Counts.Feedback.TooSmall
+	large := view.Counts.Returns.TooLarge + view.Counts.Feedback.TooLarge
+	fit := small + large + view.Counts.Feedback.FitsWell
+	up := direction == domain.FitDirectionSmall
+	recommend := neighbourSize(size, up)
+	verb, blamed, excused := "up to", "too small", "too large"
+	if !up {
+		verb, blamed, excused = "down to", "too large", "too small"
+	}
+	if recommend == size {
+		return contract.GuidanceView{
+			Text:  fmt.Sprintf("Stay with size %s for %s: %d of the %d fit-classified settled purchases at size %s came back %s, against %d %s.", size, brand, blamedCount(small, large, up), fit, size, blamed, excusedCount(small, large, up), excused),
+			Basis: contract.GuidancePool,
+		}
+	}
+	return contract.GuidanceView{
+		Text:  fmt.Sprintf("Size %s %s for %s: %d of the %d fit-classified settled purchases at size %s came back %s, against %d %s.", verb, recommend, brand, blamedCount(small, large, up), fit, size, blamed, excusedCount(small, large, up), excused),
+		Basis: contract.GuidancePool,
+	}
+}
+
+// blamedCount reports the direction's outcomes for guidance: the small
+// count when the pool blames small, the large count otherwise.
+func blamedCount(small, large int, up bool) int {
+	if up {
+		return small
+	}
+	return large
+}
+
+// excusedCount reports the opposite direction's outcomes for guidance.
+func excusedCount(small, large int, up bool) int {
+	if up {
+		return large
+	}
+	return small
+}
+
+// guidanceForStatement tells the agent what to recommend from the
+// shopper's general statement: the size they said they usually take. A
+// statement is Claimed and never promotes; it decides only when no
+// evidence and no pool speak.
+func guidanceForStatement(view contract.BeliefView) contract.GuidanceView {
+	size := lastSize(view.Value)
+	name := view.Subject.Name
+	if name == "" {
+		name = view.Subject.ID
+	}
+	text := fmt.Sprintf("Follow the shopper's usual size for %s", name)
+	if size != "" {
+		text = fmt.Sprintf("Take size %s for %s: the shopper's usual size.", size, name)
+	}
+	beliefID := view.BeliefID
+	return contract.GuidanceView{
+		Text:     text,
+		Basis:    contract.GuidanceStatement,
 		BeliefID: &beliefID,
 	}
 }
@@ -147,7 +248,7 @@ func guidanceForBelief(rec *beliefRecord) contract.GuidanceView {
 // The agent asks about the gaps instead of guessing.
 func noGuidance() contract.GuidanceView {
 	return contract.GuidanceView{
-		Text:  "No recommendation yet: too little evidence.",
+		Text:  "No memory applies yet: no correction, no fit evidence, no pool and no general statement. Ask the shopper which size they usually take.",
 		Basis: contract.GuidanceNone,
 	}
 }

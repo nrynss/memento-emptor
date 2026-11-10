@@ -10,4 +10,16 @@
 // ledger can show that a recommendation followed a recall. A contradicted
 // belief never leaves recall without its override: the response assembler
 // fails closed instead of serving one.
+//
+// Recall resolves the pivot's five steps — correction, own evidence, the
+// pooled product fit adjusted from the usual size, statement, nothing —
+// in internal/precedence, and serves every item with the step it came
+// from, overridden or not. Corrections with no belief stand on their own
+// in a per-shopper journal (internal/memory), persisted across restarts
+// by internal/standing and declared against a matching belief when one
+// is written later. The per-shopper fit writers behind product_fit and
+// set_pooling resolve every purchase's line through the one catalog
+// source, so the ingest-time capture and the later classification agree
+// on the row they pool. The layer trusts the edge's X-Memento-* headers
+// and never re-reads Authorization; the call log stays agent-only.
 package server

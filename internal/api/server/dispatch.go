@@ -11,15 +11,11 @@ import (
 
 // dispatch runs one frozen tool by name over its request JSON and returns
 // the response JSON. Unknown tools fail; unknown fields in the request
-// fail fast so caller and contract cannot drift.
+// fail fast so caller and contract cannot drift. Each request is one
+// object: trailing data after it fails the call.
 func (s *Service) dispatch(ctx context.Context, tool string, raw json.RawMessage) (json.RawMessage, error) {
 	decode := func(target any) error {
-		decoder := json.NewDecoder(bytes.NewReader(raw))
-		decoder.DisallowUnknownFields()
-		if err := decoder.Decode(target); err != nil {
-			return fmt.Errorf("bad %s request: %w", tool, err)
-		}
-		return nil
+		return decodeSingle(raw, target, tool)
 	}
 	encode := func(value any) (json.RawMessage, error) {
 		out, err := marshalResponse(value)
@@ -35,6 +31,26 @@ func (s *Service) dispatch(ctx context.Context, tool string, raw json.RawMessage
 			return nil, err
 		}
 		res, err := s.Recall(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		return encode(res)
+	case contract.ToolProductFit:
+		var req contract.ProductFitRequest
+		if err := decode(&req); err != nil {
+			return nil, err
+		}
+		res, err := s.ProductFit(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+		return encode(res)
+	case contract.ToolSetPooling:
+		var req contract.SetPoolingRequest
+		if err := decode(&req); err != nil {
+			return nil, err
+		}
+		res, err := s.SetPooling(ctx, req)
 		if err != nil {
 			return nil, err
 		}
@@ -122,6 +138,21 @@ func (s *Service) dispatch(ctx context.Context, tool string, raw json.RawMessage
 	default:
 		return nil, fmt.Errorf("unknown tool %q", tool)
 	}
+}
+
+// decodeSingle decodes one request object with unknown fields rejected.
+// A second value after the object fails the call: batches are not a
+// shape the guard can scope, so the layer never accepts one.
+func decodeSingle(raw json.RawMessage, target any, what string) error {
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(target); err != nil {
+		return fmt.Errorf("bad %s request: %w", what, err)
+	}
+	if decoder.More() {
+		return fmt.Errorf("bad %s request: trailing data", what)
+	}
+	return nil
 }
 
 // marshalResponse encodes one tool response. It then normalizes the
