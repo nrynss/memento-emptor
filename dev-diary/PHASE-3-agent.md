@@ -212,6 +212,26 @@ the agent's tools are fake-backed at the post-correction fixture
 state, so the pre-correction L is served by the live layer recall
 (recorded, not conflated). Handoff text in the worker's report.
 
+**Notes (reviewer, T3.6-review branch).** Adversarial re-verification
+from the committed records (no live calls): all six steps' claimed
+evidence supports the claim. Fixes committed on this branch, all
+wording inside `demo/`: (a) step-1 records now name the ingested
+recording twins (`WH-2EV-01/02/03`) and mark the live PayPal reads as
+verification; (b) every agent-cited `corr_`/`blf_`/`ev_`/`ORD-7XK` id is
+now explicitly marked fixture state from the fake-backed tools, and the
+step-3 header reads "live layer + fake-backed agent turn"; (c) the
+run-2 table now records the one-span difference in turn 1
+(`pending_questions` called in run 2, asked in prose in run 1) instead
+of "wording differs"; (d) README placeholder section corrected on
+captures (REFUNDED by design, not COMPLETED) and on `drive.py`'s
+standing route config. Standing findings (no edits): the agent never
+consumes the live layer (fixture twin with the same words); run-2 turn-1
+span order differs as noted — immaterial, disclosed. Spend recomputed:
+clean turns $0.0688 + $0.0859 plus Jev $0.000171 = ~$0.155; $0.57
+session delta ($0.67 → $1.24) leaves ~$0.415 across the four failed
+attempts, consistent with the per-turn costs — plausible, under the
+$1.00 cap, no turn over $0.10. Gate passes. Reviewer spend $0.
+
 
 ---
 

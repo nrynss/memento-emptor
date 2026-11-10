@@ -13,7 +13,10 @@ serves recall; the hybrid proof is T2.3b's).
 Reused, nothing created: the T1.3b cycles `t13b-demo-003/004/005`
 read back live — refund COMPLETED, capture settled (REFUNDED, as the
 cycles were fully refunded by design), order line items "Brand X
-Button Down Oxford Shirt size M" x1, custom ids join. Free.
+Button Down Oxford Shirt size M" x1, custom ids join. Free. The layer
+ingests their recording twins (`WH-2EV-01/02/03`, shapes proven
+identical to these reads in T2.1b); the live calls above are
+verification, not the ingested bytes.
 
 Newly created: 4 live Jev classifications on the fixture wording
 (3 fit + 1 vague), build `typesafe/jev-1.14-20261014` pinned every
@@ -41,7 +44,7 @@ configuration: the layer is not served to the agent yet), so its
 turns demonstrate the correction-honoured M; both halves are recorded
 here, not conflated.
 
-## Step 3 — shopper correction → M at once (live + agent)
+## Step 3 — shopper correction → M at once (live layer + fake-backed agent turn)
 
 Live `record_correction` ("I've lost weight, use M") against the
 earned belief: Out of true, standing Venerable, guidance "Take size M
@@ -53,8 +56,10 @@ Agent turn 1 (trace `963018cb`, $0.0234, tools
 generation): recommends M per correction `corr_3b7e52`, cites belief
 `blf_8f2c41` with its 3 seeded fit returns (`ev_6d1a09`,
 `ev_6d1a10`, `ev_6d1a11`), and asks the pending question (order
-`ORD-7XK-03`). Full reply in `out/turn1-reply.txt` (git-ignored);
-quoted in the report.
+`ORD-7XK-03`). Every `corr_`/`blf_`/`ev_`/`ORD-7XK` id in this turn is
+fixture state from the fake-backed tools, not a live-session id; the
+live correction above is the layer-side twin with the same words. Full
+reply in `out/turn1-reply.txt` (git-ignored); quoted in the report.
 
 ## Step 4 — approval, then a sandbox purchase of the M (live)
 
@@ -95,10 +100,11 @@ with the correction beside it; seller Claimed. `ledger_evidence`
 for the sizing belief: 3 rows, all counting toward fit.
 `explain_belief`: 3 evidence, 1 correction, 4 timeline events.
 Call log under the demo trace: `recall_for_purchase` then
-`record_correction`. Turn traces: `963018cb` recall-first,
-`19b69d56` recall-first, `e0e01e59` no tool spans (yes-turn claims
-no purchase; the real purchase follows it in this transcript, after
-the frozen approve-first gate).
+`record_correction`. Turn traces: `963018cb` recall-first (against
+the fake-backed tools, as above), `19b69d56` recall-first (same),
+`e0e01e59` no tool spans (yes-turn claims no purchase; the real
+purchase follows it in this transcript, after the frozen approve-first
+gate).
 
 ## Spend (run 1)
 

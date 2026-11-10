@@ -12,9 +12,13 @@ a live sandbox REST transport.
 ## The six steps and where each runs live
 
 1. **Three documented fit returns → Earned.** The three T1.3b sandbox
-   cycles (`t13b-demo-003/004/005`) are read back live (refund +
-   capture + order with line items, all COMPLETED, free). Their reason
-   words go through live Jev (4 classifications incl. the vague
+   cycles (`t13b-demo-003/004/005`) are read back live (refund
+   COMPLETED, capture settled — REFUNDED, as the cycles were fully
+   refunded by design — order with line items, free). The layer
+   ingests their recording twins (`WH-2EV-01/02/03`, whose shapes T2.1b
+   proved identical to the live reads); the live calls are
+   verification, not the ingested bytes. Their reason words go through
+   live Jev (4 classifications on the fixture wording incl. the vague
    ask-again, ~$0.0001 total, pinned build, 10x-per-call guard) and the
    writes land on a live Lambo 0.10.1 session (native
    `.jina-embeddings-v3`, throwaway SQLite store beside the session,
@@ -33,10 +37,11 @@ a live sandbox REST transport.
    L. Both halves are recorded below.
 3. **Shopper correction → M at once.** Live `record_correction`
    against the earned belief: Out of true, standing Venerable, guidance
-   M. Agent turn 1 (shopping question) recommends M per the correction,
-   cites the belief/returns, asks the pending question and asks for an
-   explicit yes. Its trace shows `recall_for_purchase` before the
-   recommendation generation.
+   M. Agent turn 1 (shopping question) recommends M per the correction
+   as seen through its fake-backed tools (post-correction fixture
+   state, not the live session), cites the belief/returns, asks the
+   pending question and asks for an explicit yes. Its trace shows
+   `recall_for_purchase` before the recommendation generation.
 4. **Approval, then a sandbox purchase of the M.** Agent turn 2 answers
    "yes". The demo then executes the approved purchase through the
    frozen orders machine: propose → capture-before-approval refused
@@ -87,9 +92,11 @@ ids). Real ids stay in `demo/out/` (git-ignored, mode 0600).
 | `BLF-T36-R<n>[-SELLER]` | the run's belief ids |
 
 Trace ids and costs are kept (short ids in prose, full only in `out/`).
-No key, token, email, host, bearer or deployment locator enters any
-committed file; the driver refuses to finish if a live value survives
-into `demo/` outside `out/`.
+No key, token, email, shopper credential, bearer, order id or other
+live value enters any committed file; the only route config is
+`drive.py`'s standing deployment id and API host (the agent's address,
+no secret — predates this task). The driver refuses to finish if a live
+value outside that config survives into `demo/` outside `out/`.
 
 ## Spend
 
