@@ -28,3 +28,15 @@ services:
         sync: false
       - key: OPENROUTER_API_KEY
         sync: false
+      # The layer's identity salt and caller keys. They reach the service
+      # as Render secrets, never in a file: sync false leaves them to the
+      # provision call and the dashboard, which is the only place values
+      # are ever entered.
+      - key: MEMENTO_IDENTITY_SALT
+        sync: false
+      - key: MEMENTO_AGENT_KEYS
+        sync: false
+      - key: MEMENTO_SHOPPER_TOKENS
+        sync: false
+      - key: MEMENTO_MERCHANT_KEYS
+        sync: false

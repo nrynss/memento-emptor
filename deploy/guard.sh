@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Spend guard for the public demo. Render has no native spend cap, and
-# billing is fixed-rate (plan + disk, prorated to the second), so the
-# guard audits the billable inventory through the API and stops what
+# Spend guard for the public demo and its merchant app. Render has no native
+# spend cap, and billing is fixed-rate (plan + disk, prorated to the second),
+# so the guard audits the billable inventory through the API and stops what
 # exceeds the ceiling:
 #
 #   guard.sh --check            live audit; exit 0 within ceiling, 1 on alert
@@ -18,7 +18,7 @@
 set -euo pipefail
 
 API=https://api.render.com/v1
-MAX_MONTHLY="${MAX_MONTHLY:-8.00}"
+MAX_MONTHLY="${MAX_MONTHLY:-16.00}"
 PLAN_STARTER=7.00
 DISK_PER_GB=0.25
 

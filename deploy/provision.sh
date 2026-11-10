@@ -15,6 +15,10 @@ set -euo pipefail
 : "${LAMBO_ES_API_KEY:?load tools/env.sh first}"
 : "${ELASTIC_URL:?load tools/env.sh first}"
 : "${OPENROUTER_API_KEY:?load tools/env.sh first}"
+: "${MEMENTO_IDENTITY_SALT:?load tools/env.sh first}"
+: "${MEMENTO_AGENT_KEYS:?load tools/env.sh first}"
+: "${MEMENTO_SHOPPER_TOKENS:?load tools/env.sh first}"
+: "${MEMENTO_MERCHANT_KEYS:?load tools/env.sh first}"
 
 SERVICE_NAME="${SERVICE_NAME:-memento-emptor}"
 REPO="${REPO:-https://github.com/nrynss/memento-emptor}"
@@ -41,6 +45,10 @@ print(json.dumps({
         {"key": "LAMBO_ES_API_KEY", "value": env("LAMBO_ES_API_KEY")},
         {"key": "ELASTIC_URL", "value": env("ELASTIC_URL")},
         {"key": "OPENROUTER_API_KEY", "value": env("OPENROUTER_API_KEY")},
+        {"key": "MEMENTO_IDENTITY_SALT", "value": env("MEMENTO_IDENTITY_SALT")},
+        {"key": "MEMENTO_AGENT_KEYS", "value": env("MEMENTO_AGENT_KEYS")},
+        {"key": "MEMENTO_SHOPPER_TOKENS", "value": env("MEMENTO_SHOPPER_TOKENS")},
+        {"key": "MEMENTO_MERCHANT_KEYS", "value": env("MEMENTO_MERCHANT_KEYS")},
     ],
     "serviceDetails": {
         "runtime": "docker",

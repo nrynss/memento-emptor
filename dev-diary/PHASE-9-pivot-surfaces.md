@@ -160,13 +160,24 @@ requires:   [T8.5b, T9.1, T7.3]
 fixture-ok: no
 size:       S · mid
 owns:       deploy/render.yaml, deploy/seed/, deploy/guard.sh, deploy/provision.sh, .env.example, tools/env.sh
-status:     claimed:t96-live-layer
+status:     in-review
 ```
 The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. Measure `--max-sessions 128` and `--rate-limit-rps 200` on the 0.5 CPU starter; the T8.1b numbers are from a 12-CPU machine and do not stand for the starter. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Add the three auth key variables (`MEMENTO_AGENT_KEYS`, `MEMENTO_SHOPPER_TOKENS`, `MEMENTO_MERCHANT_KEYS`) to `deploy/render.yaml` as `sync: false`, name them in `.env.example`, and read them in `tools/env.sh` from the keyring; mint the keys with T8.5's command, never invent them. If seeding through the writer, call `Refunded` then `Classified` so a reason-bearing seed refund settles, and measure the forced-refresh cost at population scale. The fixture embedder cannot converge the frozen arc; keep `LAMBO_SEED=0` for the local loop. Raise `deploy/guard.sh`'s ceiling to the combined two-service shape ($14.25/mo run-rate); until then it trips exit 2 while `deploy/merchant/guard.sh` stays green for the pair. Append the merchant key entry to the layer's `MEMENTO_MERCHANT_KEYS` (digest from the T9.3d notes — secret stays in Render, never in a file). Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
 
 **Done when:** the public URL answers `recall_for_purchase` for the demo shopper with the pool step working, and `product_fit` for the demo oxford reads Earned. The guard reports green. Spend is recorded.
 
 Staged (landed): the seed driver, auth key plumbing, starter-shape guard. The live-image wiring and the public-URL proof are T9.6b.
+
+**Notes (worker).** `deploy/seed/` now seeds the T9.1 population as well as the demo graph, each under its own disk marker. The population seed runs first: it generates the population with `asOf` at the seeding moment, writes all 69 rows through one fit writer per shopper (`Refunded` then `Classified` for reason-bearing refunds, `Captured`+`Feedback`/`Kept` for the rest), and refuses the marker unless the pool reader returns T9.1's table (demo oxford Earned small; the other lines Building, Claimed, Out of true). The live index name is `fit-rows`; test runs take `-fit-index` with their own prefix (deleted afterwards) and `-fit-only`. The fit part is skipped when `MEMENTO_FIT_SEED=0` or `LAMBO_EMBEDDER=fixture`, so the documented local loop never touches the live index. `render.yaml` declares the salt plus the three auth vars as `sync: false`; `provision.sh` pushes all nine vars; `.env.example` names the three; `tools/env.sh` reads them from the keyring service `memento-keys`. The keys are minted with `memento key issue` (agent `agent-reference-01`, shopper `shop-demo-01`, merchant `merchant-app-01`, all seller `seller-acme-01`): entries live in the keyring for the deploy, tokens in the keyring service `memento-tokens` for their callers. All nine vars are set on the live service; values stage for the next deploy and the service stays green.
+
+Measured. Population seed at scale: 187 forced-refresh writes in about 96 s (about 516 ms per write), verified back as 66 settled of 69 rows with the exact six-line verdicts. Hub flags on the starter shape (the pinned 0.10.1 binary in a container capped at 0.5 CPU and 512 MB, fixture embedder): 130 concurrent initializes with 9 live attach 116 and refuse 14 with 503, zero other errors; 600 stats calls over 8 workers sharing 4 sessions answer 156 ok with 444 throttled at 429 and zero other errors. The 200rps limiter, not the CPU, is the bound on the starter too. Hub RSS about 13 MB against the 512 MB instance.
+
+Cost. The live inventory is now two starter services (the layer plus T9.3d's merchant app, provisioned while this task ran) and one 1 GB disk: $14.25/mo, recorded here. `guard.sh` audits that shape with a $16.00 ceiling and reports green live; the snapshot dry-run still trips. This task's own delta is $0: env vars and markers change nothing billable.
+
+Two things the next agent should not have to rediscover:
+
+- The public-URL Done-when is blocked outside this task's `owns`: the deployed image still runs the pre-pivot layer (`product_fit` answers unknown tool; recall has no pool or precedence fields), because wiring the pivoted layer into the image needs `cmd/memento` (pool reader, fit writer, identity salt, line resolver, standing dir, hub graph client), `deploy/start.sh` (boot order and env) and `deploy/Dockerfile` (population fixture) — none of which this task owns. The follow-up wiring task owns that; this task's seeder, keys, vars and guard are staged for it. The pool half is proved: the same live Elastic deployment returned the exact verdicts for the seeded population under the `t96-` prefix before the index was deleted.
+- Keep the old Lambo arc seed until the pivoted image lands: removing it now would darken the current demo with no replacement, and its session is the same name the hub will serve the new layer on, so the wiring task should decide whether the arc retires with the replay.
 
 ---
 
@@ -194,11 +205,7 @@ status:     not-started
 ```
 Wire the merchant page from the fixture transport to same-origin `/tools/product_fit`; no caller credential is needed (the edge holds the merchant key server-side). Until then the proxy answers 502/503 and the app reads its bundled snapshot. T9.6 registers the key entry on the layer first.
 
-**Done when:** the deployed page renders live pool counts through the proxy; the fixture transport remains for tests; the gate passes.
-
----
-
-### T9.7: The demo, after the pivot ★
+**Done when:** the deployed page renders live pool counts through the proxy; the fixture transport remains for tests; the gate passes.### T9.7: The demo, after the pivot ★
 ```yaml
 requires:   [T9.2, T9.3d, T9.5, T9.6]
 fixture-ok: no

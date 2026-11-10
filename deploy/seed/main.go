@@ -1,16 +1,33 @@
-// Command seed plants the demo shopper's live graph on first boot and
-// then exits: the same arc the T2.4b live leg proved (three fit returns
-// take the sizing belief to Venerable, a non-arrival dispute stays
-// seller-only, the correction declares against the belief without
-// deleting it). It is idempotent through a marker file on the disk: a
-// second boot with the marker present seeds nothing. Writes speak the
-// stdio MCP dialect the release binary serves; event times anchor the
-// seeded history the way the proven runs do.
+// Command seed plants the deployment's seeded state on first boot and then
+// exits. It has two independent parts, each idempotent through its own
+// marker file on the disk, so a restart reseeds nothing and loses nothing:
+//
+//   - the fit population: the T9.1 seeded shoppers behind the pool, written
+//     through the fit index writer into the live fit index, verified back
+//     through the pool reader before the marker lands;
+//   - the demo shopper's live graph: the same arc the T2.4b live leg proved
+//     (three fit returns take the sizing belief to Venerable, a non-arrival
+//     dispute stays seller-only, the correction declares against the belief
+//     without deleting it).
+//
+// The seeding moment is the seed's own now: T9.1's statuses are judged over
+// event times measured back from asOf, so seeding later than the fixture's
+// anchor would drift rows out of the recent window and change statuses.
+// Every reason-bearing seed refund goes through Refunded and then Classified,
+// because a refund's evidence never carries a reason through ingest and the
+// row settles only when the classified reason lands.
+//
+// The live fit index name is "fit-rows": the production name, never a test
+// prefix. Local runs must not touch it: the fit part is skipped when
+// LAMBO_EMBEDDER is fixture (the documented local loop) or when
+// MEMENTO_FIT_SEED is 0. A proof run against a scratch index takes
+// -fit-index and -fit-only, which production never sets.
 package main
 
 import (
 	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -18,9 +35,21 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/nrynss/memento-emptor/internal/domain"
+	"github.com/nrynss/memento-emptor/internal/fitindex"
+	"github.com/nrynss/memento-emptor/internal/identity"
+	"github.com/nrynss/memento-emptor/internal/pool"
+	"github.com/nrynss/memento-emptor/seed"
 )
+
+// liveFitIndex is the production fit index name. Test runs use their own
+// prefix through -fit-index and delete it afterwards; this name is never a
+// test prefix.
+const liveFitIndex = "fit-rows"
 
 // The seeded contents: demo fiction, identical in shape to the proven
 // live leg. Short and keyed, so evidence cites the belief and the
@@ -67,11 +96,29 @@ func main() {
 	config := flag.String("config", "", "lambo.toml written at boot (required)")
 	session := flag.String("session", "demo-shopper", "session to seed")
 	agent := flag.String("agent", "memento-seed", "agent id the seed writes under")
-	marker := flag.String("marker", "", "marker file proving a finished seed (required)")
+	marker := flag.String("marker", "", "marker file proving a finished graph seed (required)")
+	fitIndexName := flag.String("fit-index", liveFitIndex, "fit index the seeded population is written to")
+	fitOnly := flag.Bool("fit-only", false, "seed only the fit population, not the demo graph")
 	flag.Parse()
 
 	if *config == "" || *marker == "" {
 		log.Fatal("seed: -config and -marker are required")
+	}
+	if *fitIndexName == "" {
+		log.Fatal("seed: -fit-index names no index")
+	}
+
+	if err := seedFit(*fitIndexName, *marker); err != nil {
+		if strings.Contains(err.Error(), errFitSkipped.Error()) {
+			log.Printf("seed: fit population skipped: %v", err)
+		} else {
+			log.Printf("seed: fit population: %v", err)
+			os.Exit(1)
+		}
+	}
+	if *fitOnly {
+		log.Print("seed: fit-only run, demo graph untouched")
+		return
 	}
 	if _, err := os.Stat(*marker); err == nil {
 		log.Printf("seed: marker %s present, nothing to do", *marker)
@@ -97,6 +144,221 @@ func main() {
 		os.Exit(1)
 	}
 	log.Printf("seed: finished, marker %s written", *marker)
+}
+
+// errFitSkipped reports a fit seed the run chose not to do: the local
+// loop or an explicit opt-out. It is not a failure and writes no marker.
+var errFitSkipped = fmt.Errorf("seed: fit seeding skipped for this run")
+
+// fitMarker names the marker file proving a finished population seed for
+// one index. It sits beside the graph marker on the same disk, so the two
+// parts retry independently.
+func fitMarker(marker, index string) string {
+	return filepath.Join(filepath.Dir(marker), ".seeded-fit-"+index+"-v1")
+}
+
+// seedFit writes the T9.1 seeded population into one fit index, once per
+// index, and reads every line back through the pool reader before the
+// marker lands. The seeding moment is this run's now: the fixture's as-of
+// anchor would drift the recent window if it were reused later.
+func seedFit(indexName, marker string) error {
+	if os.Getenv("MEMENTO_FIT_SEED") == "0" {
+		return fmt.Errorf("%w: MEMENTO_FIT_SEED=0", errFitSkipped)
+	}
+	if os.Getenv("LAMBO_EMBEDDER") == "fixture" {
+		return fmt.Errorf("%w: LAMBO_EMBEDDER=fixture never touches the live index", errFitSkipped)
+	}
+	markPath := fitMarker(marker, indexName)
+	if _, err := os.Stat(markPath); err == nil {
+		log.Printf("seed: fit marker %s present, population stands", markPath)
+		return nil
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+
+	asOf := time.Now().UTC().Truncate(time.Second)
+	population, err := seed.GeneratePopulation(asOf)
+	if err != nil {
+		return err
+	}
+	baseURL := os.Getenv("ELASTIC_URL")
+	apiKey := os.Getenv("LAMBO_ES_API_KEY")
+	if baseURL == "" || apiKey == "" {
+		return fmt.Errorf("seed: fit seeding needs ELASTIC_URL and LAMBO_ES_API_KEY in the environment")
+	}
+	writerIndex, err := fitindex.NewHTTPIndex(baseURL, apiKey, indexName)
+	if err != nil {
+		return fmt.Errorf("seed: fit index client: %w", err)
+	}
+	if err := writerIndex.Create(ctx); err != nil {
+		return fmt.Errorf("seed: create fit index %q: %w", indexName, err)
+	}
+	writes, elapsed, err := seedRows(ctx, writerIndex, population.Rows)
+	if err != nil {
+		return err
+	}
+	log.Printf("seed: population holds: %d rows, %d index writes in %s (%.1f ms per write, refresh forced)",
+		len(population.Rows), writes, elapsed.Round(time.Millisecond),
+		float64(elapsed.Microseconds())/float64(writes)/1000.0)
+	if err := verifyPopulation(ctx, baseURL, apiKey, indexName, asOf); err != nil {
+		return err
+	}
+	if err := os.WriteFile(markPath, []byte(asOf.Format(time.RFC3339)+"\n"), 0o644); err != nil {
+		return fmt.Errorf("seed: write fit marker: %w", err)
+	}
+	log.Printf("seed: fit population holds, marker %s written", markPath)
+	return nil
+}
+
+// seedRows drives every population row through one shopper's writer, one
+// purchase per shopper. A refund's evidence never carries a reason, so a
+// reason-bearing refund is written Refunded and then Classified: the row
+// settles only when the classified reason lands. The ids are deterministic
+// in row order, so a rerun before the marker lands rewrites the same
+// documents instead of doubling them.
+func seedRows(ctx context.Context, writerIndex fitindex.Index, rows []domain.FitRow) (int, time.Duration, error) {
+	keyer, err := identity.NewKeyer(identity.SeedSaltHex)
+	if err != nil {
+		return 0, 0, fmt.Errorf("seed: population keyer: %w", err)
+	}
+	start := time.Now()
+	writes := 0
+	for i, row := range rows {
+		if err := ctx.Err(); err != nil {
+			return writes, time.Since(start), fmt.Errorf("seed: population row %d: %w", i, err)
+		}
+		payer := fmt.Sprintf("seedshopper-live-%04d", i+1)
+		writer, err := fitindex.NewWriter(writerIndex, keyer, payer, fitindex.LinesFunc(noLineResolution))
+		if err != nil {
+			return writes, time.Since(start), fmt.Errorf("seed: writer for row %d: %w", i, err)
+		}
+		before := writes
+		if err := seedRow(ctx, writer, row, fmt.Sprintf("seedlive-%04d", i+1)); err != nil {
+			return before, time.Since(start), fmt.Errorf("seed: population row %d: %w", i, err)
+		}
+		writes = before + transitionWrites(row)
+	}
+	return writes, time.Since(start), nil
+}
+
+// transitionWrites counts the index writes one row's transitions perform:
+// a capture plus one write per further transition the row carries.
+func transitionWrites(row domain.FitRow) int {
+	writes := 1
+	switch row.State {
+	case domain.FitStateCaptured:
+	case domain.FitStateRefunded:
+		writes++
+	case domain.FitStateReasonClassified:
+		writes += 2
+	case domain.FitStateFeedback, domain.FitStateKept:
+		writes++
+	}
+	return writes
+}
+
+// noLineResolution never resolves a catalog line: the population drives
+// writer transitions directly with the row's own line, so a resolution
+// would mean the seed took the wrong path.
+func noLineResolution(ctx context.Context, item domain.Item) (domain.ProductLine, error) {
+	return domain.ProductLine{}, fmt.Errorf("seed: population rows carry their own line, item %q must not resolve", item.SKU)
+}
+
+// seedRow writes one population row through its shopper's writer, in
+// state order. Every transition carries the row's own event time, so the
+// stored document converges to the generated row.
+func seedRow(ctx context.Context, writer *fitindex.Writer, row domain.FitRow, txnID string) error {
+	purchase := fitindex.Purchase{TxnID: txnID, Line: row.Line, Size: row.Size, Seeded: true}
+	if row.CapturedAt.IsZero() {
+		return fmt.Errorf("seed: purchase %q has no capture time", txnID)
+	}
+	if err := writer.Captured(ctx, purchase, row.CapturedAt); err != nil {
+		return fmt.Errorf("capture: %w", err)
+	}
+	switch row.State {
+	case domain.FitStateCaptured:
+		return nil
+	case domain.FitStateRefunded:
+		if row.RefundedAt.IsZero() {
+			return fmt.Errorf("seed: purchase %q refunded with no refund time", txnID)
+		}
+		return writer.Refunded(ctx, purchase, row.RefundedAt)
+	case domain.FitStateReasonClassified:
+		if row.RefundedAt.IsZero() {
+			return fmt.Errorf("seed: purchase %q classified with no refund time", txnID)
+		}
+		if err := writer.Refunded(ctx, purchase, row.RefundedAt); err != nil {
+			return fmt.Errorf("refund: %w", err)
+		}
+		at := row.EventAt
+		if row.Settled && !row.SettledAt.IsZero() {
+			at = row.SettledAt
+		}
+		if err := writer.Classified(ctx, purchase, row.Reason, at); err != nil {
+			return fmt.Errorf("classify: %w", err)
+		}
+		return nil
+	case domain.FitStateFeedback:
+		if row.Verdict == "" {
+			return fmt.Errorf("seed: purchase %q has feedback state with no verdict", txnID)
+		}
+		return writer.Feedback(ctx, purchase, row.Verdict, row.SettledAt)
+	case domain.FitStateKept:
+		return writer.Kept(ctx, purchase, row.SettledAt)
+	default:
+		return fmt.Errorf("seed: purchase %q has unknown state %q", txnID, string(row.State))
+	}
+}
+
+// expectedPools is the status table T9.1 pins: the verdict the pool
+// reader must return for every seeded line and size after the seed.
+var expectedPools = []struct {
+	line      domain.ProductLine
+	size      string
+	status    domain.BeliefStatus
+	direction domain.FitDirection
+}{
+	{line: seed.DemoOxfordLine(), size: seed.DemoOxfordSize, status: domain.StatusEarned, direction: domain.FitDirectionSmall},
+	{line: seed.DemoOxfordLine(), size: "L", status: domain.StatusBuilding, direction: domain.FitDirectionLarge},
+	{line: domain.ProductLine{Brand: "brand-y-002", Category: "shirts", FitHandle: "slim"}, size: "M", status: domain.StatusBuilding, direction: domain.FitDirectionSmall},
+	{line: domain.ProductLine{Brand: "brand-z-003", Category: "shirts", FitHandle: "regular"}, size: "M", status: domain.StatusBuilding, direction: domain.FitDirectionSmall},
+	{line: domain.ProductLine{Brand: "brand-v-004", Category: "shirts", FitHandle: "relaxed"}, size: "M", status: domain.StatusClaimed, direction: domain.FitDirectionNone},
+	{line: domain.ProductLine{Brand: "brand-w-005", Category: "shirts", FitHandle: "regular"}, size: "M", status: domain.StatusOutOfTrue, direction: domain.FitDirectionSmall},
+}
+
+// verifyPopulation reads every seeded line back through the pool reader
+// the merchant app and recall use, and refuses the seed when any verdict
+// differs from the table T9.1 pins. The seeded and live split rides along
+// so the ledger's counts are proved too.
+func verifyPopulation(ctx context.Context, baseURL, apiKey, indexName string, asOf time.Time) error {
+	readerIndex, err := pool.NewHTTPIndex(baseURL, apiKey, indexName)
+	if err != nil {
+		return fmt.Errorf("seed: pool client: %w", err)
+	}
+	reader, err := pool.NewReader(readerIndex)
+	if err != nil {
+		return fmt.Errorf("seed: pool reader: %w", err)
+	}
+	if err := readerIndex.Warm(ctx); err != nil {
+		return fmt.Errorf("seed: warm pool connection: %w", err)
+	}
+	for _, want := range expectedPools {
+		fit, err := reader.Fit(ctx, want.line, want.size)
+		if err != nil {
+			return fmt.Errorf("seed: read pool for %s/%s/%s size %s: %w",
+				want.line.Brand, want.line.Category, want.line.FitHandle, want.size, err)
+		}
+		if fit.Verdict.Status != want.status || fit.Verdict.Direction != want.direction {
+			return fmt.Errorf("seed: pool for %s/%s/%s size %s reads %s %s, want %s %s",
+				want.line.Brand, want.line.Category, want.line.FitHandle, want.size,
+				fit.Verdict.Status, fit.Verdict.Direction, want.status, want.direction)
+		}
+		log.Printf("seed: pool %s/%s/%s size %s: %s %s (settled %d, seeded %d, live %d)",
+			want.line.Brand, want.line.Category, want.line.FitHandle, want.size,
+			fit.Verdict.Status, fit.Verdict.Direction,
+			fit.Counts.Settled, fit.Seeded.Settled, fit.Live.Settled)
+	}
+	return nil
 }
 
 func run(lamboBin, config, session, agent string) error {
