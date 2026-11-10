@@ -116,7 +116,7 @@ requires:   [T5.5]
 fixture-ok: yes
 size:       S · frontier
 owns:       bench/README.md
-status:     not-started
+status:     claimed:t56-results
 ```
 The results as counts, never percentages, each linked to its runs. The limits are stated up front: we wrote both the shoppers and the hidden answers, so this shows the mechanism on constructed cases and not real-world accuracy. If arm 2 matches arm 3 on a measure, the document says so.
 
