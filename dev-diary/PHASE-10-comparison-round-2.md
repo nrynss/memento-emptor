@@ -28,7 +28,7 @@ requires:   []
 fixture-ok: yes
 size:       XS · light
 owns:       bench/README.md
-status:     not-started
+status:     claimed:t102-relabel
 ```
 In `bench/README.md`, the round 1 arm called "raw history" is renamed **Memento evidence without beliefs**, with one paragraph saying why: its rows carried the layer's classified reasons, signal strength and write kind. No count changes, and no run file is touched. A pointer to round 2 is added.
 

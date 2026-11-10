@@ -12,7 +12,7 @@ requires:   [T0.11, T0.12]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/contract/, internal/domain/, docs/interface.md, docs/architecture.md, testdata/api/
-status:     not-started
+status:     claimed:t71-pivot-contracts
 ```
 Change the frozen contract to the pivot in product.md, and update every fixture in `testdata/api/` in the same commit.
 
