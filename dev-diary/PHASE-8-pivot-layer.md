@@ -90,7 +90,7 @@ requires:   [T7.1]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/memory/
-status:     not-started
+status:     claimed:t84-standing-corrections
 ```
 A correction with no belief is written as a standing record with no `against`, and never promotes. When a matching belief is later written for the same subject, the standing correction is declared `against` it, once. A correction against an existing belief keeps today's path. The belief is never deleted (developer rule 4).
 
