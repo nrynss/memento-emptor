@@ -160,6 +160,10 @@ Re-verified all ten exit criteria against research + fixtures. Real defect caugh
 
 T3.6 full demo still running at review time. P3 gets its phase review after T3.6 lands (covering T3.1–T3.8 as one arc).
 
+### R3 review: P3 agent end-to-end (APPROVE, landed)
+
+Walked the whole arc as one story: recall-first → candidate+marks → ask/approve/correction/feedback → idempotent approve-first capture → evals → 6-step demo from reset → no-login frontend. Money safety proved in code + tests: no capture path without explicit-yes mirrored into the transport; deployed agent owns no purchase tool. Honesty fix landed (runtime README listed a fixture correction as "live"). Findings for follow-up: (F1) probe Dockerfile stayed root for :80 while the agent image runs as `bun` — T3.8 must confirm port binding; (F2) shopper page + `serve(agent)` composition unproven; (F3) `frontend:true` in the frozen runtime spec needs an owns decision; (F4) deployment id committed in demo/ files — move to env in a hygiene follow-up.
+
 ### R5 review: P5 comparison (APPROVE, landed)
 
 Re-verified both exit criteria with independent runs (6 shoppers × 3 arms, byte-equality, cap math, three-way hidden-answer check incl. a failed attempt to construct a leaking shopper). Fix landed: F1–F4 + extraction rule moved from README handoffs onto the T5.1/T5.2 phase-doc lines where T5.4's freeze author reads them. Findings (advisories for freeze/pilot): arm-2 inputs omit amounts/IDs (define the contract at freeze; ID-cites in arm-2 runs = hallucination signal); pilot needs a two-turn driver + extraction rule in bench/pilot/; T2.6 direction note lives only in README (P2 follow-up, not P5's to fix).
