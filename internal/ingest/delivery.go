@@ -34,8 +34,9 @@ func WithVerifier(v Verifier) Option {
 }
 
 // HandleDelivery verifies one raw webhook delivery and ingests the event
-// it carries, idempotent on the event id in its body. Verification runs
-// before the idempotency check, so a forged body that names an already
+// it carries, idempotent on the event id in its body. The event id is
+// parsed first so malformed bodies are refused without a call; verification
+// runs before the idempotency check, so a forged body that names an already
 // stored event id is refused rather than answered as a duplicate.
 //
 // Every way a delivery can fail verification is one refusal: a tampered

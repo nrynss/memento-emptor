@@ -26,10 +26,11 @@
 // says the item did not arrive, which is about the seller and not how the
 // product fits.
 //
-// Verification itself happens before anything is read from a delivery.
-// HandleDelivery takes the transport's raw bytes, asks the delivery gate
+// Verification itself happens before a delivery changes anything.
+// HandleDelivery takes the transport's raw bytes, parses the event id so
+// malformed bodies are refused without a call, asks the delivery gate
 // (the real signature verifier by default) to check them, and only then
-// reads the event id and stores rows. A delivery that does not verify is
+// stores rows. A delivery that does not verify is
 // refused with ErrBadSignature and stores nothing, whether its body was
 // tampered with, its signature belongs to no delivery, or the verifier
 // could not answer. Handle names an event id directly and is the recorded
