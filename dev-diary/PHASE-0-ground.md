@@ -203,6 +203,15 @@ documented but not exercisable live on this network. Every test index
 deleted (empty listing verified). Spend: $1.6e-07 OpenRouter; ~30 short
 native calls, unmetered in-band.
 
+**Later direction (pointer, not a re-verdict).** The stay above was the
+task's evidence on Lambo 0.10.0. The user has since directed the demo to
+Elastic-native embeddings now that Lambo 0.10.1 ships the missing pieces
+(configurable elastic timeouts and a jina-v3 calibration row); see the
+"unblocked" entry in `dev-diary/README.md` and the P2 live twins that
+proved the native path. The settled BGE-M3 contract in `research/elastic.md`
+stands as the measured fallback until a later task adopts the native
+contract and re-verifies calibration on the demo shopper.
+
 ---
 
 ### T0.7: Jev reason classifier
@@ -288,8 +297,8 @@ Mount AG Grid through its plain JavaScript API inside a Svelte 5 component on Ch
 
 - [x] Accounts and keys in place (T0.1).
 - [x] Scaffold and gate passing (T0.2).
-- [ ] A seeded belief reaches Venerable, shows the contradiction warning, and ignores a non-fit dispute (T0.3).
-- [ ] PayPal refund, dispute and webhook behaviour recorded (T0.4).
-- [ ] Channel3, Elastic, Jev and Astropods each measured and recorded (T0.5 to T0.8).
-- [ ] Hosting decided (T0.9).
-- [ ] AG Grid confirmed inside Chaaya (T0.10).
+- [x] A seeded belief reaches Venerable, shows the contradiction warning, and ignores a non-fit dispute (T0.3).
+- [x] PayPal refund, dispute and webhook behaviour recorded (T0.4).
+- [x] Channel3, Elastic, Jev and Astropods each measured and recorded (T0.5 to T0.8).
+- [x] Hosting decided (T0.9).
+- [x] AG Grid confirmed inside Chaaya (T0.10).

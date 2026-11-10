@@ -134,6 +134,14 @@ dependencies (embedder plus tier on Elastic).
 
 ## Recommendation: stay
 
+> Pointer: this stay verdict was the evidence on Lambo 0.10.0. The user has
+> since directed the demo to Elastic-native embeddings now that Lambo 0.10.1
+> ships configurable elastic timeouts and a jina-v3 calibration row; the
+> P2 live twins (T2.3b/T2.4b) proved the native path end to end. The stay
+> reasoning below is kept as measured; the switch itself belongs to a later
+> task, which re-verifies calibration on the demo shopper and confirms
+> console billing.
+
 Stay on BGE-M3 via OpenRouter. The native path matches the settled number
 (0.677 vs 0.68) and the ranking shape with no quality gain, while:
 

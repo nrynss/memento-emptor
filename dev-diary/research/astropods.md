@@ -85,7 +85,9 @@ Partly confirmed; the live two-turn exchange is still to run (see the gap).
   user to type "yes" before acting, and to act only after the confirmation.
 - Not yet run: the deployed web chat sits behind user-scoped SSO (anonymous
   requests get a login redirect), so a scripted turn-taking exchange needs an
-  interactive session. The agent is left `Running` for that step.
+  interactive session. The agent is left `Running` for that step. (Closed:
+  the exchange was driven through the platform messaging proxy with no
+  browser — see "Gap closed: the live conversation" below.)
 
 Meaning for the build: approval and correction forms are agent-built chat turns
 ("reply yes to approve", "which size instead?"), resumed on the shopper's next

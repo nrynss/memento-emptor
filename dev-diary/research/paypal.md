@@ -274,7 +274,8 @@ placeholders that keep the shape:
 | `WEBHOOK-EVENT-ID-1`, `-2` | webhook event ids (first app) |
 | `WEBHOOK-EVENT-US-1` | webhook event id (replacement app, refund) |
 | `WEBHOOK-EVENT-DISPUTE-1`, `WEBHOOK-EVENT-CAP3-1` | dispute-created and capture event ids |
-| `BUYER-EMAIL-REDACTED`, `BUYER-NAME-REDACTED` | shopper account email and name on the dispute |
+| `BUYER-EMAIL-REDACTED`, `BUYER-NAME-REDACTED` | shopper account email and name on the dispute, order and capture reads |
+| `SHOPPER-ADDRESS-REDACTED`, `SHOPPER-CITY-REDACTED`, `SHOPPER-STATE-REDACTED`, `SHOPPER-POSTAL-REDACTED` | shopper shipping street, city, state and postal code on the order and capture reads |
 | `INVOICE-ID-SANDBOX-1` | invoice id and URL fragment |
 | `PRODUCT-ID-SANDBOX-1` | catalog product id |
 | `ITEM-ID-REDACTED`, `TEMPLATE-ID-REDACTED` | invoice item / template ids |
