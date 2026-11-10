@@ -6,9 +6,13 @@ each its own interaction citing the belief in depends_on (the frozen write
 rule in internal/memory: a reason's direction must match the belief's
 direction to count toward it). Then records ONE opposite-direction
 (too-large) return as its own interaction with neither depends_on nor
-against -- the corrected writer refuses it with ErrDirectionMismatch and
-the service stores a match-less answer unattached, so at the graph level
-it attaches nowhere.
+against. This models the graph-level consequence of the refusal (opposing
+content present but unlinked) to check the daemon does not auto-attach or
+auto-contradict; it is not the service path itself, which this driver
+bypasses with direct MCP calls. The refusal (writer touches nothing,
+ErrDirectionMismatch) and the service routing (a match-less answer is
+stored as an unattached ledger row with no graph write at all) are proved
+offline by T2.7's writer and service tests.
 
 Usage:
   drive.py --lambo BIN --config CFG --session S --agent A --out OUT [--probe]
@@ -203,9 +207,11 @@ def run_full(driver, anchor):
 
     # Check 2: the opposite-direction return attaches nowhere. It is its
     # own interaction with neither depends_on (no support) nor against (no
-    # contradiction): that is what the corrected writer does (it refuses
-    # with ErrDirectionMismatch, touching nothing) and what the service
-    # does with a match-less answer (stores it unattached).
+    # contradiction). This checks graph-level non-interference: the belief's
+    # neighbourhood must be unchanged and the daemon must not declare a
+    # contradiction on directly opposing wording. (The writer refusal and
+    # the service's ledger-only unattached row are T2.7's offline tests;
+    # this live leg bypasses both with direct MCP calls.)
     r = driver.record_action(RET4, event_time=at(10))
     text = driver.wait_applied(r, "opposite-direction return")
     if text is None:

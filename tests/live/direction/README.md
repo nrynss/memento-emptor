@@ -6,9 +6,14 @@ else `ErrDirectionMismatch` with no graph touch, no `against`) as real
 graph writes with T0.3's settings (local session, backdated event times
 spanning the extent, GC cadence from the proven toml, receipt waits). The
 opposite-direction return is recorded as its own interaction with neither
-`depends_on` nor `against` -- what the corrected writer does (refuse,
-touch nothing) and what the service does with a match-less answer (store
-it unattached, reason kept, never silent). Nothing here runs in CI and
+`depends_on` nor `against`. That shape is a graph-level non-interference
+probe, not the service path: it puts opposing content in the graph
+unlinked to check the daemon neither auto-attaches nor auto-contradicts.
+The corrected writer itself touches nothing on a mismatch
+(`ErrDirectionMismatch`), and the service stores a match-less answer as an
+unattached ledger row with no graph write at all -- both proved offline by
+T2.7's writer and service tests, which this driver bypasses with direct
+MCP calls. Nothing here runs in CI and
 nothing here gates a build: there are no `*_test.go` files under
 `tests/live/`, so the gate's `go test -race` has no tests to run.
 
@@ -88,7 +93,11 @@ built with `--features store-sqlite,embed-elastic,recall-elastic`
 (build only; nothing committed). Committed files carry no transcript:
 the raw `transcript.jsonl` stays under `out/` (gitignored), scrub-checked
 like T2.4b (no key, token, bearer, secret material, no deployment
-hostname). Key excerpts are in the worker's handoff report.
+hostname). Key excerpts are in the worker's handoff report. Everything
+below this point -- scores, counts, listings -- rests on the gitignored
+run outputs and that report, not on committed files: a reader without
+them can verify what the driver checks (from `drive.py`), but not the
+live outcome.
 
 - Embedder path that ran: **native**. `[embedder] kind = "elastic"`
   on `.jina-embeddings-v3` (1024 dims, `canary = "verify"`,

@@ -303,19 +303,27 @@ configured (Elastic touch was `_inference` embeds only; no indices,
 `memento-t27b`. Venerable proof: after three too-small returns the
 belief inspects `[Logic, venerable]`, blast radius 3, the three returns
 as `Dependency` dependents. No-attach proof: the standalone too-large
-return (no `depends_on`, no `against`) leaves the belief byte-identical
-(still `[Logic, venerable]`, blast radius 3, opposite absent, no
-`Contradicts`, no warning) and inspects itself as `[Resource]` with
-`None -> Candidate refused` and only its own `Derives` edge. Recall
+return (no `depends_on`, no `against`) leaves the belief unchanged on
+every asserted property (still `[Logic, venerable]`, blast radius 3,
+opposite absent, no `Contradicts`, no warning; the driver checks the
+listed properties, not a before/after byte comparison) and inspects
+itself as `[Resource]` with `None -> Candidate refused` and only its own
+`Derives` edge. Shape note: the standalone return is a graph-level
+non-interference probe over direct MCP calls, bypassing `WriteEvidence`
+and `RecordReason`; the writer refusal (no graph touch) and the service
+routing (match-less answer as an unattached ledger row, no graph write)
+are proved offline by T2.7's writer and service tests. Recall
 proof: the sizing query serves the belief with no `Contradicted`
-warning; the opposite return ranks first (2.51) on its own query --
+warning; the opposite return is visible on its own query (rank/score per
+the transcript excerpts; the driver asserts presence only) --
 unattached, never silent. Cleanup: `erase-session` removed 1 session
 (5 interactions, 5 concepts, 12 edges, 5 write intents, 2
-canonization events); post-erase inspect finds no concept in the
-session. Spend $0. Surprise: none -- no eventual-promotion retry beyond
-the inherited convergence poll (3 polls), no auto-contradiction from
-the daemon on the directly opposing wording. Full transcript excerpts
-in the worker's report.
+canonization events); post-erase inspect refuses, confirming the session
+is gone (counts and listings from gitignored `out/`; committed files
+prove the script checks, not the outcome). Spend $0. Surprise: none --
+no eventual-promotion retry beyond the inherited convergence poll
+(3 polls), no auto-contradiction from the daemon on the directly
+opposing wording. Full transcript excerpts in the worker's report.
 
 ---
 
