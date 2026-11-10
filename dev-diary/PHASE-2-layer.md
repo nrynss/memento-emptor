@@ -281,11 +281,41 @@ requires:   [T2.7]
 fixture-ok: no
 size:       XS · frontier
 owns:       tests/live/direction/
-status:     claimed:t27b-live
+status:     in-review
 ```
 Re-prove the corrected writer against live Lambo (native embedder, 0.10.1+): same-direction returns earn, an opposite-direction return attaches nowhere, recall reflects it. Throwaway session, deleted after; spend bounded like T2.4b.
 
 **Done when:** live inspect + recall show the corrected behavior; transcript in the handoff log.
+
+note (worker t27b-live). `tests/live/direction/` holds the live driver
+(`drive.py` MCP-stdio seeder with receipt waits and convergence polling,
+`run.sh` which generates the config into gitignored `out/` so the
+deployment URL never enters the repo, `README.md`), 21-exchange raw
+transcript under `out/run/` (gitignored, scrub-checked: no key, token,
+bearer, secret material, no deployment hostname). One native run, exit
+0, all 18 checks PASS. Seeded on the 0.10.1 binary
+(`store-sqlite,embed-elastic,recall-elastic`; build only) with
+`[embedder] kind = "elastic"` on `.jina-embeddings-v3` plus 0.10.1's
+`connect_timeout_ms`/`timeout_ms`: the scratch-session probe reported up
+first try, so the BGE-M3 fallback never ran and no `[recall]` tier was
+configured (Elastic touch was `_inference` embeds only; no indices,
+`t27b*` listing verified empty). Session `t27b-direction`, agent
+`memento-t27b`. Venerable proof: after three too-small returns the
+belief inspects `[Logic, venerable]`, blast radius 3, the three returns
+as `Dependency` dependents. No-attach proof: the standalone too-large
+return (no `depends_on`, no `against`) leaves the belief byte-identical
+(still `[Logic, venerable]`, blast radius 3, opposite absent, no
+`Contradicts`, no warning) and inspects itself as `[Resource]` with
+`None -> Candidate refused` and only its own `Derives` edge. Recall
+proof: the sizing query serves the belief with no `Contradicted`
+warning; the opposite return ranks first (2.51) on its own query --
+unattached, never silent. Cleanup: `erase-session` removed 1 session
+(5 interactions, 5 concepts, 12 edges, 5 write intents, 2
+canonization events); post-erase inspect finds no concept in the
+session. Spend $0. Surprise: none -- no eventual-promotion retry beyond
+the inherited convergence poll (3 polls), no auto-contradiction from
+the daemon on the directly opposing wording. Full transcript excerpts
+in the worker's report.
 
 ---
 
