@@ -38,13 +38,36 @@ requires:   [T8.1]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/hub/
-status:     claimed:t81b-live-hub
+status:     in-review
 ```
 The T8.1 shape against the live Elastic recall tier: three shoppers created on demand, each recalls only its own concepts, and the ledger reader serves the allowlisted ones. Budget: under $0.20 of embedding spend. Run one shopper first and check its cost. Test sessions are erased afterwards.
 
 Also exercise the 503 + `Retry-After` refusal with all `max_attached` places full, and measure `--max-sessions 128` and `--rate-limit-rps 200` on the 0.5 CPU starter.
 
 **Done when:** the transcript is in the handoff log, with spend and the erase shown.
+
+**Notes (in-review).** `tests/live/hub/` holds the driver (`main.go`), `run.sh`, its README and the `out/` ignore. It boots the 0.10.1 release binary (the deploy's pinned sha) locally in the exact `start.sh` shape — one pinned demo session, `max_attached = 16`, the `shopper-` on-demand credential, `--max-sessions 128 --rate-limit-rps 200` — with the fixture embedder and the live recall tier in test-prefixed indices `t81b-*`, deleted afterwards.
+
+The run passed end to end (transcript in `out/`, kept out of git):
+
+- The prefix listing was empty before the run, and the pinned demo session equals what `internal/identity` builds for `shopper_01` under the seed salt (the 72-byte vector the identity test pins).
+- One shopper first: its own marker recalled, spend stated as $0.00 of embedding (in-process vectors, no embedding endpoint called), under the $0.20 budget, then the other two shoppers.
+- Each of the three recalls its own marker; all six cross-recalls carry no other session's marker, and every cross-session exact-content inspect is "no concept matching".
+- The demo session (pinned, attached, nothing derived in it) recalls none of the test markers and inspects none of the test beliefs; its stats read `concepts=0`. The driver never addresses a deployment path outside `t81b-*`.
+- The reader started with the demo plus the three test sessions: own beliefs 200 found=true, a cross-window read 200 found=false, the unscoped alias (the demo, first in the allowlist) 200 found=false for a test belief, `/api/sessions` exactly the four names, and a shopper created after the reader started the uniform 404.
+- A second hub with `max_attached = 2` (pinned demo plus one hot shopper, kept hot by a stats loop) refused the newcomer with HTTP 503 in 1.379 ms and `Retry-After="5"`; the hot session still answered.
+- 130 concurrent `initialize` with 5 sessions already live: 123x200, 7x503, zero other errors — 123+5 is exactly the 128 bound engaging.
+- 600 stats calls over 8 workers sharing 4 live sessions: 600 ok, zero 429s, 98 req/s served on this 12-CPU machine — the 200rps ceiling untouched.
+- Hub RSS 22.2 MiB at start, 37.2 MiB with 5 attached sessions (the release binary; T0.11's 0.4 MiB marginal was the same order).
+- Cleanup deleted the 2 `t81b-*` indices (the data index and the meta index), the listing after is `[]`, and the temp run dir (store, configs, child logs) was removed. No key, URL or token entered a file: the leak check is clean.
+
+Five things the next agent should not have to rediscover:
+
+- The native embedder cannot connect from here (the DNS stall T0.6b records outlasts its 5 s connect timeout), so the live leg is the recall tier with the fixture embedder, as in T0.11's check 4. Embedding spend is $0.00 by construction; the staged one-shopper-first gate still runs and states it.
+- `serve-web`'s unscoped alias reads the first session on its allowlist, not the hub's pinned default: a reader started with the test sessions first serves a test belief at `/api/inspect`. The driver lists the demo first, mirroring `start.sh`'s allowlist, so the alias is the demo-is-default check. The first draft asserted found=false with the test sessions first and failed exactly this way.
+- The rate burst must reuse live MCP sessions: opening one session per worker spends the 128 session ceiling (the first draft's 600-call probe died with 450 session-503s, zero 429s) instead of measuring the rate budget. The driver shares four sessions across eight workers under a client lock.
+- The 503 needs every attached session non-idle: the probe keeps the one place hot with a stats loop while the newcomer attaches, otherwise the hub evicts instead of refusing. `max_attached = 2` keeps the probe to one hot session.
+- `lambo_stats` with a receipt answers the outcome on the same call (wait_ms lets the server wait); a derive of two concepts returns one receipt per concept and the driver waits each. The hub and reader logs are scanned for `127.0.0.1:<port>`; `serve-web` logs its URL in the same shape, so one scanner starts both.
 
 ---
 
