@@ -50,7 +50,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/lib/ledger/, web/src/routes/belief/, web/src/lib/contest/
-status:     in-review
+status:     done
 ```
 The shopper's ledger shows which precedence step decided each recommendation, an overridden step beside the one that won, a standing correction with no belief, and the pooled belief that applies to them as counts with its seeded count. It never shows another shopper's rows. The shopper can opt out of pooling here, and back in, through `set_pooling`, with the number of rows removed shown. Fix the pre-pivot correction types in `web/src/lib/contest/`: a standing correction is schema-valid now, and the decoder must accept it. Svelte 5 runes only.
 
@@ -161,7 +161,7 @@ product.md's demo from step 0 to step 7, live, on the hosted service: the new sh
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
-- [ ] The ledger shows the deciding step and the pool, with no other shopper's rows (T9.2).
+- [x] The ledger shows the deciding step and the pool, with no other shopper's rows (T9.2).
 - [ ] The merchant app is built and deployed, reading only `product_fit` (T9.3, T9.3d).
 - [ ] The reference agent never refuses on evidence and records standalone corrections (T9.4).
 - [ ] A second agent honours a correction it never saw (T9.5).

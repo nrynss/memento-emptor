@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 12 / 13 | In progress (T8.5c) |
-| P9 | 2 / 8 | In progress (T9.2, T9.4) |
+| P9 | 3 / 8 | In progress (T9.4) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.2: Ledger with precedence and the pool (done)
+
+**What exists.** The ledger decodes all five precedence steps from the frozen fixtures (correction with two overridden steps, own with pool overridden, pool with statement overridden, none said plainly, plus a synthesized statement case), renders the decision line with the loser struck through, shows a standing correction ("no belief yet" + date), and renders the pooled belief as counts only (key set pinned; no shopper id, custom id, event id or free text in the render path). The opt-out toggle lands "Pooling is off: 3 existing fit rows removed" from the frozen answer; opt-in removes 0. The pre-pivot correction types now accept the schema-valid standing correction. Svelte 5 runes only; every fixture transport rejects a mismatched shopper. Review APPROVE with no fixes (comment-only notes: the vitest `svelte/reactivity` server/client split means notified Chaaya state doesn't invalidate templates in tests, so the toggle mirrors answers into local `$state` — the browser build is unaffected).
+
+**What surprised.** `PoolView` carries no identity by construction, and the seeded split renders ("48 of the 60 settled purchases are seeded history"). The ledger's pool decoder and the merchant app's pool client both decode pool counts — deliberate duplication, since the merchant app must not import shopper-side code.
+
+**The next agent should not have to work out.** Guidance bases are exactly the contract's five steps. `decodePoolPrecedence` omits the key when the fixture has none, staying byte-equal per `omitempty`. T9.6 must send the demo shopper's link token as a bearer header on ledger reads and contest calls.
 
 ### T9.3: Merchant app (done)
 
