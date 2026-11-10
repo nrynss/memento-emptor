@@ -129,11 +129,10 @@ permanently.
 
 The hub accepts one credential, so every request needs the bearer
 token. `start.sh` uses `LAMBO_MCP_TOKEN` when the environment sets it
-and otherwise generates one for that boot; both the layer and the hub
-start in the same boot, so they agree either way. The token is
-exported, never written to a file or printed. The deploy also exports
-`LAMBO_MCP_URL`, the hub's loopback URL, for the layer's graph client;
-wiring that client is T8.5.
+and otherwise generates one for that boot, then exports it for the hub
+and for the layer's graph client. It is never written to a file or
+printed. The deploy also exports `LAMBO_MCP_URL`, the hub's loopback
+URL; wiring the layer's graph client is T8.5.
 
 ## The ledger reader's allowlist
 

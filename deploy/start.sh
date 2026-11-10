@@ -45,9 +45,10 @@ DEMO_SESSION="${LAMBO_DEMO_SESSION:-shopper-00895719a8a9d1ba88c99984e50dd200a83b
 WEB_SESSIONS="${LAMBO_WEB_SESSIONS:-$DEMO_SESSION}"
 
 # The one credential the hub accepts. The deploy generates a token per boot
-# when the environment holds none, so the layer and the hub agree without a
-# stored secret; a value from the environment is left alone. It is exported,
-# never written to a file or printed.
+# when the environment holds none, so the hub needs no stored secret and the
+# layer's graph client (T8.5) can read the same value; a value from the
+# environment is left alone. It is exported, never written to a file or
+# printed.
 if [ -z "${LAMBO_MCP_TOKEN:-}" ]; then
 	LAMBO_MCP_TOKEN="$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n')"
 fi
@@ -72,7 +73,12 @@ fi
 mkdir -p "$DATA"
 
 pids=()
+stopping=0
 stop_all() {
+	if [ "$stopping" -eq 1 ]; then
+		return
+	fi
+	stopping=1
 	for pid in "${pids[@]}"; do
 		kill "$pid" 2>/dev/null || true
 	done
@@ -266,4 +272,10 @@ status=$?
 set -e
 echo "start: a child exited ($status); stopping the rest"
 stop_all
+# Let the children finish their own close before this process exits. Lambo's
+# memory writes are a write-behind log with no on-disk WAL, so a second
+# signal, or the container going away mid-close, loses the unflushed tail.
+set +e
+wait
+set -e
 exit "$status"
