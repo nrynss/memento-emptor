@@ -150,7 +150,7 @@ requires:   [T5.7]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/runs/
-status:     in-review
+status:     done
 ```
 Re-run all three arms on the hardened shoppers only (repeat count per freeze), with the real `recall_forphurchase` + pending shape for arm 3, neutral instrument, cumulative $5 cap, publish-everything rule.
 
