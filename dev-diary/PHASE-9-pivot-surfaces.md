@@ -94,7 +94,7 @@ requires:   [T9.3, T6.1]
 fixture-ok: no
 size:       S · mid
 owns:       deploy/merchant/
-status:     in-review
+status:     done
 ```
 Its own Render service, following T6.1's provision and guard pattern. It reaches the layer's `product_fit` and nothing else. The user has pre-approved new services for the pivot: record the service's monthly cost in the brief and the handoff log, and keep the guard, but do not stop for a second approval.
 
@@ -151,9 +151,23 @@ size:       S · mid
 owns:       deploy/render.yaml, deploy/seed/, deploy/guard.sh, deploy/provision.sh, .env.example, tools/env.sh
 status:     claimed:t96-live-layer
 ```
-The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. Measure `--max-sessions 128` and `--rate-limit-rps 200` on the 0.5 CPU starter; the T8.1b numbers are from a 12-CPU machine and do not stand for the starter. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Add the three auth key variables (`MEMENTO_AGENT_KEYS`, `MEMENTO_SHOPPER_TOKENS`, `MEMENTO_MERCHANT_KEYS`) to `deploy/render.yaml` as `sync: false`, name them in `.env.example`, and read them in `tools/env.sh` from the keyring; mint the keys with T8.5's command, never invent them. If seeding through the writer, call `Refunded` then `Classified` so a reason-bearing seed refund settles, and measure the forced-refresh cost at population scale. The fixture embedder cannot converge the frozen arc; keep `LAMBO_SEED=0` for the local loop. Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
+The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. Measure `--max-sessions 128` and `--rate-limit-rps 200` on the 0.5 CPU starter; the T8.1b numbers are from a 12-CPU machine and do not stand for the starter. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Add the three auth key variables (`MEMENTO_AGENT_KEYS`, `MEMENTO_SHOPPER_TOKENS`, `MEMENTO_MERCHANT_KEYS`) to `deploy/render.yaml` as `sync: false`, name them in `.env.example`, and read them in `tools/env.sh` from the keyring; mint the keys with T8.5's command, never invent them. If seeding through the writer, call `Refunded` then `Classified` so a reason-bearing seed refund settles, and measure the forced-refresh cost at population scale. The fixture embedder cannot converge the frozen arc; keep `LAMBO_SEED=0` for the local loop. Raise `deploy/guard.sh`'s ceiling to the combined two-service shape ($14.25/mo run-rate); until then it trips exit 2 while `deploy/merchant/guard.sh` stays green for the pair. Append the merchant key entry to the layer's `MEMENTO_MERCHANT_KEYS` (digest from the T9.3d notes — secret stays in Render, never in a file). Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
 
 **Done when:** the public URL answers `recall_for_purchase` for the demo shopper with the pool step working, and `product_fit` for the demo oxford reads Earned. The guard reports green. Spend is recorded.
+
+---
+
+### T9.3e: Merchant page reads live pool data
+```yaml
+requires:   [T9.3d, T9.6]
+fixture-ok: yes
+size:       S · mid
+owns:       merchant/
+status:     not-started
+```
+Wire the merchant page from the fixture transport to same-origin `/tools/product_fit`; no caller credential is needed (the edge holds the merchant key server-side). Until then the proxy answers 502/503 and the app reads its bundled snapshot. T9.6 registers the key entry on the layer first.
+
+**Done when:** the deployed page renders live pool counts through the proxy; the fixture transport remains for tests; the gate passes.
 
 ---
 

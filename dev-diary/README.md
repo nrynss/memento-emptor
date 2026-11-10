@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 12 / 13 | In progress (T8.5c) |
-| P9 | 4 / 8 | In progress |
+| P9 | 5 / 9 | In progress (T9.5, T9.6) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -184,6 +184,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** `PoolView` carries no identity by construction, and the seeded split renders ("48 of the 60 settled purchases are seeded history"). The ledger's pool decoder and the merchant app's pool client both decode pool counts — deliberate duplication, since the merchant app must not import shopper-side code.
 
 **The next agent should not have to work out.** Guidance bases are exactly the contract's five steps. `decodePoolPrecedence` omits the key when the fixture has none, staying byte-equal per `omitempty`. T9.6 must send the demo shopper's link token as a bearer header on ledger reads and contest calls.
+
+### T9.3d: Merchant app deployed (done, verify after push)
+
+**What exists.** `deploy/merchant/` provisions `memento-merchant` (starter, virginia, docker, no disk) following the T6.1 pattern: `provision.sh`, `render.yaml`, edge `main.go` (injects the merchant key server-side, drops caller auth), `guard.sh` with settled/over-limit snapshots, README. Service is live in shape; first deploy is `build_failed` because Render builds `main`, which gains the Dockerfile only on land — the green deploy auto-follows the push via `autoDeployTrigger: commit` (T6.1 precedent). Guard live: 2 services, 1 GB disk, run-rate $14.25/mo vs $15.00 ceiling, exit 0. Cost: **$7.00/mo** new ($14.25/mo combined vs $50 credit ≈ 3.5 months runway). Review APPROVE with two fixes (static-dir env name, transient API response unset).
+
+**What surprised.** Render's env-vars API echoes secret values on write/read — the worker rotated once after an in-transit echo (dead token, no file copy). Treat API/dashboard output as sensitive. The merchant build imports repo-root `testdata/api`, so the image's web stage copies it.
+
+**The next agent should not have to work out.** T9.6 appends the merchant key entry (digest in the T9.3d notes) to the layer's `MEMENTO_MERCHANT_KEYS` and raises `deploy/guard.sh`'s ceiling to the combined shape. **T9.3e** (new) wires the page from the fixture transport to same-origin `/tools/product_fit`. Post-push verify: `curl https://memento-merchant.onrender.com/healthz` → 200, then `/` → 200 HTML, then the layer entry makes live reads return the pool. Until then the proxy answers 502/503 and the app reads its bundled snapshot.
 
 ### T9.4: Reference agent, after the pivot (done)
 
