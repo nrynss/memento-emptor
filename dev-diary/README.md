@@ -220,7 +220,7 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **What surprised.** The deployment exposes two hostnames (chat + frontend); both 302 anonymously. `ast agent access set` offers `anyone` (= any signed-in user) but no public option. Public is documented only in an adapter-auth warning and has never been observed working — platform gap, not config. The earlier flip landed on `memento-agent` by mistake (user-confirmed; its posture is the user's call).
 
-**The next agent should know.** No-login serving on Astropods is BLOCKED pending the platform. The public-shopper-page follow-up stays unscheduled. Judges' access to the demo is now a P6/demo decision (Render-hosted page vs signed-in access), not an agent task.
+**The next agent should know.** No-login serving on Astropods is PROVEN on the public frontend host (dedicated `agents.public.astropods.ai` hostname; chat host correctly stays signed-in): anonymous 200 with our page body, model turn $0.0057 with tool spans. Follow-up T3.8 (public shopper page) added to the phase doc, parked until the full demo exists (requires T3.6). memento-agent's own Public posture is the user's call.
 
 ### T3.4: Asking the shopper (done) ★
 

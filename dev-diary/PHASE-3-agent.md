@@ -196,6 +196,20 @@ Prove whether an Astropods agent can be reached with no login, on `probe-gw` onl
 
 ---
 
+### T3.8: Public shopper page
+```yaml
+requires:   [T3.7, T3.6]
+fixture-ok: no
+size:       S · mid
+owns:       agent/frontend/
+status:     not-started
+```
+Serve the Memento Emptor shopper page on the shopper deployment's frontend hostname with the custom-app list set to Public and no auth guard mounted (T3.7 pattern: `agent.interfaces` frontend+messaging, port 80, root, read-only FS). Parked until the full demo exists.
+
+**Done when:** anonymous `GET /` on the frontend host returns 200 serving the shopper page with no SSO redirect, the chat host still requires sign-in, and one model turn through messaging shows the trace with tool spans. Budget $0.25 with billing re-checks.
+
+---
+
 ## Exit Criteria
 
 - [ ] The agent runs on Astropods, recalling first (T3.1).
