@@ -333,11 +333,13 @@ requires:   [T2.7]
 fixture-ok: yes
 size:       S · frontier
 owns:       internal/domain/, internal/memory/, internal/api/server/
-status:     claimed:t28-rival
+status:     in-review
 ```
 N consecutive opposite-direction classified returns (N=3, mirroring the Earned bar) birth a same-kind opposite-direction rival belief instead of landing unattached. The count resets on any same-direction return or on a correction. The rival starts unpromoted (None/Candidate per the normal gates — birth is not promotion) and the existing belief is untouched (no auto-against, no demotion). Update the domain rule, writer, and router; add consecutive-opposite tests (birth at exactly 3, reset on interruption, no birth at 2).
 
 **Done when:** tests prove birth at 3, reset on interruption, and no birth at 2; the existing belief is unchanged; all P2 suites green.
+
+note (worker t28-rival). Streak state lives in the service's per-shopper state (`streaks` map in `shopperState`, keyed by kind + subject id): runtime state, never beliefs, never the graph. `domain.OppositeStreak` counts consecutive opposite-direction classified returns against `RivalBirthThreshold = 3`; reaching it consumes the run. `beliefForReason` advances the run on a direction mismatch, breaks it on a same-direction attach, and mints the rival via the existing `newBelief` + `fitBeliefValue` (direction set, value derived from the reason) on the Nth consecutive opposite; a directionless fit answer lands unattached without moving the run. `RecordCorrection` clears all streaks for the shopper. The writer is unchanged: the birth path offers matching direction, so `ErrDirectionMismatch` stays the backstop and no against edge is ever declared by birth. Service tests drive seven answers on one shopper through six test-only extra refund events (the frozen story holds four): birth at exactly 3 (rival Claimed/None, 1 row, existing belief at 1 row untouched, 0 against), no birth at 2 (both unattached), reset on interruption (opp, opp, same, opp, opp gives none; next opp gives rival), correction resets (opp, opp, correction, opp, opp gives none; next opp gives rival; only the correction's against edge on the graph). `testdata/` and `internal/fakes/` byte-untouched; all P2 suites green.
 
 ---
 

@@ -262,6 +262,9 @@ func (s *Service) RecordCorrection(ctx context.Context, req contract.RecordCorre
 	defer s.mu.Unlock()
 	s.log(string(contract.ToolRecordCorrection), req.ShopperID, traceOf(req.TraceID))
 	st := s.state(req.ShopperID)
+	// A correction is shopper-driven and resets every opposite-direction
+	// run for the shopper: the shopper's word breaks all streaks.
+	clear(st.streaks)
 	belief, ok := st.beliefs[req.ContradictsBeliefID]
 	if !ok {
 		return contract.RecordCorrectionResponse{}, fmt.Errorf("server: record correction: %w %q", ErrUnknownBelief, req.ContradictsBeliefID)
@@ -535,9 +538,14 @@ func markUnattached(rows []*evidenceRecord) {
 // the most-supported fit belief for the brand pointing the reason's way,
 // or the seller belief behind the transaction. It creates the belief on
 // first sight. When fit beliefs exist for the brand but none points the
-// reason's way, it returns nil: the answer counts toward nothing and the
-// caller stores it unattached. A nil belief is never an error, and no
-// against edge is declared on the way out.
+// reason's way, the answer joins the brand's opposite-direction run:
+// below the birth threshold it counts toward nothing and the caller
+// stores it unattached, while the run reaching the threshold births a
+// same-kind opposite-direction rival belief the answer attaches to. A
+// same-direction answer that attaches to an existing belief breaks the
+// run. Birth is not promotion: the rival derives and earns exactly like
+// any new belief, and the existing belief is untouched — no against edge
+// is declared on the way out. A nil belief is never an error.
 func (s *Service) beliefForReason(ctx context.Context, st *shopperState, question *pendingRecord, reason *domain.Reason) (*beliefRecord, error) {
 	item := domain.Item{}
 	if len(question.items) > 0 {
@@ -547,6 +555,7 @@ func (s *Service) beliefForReason(ctx context.Context, st *shopperState, questio
 		return s.ensureSellerBelief(ctx, st, item, question.awaitingSince)
 	}
 	want := reason.Category.Direction()
+	subject := domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName}
 	var best *beliefRecord
 	anyFit := false
 	for _, rec := range st.beliefs {
@@ -562,13 +571,24 @@ func (s *Service) beliefForReason(ctx context.Context, st *shopperState, questio
 		}
 	}
 	if best != nil {
+		// A same-direction return breaks the brand's opposite run.
+		st.streakFor(domain.BeliefKindFit, item.BrandID).NoteMatched()
 		return best, nil
 	}
 	if anyFit {
+		// Fit beliefs exist but none points the answer's way. A
+		// directionless fit answer is not opposite-direction, so it
+		// lands unattached without moving the run.
+		if want == domain.FitDirectionNone {
+			return nil, nil
+		}
+		if st.streakFor(domain.BeliefKindFit, item.BrandID).NoteOpposite() {
+			return s.newBelief(ctx, st, domain.BeliefKindFit, subject,
+				fitBeliefValue(reason.Category, item.BrandName, item.Size), want, false, question.awaitingSince)
+		}
 		return nil, nil
 	}
-	return s.newBelief(ctx, st, domain.BeliefKindFit,
-		domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName},
+	return s.newBelief(ctx, st, domain.BeliefKindFit, subject,
 		fitBeliefValue(reason.Category, item.BrandName, item.Size), want, false, question.awaitingSince)
 }
 

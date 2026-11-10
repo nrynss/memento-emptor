@@ -174,6 +174,29 @@ type shopperState struct {
 	notices     map[string]string
 	captures    map[string][]string
 	seq         map[string]int
+	streaks     map[streakKey]*domain.OppositeStreak
+}
+
+// streakKey scopes one opposite-direction run to the beliefs it could
+// rival: one belief kind on one subject. The shopper partition owns the
+// map, so the key carries only kind and subject. The streaks are runtime
+// state, not beliefs: they decide when an opposite-direction answer
+// births a rival, and nothing about them reaches the graph.
+type streakKey struct {
+	kind      domain.BeliefKind
+	subjectID string
+}
+
+// streakFor returns the opposite-direction run for one (kind, subject),
+// creating it on the first mismatch. The caller holds the service lock.
+func (st *shopperState) streakFor(kind domain.BeliefKind, subjectID string) *domain.OppositeStreak {
+	key := streakKey{kind: kind, subjectID: subjectID}
+	streak, ok := st.streaks[key]
+	if !ok {
+		streak = &domain.OppositeStreak{}
+		st.streaks[key] = streak
+	}
+	return streak
 }
 
 // Service is the running memory layer: nine frozen tools plus webhook
@@ -237,6 +260,7 @@ func (s *Service) state(shopper string) *shopperState {
 			notices:     map[string]string{},
 			captures:    map[string][]string{},
 			seq:         map[string]int{},
+			streaks:     map[streakKey]*domain.OppositeStreak{},
 		}
 		s.shoppers[shopper] = st
 	}
