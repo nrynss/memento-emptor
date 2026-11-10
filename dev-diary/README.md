@@ -228,6 +228,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 
 **What surprised.** Review scoped the claim honestly: the live leg proves graph-level non-interference (no auto-attach/contradict by the daemon), NOT the service path — refusal (`ErrDirectionMismatch`) and unattached-row routing are proved offline in T2.7's tests. Wording fixed accordingly ("byte-identical" → asserted properties; cleanup counts marked transcript-only).
 
+### T2.8b: Rival birth, live (done)
+
+**What exists.** `tests/live/rival/` driver (no CI tests, `out/` ignored): Venerable on 3 same-direction returns live, opposing standalone stays unattached with no `Contradicts`/warning, recall clean while ranking the opposite; rival born at 3rd consecutive opposite (Claimed/None, 1 row), absent on interrupted streak; sessions erased, `t28b*` indices empty. $0 spend.
+
+**What surprised.** Review scoped the claim honestly (graph-level non-interference proved live; refusal + routing proved offline) and fixed two README overclaims (unattached = ledger rows with no graph write, not "citing nothing"; gap-inspect accepts refusal or non-admitting answer).
+
 ### T2.8: Rival-belief birth rule (done) ★
 
 **What exists.** `OppositeStreak` streak state (in-memory service state, never the graph) with `RivalBirthThreshold = 3` in one place: 3 consecutive opposite-direction returns birth an unpromoted same-kind rival via the existing mint path; below 3 they land unattached (T2.7); any same-direction return or shopper correction resets; no auto-against, existing belief untouched, no second rival (4th joins the newborn — pinned by review-added test).
