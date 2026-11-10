@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 11 / 12 | In progress (T8.5b) |
+| P8 | 12 / 13 | In progress (T8.5c) |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -259,6 +259,45 @@ PASS T8.3b live pool: seeded pool read warm and cold; index deleted
 **What surprised.** The index's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the eight-shopper floor: 10 shoppers with only `too_small` feedback read Building where the rule says Earned. That is T8.3c (new): union the counts or narrow the rule — the latter is a contract change and the orchestrator's call. The T0.12 recording predates the `fit_shoppers` filter, so the fixture test derives 63/55/8 from the recorded counts. The index predates `settled_at`-window reads; the recent window is a separate top-level aggregation.
 
 **The next agent should not have to work out.** T8.5 builds the reader in the layer, calls `Warm` at boot (a nil return is not "the pool is configured" — a wrong key shows up on the first `Fit`), maps `ErrUnavailable` to `contract.PoolUnavailable`, and maps `Counts.Reasons` to the contract views. T8.3b does the live read. T8.3c resolves the union question before the pool is served.
+
+### T8.5b: Layer end to end, live (done)
+
+**What exists.** `tests/live/precedence/` (driver, `run.sh`, README, git-ignored `out/`) boots the release binary in the T8.1 shape with the live recall tier, wires one served layer per shopper plus the live pool reader and fit writer, and decides one purchase per precedence step. Review APPROVE with one wording fix (driver header aligned with the pinned total-loss-of-force behaviour).
+
+**Live transcript** (verbatim from `bash tests/live/precedence/run.sh`; test indices/sessions erased, prefix empty before and after):
+
+```
+T8.5b live layer -- every precedence step decides, live
+deployment: <deployment> (elastic, T0.12's project)
+budget: under $0.50 of model spend; test sessions erased afterwards
+
+== correction decides (Take size M for Brand X)
+-- standing correction with no belief, recorded Claimed and uncontradicted
+-- next recall decides it, over pool+beliefs
+-- same correction still decides over a fresh hub MCP session to the same shopper session
+-- same correction still decides over a rebuilt layer on the same standing dir
+
+== pool decides (Earned small, exact counts, seeded 10 / live 0)
+-- new shopper on the seeded Earned-small line, decided by the pool
+-- guidance text carries the exact counts and split
+
+== own evidence decides (live Earned/Venerable belief beats the disagreeing pool)
+-- three too-large returns earn the belief live; the pool rides along overridden
+-- guidance carries "ahead of the pool" and the seeded 10 / live 3 split
+
+== statement decides (Take size M for Brand S: the shopper's usual size.)
+-- seeded general statement alone decides
+
+== nothing decides (GuidanceNone, never a refusal)
+-- fresh shopper on a lineless recall gets GuidanceNone
+
+-- cleanup: deleted all 3 t85b-* indices, listing after []
+-- run dir removed (store, configs, standing dir, child logs)
+
+model spend: $0.00 (recording classifier, fixture embedder; one case ran first and stated $0.00)
+```
+
+Two behaviours pinned live with tripwires, both owned by **T8.5c**: (1) consulted-but-empty pool — the lookup returns Claimed with `(nil, consulted)` and the assembler rejects it; (2) dangling declared views — post-restart the restored view matches no class (total loss of force, pool decides), and post-rebuild replays the mint order so the stale view matches by id coincidence, not content re-linking.
 
 ### T8.5: Recall never refuses (done)
 

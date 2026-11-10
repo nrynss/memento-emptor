@@ -341,7 +341,7 @@ requires:   [T8.5, T8.1b, T8.2b, T8.3b]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/precedence/
-status:     in-review
+status:     done
 ```
 The live layer through the hub and a test-prefixed fit index: one shopper per precedence step, plus a correction made in one MCP session and read in a fresh one. Budget: under $0.50. Run one case first and check its cost. Test sessions and indices removed afterwards.
 
@@ -371,6 +371,18 @@ Five things the next agent should not have to rediscover:
 - The driver's graph client reads receipts from `structuredContent` with a text fallback, maps a `no concept matching` inspect to None, and polls recall (not inspect) for promotion: the own-evidence belief reached Earned/Venerable on the live daemon within the first poll window.
 - `evidenceCount` spells out only one and two; three renders `3 returns`, which is what the exact own-evidence guidance text asserts.
 
+### T8.5c: Re-link declared views after restart
+```yaml
+requires:   [T8.5, T8.5b]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/
+status:     not-started
+```
+T8.5b pinned two defects live, both needing `internal/api/server/`: a restored declared view matches no precedence class after restart (beliefs get fresh ids, the stale `ContradictsBeliefID` matches nothing), so the correction loses all force and the pool decides; and a wired pool consulted on an empty line returns Claimed with a `(nil, consulted)` lookup the assembler rejects. Re-link declared views by content match on restore, and decide the consulted-empty guard (serve it or refuse it loudly). Tripwires for both live in `tests/live/precedence/`.
+
+**Done when:** a restarted layer re-links a declared correction to the rewritten belief by content; the consulted-empty case is decided and tested; the gate passes.
+
 ---
 
 ## Exit Criteria
@@ -381,4 +393,4 @@ Five things the next agent should not have to rediscover:
 - [x] A correction stands on its own (T8.4).
 - [x] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).
 - [x] Webhook deliveries are verified against PayPal's signature, not a fixture (T8.7).
-- [ ] Recall never refuses, and says which step decided, live (T8.5, T8.5b).
+- [x] Recall never refuses, and says which step decided, live (T8.5, T8.5b).
