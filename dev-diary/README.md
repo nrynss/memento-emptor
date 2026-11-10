@@ -15,7 +15,7 @@ Each phase document gives an engineer starting cold the complete context for its
 
 **This diary is public.** The repository goes public for submission. Nothing private goes in here: no key, no account detail, no IP address, no personal path beyond `~`, no private repository's name.
 
-**Current status:** P0 to P5 are done as first built, and P0 is complete including the pivot's two gates: T0.11 proved Lambo v0.10.1 serves many isolated shopper sessions from one hub, and T0.12 proved the pooled fit index on Elastic with settled-only aggregations. product.md carries the pivot (the reason layer, pooled product fit in Elastic, a merchant view). The pivot's implementation phases are not yet written; P6 waits on them.
+**Current status:** P0 to P5 are done as first built, and the pivot in product.md is decided. P7 to P10 carry it out. Ready now: T7.1 (pivot contracts), T7.3 (consent, the user's call), T10.1 (what arm 2 gets) and T10.2 (round 1 relabel). P6 resumes after P9 and P10.
 
 ---
 
@@ -39,7 +39,11 @@ Do not wait for a whole phase to finish. If a task requires only `T1.1`, start i
 | **P3** Reference agent | [PHASE-3-agent.md](PHASE-3-agent.md) | P1 | P2, P4 | T5.1, T6.4 |
 | **P4** Evidence ledger | [PHASE-4-ledger.md](PHASE-4-ledger.md) | T1.2, T1.4 | P2, P3 | T6.2, T6.4 |
 | **P5** Comparison | [PHASE-5-comparison.md](PHASE-5-comparison.md) | T1.3, T3.1 for the harness; T2.6 and T3.6 for arm 3 | P4 | T6.2 |
-| **P6** Ship | [PHASE-6-ship.md](PHASE-6-ship.md) | P2 to P5 | none | submission |
+| **P7** Pivot contracts | [PHASE-7-pivot-contracts.md](PHASE-7-pivot-contracts.md) | T0.11, T0.12 | none | P8 to P10 |
+| **P8** The layer, after the pivot | [PHASE-8-pivot-layer.md](PHASE-8-pivot-layer.md) | T7.1, T7.2 | T10.1, T10.2 | P9, T10.3 |
+| **P9** Population and surfaces | [PHASE-9-pivot-surfaces.md](PHASE-9-pivot-surfaces.md) | T7.1, T7.2 for T9.1; T8.3 for T9.3; T8.5 for the rest | P8's live twins | T10.3, T10.4, P6 |
+| **P10** Comparison, round 2 | [PHASE-10-comparison-round-2.md](PHASE-10-comparison-round-2.md) | T10.1 and T10.2 none; T9.1 and T8.5 for the freeze; T9.5 and T9.6 for the runs | P8, P9 | P6 |
+| **P6** Ship | [PHASE-6-ship.md](PHASE-6-ship.md) | P2 to P5, then P9 and P10 after the pivot | none | submission |
 
 ```text
   T0.1 accounts ─▶ T0.3 to T0.8 live checks ─┐
@@ -48,6 +52,19 @@ Do not wait for a whole phase to finish. If a task requires only `T1.1`, start i
                                                                         └─▶ P4 ledger ──┤
   T5.1 harness ─▶ T5.2 grader ─▶ T5.3 baseline pilot ─▶ T5.4 freeze ─▶ T5.5 arm 3 ─▶ T5.6 ┤
                                                                                          └─▶ P6 ship
+```
+
+After the pivot:
+
+```text
+  T0.11 + T0.12 ─▶ T7.1 contracts ─▶ T7.2 keys ─┬─▶ T8.1 hub ────────────────┐
+                                               ├─▶ T8.2 fit writer ─▶ T8.3 pool ─┼─▶ T8.5 recall ─▶ T8.5b live
+                                               ├─▶ T8.4 corrections ─────────────┘
+                                               └─▶ T9.1 population
+  T8.3 ─▶ T9.3 merchant app ─▶ T9.3d deployed
+  T8.5 ─▶ T9.2 ledger, T9.4 agent ─▶ T9.5 second agent
+  T8.5b + T9.1 + T7.3 ─▶ T9.6 live on Render ─▶ T9.7 demo
+  T10.1 arm 2 input, T10.2 relabel ─▶ T10.3 freeze ─▶ T10.4 runs ─▶ T10.5 results ─▶ P6
 ```
 
 T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable and show the contradiction warning, the demo loses its centre. Nothing builds on promotion until it passes.
@@ -62,6 +79,9 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 | **B: Reference agent** | P3 | Yes | T3.1 | Runs on Astropods; replays the layer's contract until P2 lands |
 | **C: Ledger** | P4 | No | T4.1 | Builds against fixtures |
 | **D: Comparison** | P5 | Yes | T5.1 | The baseline pilot runs before the layer is finished |
+| **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
+| **F: Pivot surfaces** | P9 | Yes, for agents and deploys | T9.1 | The population, ledger, merchant app, two agents, the demo |
+| **G: Round 2** | P10 | Yes, for T10.1 and the runs | T10.1, T10.2 | Both start now; the freeze waits on T9.1 and T8.5 |
 
 If capacity is short, run A first and then B: the demo needs both, and the ledger can follow on fixtures.
 
@@ -145,6 +165,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
+| P7 | 0 / 3 | Ready (T7.1, T7.3) |
+| P8 | 0 / 9 | Waits on P7 |
+| P9 | 0 / 8 | Waits on P7, P8 |
+| P10 | 0 / 5 | Ready (T10.1, T10.2) |
 
 ---
 
@@ -168,7 +192,7 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **The next agent should not have to work out.** Keep the seed-then-hub order in `start.sh`: the seeder's short-lived stdio writer must own its session alone while it runs. Do not pin every shopper; pinned sessions never idle-detach and each spends a `max_attached` place. The Elastic tier keeps one data index per embedding contract, filtered by `session_id`.
 
-### Pivot proposed after P5 (user, under discussion)
+### Pivot decided after P5 (user)
 
 The comparison's "raw history" arm was handed rows the layer had already classified (reason, signal strength, write kind), so its 15/15 and 4/4 measure Memento's evidence without beliefs, not raw PayPal history. The arm that gated on Earned refused and lost. product.md now proposes: recall never refuses (status is a label), corrections stand alone, a real PayPal-only arm 2, pooled product fit across shoppers, and a merchant view (decided: ships). Per shopper stays in Lambo, one session each; the pool goes to an Elastic fit index, written at ingest, one row per purchase, settled rows only (kept past the window counts), a per-product-line shopper hash, seeded and live in one index. T0.11 and T0.12 tested both halves and both passed (entries above), so the pivot's implementation phases can now be written. Open: consent for pooling, and which headline the new comparison supports.
 

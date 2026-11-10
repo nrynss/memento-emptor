@@ -30,13 +30,13 @@ The service, the ledger and Lambo, on the hosting T0.9 chose. PayPal webhooks po
 
 ### T6.2: The judges' page ★
 ```yaml
-requires:   [T4.3, T5.6, T6.1]
+requires:   [T4.3, T6.1, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/judges/
 status:     not-started
 ```
-The first screen is a "For judges: start here" table: the demo, the evidence ledger, the traces, the comparison results, and the seeded rows clearly marked. Test credentials for the sandbox, if a judge needs them, are safe to publish and are sandbox-only.
+The first screen is a "For judges: start here" table: the demo, the evidence ledger, the merchant app, the traces, both comparison rounds, and the seeded rows clearly marked. Test credentials for the sandbox, if a judge needs them, are safe to publish and are sandbox-only.
 
 **Done when:** every link works from a clean browser; every claim on the page links to its evidence.
 
@@ -44,7 +44,7 @@ The first screen is a "For judges: start here" table: the demo, the evidence led
 
 ### T6.3: README and submission text ★
 ```yaml
-requires:   [T5.6, T6.1]
+requires:   [T6.1, T9.6, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · frontier
 owns:       README.md, docs/submission.md
@@ -58,13 +58,13 @@ The README is written for a developer on PayPal's Agent Toolkit, opening with th
 
 ### T6.4: The video ★
 ```yaml
-requires:   [T3.6, T4.3, T5.6]
+requires:   [T9.7, T10.5]
 fixture-ok: no
 size:       M · user
 owns:       docs/video.md
 status:     not-started
 ```
-Under 3 minutes, on YouTube, public, showing the project working end to end, with no third-party trademarks or unlicensed music. Opens on the shopper's problem, shows what a builder plugs in, leads with the number chosen in T5.6, and signs off with *Caveat agens*, with its translation. An agent drafts the script in `docs/video.md`; the user records and publishes.
+Under 3 minutes, on YouTube, public, showing the project working end to end, with no third-party trademarks or unlicensed music. Opens on the shopper's problem, shows what a builder plugs in, leads with the number the user picks from T10.5, and signs off with *Caveat agens*, with its translation. An agent drafts the script in `docs/video.md`; the user records and publishes.
 
 **Done when:** the video is public and under 3 minutes, and its link is in `docs/submission.md`.
 
