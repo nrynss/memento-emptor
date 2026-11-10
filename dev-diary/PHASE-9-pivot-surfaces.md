@@ -12,7 +12,7 @@ requires:   [T7.1, T7.2]
 fixture-ok: yes
 size:       M · mid
 owns:       seed/population.go, seed/population_test.go, testdata/seed/population/
-status:     not-started
+status:     claimed:t91-population
 ```
 A deterministic generator for the shoppers behind the pool, written through the T8.2 row shape with the seeded salt and the seeded mark on every row. It must include the demo brand's oxford with a pooled belief that reaches Earned honestly under the T7.1 rule (product.md's demo step 0), lines that stay Building, and one line that is Out of true. Existing shoppers and their transaction ids stay byte-identical (the T5.7 rule).
 
