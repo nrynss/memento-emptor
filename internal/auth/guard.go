@@ -46,7 +46,7 @@ const (
 	// HeaderSeller carries the seller whose layer issued the key.
 	HeaderSeller = "X-Memento-Seller"
 	// HeaderShopper carries the shopper the request is scoped to, and is
-	// absent when the request names none.
+	// absent unless the guard checked the caller against one.
 	HeaderShopper = "X-Memento-Shopper"
 )
 
@@ -102,7 +102,7 @@ func (g *Guard) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		forbid(w)
 		return
 	}
-	applyPrincipal(r, principal, scope.shopper)
+	applyPrincipal(r, principal, checkedShopper(route, scope))
 	g.next.ServeHTTP(w, r.WithContext(withPrincipal(r.Context(), principal)))
 }
 
@@ -147,8 +147,10 @@ type requestScope struct {
 }
 
 // readScope reads the fields the guard enforces and puts the body back for
-// the proxy. A body that is not JSON names no tool and no shopper; the route
-// then decides, and a scoped tool refuses it.
+// the proxy. A body that is not JSON names no tool and no shopper: the tools
+// route then names its tool from the path and refuses the missing shopper,
+// while the MCP route passes the body on and the layer's own decoder rejects
+// it.
 func readScope(route Route, r *http.Request) (requestScope, error) {
 	if route.ID != RouteMCP && route.ID != RouteTools {
 		return requestScope{}, nil
@@ -265,6 +267,26 @@ func authorizeTool(principal Principal, scope requestScope) decision {
 		return denyUnauthenticated
 	}
 	return allow
+}
+
+// checkedShopper returns the shopper the guard actually checked the caller
+// against, so the layer is told a shopper only when the call is bound to one.
+// A tool whose rule names no shopper, and a tool the contract does not name,
+// are never checked against the body's shopper_id: the header is then absent
+// whatever the body said, so a caller cannot hand the layer a shopper it may
+// not act for.
+func checkedShopper(route Route, scope requestScope) string {
+	if route.ID != RouteMCP && route.ID != RouteTools {
+		return ""
+	}
+	if !scope.hasTool {
+		return ""
+	}
+	access, known := AccessFor(scope.tool)
+	if !known || access.Scope != ScopeShopper {
+		return ""
+	}
+	return scope.shopper
 }
 
 // applyPrincipal sets the authenticated caller's identity headers. The

@@ -218,4 +218,21 @@ func TestTheLedgerShellIsStillServed(t *testing.T) {
 			t.Fatalf("GET %s = %d %q, want 404 rather than the app shell", path, recorder.Code, recorder.Body.String())
 		}
 	}
+
+	// A method the surface does not serve on an API path is a 404 too: the
+	// request must never fall through to the shell and be answered there.
+	for _, request := range []struct {
+		method string
+		path   string
+	}{
+		{method: "GET", path: "/tools/recall_for_purchase"},
+		{method: "POST", path: "/calls"},
+		{method: "POST", path: "/tools/recall_for_purchase/"},
+	} {
+		recorder := httptest.NewRecorder()
+		mux.ServeHTTP(recorder, httptest.NewRequest(request.method, request.path, strings.NewReader(`{}`)))
+		if recorder.Code != http.StatusNotFound {
+			t.Fatalf("%s %s = %d %q, want 404 rather than the app shell", request.method, request.path, recorder.Code, recorder.Body.String())
+		}
+	}
 }

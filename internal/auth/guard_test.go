@@ -60,6 +60,10 @@ func mcpCallBody(tool, arguments string) string {
 // productFitBody asks for the pool of one line and size.
 const productFitBody = `{"brand_id":"brand-x","category":"shirts","fit_handle":"regular","size":"M"}`
 
+// productFitWithShopper is a pool read whose body also names a shopper. The
+// tool's rule names none, so the guard must not pass the name on.
+const productFitWithShopper = `{"shopper_id":"shopper_09","brand_id":"brand-x","category":"shirts","fit_handle":"regular","size":"M"}`
+
 // errorCode reads one refusal's stable code.
 func errorCode(t *testing.T, body []byte) string {
 	t.Helper()
@@ -170,6 +174,18 @@ func TestGuardTable(t *testing.T) {
 			wantSeller: "seller-demo",
 		},
 		{
+			name: "agent good key on product fit naming another seller's shopper", method: "POST", path: "/tools/product_fit",
+			body: productFitWithShopper, token: tokenAgentChat,
+			wantStatus: 200, wantReached: true, wantKind: CallerAgent, wantKeyID: "agent-chat",
+			wantSeller: "seller-demo",
+		},
+		{
+			name: "agent good key on an unknown tool naming another seller's shopper", method: "POST", path: "/tools/not_a_tool",
+			body: recallBody("shopper_09"), token: tokenAgentChat,
+			wantStatus: 200, wantReached: true, wantKind: CallerAgent, wantKeyID: "agent-chat",
+			wantSeller: "seller-demo",
+		},
+		{
 			name: "shopper good token on their own ledger", method: "POST", path: "/tools/ledger_beliefs",
 			body: `{"shopper_id":"shopper_01","include_seeded":true}`, token: tokenShopperDemo,
 			wantStatus: 200, wantReached: true, wantKind: CallerShopper, wantKeyID: "shopper-demo",
@@ -220,6 +236,12 @@ func TestGuardTable(t *testing.T) {
 		{
 			name: "merchant good key on product fit", method: "POST", path: "/tools/product_fit",
 			body: productFitBody, token: tokenMerchant,
+			wantStatus: 200, wantReached: true, wantKind: CallerMerchant, wantKeyID: "merchant-brandx",
+			wantSeller: "seller-demo",
+		},
+		{
+			name: "merchant good key on product fit naming a shopper", method: "POST", path: "/tools/product_fit",
+			body: productFitWithShopper, token: tokenMerchant,
 			wantStatus: 200, wantReached: true, wantKind: CallerMerchant, wantKeyID: "merchant-brandx",
 			wantSeller: "seller-demo",
 		},
@@ -423,6 +445,61 @@ func TestRefusalsAreIdentical(t *testing.T) {
 		}
 		if recorder.Header().Get("Content-Type") != reference.Header().Get("Content-Type") {
 			t.Fatalf("%s: the refusal content type differs", tc.name)
+		}
+		if !headersEqual(recorder.Header(), reference.Header()) {
+			t.Fatalf("%s: headers = %v, want %v", tc.name, recorder.Header(), reference.Header())
+		}
+	}
+}
+
+// headersEqual reports whether two responses carry the same headers and the
+// same values, so a header added on one refusal path and not another fails.
+func headersEqual(a, b http.Header) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for name, values := range a {
+		other, ok := b[name]
+		if !ok || len(values) != len(other) {
+			return false
+		}
+		for i := range values {
+			if values[i] != other[i] {
+				return false
+			}
+		}
+	}
+	return true
+}
+
+// TestForbiddenDoesNotVaryWithTheShopper proves the 403 for a valid key whose
+// kind may not use a tool does not change with the shopper the body names, so
+// it cannot be used to learn whether a shopper exists.
+func TestForbiddenDoesNotVaryWithTheShopper(t *testing.T) {
+	t.Parallel()
+
+	ring := testRing(t)
+	bodies := []string{
+		recallBody("shopper_01"),
+		recallBody("shopper_09"),
+		recallBody("shopper_nobody"),
+		`{"brand_id":"brand-x"}`,
+	}
+	var reference *httptest.ResponseRecorder
+	for _, body := range bodies {
+		recorder, got := serve(ring, "POST", "/tools/recall_for_purchase", body, tokenMerchant)
+		if recorder.Code != 403 {
+			t.Fatalf("body %q: status = %d, want 403", body, recorder.Code)
+		}
+		if got.reached {
+			t.Fatalf("body %q: the merchant key reached a shopper's tool", body)
+		}
+		if reference == nil {
+			reference = recorder
+			continue
+		}
+		if recorder.Body.String() != reference.Body.String() || !headersEqual(recorder.Header(), reference.Header()) {
+			t.Fatalf("body %q: the refusal differs from the first one", body)
 		}
 	}
 }
