@@ -80,11 +80,24 @@ requires:   [T8.2]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/fitindex/
-status:     claimed:t82b-live-fit
+status:     in-review
 ```
 One sandbox purchase through capture, refund and reason, written to a test-prefixed index on the live deployment, with a replayed webhook. No model spend. Test indices deleted afterwards, with an empty listing shown.
 
 **Done when:** the transcript is in the handoff log.
+
+**Notes (in-review).** `tests/live/fitindex/` holds the driver (`main.go`), `run.sh`, its README and the `out/` ignore. It creates `t82b-fit-rows` through `fitindex.NewHTTPIndex` and `Create` against the deployment T0.12 recorded, drives one recorded sandbox purchase through `ingest.Service` with `WithFitRecorder`, and deletes the index in a deferred cleanup before printing the empty `t82b-` listing. The purchase is the T0.4 cycle that is recorded end to end: the order with its line item, its capture and its refund (the refund's `up` link is that capture). The capture creates the row, the refund stores it returned and unsettled, and the shopper's answer settles it; the answer is the T0.7 one, replayed through `fakes.NewRecordingReasonClassifier`, so the reason is recorded rather than classified live. Only the index is live; webhook verification is T2.1's and T8.7's leg and this driver replays the recorded deliveries.
+
+The run showed one document per purchase through every state: `captured` at rank 1, `refunded` at rank 2 (stored, unsettled, both timestamps), `reason_classified` at rank 3 (settled by `return_reason`, `fit_too_small`, `too_small`), one document for the purchase, for the shopper's line and in the index. A replayed delivery was a duplicate and wrote nothing, twice: before and after the reason. Retrying the fit write with the refund event and with the capture event rewrote the same version and source, and a fresh writer replaying the capture got the index's `409 version_conflict_engine_exception` and treated it as done, so a restarted process cannot undo a newer state. The index was deleted (`{"acknowledged":true}`) and `_cat/indices/t82b-*` was `[]`. No model spend; one kilobyte-scale index, six writes, reads, counts and the delete.
+
+Four things the next agent should not have to rediscover:
+
+- The recorded T0.4 cycle with line items is the first one: its order read carries the item and its refund's `up` link names its capture. The second cycle's order read stopped at `PAYER_ACTION_REQUIRED`, so it has no line items; a paired capture and refund can only be built from the first.
+- `fitindex.HTTPIndex` exposes `Create`, `Put` and `DeleteShopper` and nothing else, so the driver carries its own small read/delete probe (document read, `_count`, `_cat/indices`, `DELETE` index). T8.3b's pool reader will need the same shape for its empty-listing check.
+- The writer swallows `ErrOlderEvent` by design, so a fresh-process replay leaves no visible status. To show the refusal in a transcript, write the captured rank directly with the probe: the deployment's `409` names the current version, which is the refusal the writer received.
+- The driver's versions are deterministic because every event time is the recording's, so a rerun reproduces the same three version numbers and the same document.
+
+The dev-diary report's transcript is the handoff log entry; it is not committed here.
 
 ---
 
