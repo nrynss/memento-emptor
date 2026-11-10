@@ -193,6 +193,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **The next agent should not have to work out.** T9.6 appends the merchant key entry (digest in the T9.3d notes) to the layer's `MEMENTO_MERCHANT_KEYS` and raises `deploy/guard.sh`'s ceiling to the combined shape. **T9.3e** (new) wires the page from the fixture transport to same-origin `/tools/product_fit`. Post-push verify: `curl https://memento-merchant.onrender.com/healthz` → 200, then `/` → 200 HTML, then the layer entry makes live reads return the pool. Until then the proxy answers 502/503 and the app reads its bundled snapshot.
 
+### T9.6: Staged deploy work (in-review, T9.6b owns the live proof)
+
+**What exists.** `deploy/seed/` seeds the T9.1 population plus the demo graph, each under its own disk marker (`asOf` at the seeding moment; `Refunded` then `Classified`; skips on `MEMENTO_FIT_SEED=0` or fixture embedder; refuses the marker unless the pool reader returns T9.1's table). Auth plumbing: salt + three caller-key vars as `sync: false` in `render.yaml`, keyring rows in `tools/env.sh` (service `memento-keys`), names in `.env.example`; keys minted with `memento key issue`. Guard ceiling raised $8→$16 for the two-service shape ($14.25/mo run-rate, green live). Review APPROVE; the one finding (missing T9.6b task) was stale — T9.6b exists.
+
+**What surprised.** Population seed at scale: 187 forced-refresh writes in ~96 s (~516 ms/write). Starter-shape flags measured in a 0.5 CPU/512 MB container: 128 cap engages (116+14 refused), 200rps limiter binds before CPU. Nine vars are set on the live service and stage for the next deploy. The old Lambo arc seed stays until the pivoted image lands (name collides with the hub's future shopper session).
+
+**The next agent should not have to work out.** T9.6b wires the image and proves the public URL. Keep the arc seed until then.
+
 ### T9.5: Second agent (done)
 
 **What exists.** `agent/second/` is a second Astropods deployment (`memento-second`, own name/prompt/traces): fresh prompt with zero shared 5-grams vs the reference instructions, tool descriptions byte-matching the frozen contract, own stand-in store with the same ids. Live proof: reference trace (record_correction → M) and second trace (recall → first recommendation M from `corr_3b7e52`, citing rung, Out-of-true, counts). Spend $0.13 of $0.50. Review APPROVE with no fixes.
