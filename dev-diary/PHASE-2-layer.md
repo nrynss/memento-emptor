@@ -349,7 +349,7 @@ requires:   [T2.8]
 fixture-ok: no
 size:       XS · frontier
 owns:       tests/live/rival/
-status:     not-started
+status:     claimed:t28b-live
 ```
 Re-prove the rival-birth rule against live Lambo (native embedder, 0.10.1+): three consecutive opposite-direction returns birth the rival; an interrupted streak does not. Throwaway session, deleted after.
 
