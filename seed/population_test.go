@@ -172,6 +172,25 @@ func TestPopulationRowsCarryOnlyHashesAndTheSeededMark(t *testing.T) {
 	}
 }
 
+// TestSettledRowsCarryTheirSettlingEventTime pins that a settled row's event
+// time is the moment it settled. The index mapping T0.12 recorded carries no
+// separate event time, so the pool's 90-day window reads settled_at: a row
+// whose event time drifted from it would give the fixture's recent counts and
+// the pool reader different windows.
+func TestSettledRowsCarryTheirSettlingEventTime(t *testing.T) {
+	for i, row := range populationFor(t).Rows {
+		if !row.Settled {
+			continue
+		}
+		if row.SettledAt.IsZero() {
+			t.Errorf("row %d: settled with no SettledAt", i)
+		}
+		if !row.EventAt.Equal(row.SettledAt) {
+			t.Errorf("row %d: event time %s is not the settling time %s", i, row.EventAt, row.SettledAt)
+		}
+	}
+}
+
 // TestPopulationPairsAreExactlyTheIntendedOnes pins that the population covers
 // the intended line-and-size pairs and no others, so a changed status cannot
 // hide behind a new pair.
