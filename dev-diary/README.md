@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
-| P5 | 7 / 9 | In progress |
+| P5 | 8 / 9 | In progress |
 | P6 | 0 / 7 | Not started |
 
 ---
@@ -199,6 +199,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `web/src/lib/contest/` (CorrectionButton column, ContestEditor form, correction-path-only transport, state helpers, source-scan + mount tests — 19/19 with reviewer's additions). Edit moves Earned→Out of true, standing kept, row visible; three layers of proof that only `record_correction` fires.
 
 **What surprised.** Review caught a real rendered bug: file-header `//` comments in Svelte compile to visible text nodes (fixed; same pattern pre-exists frozen in T4.2's `LedgerGrid.svelte` — follow-up task to sweep all `.svelte` files, not a silent fix). T4.4's own mount tests needed a client-entry import path (Vitest resolves `svelte` to server build here).
+
+### T5.7: Hardened comparison shoppers (done)
+
+**What exists.** 4 new deterministic shoppers via the generator (`cmp-noisy-small → L`, `cmp-noisy-large → S`, `cmp-brands-steady → M`, `cmp-brands-split → S`), hidden answers separated, freeze manifest amended to 25 rows. Review walked each as a perfect reasoner: all fair, arm 2 would also get all four right (honest — hardening is about realistic noise, not anti-arm-2 tuning).
+
+**What surprised.** Nothing structural. Observation carried forward: `brands-split` moves on 2 fit rows while noisy pair pins ≥3 — T5.8 reports per-case evidence counts outright.
 
 ### T5.6: Results (done)
 

@@ -134,7 +134,7 @@ requires:   [T5.4, T1.3]
 fixture-ok: yes
 size:       M · frontier
 owns:       seed/, testdata/seed/, bench/FROZEN.md
-status:     in-review
+status:     done
 ```
 Arm 2 scored a perfect 15/15 on the current set by correct causal algebra over clean histories — so per product.md, harden with cases a real history would contain: LONG NOISY histories (many mixed-signal rows where raw context drowns and beliefs must carry) and MULTI-BRAND histories (same shopper, several brands, cross-brand cut matching). Design 4 new shoppers (2 per class) with hidden answers, generate through the T1.3 generator path (new hidden answers, same seeded-marking + determinism rules; NO edits to existing shoppers or answers), and AMEND the freeze: append the new rows to FROZEN.md with fresh hashes (freeze amendment, same commit as the fixtures).
 
