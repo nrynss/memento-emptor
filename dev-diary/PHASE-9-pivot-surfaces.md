@@ -108,7 +108,7 @@ requires:   [T8.5]
 fixture-ok: no
 size:       M · frontier
 owns:       agent/runtime/
-status:     in-review
+status:     done
 ```
 The reference agent reads the precedence step and states how sure it is from the label. It never refuses when recall returns evidence, and it says when an answer rests on the pool or on a Claimed statement. It records a standalone correction when recall served no belief (the 7-in-9 gap from T5.9). The existing guarantees stay: recall first, approval before any purchase, double-buy protection. Re-run the T3.5 evals and add one per precedence step. Budget: under $1.00. Run one eval first and check its cost.
 
@@ -167,6 +167,6 @@ product.md's demo from step 0 to step 7, live, on the hosted service: the new sh
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
 - [x] The ledger shows the deciding step and the pool, with no other shopper's rows (T9.2).
 - [ ] The merchant app is built and deployed, reading only `product_fit` (T9.3, T9.3d).
-- [ ] The reference agent never refuses on evidence and records standalone corrections (T9.4).
+- [x] The reference agent never refuses on evidence and records standalone corrections (T9.4).
 - [ ] A second agent honours a correction it never saw (T9.5).
 - [ ] The pivoted layer is live, and the demo runs end to end (T9.6, T9.7).

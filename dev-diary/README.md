@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
 | P8 | 12 / 13 | In progress (T8.5c) |
-| P9 | 3 / 8 | In progress (T9.4) |
+| P9 | 4 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -184,6 +184,14 @@ Newest first. What exists, what surprised, and what the next agent must not have
 **What surprised.** `PoolView` carries no identity by construction, and the seeded split renders ("48 of the 60 settled purchases are seeded history"). The ledger's pool decoder and the merchant app's pool client both decode pool counts — deliberate duplication, since the merchant app must not import shopper-side code.
 
 **The next agent should not have to work out.** Guidance bases are exactly the contract's five steps. `decodePoolPrecedence` omits the key when the fixture has none, staying byte-equal per `omitempty`. T9.6 must send the demo shopper's link token as a bearer header on ledger reads and contest calls.
+
+### T9.4: Reference agent, after the pivot (done)
+
+**What exists.** The reference agent reads the precedence step and states its certainty from the label; never refuses when recall returns evidence; says when an answer rests on the pool or a Claimed statement; records a standalone correction when recall served no belief (trace `8238de5b`, `corr_stand_01` with no belief id, re-served next session — closing the T5.9 7-in-9 gap). Recall-first traces on all six live turns; approval-before-purchase true everywhere. Eight-judge eval set (3 kept T3.5 judges + 5 per-basis judges). Spend $0.92 of $1.00. Review APPROVE with one notes fix (F1/F2 judge-strictness findings now owned by T10.3).
+
+**What surprised.** The agent needed two instruction tightenings: recording is its own confirmation (no asking first), and never rely on an earlier turn's recall. The pool reply once paraphrased a count; a quote-don't-paraphrase line fixed it. The `yes`-confirmation turn carries no tool spans (nothing to recommend; purchase honestly not wired).
+
+**The next agent should not have to work out.** Server eval set has diverged from `agent/evals/EVALUATION.yaml` — re-pushing from `agent/evals/` would revert the five new judges; reconcile before reusing. T10.3 extends the evidence clauses for evidence-free recalls and maps applicable judges per trace.
 
 ### T9.3: Merchant app (done)
 
