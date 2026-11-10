@@ -166,7 +166,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
-| P7 | 2 / 4 | Ready (T7.2, needs the identity salt) |
+| P7 | 2 / 4 | In progress (T7.2) |
 | P8 | 0 / 10 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
 | P10 | 2 / 6 | In progress (T10.1) |
@@ -176,6 +176,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### Identity salt created (user, stands)
+
+The live identity salt is in the keyring at `service identity account memento-emptor kind salt`, read as `MEMENTO_IDENTITY_SALT`: 32 random bytes as 64 lowercase hex characters, generated once and never printed. It keys the salted payer-ID session name and the salted per-line shopper hash; the transaction row id stays the unsalted `sha256("txn|" + id)`. Seeded rows use a separate published seed salt. Rotating the live salt changes every session name and per-line hash, orphaning existing sessions and breaking opt-out's recompute. The same value must reach the live Render service as a secret.
 
 ### T7.1: Pivot contracts (done)
 

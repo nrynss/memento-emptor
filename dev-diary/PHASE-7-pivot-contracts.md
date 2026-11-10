@@ -47,7 +47,7 @@ requires:   [T7.1]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/identity/, .env.example, tools/env.sh
-status:     not-started
+status:     claimed:t72-identity-keys
 ```
 One place that turns PayPal identifiers into the keys the layer stores:
 
@@ -55,7 +55,7 @@ One place that turns PayPal identifiers into the keys the layer stores:
 - **Per-line shopper hash:** salted over (payer ID, product line), so it counts distinct shoppers within a line and can't link one shopper across lines.
 - **Transaction hash:** the construction T0.12 pinned (`sha256("txn|" + transaction id)`), so the row id is stable.
 
-The salt is a key: it comes from the keyring through `tools/env.sh` and is never written to a file. The keyring entry (service and kind) is named here, in `.env.example` by name only, and in the handoff log. The user creates it. Seeded rows use a fixed, published seed salt marked as seeded, so the population replays byte for byte; live rows use the keyring salt.
+The salt is a key: it comes from the keyring through `tools/env.sh` and is never written to a file. The entry is `service identity account memento-emptor kind salt`, read as `MEMENTO_IDENTITY_SALT`; it holds 32 random bytes as 64 lowercase hex characters. It is named in `.env.example` by name only and in the handoff log. Seeded rows use a fixed, published seed salt marked as seeded, so the population replays byte for byte; live rows use the keyring salt. Generate it once: rotating it changes every session name and per-line hash, orphaning existing sessions and breaking opt-out's recompute.
 
 **Done when:** table tests pin every construction, including a payer whose session name is exactly at the length limit. A test shows the per-line hash differs across lines for one payer. No salt value appears in any committed file. The gate passes.
 
