@@ -24,8 +24,9 @@ The deployed agent initially talks to the fake-backed tools because the
 layer is not served yet (T2.5 is later). This is the recorded standing
 configuration, not a gap. The fake serves the frozen demo-shopper state
 (`shopper_01`): the Out-of-true L belief with three seeded fit returns, the
-live correction to M, one pending refund, the fits-well feedback row, and
-the seller-side non-arrival dispute.
+M correction (same words as the live layer-side correction in T3.6, served
+here as fixture state, not a live recall), one pending refund, the fits-well
+feedback row, and the seller-side non-arrival dispute.
 
 ## Run
 
