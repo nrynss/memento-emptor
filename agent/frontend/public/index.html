@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Memento Emptor — shopper page</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; }
+      #chat { border: 1px solid #888; border-radius: 0.5rem; padding: 1rem; min-height: 12rem; margin: 1rem 0; }
+      #chat p { margin: 0.5rem 0; }
+      #chat .turn { font-size: 0.75rem; color: #555; }
+      form { display: flex; gap: 0.5rem; }
+      input[type=text] { flex: 1; padding: 0.5rem; }
+      button { padding: 0.5rem 1rem; }
+      code { background: #f0f0f0; padding: 0 0.25rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Memento Emptor — shopper page</h1>
+    <p>The reference shopper for the memory layer. It remembers what happened
+    to your money — and it never moves money. Before any recommendation it
+    recalls the earned fit beliefs first; your correction wins at once while
+    the belief stays; nothing is bought without an explicit
+    <code>yes</code>.</p>
+    <p>Memory here is the <strong>recorded demo fixture</strong> (seeded marks
+    shown on every return), not live layer data. Purchases are
+    <strong>not wired</strong> on this page: after a <code>yes</code> the
+    assistant says so plainly instead of claiming it happened.</p>
+
+    <h2>The flow this page demonstrates</h2>
+    <ol>
+      <li><strong>Recall</strong> — every recommendation starts with a
+      <code>recall_for_purchase</code> call for shopper <code>shopper_01</code>.</li>
+      <li><strong>Recommend</strong> — size M per the recorded correction
+      <code>corr_3b7e52</code>, citing belief <code>blf_8f2c41</code> with its
+      three seeded fit returns.</li>
+      <li><strong>Correct</strong> — correct the size mid-chat; the correction
+      is recorded at once and the very next recommendation follows it.</li>
+      <li><strong>Approve</strong> — reply <code>yes</code> and the assistant
+      confirms the gate instead of buying.</li>
+    </ol>
+
+    <h2>Try it</h2>
+    <ol>
+      <li><code>I need a Brand X oxford shirt</code> — recall first, recommends M, asks the pending refund question.</li>
+      <li><code>Actually, use L — I'm between sizes</code> — correction recorded, next recommendation follows it.</li>
+      <li><code>yes</code> — approval gated, honestly not purchased on this page.</li>
+    </ol>
+
+    <h2>Chat</h2>
+    <div id="chat" aria-live="polite"></div>
+    <form id="form">
+      <input type="text" id="input" maxlength="1000" placeholder="Ask for a shirt…" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+
+    <h2>Traces</h2>
+    <p>Every chat turn here is traced on the deployment with the recall/tool
+    spans in order; each reply shows its turn id. Proof turn: REPLACE_WITH_PROOF_TRACE.</p>
+
+    <script>
+      const chat = document.getElementById("chat");
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const history = [];
+
+      function add(who, text, turn) {
+        const p = document.createElement("p");
+        p.textContent = who + ": " + text;
+        chat.appendChild(p);
+        if (turn) {
+          const t = document.createElement("p");
+          t.className = "turn";
+          t.textContent = turn;
+          chat.appendChild(t);
+        }
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text) return;
+        input.value = "";
+        history.push({ role: "user", content: text });
+        add("you", text);
+        add("…", "thinking");
+        try {
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ messages: history }),
+          });
+          const data = await res.json();
+          chat.removeChild(chat.lastChild);
+          if (!res.ok) {
+            add("shopper", "Error: " + (data.error || res.status));
+            history.pop();
+            return;
+          }
+          history.push({ role: "assistant", content: data.reply });
+          add("shopper", data.reply, data.turn_id);
+        } catch (err) {
+          chat.removeChild(chat.lastChild);
+          add("shopper", "Error: could not reach the assistant");
+          history.pop();
+        }
+      });
+    </script>
+  </body>
+</html>

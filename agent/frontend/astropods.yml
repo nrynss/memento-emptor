@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://astropods.com/schema/package.json
+spec: blueprint/v1
+name: probe-gw
+
+agent:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  interfaces:
+    # F2/T3.8: the shopper page AND the messaging sidecar live in one
+    # container. frontend serves the page on the frontend hostname;
+    # messaging keeps the chat interface (trace proof turns go through it).
+    # messaging defaults to false once interfaces is declared, so both
+    # must be listed. memento-agent is untouched by this spec.
+    frontend: true
+    messaging: true
+
+models:
+  # Astro AI Gateway — managed model access (platform injects
+  # ASTRO_GATEWAY_URL + ASTRO_GATEWAY_API_KEY at deploy; the deploy-time
+  # pick arrives as MODEL_DEFAULT). Same model as the reference agent, so
+  # per-turn cost stays comparable across the demo.
+  default:
+    provider: gateway
+    models: [claude-sonnet-4-6]
+
+dev:
+  interfaces:
+    frontend:
+      port: 80
