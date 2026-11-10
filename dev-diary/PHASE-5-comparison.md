@@ -1,6 +1,6 @@
 # P5: Comparison
 
-Three arms, with the same agent, model, shoppers and catalog: no memory, raw PayPal history, and Memento Emptor. Arm 2 is the baseline that matters: "why not just give my agent the transaction history?"
+Three arms, with the same agent, model, shoppers and catalog: no memory, raw PayPal history, and Memento Emptor. Arm 2 is the baseline that matters: "why not just give my agent the transaction history?" The arm called "raw history" in this phase is now reported as **Memento evidence without beliefs**; see `bench/README.md` for the relabel.
 
 Read first: [`../product.md`](../product.md) (The comparison), `seed/`.
 

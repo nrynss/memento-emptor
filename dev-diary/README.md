@@ -177,6 +177,10 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### Low-finding sweep (docs)
+
+The stale "nine frozen tools" comments in `internal/api/server/mcp.go`, `internal/api/server/server.go` and `cmd/memento/main.go`, and the same count in `agent/runtime/README.md`, are corrected to eleven. The historical round 1 name is annotated in `bench/pilot/README.md` and `PHASE-5-comparison.md`, pointing at `bench/README.md`. Remaining low findings are not doc-only and stay with the task that owns the file: the durable standing-correction journal and its serialisation/repeat-time rules (T8.5), the pre-pivot correction types in `web/src/lib/contest/` (T9.2), the Claimed/Building `product_fit` fixtures and the population-aligned example counts (T7.4), and the 31-day/arm-2 fairness notes (T10.3).
+
 ### T9.1: Seeded population (done)
 
 **What exists.** `seed/population.go` generates 69 `domain.FitRow` rows across six line-and-size pairs, using `identity.SeedSaltHex` per-line hashes, `identity.TxnHash` row ids and the seeded mark on every row; no raw shopper or transaction id is in the fixture. `GeneratePopulation(asOf)` takes the anchor and `WritePopulation` writes `testdata/seed/population/population.json`. The demo oxford M is **Earned small** (12 distinct too-small shoppers, 63% share, and the recent window earns on its own); oxford L and brand-y are **Building**; brand-z is Building because the 60% share fails; brand-v is **Claimed** below the floor; brand-w is **Out of true** (the recent window flipped to large). Review APPROVE with one fix pinning a settled row's `EventAt` to its `SettledAt`.

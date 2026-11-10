@@ -288,7 +288,7 @@ func (s *Service) handleMCP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// describeTools lists the nine frozen tools with their request schemas.
+// describeTools lists the eleven frozen tools with their request schemas.
 func (s *Service) describeTools() []mcpToolDescription {
 	out := []mcpToolDescription{}
 	for _, tool := range contract.Tools() {

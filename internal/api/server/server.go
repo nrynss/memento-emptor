@@ -199,7 +199,7 @@ func (st *shopperState) streakFor(kind domain.BeliefKind, subjectID string) *dom
 	return streak
 }
 
-// Service is the running memory layer: nine frozen tools plus webhook
+// Service is the running memory layer: eleven frozen tools plus webhook
 // ingest and the call log, over one HTTP handler. It is safe for
 // concurrent use.
 type Service struct {

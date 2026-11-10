@@ -9,7 +9,7 @@ The Memento Emptor reference shopping agent as a deployed Astropods service.
 - Model: `claude-sonnet-4-6` via the gateway provider (no personal key; the
   platform injects `ASTRO_GATEWAY_URL`/`KEY`, deploy picks `MODEL_DEFAULT`).
   The same model runs in all three comparison arms.
-- Tools: the layer's nine frozen interface calls plus one PayPal-flavoured
+- Tools: the layer's eleven frozen interface calls plus one PayPal-flavoured
   order read. All fake-backed (see `agent/memory.ts`): tool names and shapes
   match the frozen contract, so the live swap changes no tool the agent
   reads.

@@ -2,6 +2,8 @@
 
 Status: pilot complete, 10 clean runs graded, 2 discarded contaminated turns kept as evidence.
 
+The arm called "raw history" in this pilot is now reported as **Memento evidence without beliefs**; see `bench/README.md` for the relabel.
+
 ## What was measured
 
 Every comparison shopper (`cmp-*`, never the demo shopper) through arms 1

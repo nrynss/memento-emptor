@@ -1,4 +1,4 @@
-// Command memento runs the memory layer: nine frozen tools over MCP and
+// Command memento runs the memory layer: eleven frozen tools over MCP and
 // plain HTTP, the call log, and payment webhook ingest. It boots on the
 // recording fakes with no key and no network, so the demo story replays
 // offline; the live swap replaces the fakes behind the same seams and
