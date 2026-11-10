@@ -160,6 +160,20 @@ Worker notes (in-review): 12/12 turns committed under `bench/runs/t58/` (4 harde
 
 ---
 
+### T5.9: Correction-round comparison
+```yaml
+requires:   [T5.8]
+fixture-ok: no
+size:       M · frontier
+owns:       bench/runs/
+status:     claimed:t59-correction
+```
+Every shopper, every arm, one correction turn: after the arm's first recommendation (or refusal), the shopper says "Actually I take L now" (uniform text naming an explicit size that differs from what the arm just gave; where the arm already recommended L, the text names M instead so the correction always contradicts). Then re-ask once. Grade with the frozen grader: honoured-on-next-turn, belief/state kept (arm 3: prior belief retained beside the correction, per the decision-vs-belief rule), history intact (arm 2), no fabrication. This is the signature move raw history has no mechanism for — run it honestly and report whatever happens, including arm 2 honouring it too.
+
+**Done when:** 27 correction turns committed (9 shoppers × 3 arms), graded, and verified against the freeze; any new input files hashed into the manifest by amendment in the same commit.
+
+---
+
 ## Exit Criteria
 
 - [ ] The harness and grader work on fixtures (T5.1, T5.2).
