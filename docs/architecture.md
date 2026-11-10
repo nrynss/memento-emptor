@@ -87,10 +87,11 @@ names a missing key without printing a value. There is no `.env`.
 The embedder sits behind the `EmbedderContract` interface in
 `internal/domain`: a kind name plus validation, no model name, no
 dimensions, no endpoint, no key. The direction is native embeddings
-served by the evidence store itself; the switch is blocked on three
-filed graph issues (connect timeout, missing calibration row, dropped
-timeout source) and, when they land, means adopting the native contract,
-re-measuring calibration, and re-embedding. Until then every session
+served by the evidence store itself. Three filed graph issues
+(connect timeout, missing calibration row, dropped timeout source)
+closed in graph 0.10.1; adopting the native contract still needs
+calibration confirmation on the demo shopper plus console billing, then
+re-embedding. Until then every session
 matches the contract it was built on. (Handoff log: issues 236–238;
 `research/elastic.md`; `research/elastic-native.md`.)
 
