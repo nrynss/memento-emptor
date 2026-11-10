@@ -15,7 +15,7 @@ Each phase document gives an engineer starting cold the complete context for its
 
 **This diary is public.** The repository goes public for submission. Nothing private goes in here: no key, no account detail, no IP address, no personal path beyond `~`, no private repository's name.
 
-**Current status:** T0.1 and T0.2 are done. T0.3 to T0.8 and T0.10 are ready. T0.9 waits on T0.3.
+**Current status:** P0 to P5 are done as first built. product.md now carries a proposed pivot (the reason layer, pooled product fit in Elastic, a merchant view). Two new ground probes come before any pivot work: T0.11 (Lambo serving many shoppers) and T0.12 (the Elastic fit index). Both are ready and independent. P6 waits on the pivot.
 
 ---
 
@@ -138,19 +138,23 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 10 / 10 | Done |
+| P0 | 10 / 12 | In progress (T0.11, T0.12 ready) |
 | P1 | 5 / 5 | Done |
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
-| P6 | 1 / 8 | In progress |
+| P6 | 1 / 8 | Paused for the pivot |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### Pivot proposed after P5 (user, under discussion)
+
+The comparison's "raw history" arm was handed rows the layer had already classified (reason, signal strength, write kind), so its 15/15 and 4/4 measure Memento's evidence without beliefs, not raw PayPal history. The arm that gated on Earned refused and lost. product.md now proposes: recall never refuses (status is a label), corrections stand alone, a real PayPal-only arm 2, pooled product fit across shoppers, and a merchant view (decided: ships). Per shopper stays in Lambo, one session each; the pool goes to an Elastic fit index, written at ingest, one row per purchase, settled rows only (kept past the window counts), a per-product-line shopper hash, seeded and live in one index. T0.11 and T0.12 test both halves before any pivot task is written. Open: consent for pooling, and which headline the new comparison supports.
 
 ### T5.9: Correction round (done)
 

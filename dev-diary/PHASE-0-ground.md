@@ -291,6 +291,55 @@ Mount AG Grid through its plain JavaScript API inside a Svelte 5 component on Ch
 
 **Notes.** Community tier (MIT), no Enterprise import; meets the sponsor prize on the face of it, with Devpost wording left to submission. `spikes/ag-grid/` is self-contained (own package, tests, demo) and `web/` is untouched. Plain-JS `createGrid` in `$effect` after `ModuleRegistry.registerModules([AllCommunityModule])`; theme from live Chaaya tokens with `colorSchemeDark` for dark mode, applied via `setGridOption` so edits survive toggling; status pill and seeded-mark renderers; status select editor plus editable note with `onEdit` reporting. jsdom needs ResizeObserver/matchMedia/rAF stubs, `suppressColumnVirtualisation`, and a `firstDataRendered` wait; theme CSS is not observable there. No Chaaya gap found.
 
+### T0.11: Lambo serving many shoppers ★
+```yaml
+requires:   [T0.3]
+fixture-ok: no
+size:       M · frontier
+owns:       dev-diary/research/lambo-multi.md, testdata/lambo-multi/
+status:     not-started
+```
+**The gate on per-shopper memory after the pivot.** product.md now keeps every shopper in their own Lambo session, keyed by a salted hash of their PayPal payer ID. T0.3 proved two sessions don't see each other, on one writer each. The deploy runs one writer for one session (`deploy/start.sh`, `LAMBO_SESSION`). Find out, on the Lambo release the deploy pins (`deploy/Dockerfile`), how the layer serves many shoppers:
+
+1. **One process or many.** Can one `lambo serve` (MCP) write to and read from more than one session, for example by a session argument per call, or is it one writer per session? Read the source and confirm by running it. If it's one writer per session, measure what each costs (resident memory, startup time, file handles) and how many fit on the deploy's Render instance (`deploy/render.yaml`).
+2. **Sessions on demand.** Can a session be created the first time a shopper appears, without a restart? Which characters and lengths a session name allows, and whether a 64-character hex hash fits.
+3. **Many writers, one store.** Several sessions writing at once to the same store file, with the store kind the deploy uses: any lock errors, lost writes or receipt timeouts.
+4. **Recall tier with many sessions.** With `recall-elastic` on, as the deploy runs it: how sessions share the Elastic recall index, and whether recall stays scoped to its session there too.
+5. **Isolation at scale.** Repeat T0.3's check 6 across at least 20 seeded sessions with overlapping brands: no recall, inspect or stats in one session returns another's concept.
+6. **Promotion per session.** One belief taken to Venerable in each of three sessions, seeded in interleaved order, so one session's writes and GC sweeps don't change another's promotion or time extent.
+7. **The ledger per shopper.** Can `serve-web` or `/api/inspect` read a session chosen per request, or is it fixed at start?
+
+Local first: the SQLite store, and the fixture embedder wherever the check allows it. Use the live Elastic deployment only for check 4, in a test index prefix, and delete every test index afterwards. Budget: under $0.50 of embedding spend. Run one case first and check its cost.
+
+Any gap becomes Lambo issue text in the handoff log, for the user to file. Don't work around it here. If 1 and 2 both fail (one writer per session and no sessions on demand), this task is `blocked`, and the orchestrator asks the user with options.
+
+**Done when:** `research/lambo-multi.md` holds each check's command and result, and a recommendation for how the deploy should serve many shoppers. Transcripts are in `testdata/lambo-multi/` with no key. Test indices are deleted (empty listing shown) and spend is recorded.
+
+### T0.12: The Elastic fit index ★
+```yaml
+requires:   [T0.6]
+fixture-ok: no
+size:       M · frontier
+owns:       dev-diary/research/elastic-fit.md, testdata/elastic-fit/
+status:     not-started
+```
+**The gate on pooled product fit and the merchant view.** product.md (the evidence model, "Lambo holds the shopper; Elastic holds the pool") settles the row: one document per purchase, keyed by a hash of the transaction ID, updated in place, written at ingest. Only settled rows count: returned with a classified reason, fit feedback, or kept past the return window. The shopper key is a salted hash per (shopper, product line). Seeded and live rows share one index, with the seeded mark on every row. Prove that design on the existing Serverless deployment (`research/elastic.md`):
+
+1. **Mapping.** A test index with a field for each part of the row: product line (brand, category, fit handle), size, purchase state, reason category, fit direction, per-line shopper hash, transaction hash, seeded mark, event times (captured, refunded, settled). Record the mapping exactly as later tasks will create it. No prose fields.
+2. **Rows move through states.** Write one purchase through every state in product.md's order (captured, refunded with no reason, reason classified; and separately feedback, and kept past the window; and a contested reason). Show each update lands in place, the document count stays one per purchase, and replaying a webhook-shaped write is harmless (`external` versioning or a sequence-number guard; record which, and why).
+3. **Settled-only aggregations.** Over a seeded population of at least 500 purchases across at least 3 lines and several sizes, built to known answers: for one line and size, settled purchases (denominator), fit returns by direction, feedback by verdict, and distinct shoppers per direction. Every number matches the known answer, or the difference is explained. Show an unsettled purchase and a refund with no reason count toward nothing.
+4. **Distinct counts.** `cardinality` is approximate. Record its `precision_threshold`, show it's exact at this population's size, and say at what size it stops being exact.
+5. **Seeded split.** The same aggregations split by the seeded mark, as the ledger will show them.
+6. **Speed inside recall.** Warm and cold latency of the line-and-size aggregation from this machine, since it runs on every `recall_for_purchase`. Record whether it needs the `timeout_ms` treatment T0.6 found for the cold TLS handshake.
+7. **Beside Lambo's recall tier.** The fit index sits next to Lambo's recall index on the same deployment without touching it: different name, no shared alias or template, and Lambo recall still answers afterwards.
+8. **Serverless limits.** Anything this deployment refuses or bills differently for these operations (index mode, update-by-id, aggregations), read from the responses and the docs.
+
+No embeddings are needed; the fit index has no vector field. Every index this task creates uses a test prefix and is deleted afterwards. Budget: no model spend. Elastic usage is whatever these calls cost on the Serverless project; record the console reading if the user provides it.
+
+If 2 or 3 fails, this task is `blocked`, and the orchestrator asks the user with options.
+
+**Done when:** `research/elastic-fit.md` holds each check's request, response and result, the exact mapping, and the aggregation queries later tasks will reuse. Recordings are in `testdata/elastic-fit/` with no key and no deployment URL. Test indices are deleted (empty listing shown).
+
 ---
 
 ## Exit Criteria
@@ -302,3 +351,5 @@ Mount AG Grid through its plain JavaScript API inside a Svelte 5 component on Ch
 - [x] Channel3, Elastic, Jev and Astropods each measured and recorded (T0.5 to T0.8).
 - [x] Hosting decided (T0.9).
 - [x] AG Grid confirmed inside Chaaya (T0.10).
+- [ ] Lambo serves many shoppers, each isolated, with a recommended deploy shape (T0.11).
+- [ ] The Elastic fit index updates per purchase in place and aggregates settled rows exactly (T0.12).
