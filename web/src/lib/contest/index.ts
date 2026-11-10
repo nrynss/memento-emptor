@@ -11,7 +11,8 @@ export { decodeRecordCorrectionResponse } from './decode';
 export {
 	createFixtureCorrectionTransport,
 	fixtureContradictedBeliefId,
-	fixtureCorrectionText
+	fixtureCorrectionText,
+	fixtureStandingCorrectionId
 } from './fixture';
 export {
 	createFixtureContestState,
@@ -21,7 +22,9 @@ export {
 	type ContestStatus
 } from './state';
 export type {
+	ContestCorrectionView,
 	CorrectionGuidance,
+	CorrectionGuidanceBasis,
 	CorrectionToolName,
 	CorrectionTransport,
 	RecordCorrectionRequest,

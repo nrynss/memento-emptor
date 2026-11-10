@@ -2,6 +2,10 @@
 // picker walks the demo story, a belief picker walks the rows at that step,
 // and the view shows what counts toward the belief, what was deliberately
 // not counted and why, the correction beside it, and the trace placeholders.
+// Below it, the pivot's reads for one shopper at a time: which precedence
+// step decided the recommendation with any overridden step beside the one
+// that won, the pooled belief as counts with its seeded split, a standing
+// correction with no belief, and the pooling opt-out with rows removed.
 
 <script lang="ts">
 	import { resolve } from '$app/paths';
@@ -14,12 +18,34 @@
 		type LedgerBeliefRow,
 		type LedgerFixtureStep
 	} from '$lib/api';
+	import { createFixtureContestState } from '$lib/contest';
+	import type { ContestCorrectionView } from '$lib/contest';
+	import ContestEditor from '$lib/contest/ContestEditor.svelte';
+	import {
+		createFixturePoolingState,
+		createFixtureRecallTransport,
+		DecisionLine,
+		decodeRecallResponse,
+		PoolCounts,
+		PoolingToggle,
+		recallCaseLabels,
+		recallCaseShopper,
+		recallCases,
+		StandingCorrection,
+		type OverriddenStep,
+		type RecallCase,
+		type RecallResponse
+	} from '$lib/ledger';
 	import { toLedgerGridRow } from '$lib/ledger/rows';
 	import { buildWhyView, tracesForBelief, WhyView, type WhyViewData } from '$lib/why';
 
 	const stepOptions: { step: LedgerFixtureStep; label: string }[] = (
 		Object.entries(fixtureStepLabels) as [string, string][]
 	).map(([raw, label]) => ({ step: Number(raw) as LedgerFixtureStep, label }));
+
+	const caseOptions: { recallCase: RecallCase; label: string }[] = recallCases.map(
+		(recallCase) => ({ recallCase, label: recallCaseLabels[recallCase] })
+	);
 
 	const preferredBeliefId = 'blf_8f2c41';
 
@@ -29,6 +55,42 @@
 	let detail = $state<WhyViewData | null>(null);
 	let loadError = $state<string | null>(null);
 	let loading = $state(true);
+
+	let recallCase = $state<RecallCase>('correction');
+	let recall = $state<RecallResponse | null>(null);
+	let recallError = $state<string | null>(null);
+	let recallLoading = $state(true);
+
+	const caseShopper = $derived(recallCaseShopper[recallCase]);
+	const contestState = $derived(createFixtureContestState(caseShopper, []));
+	const poolingState = $derived(createFixturePoolingState(caseShopper));
+	let standingList = $state<ContestCorrectionView[]>([]);
+
+	const overridden = $derived.by((): OverriddenStep[] => {
+		const current = recall;
+		if (current === null) return [];
+		const seen: string[] = [];
+		const out: OverriddenStep[] = [];
+		for (const belief of current.beliefs) {
+			const precedence = belief.precedence;
+			if (precedence?.overridden === true && precedence.overridden_by !== null) {
+				const key = `${precedence.step}>${precedence.overridden_by}`;
+				if (!seen.includes(key)) {
+					seen.push(key);
+					out.push({ step: precedence.step, winner: precedence.overridden_by });
+				}
+			}
+		}
+		const poolPrecedence = current.pool?.precedence;
+		if (poolPrecedence?.overridden === true && poolPrecedence.overridden_by !== null) {
+			const key = `${poolPrecedence.step}>${poolPrecedence.overridden_by}`;
+			if (!seen.includes(key)) {
+				seen.push(key);
+				out.push({ step: poolPrecedence.step, winner: poolPrecedence.overridden_by });
+			}
+		}
+		return out;
+	});
 
 	$effect(() => {
 		const currentStep = step;
@@ -86,6 +148,32 @@
 		};
 	});
 
+	$effect(() => {
+		const current = recallCase;
+		let live = true;
+		recallLoading = true;
+		recallError = null;
+		void (async () => {
+			try {
+				const transport = createFixtureRecallTransport(current);
+				const raw = await transport.call('recall_for_purchase', {
+					shopper_id: recallCaseShopper[current]
+				});
+				if (!live) return;
+				recall = decodeRecallResponse(raw);
+			} catch (error) {
+				if (!live) return;
+				recall = null;
+				recallError = error instanceof Error ? error.message : 'The recommendation failed to load';
+			} finally {
+				if (live) recallLoading = false;
+			}
+		})();
+		return () => {
+			live = false;
+		};
+	});
+
 	function optionLabel(row: LedgerBeliefRow): string {
 		const flat = toLedgerGridRow(row);
 		return `${flat.kindLabel} · ${flat.subject} — ${flat.value}`;
@@ -97,6 +185,11 @@
 
 	function pickBelief(event: Event): void {
 		beliefId = (event.currentTarget as HTMLSelectElement).value;
+	}
+
+	function pickCase(event: Event): void {
+		recallCase = (event.currentTarget as HTMLSelectElement).value as RecallCase;
+		standingList = [];
 	}
 </script>
 
@@ -137,6 +230,60 @@
 {:else}
 	<WhyView view={detail} />
 {/if}
+
+<h2>What the layer recommends</h2>
+<p class="lede">
+	Which precedence step decided, with any overridden step beside the one that won.
+	One shopper at a time: each case replays a single shopper's rows, and any other
+	shopper fails instead of mixing in.
+</p>
+
+<div class="why-controls">
+	<label for="why-case">Recommendation case</label>
+	<select id="why-case" value={recallCase} onchange={pickCase}>
+		{#each caseOptions as option (option.recallCase)}
+			<option value={option.recallCase}>{option.label} · {recallCaseShopper[option.recallCase]}</option>
+		{/each}
+	</select>
+</div>
+
+{#if recallError !== null}
+	<p role="alert" class="why-error">The recommendation failed to load: {recallError}</p>
+{:else if recallLoading || recall === null}
+	<p class="why-loading">Loading the recommendation…</p>
+{:else}
+	<DecisionLine text={recall.guidance.text} basis={recall.guidance.basis} overridden={overridden} />
+	{#if recall.pool !== null && recall.pool !== undefined}
+		<PoolCounts pool={recall.pool} />
+	{:else}
+		<p class="why-loading">No pooled belief applies here.</p>
+	{/if}
+{/if}
+
+<h2>Your standing correction</h2>
+<p class="lede">
+	No belief yet: record a correction that stands on its own and decides at once.
+</p>
+{#key caseShopper}
+	<ContestEditor
+		contest={contestState}
+		onRecorded={(response) => {
+			if (response.belief_id === undefined) {
+				standingList = [response.correction, ...standingList];
+			}
+		}}
+	/>
+{/key}
+{#each standingList as correction (correction.correction_id)}
+	<StandingCorrection text={correction.text} recordedAt={correction.recorded_at} />
+{/each}
+
+<h2>Pooling choice</h2>
+<p class="lede">
+	Pooling is opt-out. Opting out stops new fit rows and removes the ones already
+	written; the layer says how many rows went.
+</p>
+<PoolingToggle pooling={poolingState} />
 
 <style>
 	.why-controls {

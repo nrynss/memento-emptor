@@ -3,12 +3,13 @@
 // client: the shopper's words go to record_correction, and the rows update
 // from the layer's decoded answer. Nothing here rewrites a belief on its
 // own — every field applied below comes from the correction response, so
-// the evidence stays untouched and the contradicted row stays visible.
+// the evidence stays untouched and the contradicted row stays visible. A
+// correction with no belief yet stands on its own beside the rows.
 import { Notifier } from '@nrynss/chaaya/core';
 import { LedgerApiError, type LedgerBeliefRow } from '$lib/api';
 import { CorrectionClient } from './client';
 import { createFixtureCorrectionTransport } from './fixture';
-import type { RecordCorrectionResponse } from './types';
+import type { ContestCorrectionView, RecordCorrectionResponse } from './types';
 
 /** Where a correction stands. It starts idle and never returns there. */
 export type ContestStatus = 'idle' | 'sending' | 'ready' | 'error';
@@ -36,7 +37,16 @@ export function confirmationLineFor(correctionText: string): string {
 			status: response.status,
 			standing: response.standing,
 			contradicted: response.contradicted,
-			contradicted_by: response.correction,
+			contradicted_by:
+				response.correction.contradicts_belief_id === undefined
+					? row.belief.contradicted_by
+					: {
+							correction_id: response.correction.correction_id,
+							text: response.correction.text,
+							contradicts_belief_id: response.correction.contradicts_belief_id,
+							recorded_at: response.correction.recorded_at,
+							takes_precedence: true
+						},
 			updated_at: response.correction.recorded_at
 		},
 		evidence_count: row.evidence_count,
@@ -49,6 +59,7 @@ export class ContestState extends Notifier {
 	private readonly client: CorrectionClient;
 	private readonly shopperId: string;
 	private rows: LedgerBeliefRow[];
+	private standing: ContestCorrectionView[] = [];
 	private opStatus: ContestStatus = 'idle';
 	private opError: string | null = null;
 	private lastResponse: RecordCorrectionResponse | null = null;
@@ -68,6 +79,11 @@ export class ContestState extends Notifier {
 	/** The rows, with any contested row kept in place. */
 	get beliefs(): LedgerBeliefRow[] {
 		return this.rows;
+	}
+
+	/** Corrections that stand on their own, with no belief yet, newest first. */
+	get standingCorrections(): ContestCorrectionView[] {
+		return this.standing;
 	}
 
 	/** Why the latest correction failed, or null. */
@@ -102,9 +118,43 @@ export class ContestState extends Notifier {
 				text: words,
 				contradicts_belief_id: beliefId
 			});
-			this.rows = this.rows.map((row) =>
-				row.belief.belief_id === response.belief_id ? applyCorrectionResponse(row, response) : row
-			);
+			const answered = response.belief_id;
+			if (answered !== undefined) {
+				this.rows = this.rows.map((row) =>
+					row.belief.belief_id === answered ? applyCorrectionResponse(row, response) : row
+				);
+			}
+			this.lastResponse = response;
+			this.opStatus = 'ready';
+			this.notify();
+			return response;
+		} catch (error) {
+			this.opStatus = 'error';
+			this.opError = error instanceof Error ? error.message : 'The correction failed.';
+			this.notify();
+			throw error;
+		}
+	}
+
+	/**
+	 * Sends the shopper's correction with no belief yet. The layer keeps
+	 * it as a standing record that decides at once; the rows stay
+	 * untouched, and the correction lists beside them.
+	 */
+	async submitStandingCorrection(text: string): Promise<RecordCorrectionResponse> {
+		const words = text.trim();
+		if (words === '') {
+			throw new LedgerApiError('unknown-request', 'a correction needs the shopper in words');
+		}
+		this.opStatus = 'sending';
+		this.opError = null;
+		this.notify();
+		try {
+			const response = await this.client.recordCorrection({
+				shopper_id: this.shopperId,
+				text: words
+			});
+			this.standing = [response.correction, ...this.standing];
 			this.lastResponse = response;
 			this.opStatus = 'ready';
 			this.notify();

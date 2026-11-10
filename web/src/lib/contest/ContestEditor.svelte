@@ -1,25 +1,30 @@
 <script lang="ts">
 	// The shopper's correction form. Everything a first-time judge needs is
 	// on the form itself: what the ledger says now, what will happen, the
-	// box, the button, and the result in plain words. The edit goes through
-	// the contest state's correction path on submit; the form never touches a
-	// belief itself. Svelte 5 runes only: props in, local $state out.
+	// box, the button, and the result in plain words. With a belief the edit
+	// goes through the contest state's declared path; with none it stands
+	// on its own through the standing path. The form never touches a belief
+	// itself. Svelte 5 runes only: props in, local $state out.
 
 	import type { ContestState } from './state';
+	import type { RecordCorrectionResponse } from './types';
 	import { confirmationLineFor, correctionPreviewLine } from './state';
 
 	interface Props {
 		contest: ContestState;
-		beliefId: string;
+		beliefId?: string | null;
 		currentValue?: string;
+		onRecorded?: (response: RecordCorrectionResponse) => void;
 	}
 
-	let { contest, beliefId, currentValue }: Props = $props();
+	let { contest, beliefId = null, currentValue, onRecorded }: Props = $props();
 
 	let text = $state('');
 	let sending = $state(false);
 	let formError = $state<string | null>(null);
 	let confirmed = $state<string | null>(null);
+
+	const standing = $derived(beliefId === null);
 
 	async function submit(event: Event): Promise<void> {
 		event.preventDefault();
@@ -31,9 +36,13 @@
 		formError = null;
 		confirmed = null;
 		try {
-			const response = await contest.submitCorrection(beliefId, text.trim());
+			const response =
+				beliefId === null
+					? await contest.submitStandingCorrection(text.trim())
+					: await contest.submitCorrection(beliefId, text.trim());
 			confirmed = response.correction.text;
 			text = '';
+			onRecorded?.(response);
 		} catch (error) {
 			formError = error instanceof Error ? error.message : 'The correction failed.';
 		} finally {
@@ -43,13 +52,21 @@
 </script>
 
 <form class="contest-editor" onsubmit={submit}>
-	<label class="contest-label" for="contest-text">Contest this belief</label>
+	<label class="contest-label" for="contest-text">
+		{standing ? 'Record a standing correction' : 'Contest this belief'}
+	</label>
 	{#if currentValue !== undefined}
 		<p class="contest-current">The ledger currently says: “{currentValue}”.</p>
 	{/if}
-	<p class="contest-preview" id="contest-preview">
-		{correctionPreviewLine}
-	</p>
+	{#if standing}
+		<p class="contest-preview" id="contest-preview">
+			No belief yet: your correction stands on its own and decides at once.
+		</p>
+	{:else}
+		<p class="contest-preview" id="contest-preview">
+			{correctionPreviewLine}
+		</p>
+	{/if}
 	<textarea
 		id="contest-text"
 		class="contest-input"
