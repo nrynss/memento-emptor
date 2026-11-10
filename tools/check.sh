@@ -30,7 +30,7 @@ fi
 # Go tooling must not walk web/node_modules, which carries third-party Go
 # snippets that are not this project's code.
 all_pkgs=$(go list ./...)
-go_pkgs=$(printf '%s\n' "$all_pkgs" | grep -v '^github.com/nrynss/memento-emptor/web/node_modules/' || true)
+go_pkgs=$(printf '%s\n' "$all_pkgs" | grep -v '^github.com/nrynss/memento-emptor/web/node_modules/' | grep -v '^github.com/nrynss/memento-emptor/merchant/node_modules/' || true)
 [ -n "$go_pkgs" ] || fail "go list" "no Go packages found"
 
 echo "-- go vet"
@@ -39,11 +39,7 @@ go vet $go_pkgs || fail "go vet" "go vet reported problems"
 echo "-- go test -race"
 go test -race $go_pkgs || fail "go test -race" "tests failed"
 
-cd web
-
-[ -d node_modules ] || fail "web deps" "web/node_modules is missing; run npm ci in web"
-
-run_web() {
+run_frontend() {
 	local name=$1
 	shift
 	local log
@@ -56,22 +52,32 @@ run_web() {
 	rm -f "$log"
 }
 
-echo "-- lockfile"
-run_web "lockfile" node scripts/check-lock.mjs
-run_web "lockfile" npm ci --dry-run
+check_frontend() {
+	local dir=$1
+	cd "$dir"
 
-echo "-- svelte-check"
-run_web "svelte-check" npm run check
+	[ -d node_modules ] || fail "$dir deps" "$dir/node_modules is missing; run npm ci in $dir"
 
-echo "-- eslint"
-run_web "eslint" npm run lint
+	echo "-- $dir lockfile"
+	run_frontend "$dir lockfile" node scripts/check-lock.mjs
+	run_frontend "$dir lockfile" npm ci --dry-run
 
-echo "-- vitest"
-run_web "vitest" npm run test
+	echo "-- $dir svelte-check"
+	run_frontend "$dir svelte-check" npm run check
 
-echo "-- web build"
-run_web "web build" npm run build
+	echo "-- $dir eslint"
+	run_frontend "$dir eslint" npm run lint
 
-cd ..
+	echo "-- $dir vitest"
+	run_frontend "$dir vitest" npm run test
+
+	echo "-- $dir build"
+	run_frontend "$dir build" npm run build
+
+	cd ..
+}
+
+check_frontend web
+check_frontend merchant
 
 echo "OK all checks passed"

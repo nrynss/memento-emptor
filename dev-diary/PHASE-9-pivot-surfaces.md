@@ -64,11 +64,20 @@ requires:   [T8.3, T8.6]
 fixture-ok: yes
 size:       M · mid
 owns:       merchant/, tools/check.sh
-status:     claimed:t93-merchant
+status:     in-review
 ```
 A separate, read-only app for the sandbox merchant's product lines. It reads the pool only through the layer's `product_fit`, with the merchant key from T8.6, never Elastic, and holds no Elastic key. One AG Grid table: product line and size, settled purchases, returns by reason category and direction, feedback by verdict, pool status, seeded count. A row opens the "why" for that line and size: the counts behind its status, and the rule it was judged by. The same stack as `web/` (Svelte 5, Chaaya, AG Grid community), with its own package, tests and build, and a step in `tools/check.sh`. The Go `DemoOxfordLine()` / `PopulationLines()` helpers are not importable from Svelte; take the seller's line list from `testdata/api` or its own config.
 
 **Done when:** it builds and tests against fixtures from `testdata/api/`. Each status renders with its rule. No component can show a shopper row, and a test proves the app has no Elastic configuration. The gate passes, including the new step.
+
+**Notes (in-review).** `merchant/` mirrors `web/`'s stack (Svelte 5, Chaaya, AG Grid community, SvelteKit static, vitest) with its own package, lockfile and build. `src/lib/pool/` is the `product_fit` read: types, decoders, a one-method `MerchantClient`, a fixture transport over the six seller lines, an HTTP transport that posts only to `/tools/product_fit` with the merchant key, the line list (the Go helpers are not importable from Svelte, so it lives here as data), and the status rule. The Earned demo oxford fixture is the frozen `product_fit.response.example.json` itself; the other five lines are built so `decidePool` re-decides the status each serves, which the gate checks. `rule.ts` mirrors `internal/domain/pool.go`'s thresholds for explanation only; the layer decides. `src/lib/merchant/` is the read-only AG Grid table (line and size, settled, returns by direction, reasons by category, fits-well feedback, status, direction, seeded count) plus the why panel (`explainWhy`: the counts behind the status and the rule). Proof tests: `pool.test.ts` pins the single-method client and refuses any request naming more than the line and size; `grid.test.ts` and `rows.test.ts` assert no column, row or rendered cell can carry a shopper field; `no-elastic.test.ts` scans shipped source, the dependency lists and the only two environment names the app reads. `tools/check.sh` now runs each frontend through a shared `check_frontend` step (web, then merchant) and excludes both `node_modules` trees from the Go walk. The gate passes: Go vet and tests, both lockfiles, both svelte-checks, both lints, both vitest suites (merchant: 6 files, 37 tests), both builds.
+
+Four things the next agent should not have to rediscover:
+
+- The fixture transport validates with `checkProductFitRequest`, which requires exactly the four line-and-size fields: pass seller lines through `toProductFitRequest`, since `MerchantLine` carries a display `label` the contract rejects.
+- `svelte-check` resolves `node:` imports only with `@types/node` in devDependencies; `merchant` carries it while `web/` does not need it.
+- The `Out of true` fixture needs a recent window that is itself judged (at least 3 fit shoppers) yet fails the Earned bar; between three and seven recent fit shoppers no direction can earn, so a quiet Earned line reads Out of true.
+- The page loads through the fixture transport; wiring the HTTP transport is a config task (base URL plus merchant key), and the key never enters a file.
 
 ### T9.3d: The merchant app, deployed
 ```yaml
