@@ -1,0 +1,134 @@
+{
+  "run_id": "t58-a3-noisy-large-r1",
+  "shopper_id": "cmp-noisy-large",
+  "arm": 3,
+  "arm_name": "memento",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-noisy-large\nCandidate: a new Inlet Oxford Shirt from Brand I (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: Memento layer. Live recall for this shopper and brand, served by the layer:\nRecall request: {\"brand_id\":\"BRI\",\"shopper_id\":\"cmp-noisy-large\",\"trace_id\":\"t58-a3-noisy-large-r1\"}\nRecall response:\n{\n  \"shopper_id\": \"cmp-noisy-large\",\n  \"beliefs\": [\n    {\n      \"belief_id\": \"blf_000001\",\n      \"kind\": \"fit\",\n      \"subject\": {\n        \"Kind\": \"brand\",\n        \"ID\": \"BRI\",\n        \"Name\": \"Brand I\"\n      },\n      \"value\": \"runs large, take size S\",\n      \"status\": \"Earned\",\n      \"standing\": \"Venerable\",\n      \"contradicted\": false,\n      \"contradicted_by\": null,\n      \"evidence\": [\n        {\n          \"evidence_id\": \"ev_000003\",\n          \"outcome\": {\n            \"kind\": \"refund\",\n            \"status\": \"COMPLETED\",\n            \"amount_minor\": 5100,\n            \"currency\": \"USD\"\n          },\n          \"item\": {\n            \"brand_id\": \"BRI\",\n            \"brand_name\": \"Brand I\",\n            \"line_name\": \"Inlet Oxford Shirt\",\n            \"sku\": \"BRI-OXF-M\",\n            \"size\": \"M\",\n            \"category\": \"dress-shirts\"\n          },\n          \"reason\": {\n            \"category\": \"fit_too_large\",\n            \"text\": \"swims on the shopper\",\n            \"confidence\": 1\n          },\n          \"counts_toward\": \"fit\",\n          \"write_op\": \"record_action\",\n          \"link\": {\n            \"order_id\": \"ORD-seed-7-cmp-noisy-large-032-526b\",\n            \"capture_id\": \"CAP-seed-7-cmp-noisy-large-032-526b\",\n            \"refund_id\": \"RFD-seed-7-cmp-noisy-large-032-526b\",\n            \"custom_id\": \"seed-7-cmp-noisy-large-032\",\n            \"event_id\": \"EVT-seed-7-cmp-noisy-large-032-526b\"\n          },\n          \"seeded\": true,\n          \"occurred_at\": \"2026-01-06T00:00:00Z\"\n        },\n        {\n          \"evidence_id\": \"ev_000006\",\n          \"outcome\": {\n            \"kind\": \"refund\",\n            \"status\": \"COMPLETED\",\n            \"amount_minor\": 5100,\n            \"currency\": \"USD\"\n          },\n          \"item\": {\n            \"brand_id\": \"BRI\",\n            \"brand_name\": \"Brand I\",\n            \"line_name\": \"Inlet Oxford Shirt\",\n            \"sku\": \"BRI-OXF-M\",\n            \"size\": \"M\",\n            \"category\": \"dress-shirts\"\n          },\n          \"reason\": {\n            \"category\": \"fit_too_large\",\n            \"text\": \"too loose across the chest\",\n            \"confidence\": 1\n          },\n          \"counts_toward\": \"fit\",\n          \"write_op\": \"record_action\",\n          \"link\": {\n            \"order_id\": \"ORD-seed-7-cmp-noisy-large-035-4b27\",\n            \"capture_id\": \"CAP-seed-7-cmp-noisy-large-035-4b27\",\n            \"refund_id\": \"RFD-seed-7-cmp-noisy-large-035-4b27\",\n            \"custom_id\": \"seed-7-cmp-noisy-large-035\",\n            \"event_id\": \"EVT-seed-7-cmp-noisy-large-035-4b27\"\n          },\n          \"seeded\": true,\n          \"occurred_at\": \"2026-01-12T00:00:00Z\"\n        },\n        {\n          \"evidence_id\": \"ev_000012\",\n          \"outcome\": {\n            \"kind\": \"refund\",\n            \"status\": \"COMPLETED\",\n            \"amount_minor\": 5100,\n            \"currency\": \"USD\"\n          },\n          \"item\": {\n            \"brand_id\": \"BRI\",\n            \"brand_name\": \"Brand I\",\n            \"line_name\": \"Inlet Oxford Shirt\",\n            \"sku\": \"BRI-OXF-M\",\n            \"size\": \"M\",\n            \"category\": \"dress-shirts\"\n          },\n          \"reason\": {\n            \"category\": \"fit_too_large\",\n            \"text\": \"sleeves too long in M\",\n            \"confidence\": 1\n          },\n          \"counts_toward\": \"fit\",\n          \"write_op\": \"record_action\",\n          \"link\": {\n            \"order_id\": \"ORD-seed-7-cmp-noisy-large-041-3d78\",\n            \"capture_id\": \"CAP-seed-7-cmp-noisy-large-041-3d78\",\n            \"refund_id\": \"RFD-seed-7-cmp-noisy-large-041-3d78\",\n            \"custom_id\": \"seed-7-cmp-noisy-large-041\",\n            \"event_id\": \"EVT-seed-7-cmp-noisy-large-041-3d78\"\n          },\n          \"seeded\": true,\n          \"occurred_at\": \"2026-01-24T00:00:00Z\"\n        }\n      ],\n      \"seeded\": true,\n      \"updated_at\": \"2026-01-24T00:00:00Z\"\n    }\n  ],\n  \"overriding_correction\": null,\n  \"guidance\": {\n    \"text\": \"Take size S for Brand I\",\n    \"basis\": \"belief\",\n    \"correction_id\": null,\n    \"belief_id\": \"blf_000001\"\n  },\n  \"pending_count\": 1,\n  \"trace_id\": \"t58-a3-noisy-large-r1\"\n}\nPending questions request: {\"shopper_id\": \"cmp-noisy-large\"}\nPending questions response:\n{\n  \"shopper_id\": \"cmp-noisy-large\",\n  \"questions\": [\n    {\n      \"question_id\": \"q_000001\",\n      \"outcome\": {\n        \"kind\": \"refund\",\n        \"status\": \"COMPLETED\",\n        \"amount_minor\": 5100,\n        \"currency\": \"USD\"\n      },\n      \"item\": {\n        \"brand_id\": \"BRI\",\n        \"brand_name\": \"Brand I\",\n        \"line_name\": \"Inlet Oxford Shirt\",\n        \"sku\": \"BRI-OXF-M\",\n        \"size\": \"M\",\n        \"category\": \"dress-shirts\"\n      },\n      \"link\": {\n        \"order_id\": \"ORD-seed-7-cmp-noisy-large-039-b230\",\n        \"capture_id\": \"CAP-seed-7-cmp-noisy-large-039-b230\",\n        \"refund_id\": \"RFD-seed-7-cmp-noisy-large-039-b230\",\n        \"custom_id\": \"seed-7-cmp-noisy-large-039\",\n        \"event_id\": \"EVT-seed-7-cmp-noisy-large-039-b230\"\n      },\n      \"seeded\": true,\n      \"asked_count\": 0,\n      \"last_asked_at\": null,\n      \"awaiting_since\": \"2026-01-20T00:00:00Z\"\n    }\n  ]\n}",
+  "arm_memory_tool": "recall_for_purchase shopper_id=cmp-noisy-large brand_id=BRI trace_id=t58-a3-noisy-large-r1 + pending_questions shopper_id=cmp-noisy-large",
+  "arm_memory_response": "recall_for_purchase response:\n{\"shopper_id\":\"cmp-noisy-large\",\"beliefs\":[{\"belief_id\":\"blf_000001\",\"kind\":\"fit\",\"subject\":{\"Kind\":\"brand\",\"ID\":\"BRI\",\"Name\":\"Brand I\"},\"value\":\"runs large, take size S\",\"status\":\"Earned\",\"standing\":\"Venerable\",\"contradicted\":false,\"contradicted_by\":null,\"evidence\":[{\"evidence_id\":\"ev_000003\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":5100,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRI\",\"brand_name\":\"Brand I\",\"line_name\":\"Inlet Oxford Shirt\",\"sku\":\"BRI-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"fit_too_large\",\"text\":\"swims on the shopper\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-noisy-large-032-526b\",\"capture_id\":\"CAP-seed-7-cmp-noisy-large-032-526b\",\"refund_id\":\"RFD-seed-7-cmp-noisy-large-032-526b\",\"custom_id\":\"seed-7-cmp-noisy-large-032\",\"event_id\":\"EVT-seed-7-cmp-noisy-large-032-526b\"},\"seeded\":true,\"occurred_at\":\"2026-01-06T00:00:00Z\"},{\"evidence_id\":\"ev_000006\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":5100,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRI\",\"brand_name\":\"Brand I\",\"line_name\":\"Inlet Oxford Shirt\",\"sku\":\"BRI-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"fit_too_large\",\"text\":\"too loose across the chest\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-noisy-large-035-4b27\",\"capture_id\":\"CAP-seed-7-cmp-noisy-large-035-4b27\",\"refund_id\":\"RFD-seed-7-cmp-noisy-large-035-4b27\",\"custom_id\":\"seed-7-cmp-noisy-large-035\",\"event_id\":\"EVT-seed-7-cmp-noisy-large-035-4b27\"},\"seeded\":true,\"occurred_at\":\"2026-01-12T00:00:00Z\"},{\"evidence_id\":\"ev_000012\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":5100,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRI\",\"brand_name\":\"Brand I\",\"line_name\":\"Inlet Oxford Shirt\",\"sku\":\"BRI-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"fit_too_large\",\"text\":\"sleeves too long in M\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-noisy-large-041-3d78\",\"capture_id\":\"CAP-seed-7-cmp-noisy-large-041-3d78\",\"refund_id\":\"RFD-seed-7-cmp-noisy-large-041-3d78\",\"custom_id\":\"seed-7-cmp-noisy-large-041\",\"event_id\":\"EVT-seed-7-cmp-noisy-large-041-3d78\"},\"seeded\":true,\"occurred_at\":\"2026-01-24T00:00:00Z\"}],\"seeded\":true,\"updated_at\":\"2026-01-24T00:00:00Z\"}],\"overriding_correction\":null,\"guidance\":{\"text\":\"Take size S for Brand I\",\"basis\":\"belief\",\"correction_id\":null,\"belief_id\":\"blf_000001\"},\"pending_count\":1,\"trace_id\":\"t58-a3-noisy-large-r1\"}\npending_questions response:\n{\"shopper_id\":\"cmp-noisy-large\",\"questions\":[{\"question_id\":\"q_000001\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":5100,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRI\",\"brand_name\":\"Brand I\",\"line_name\":\"Inlet Oxford Shirt\",\"sku\":\"BRI-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"link\":{\"order_id\":\"ORD-seed-7-cmp-noisy-large-039-b230\",\"capture_id\":\"CAP-seed-7-cmp-noisy-large-039-b230\",\"refund_id\":\"RFD-seed-7-cmp-noisy-large-039-b230\",\"custom_id\":\"seed-7-cmp-noisy-large-039\",\"event_id\":\"EVT-seed-7-cmp-noisy-large-039-b230\"},\"seeded\":true,\"asked_count\":0,\"last_asked_at\":null,\"awaiting_since\":\"2026-01-20T00:00:00Z\"}]}",
+  "agent_tool_spans": [
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1576
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1588
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1557
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1561
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 735
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    }
+  ],
+  "recall_observed": false,
+  "reply": "S — the memory layer's venerable belief records three completed refunds of the Brand I Inlet Oxford Shirt in size M for being too large (\"swims on the shopper,\" \"too loose across the chest,\" \"sleeves too long\"), and guidance explicitly states \"Take size S for Brand I.\"",
+  "contaminated": false,
+  "trace_cost_usd": 0.00732,
+  "prompt_words": 404,
+  "reply_words": 47,
+  "capped": false,
+  "sent_at": "2026-11-10T12:21:36Z",
+  "trace_at": "2026-11-10T12:21:45Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "S — the memory layer's venerable belief records three completed refunds of the Brand I Inlet Oxford Shirt in size M for being too large (\"swims on the shopper,\" \"too loose across the chest,\" \"sleeves too long\"), and guidance explicitly states \"Take size S for Brand I.\"",
+    "human_size": "S",
+    "human_size_reason": "Deterministic size M names the returned item (\"size M for being too large\"); the recommendation is S (\"guidance explicitly states Take size S\"). Same override shape as the frozen pilot-a2-size-changed precedent.",
+    "id_refs": null,
+    "human_refs": [
+      {
+        "ref": "swims on the shopper",
+        "quote": "\"swims on the shopper\"",
+        "reason": "Matches exactly one row note: Fit return 1, Brand I oxford M day 5."
+      },
+      {
+        "ref": "too loose across the chest",
+        "quote": "\"too loose across the chest\"",
+        "reason": "Matches exactly one row note: Fit return 2, Brand I oxford M day 11."
+      },
+      {
+        "ref": "sleeves too long in M",
+        "quote": "\"sleeves too long\"",
+        "reason": "Matches exactly one row note: Fit return 3, Brand I oxford M day 23."
+      }
+    ],
+    "notes": "live layer seed, settled before recall: 7 polls over 60s: to fit brand BRI runs large, take size S=Venerable/3/1.000 -for-BRI ships reliably for this shopper=Venerable/3/1.000 t brand BRL size M fits this shopper now=None/1/0.000"
+  },
+  "score": {
+    "ShopperID": "cmp-noisy-large",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 3,
+    "Cited": 3,
+    "Cites": [
+      {
+        "Ref": "swims on the shopper",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "too loose across the chest",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "sleeves too long in M",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      }
+    ],
+    "TokensFirst": 451,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

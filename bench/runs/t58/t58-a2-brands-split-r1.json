@@ -1,0 +1,119 @@
+{
+  "run_id": "t58-a2-brands-split-r1",
+  "shopper_id": "cmp-brands-split",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-brands-split\nCandidate: a new Reef Oxford Shirt from Brand R (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-brands-split: 6 rows over 9 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand R Reef Oxford Shirt SKU BRR-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 2 | refund COMPLETED | signal classified_outcome | source payment | Brand R Reef Oxford Shirt SKU BRR-OXF-M size M (dress-shirts) | reason fit_too_large \"too loose across the chest\" conf 1.00 | write record_action | seeded | Fit return 1: Brand R reef oxford size M refunded; too loose across the chest\nday 4 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand T Tide Oxford Shirt SKU BRT-OXF-M size M (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand T tide oxford size M, no feedback\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand T Tide Oxford Shirt SKU BRT-OXF-M size M (dress-shirts) | reason fit_too_small \"too tight in the shoulders\" conf 1.00 | write record_action | seeded | Fit return 1: Brand T tide oxford size M refunded; too tight in the shoulders\nday 7 | refund COMPLETED | signal classified_outcome | source payment | Brand R Reef Oxford Shirt SKU BRR-OXF-M size M (dress-shirts) | reason fit_too_large \"sleeves too long in M\" conf 1.00 | write record_action | seeded | Fit return 2: Brand R reef oxford size M refunded; sleeves too long in M\nday 9 | dispute OPEN | signal classified_outcome | source payment | Brand R Reef Oxford Shirt SKU BRR-OXF-M size M (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand R parcel never arrived; carrier lost it\n",
+  "arm_memory_tool": "read_history",
+  "arm_memory_response": "response 1710 chars, first line: Raw history for cmp-brands-split: 6 rows over 9 days.",
+  "agent_tool_spans": [
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1373
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1353
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1368
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 634
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1305
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**S**\n\nBoth prior Brand R Reef Oxford Shirt purchases in M were returned for fitting too large (\"too loose across the chest,\" \"sleeves too long in M\"), so sizing down to S is warranted.",
+  "contaminated": false,
+  "trace_cost_usd": 0.002994,
+  "prompt_words": 354,
+  "reply_words": 34,
+  "capped": false,
+  "sent_at": "2026-11-10T12:32:39Z",
+  "trace_at": "2026-11-10T12:32:45Z",
+  "extraction": {
+    "size": "S",
+    "size_rule": "standalone-token",
+    "size_quote": "**S**",
+    "id_refs": null,
+    "human_refs": [
+      {
+        "ref": "too loose across the chest",
+        "quote": "\"too loose across the chest\"",
+        "reason": "Matches exactly one row note: Fit return 1, Brand R reef oxford M day 2; the Brand T fit note names tight shoulders."
+      },
+      {
+        "ref": "sleeves too long in M",
+        "quote": "\"sleeves too long in M\"",
+        "reason": "Matches exactly one row note: Fit return 2, Brand R reef oxford M day 7."
+      }
+    ]
+  },
+  "score": {
+    "ShopperID": "cmp-brands-split",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 2,
+    "Cited": 2,
+    "Cites": [
+      {
+        "Ref": "too loose across the chest",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "sleeves too long in M",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      }
+    ],
+    "TokensFirst": 388,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

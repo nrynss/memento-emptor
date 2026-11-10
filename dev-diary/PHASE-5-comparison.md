@@ -120,9 +120,9 @@ status:     done
 ```
 The results as counts, never percentages, each linked to its runs. The limits are stated up front: we wrote both the shoppers and the hidden answers, so this shows the mechanism on constructed cases and not real-world accuracy. If arm 2 matches arm 3 on a measure, the document says so.
 
-**User decision (PARKED by user): the lead-number pick is blocked until the comparison is decisive — i.e. until some honest run shows arm 3 winning where raw history fails (earned-level evidence and/or a correction round). No number is chosen until then. This gates T6.4 (video script), not T5.6: the results document is complete as written.
+**User decision:** which number the video leads with, chosen after seeing the results.
 
-**Done when:** every claim links to a run; the limits are stated.
+**Done when:** every claim links to a run; the limits are stated; the user has chosen the lead number.
 
 Worker notes (in-review): `bench/README.md` written offline ($0 spend): limits up front; arm 1 right-size 0/15, arm 2 15/15 with 0 wrong-cause, arm 3 true recommendations 0/15 (12 outright + 3 informed refusals; graded 3/15 is the frozen-rule extractor artifact on `t55-a3-unclear-r{1,2,3}.json`) with 0 wrong-cause; correction measure nil across arms; cites 40/6 arm 2, 0/0 arms 1 and 3; tokens 1309/3606/2242 words; arm 2 beats arm 3 on right-size stated plainly. Three lead-number candidates with exact counts, none chosen (`LEAD NUMBER: [user picks]`). Every claim links to run files + `bench/runs/scores.json`.
 
@@ -150,11 +150,13 @@ requires:   [T5.7]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/runs/
-status:     claimed:t58-rerun
+status:     in-review
 ```
 Re-run all three arms on the hardened shoppers only (repeat count per freeze), with the real `recall_forphurchase` + pending shape for arm 3, neutral instrument, cumulative $5 cap, publish-everything rule.
 
 **Done when:** every hardened-shopper run is committed, complete, and verified against the amended freeze.
+
+Worker notes (in-review): 12/12 turns committed under `bench/runs/t58/` (4 hardened shoppers x 3 arms x 1) plus `scores.json` from the frozen grade command; freeze check green before the first turn and after the last. Driver `bench/runs/cmd/t58/` (run-record scaffolding only, T5.5 shape; cumulative cap counts prior T5.5 committed spend). Counts: arm 1 right-size 0/4 (clean refusals), arm 2 4/4 with 0 wrong-cause, arm 3 2/4 (both noisy-shopper Venerable beliefs recommend; both multi-brand Candidate beliefs refuse) with 0 wrong-cause. Spend $0.038 this task, ~$0.20 cumulative incl. pilot + T5.5, of $5.00. Full table, spend ledger and deviations in the task report.
 
 ---
 

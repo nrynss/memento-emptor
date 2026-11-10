@@ -1,0 +1,133 @@
+{
+  "run_id": "t58-a2-noisy-small-r1",
+  "shopper_id": "cmp-noisy-small",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-noisy-small\nCandidate: a new Harbor Oxford Shirt from Brand H (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-noisy-small: 13 rows over 30 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand J Jetty Tee SKU BRJ-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand J jetty tee size M, no feedback\nday 2 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand K Kelpie Beanie SKU BRK-BEA-OS size OS (hats) | reason none | write observe | seeded | Kept past the window: Brand K kelpie beanie, no feedback\nday 4 | refund COMPLETED | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason changed_mind \"changed my mind about the colour\" conf 1.00 | write record_action | seeded | Refund: Brand H oxford size M; shopper changed their mind about the colour\nday 6 | refund COMPLETED | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason fit_too_small \"too tight in the shoulders\" conf 1.00 | write record_action | seeded | Fit return 1: Brand H oxford size M refunded; too tight in the shoulders\nday 8 | dispute OPEN | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand H parcel never arrived; tracking stuck for weeks\nday 10 | refund COMPLETED | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason damaged_or_defective \"arrived with a torn seam\" conf 1.00 | write record_action | seeded | Refund: Brand H oxford size M; arrived with a torn seam\nday 12 | refund COMPLETED | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason unclear \"not great\" conf 0.94 | write record_action | seeded | Refund: Brand H oxford size M; shopper answer too vague to classify, ask again\nday 14 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand H Harbor Tee SKU BRH-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand H harbor tee size M, no feedback\nday 16 | refund COMPLETED | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason fit_too_small \"too tight across the chest\" conf 1.00 | write record_action | seeded | Fit return 2: Brand H oxford size M refunded; too tight across the chest\nday 18 | capture COMPLETED | signal fit_feedback | source shopper | Brand J Jetty Tee SKU BRJ-TEE-M size M (t-shirts) | reason none | write record_action | seeded | Fit feedback: Brand J jetty tee size M fits well, tied to this purchase\nday 20 | dispute OPEN | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason none \"UNAUTHORIZED_TRANSACTION\" conf 1.00 | write record_action | seeded | Dispute opened: Brand H charge the shopper does not recognise; account-takeover review\nday 24 | refund COMPLETED | signal classified_outcome | source payment | Brand H Harbor Oxford Shirt SKU BRH-OXF-M size M (dress-shirts) | reason fit_too_small \"sleeves too short in M\" conf 1.00 | write record_action | seeded | Fit return 3: Brand H oxford size M refunded; sleeves too short in M\n",
+  "arm_memory_tool": "read_history",
+  "arm_memory_response": "response 3582 chars, first line: Raw history for cmp-noisy-small: 13 rows over 30 days.",
+  "agent_tool_spans": [
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1510
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1493
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 805
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1497
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1517
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    }
+  ],
+  "recall_observed": false,
+  "reply": "L — the shopper has three confirmed fit-too-small returns of the Brand H Harbor Oxford Shirt in size M (too tight in shoulders, too tight across chest, sleeves too short), indicating L is needed.",
+  "contaminated": false,
+  "trace_cost_usd": 0.00471,
+  "prompt_words": 673,
+  "reply_words": 34,
+  "capped": false,
+  "sent_at": "2026-11-10T12:17:23Z",
+  "trace_at": "2026-11-10T12:17:30Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "L — the shopper has three confirmed fit-too-small returns of the Brand H Harbor Oxford Shirt in size M (too tight in shoulders, too tight across chest, sleeves too short), indicating L is needed.",
+    "human_size": "L",
+    "human_size_reason": "Deterministic size M names the returned item (\"Brand H Harbor Oxford Shirt in size M\"); the recommendation is L (\"indicating L is needed\"). Same override shape as the frozen pilot-a2-size-changed precedent.",
+    "id_refs": null,
+    "human_refs": [
+      {
+        "ref": "too tight in the shoulders",
+        "quote": "too tight in shoulders",
+        "reason": "Matches exactly one row note: Fit return 1, Brand H oxford M day 6; the other fit notes name the chest and sleeves."
+      },
+      {
+        "ref": "too tight across the chest",
+        "quote": "too tight across chest",
+        "reason": "Matches exactly one row note: Fit return 2, Brand H oxford M day 16."
+      },
+      {
+        "ref": "sleeves too short in M",
+        "quote": "sleeves too short",
+        "reason": "Matches exactly one row note: Fit return 3, Brand H oxford M day 24."
+      }
+    ]
+  },
+  "score": {
+    "ShopperID": "cmp-noisy-small",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 3,
+    "Cited": 3,
+    "Cites": [
+      {
+        "Ref": "too tight in the shoulders",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "too tight across the chest",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "sleeves too short in M",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      }
+    ],
+    "TokensFirst": 707,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "run_id": "t58-a2-noisy-large-r1",
+  "shopper_id": "cmp-noisy-large",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-noisy-large\nCandidate: a new Inlet Oxford Shirt from Brand I (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-noisy-large: 13 rows over 28 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand L Lagoon Tee SKU BRL-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand L lagoon tee size M, no feedback\nday 3 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand M Mooring Cap SKU BRM-CAP-OS size OS (hats) | reason none | write observe | seeded | Kept past the window: Brand M mooring cap, no feedback\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"swims on the shopper\" conf 1.00 | write record_action | seeded | Fit return 1: Brand I oxford size M refunded; swims on the shopper\nday 7 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason damaged_or_defective \"buttons arrived cracked\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; buttons arrived cracked\nday 9 | dispute OPEN | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand I parcel never arrived; carrier lost it\nday 11 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"too loose across the chest\" conf 1.00 | write record_action | seeded | Fit return 2: Brand I oxford size M refunded; too loose across the chest\nday 13 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand I Inlet Tee SKU BRI-TEE-M size M (t-shirts) | reason none | write observe | seeded | Kept past the window: Brand I inlet tee size M, no feedback\nday 15 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason changed_mind \"ordered two colours, kept the other\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; ordered two colours, kept the other\nday 17 | capture COMPLETED | signal fit_feedback | source shopper | Brand L Lagoon Tee SKU BRL-TEE-M size M (t-shirts) | reason none | write record_action | seeded | Fit feedback: Brand L lagoon tee size M fits well, tied to this purchase\nday 19 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason unclear \"did not love it\" conf 0.94 | write record_action | seeded | Refund: Brand I oxford size M; shopper answer too vague to classify, ask again\nday 21 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason damaged_or_defective \"arrived with a loose hem\" conf 1.00 | write record_action | seeded | Refund: Brand I oxford size M; arrived with a loose hem\nday 23 | refund COMPLETED | signal classified_outcome | source payment | Brand I Inlet Oxford Shirt SKU BRI-OXF-M size M (dress-shirts) | reason fit_too_large \"sleeves too long in M\" conf 1.00 | write record_action | seeded | Fit return 3: Brand I oxford size M refunded; sleeves too long in M\n",
+  "arm_memory_tool": "read_history",
+  "arm_memory_response": "response 3536 chars, first line: Raw history for cmp-noisy-large: 13 rows over 28 days.",
+  "agent_tool_spans": [
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1407
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1428
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1424
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 760
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1411
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**S**\n\nThree separate fit-too-large returns on Brand I Inlet Oxford Shirt size M (\"swims on the shopper,\" \"too loose across the chest,\" \"sleeves too long in M\") consistently indicate M runs large, so S is the logical next size down.",
+  "contaminated": false,
+  "trace_cost_usd": 0.004895999999,
+  "prompt_words": 670,
+  "reply_words": 40,
+  "capped": false,
+  "sent_at": "2026-11-10T12:19:45Z",
+  "trace_at": "2026-11-10T12:19:55Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "Three separate fit-too-large returns on Brand I Inlet Oxford Shirt size M (\"swims on the shopper,\" \"too loose across the chest,\" \"sleeves too long in M\") consistently indicate M runs large, so S is the logical next size down.",
+    "human_size": "S",
+    "human_size_reason": "Deterministic size M names the returned item (\"Brand I Inlet Oxford Shirt size M\"); the recommendation is S (\"so S is the logical next size down\"). Same override shape as the frozen pilot-a2-size-changed precedent.",
+    "id_refs": null,
+    "human_refs": [
+      {
+        "ref": "swims on the shopper",
+        "quote": "\"swims on the shopper\"",
+        "reason": "Matches exactly one row note: Fit return 1, Brand I oxford M day 5."
+      },
+      {
+        "ref": "too loose across the chest",
+        "quote": "\"too loose across the chest\"",
+        "reason": "Matches exactly one row note: Fit return 2, Brand I oxford M day 11."
+      },
+      {
+        "ref": "sleeves too long in M",
+        "quote": "\"sleeves too long in M\"",
+        "reason": "Matches exactly one row note: Fit return 3, Brand I oxford M day 23."
+      }
+    ]
+  },
+  "score": {
+    "ShopperID": "cmp-noisy-large",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 3,
+    "Cited": 3,
+    "Cites": [
+      {
+        "Ref": "swims on the shopper",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "too loose across the chest",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "sleeves too long in M",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      }
+    ],
+    "TokensFirst": 710,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}
