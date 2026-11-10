@@ -180,6 +180,15 @@ two hostnames (chat + dedicated frontend); anonymous `GET /` and
 3-minute wait; `access get` unchanged. Flip has not taken effect; no-login
 serving NOT proven. Nothing changed (GETs only). Next: user re-confirms
 the toggle on the right deployment/interface, else a platform gap.
+
+**Notes (second check).** The first flip had landed on `memento-agent`;
+with Public confirmed on `probe-gw` itself, anonymous frontend `GET /`
+and `/health` still 302 to SSO, immediately and after 3 minutes.
+Verdict STILL-BLOCKED: the console Public toggle does not remove the
+front-door sign-in. Next: file as an Astropods platform gap with this
+evidence; keep the shopper-page task unscheduled until anonymous 200 is
+observed. No turn run, nothing changed, check cost $0.00 (billing
+$0.60 → $0.64 is concurrent tasks).
 Prove whether an Astropods agent can be reached with no login, on `probe-gw` only (never `memento-agent`). Deploy a minimal page with one chat endpoint on port 80 declaring `agent.interfaces: {frontend: true, messaging: true}` (both: `messaging` defaults to false once `interfaces` is declared; production filesystem is read-only). Report the exact Configure screen and Public setting for the user to switch. With no cookies, confirm 200 from our container with no login redirect. Send one short model turn through the page; confirm gateway, trace and tool spans. Budget $0.25 with billing re-checks. Record with evidence in `research/astropods.md`.
 
 **Done when:** the no-login reachability question is answered with evidence in `research/astropods.md`; if reachable, a follow-up dev-diary task for the public shopper page exists (orchestrator decides when).

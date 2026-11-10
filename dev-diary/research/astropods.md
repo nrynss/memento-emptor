@@ -329,6 +329,13 @@ everything below is the evidence for both halves.
   Nothing was changed for this check (GETs only). Next: the user
   re-confirms the toggle persisted on the right deployment/interface, else
   this becomes a platform gap for the handoff log.
+- Second check: the first flip had landed on the wrong agent; with Public
+  confirmed on `probe-gw` itself, anonymous frontend `GET /` and `/health`
+  still 302 to SSO immediately and after 3 minutes. Verdict STILL-BLOCKED:
+  the console Public toggle does not remove the front-door sign-in on the
+  frontend hostname. File as an Astropods platform gap with this evidence;
+  keep the public-shopper-page task unscheduled until anonymous 200 is
+  observed on the probe.
 - Billing for the probe: usage $0.29 before the deploy, $0.35 after
   (two model turns $0.0056 + $0.0057, the rest platform compute), inside
   the $0.25 task budget. Account usage later rose to $0.60 from concurrent

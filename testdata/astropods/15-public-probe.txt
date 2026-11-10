@@ -84,3 +84,18 @@ custom  members of the agent's account (no grants set)
 Outcome: the flip did NOT take effect on anonymous traffic. No-login
 serving is NOT proven. Nothing was changed on the deployment (no push,
 no redeploy, no access set) — verification was GETs only.
+
+## Second post-flip check (flip confirmed on probe-gw this time)
+
+The earlier flip had landed on `memento-agent` by mistake; the user
+confirmed `probe-gw` itself is now Public (custom-app/frontend access, on
+the deployment). Anonymous `GET /` and `/health` on the frontend host:
+still **302 to the platform SSO login**, immediately and after a
+3-minute wait; `access get` unchanged (CLI surfaces no Public flag).
+Billing $0.60 → $0.64 from concurrent tasks; this check cost nothing.
+Nothing changed (GETs + read-only CLI only). Verdict: **STILL-BLOCKED** —
+the console Public toggle does not remove the front-door sign-in on the
+frontend hostname. The no-login question now needs the platform: file the
+gap (Public documented only in the adapter-auth warning, never observed
+working) as an Astropods issue with this evidence, and keep the
+public-shopper-page task unscheduled until anonymous 200 is observed.
