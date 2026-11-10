@@ -50,7 +50,7 @@ requires:   [T5.1, T5.2]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/pilot/
-status:     in-review
+status:     done
 ```
 Arms 1 and 2 only, before any arm 3 run, to find out what a fair baseline does. If arm 2 scores perfectly, harden the shoppers with cases a real history would contain, or record that the lead is elsewhere. Don't weaken the baseline, and don't tune the cases against the layer.
 

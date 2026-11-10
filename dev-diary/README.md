@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
-| P5 | 2 / 6 | In progress |
+| P5 | 3 / 6 | In progress |
 | P6 | 0 / 7 | Not started |
 
 ---
@@ -191,6 +191,14 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `web/src/lib/contest/` (CorrectionButton column, ContestEditor form, correction-path-only transport, state helpers, source-scan + mount tests — 19/19 with reviewer's additions). Edit moves Earned→Out of true, standing kept, row visible; three layers of proof that only `record_correction` fires.
 
 **What surprised.** Review caught a real rendered bug: file-header `//` comments in Svelte compile to visible text nodes (fixed; same pattern pre-exists frozen in T4.2's `LedgerGrid.svelte` — follow-up task to sweep all `.svelte` files, not a silent fix). T4.4's own mount tests needed a client-entry import path (Vitest resolves `svelte` to server build here).
+
+### T5.3: The baseline pilot (done)
+
+**What exists.** `bench/pilot/` ran arms 1+2 live across all 5 comparison shoppers (neutral same-model instrument — the reference agent contaminated 2 turns with demo memory, kept as discarded evidence): arm 1 0/5, arm 2 5/5 right-size 0 wrong-cause. Extraction rule committed + tested (deterministic first, one documented human override, verbatim-ID cites only). No shopper changes (n=1 per cell; hardening would overfit — candidates recorded for freeze). Spend $0.085 of $5.00.
+
+**What surprised.** The reference agent cannot drive the arms (shopper_01 default recalls demo memory) — graded runs use the tool-less neutral instrument; T5.5 must verify recall target per turn. Arm 2's strength is honest causal algebra (damage≠fit etc.), but 7/9 cites need human prose-mapping. Review verified token math, prompt parity, and hidden-answer separation byte-level; one doc fix (neutral instrument named).
+
+**The next agent should know.** Freeze inputs recorded where T5.4 reads them: extraction rule, arm-2 input contract gap (amounts/IDs omitted), $5 cap declared-not-enforced (enforce cumulatively in T5.5), probe-turn spend should be committed as marked run files.
 
 ### T5.2: The grader (done)
 
