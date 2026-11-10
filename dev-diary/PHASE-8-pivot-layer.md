@@ -341,11 +341,35 @@ requires:   [T8.5, T8.1b, T8.2b, T8.3b]
 fixture-ok: no
 size:       S · frontier
 owns:       tests/live/precedence/
-status:     claimed:t85b-live-layer
+status:     in-review
 ```
 The live layer through the hub and a test-prefixed fit index: one shopper per precedence step, plus a correction made in one MCP session and read in a fresh one. Budget: under $0.50. Run one case first and check its cost. Test sessions and indices removed afterwards.
 
 **Done when:** every step decides at least once live, the cross-session correction holds, and the transcript and spend are in the handoff log.
+
+**Notes (in-review).** `tests/live/precedence/` holds the driver (`main.go`), `run.sh`, its README and the `out/` ignore. It boots the 0.10.1 release binary locally in the T8.1 shape (fixture embedder, live recall tier, test-prefixed recall indices `t85b-*`), wires one served layer per shopper over its own hub session plus the live pool reader and fit writer on `t85b-fit-rows`, and decides one purchase per precedence step. The classifier is a recording replay and the payments are the P0 recordings, so the model spend is $0.00 against the $0.50 budget; one case runs first and states it. Test sessions and indices are removed afterwards, with the empty listing shown.
+
+The run passed end to end (transcript in `out/`, kept out of git):
+
+- Correction: a capture names the brand, then a standing correction with no belief is recorded Claimed and uncontradicted, and the next recall decides it (`Take size M for Brand X`). The same correction still decides over a fresh hub MCP session to the same shopper session, and over a rebuilt layer on the same standing directory (the undeclared standing is re-recorded).
+- Pool: a new shopper on the seeded Earned-small line (8 small, 1 large, 1 fits-well on brand-x-001/shirts/regular size M) is decided by the pool, with the exact counts, the seeded 10 / live 0 split and the exact guidance text.
+- Own evidence: the same line plus three too-large returns earns a live Earned/Venerable belief that beats the now-disagreeing Earned-small pool, which rides along overridden with the `ahead of the pool` text and the seeded 10 / live 3 split.
+- Statement: a seeded general statement alone decides (`Take size M for Brand S: the shopper's usual size.`).
+- Nothing: a fresh shopper on a lineless recall gets GuidanceNone, never a refusal.
+- Cleanup deleted the 3 `t85b-*` indices and the listing after is `[]`; the run dir (store, configs, standing dir, child logs) was removed. No key, URL, salt or token entered the repo: the leak check over `tests/live/precedence/` (excluding `out/`) is clean.
+
+Two behaviours are pinned live with tripwires, both owned by T8.5 (`internal/api/server/` is outside this task's `owns`):
+
+- Consulted-but-empty pool: the frozen `example-none` shape (pool absent, `pool_lookup: consulted`) is what the lookup returns for a wired pool on an empty line, but the served assembler rejects exactly that pair, so a full-line recall on the empty line fails with `pool absent with lookup "consulted"` instead of serving the empty pool. The driver asserts the failure; a success means the guard was fixed.
+- Dangling declared views: after a restart the restored view cites a stale belief id and matches no precedence class — mechanically a total loss of force, not the review's "degrades to unscoped" (no class accepts a non-empty stale id). The Earned-small pool decides instead. Rebuilding the belief through a re-ingest declares nothing (the journal dropped the declared entry at persist time); the rebuilt partition replays the same mint order, so the new belief coincidentally reuses the old id and the stale view matches by id, not by content re-linking. Any divergence in mint order would leave the view dangling or attached to an unrelated belief. The driver asserts the post-restart loss of force and the coincidental post-rebuild match.
+
+Five things the next agent should not have to rediscover:
+
+- The served layer builds no fit writer without `IdentitySalt`: the first draft omitted it and every live row silently never wrote (the writer-nil paths skip by design), which the pool's live split caught.
+- A recall that should name the brand needs brand context from an ingest or a belief: a lineless recall before any history falls back to the bare brand id in guidance, so the correction shopper ingests its capture before recording.
+- The recorded purchases are reused across test shoppers, so their fit rows share document ids in the one test index and later writes overwrite earlier ones. The steps are ordered so no asserted count is affected: the pool step asserts the seeded-only split first, the own-evidence step asserts its seeded/live split next, and the declared shopper (which flips shared rows) asserts no pool counts.
+- The driver's graph client reads receipts from `structuredContent` with a text fallback, maps a `no concept matching` inspect to None, and polls recall (not inspect) for promotion: the own-evidence belief reached Earned/Venerable on the live daemon within the first poll window.
+- `evidenceCount` spells out only one and two; three renders `3 returns`, which is what the exact own-evidence guidance text asserts.
 
 ---
 
