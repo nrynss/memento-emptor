@@ -152,6 +152,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### T3.8: Public shopper page (done)
+
+**What exists.** `agent/frontend/` separate deployment (own spec, ROOT image serving :80): no-login 200 on the public frontend host, chat host untouched, one messaging turn + four page turns with recall-first spans, $0.13 of $0.50. Review APPROVED with no fixes (verified composition, cap behavior, purchases-unwired, hygiene).
+
+**What surprised.** F1–F3 all held as built: ROOT + `EXPOSE 80` with an explicit do-not-add-USER comment; page + `serve()` compose in one container; separate deployment leaves `agent/runtime/` untouched. Counter is pre-generation (a 502 burns budget too) — conservative, kept deliberately.
+
+**The next agent should know.** Judges start from the fixture proof (`corr_3b7e52`, `blf_8f2c41`); live corrections live only in container memory and reset on redeploy (the honest demo reset).
+
 ### R0 review: P0 ground (APPROVE with fix, landed)
 
 Re-verified all ten exit criteria against research + fixtures. Real defect caught and fixed: unredacted shopper emails + Mumbai street address in three capture fixtures (+ one webhook.site UUID), scrubbed per the file's own precedent with new SHOPPER-* placeholders; phase exit boxes checked (were unchecked despite done tasks); T0.6→T0.6b→native-direction coherence pointers added. No structural findings.

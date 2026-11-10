@@ -287,7 +287,7 @@ requires:   [T3.7, T3.6]
 fixture-ok: no
 size:       S · mid
 owns:       agent/frontend/
-status:     in-review
+status:     done
 ```
 Serve the Memento Emptor shopper page on the shopper deployment's frontend hostname with the custom-app list set to Public and no auth guard mounted (T3.7 pattern: `agent.interfaces` frontend+messaging, port 80, root, read-only FS). Parked until the full demo exists.
 
