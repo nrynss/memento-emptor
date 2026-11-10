@@ -179,6 +179,14 @@ func lineFilters(q Query) []any {
 	}
 }
 
+// The settled-kind labels the index stores. The writer takes them from the
+// domain, so the reader does too: a second copy of a label here could drift
+// from what the rows carry.
+const (
+	indexSettledReturnReason = string(domain.FitSettledByReturnReason)
+	indexSettledFeedback     = string(domain.FitSettledByFeedback)
+)
+
 // settledAggs is the settled part of the query: the denominator, the seeded
 // kinds, the reason categories, the fit returns by direction with their
 // distinct shoppers, the feedback by verdict, and the fit-classified
@@ -189,13 +197,13 @@ func settledAggs() map[string]any {
 			"filter": map[string]any{"bool": map[string]any{
 				"should": []any{
 					map[string]any{"bool": map[string]any{"filter": []any{
-						term("settled_kind", "return_reason"),
+						term("settled_kind", indexSettledReturnReason),
 						map[string]any{"terms": map[string]any{"reason_category": []any{
 							string(domain.CategoryFitTooSmall),
 							string(domain.CategoryFitTooLarge),
 						}}},
 					}}},
-					term("settled_kind", "feedback"),
+					term("settled_kind", indexSettledFeedback),
 				},
 				"minimum_should_match": 1,
 			}},
@@ -204,14 +212,14 @@ func settledAggs() map[string]any {
 		"settled_kind":    map[string]any{"terms": map[string]any{"field": "settled_kind"}},
 		"reason_category": map[string]any{"terms": map[string]any{"field": "reason_category"}},
 		"fit_returns": map[string]any{
-			"filter": term("settled_kind", "return_reason"),
+			"filter": term("settled_kind", indexSettledReturnReason),
 			"aggs": map[string]any{"direction": map[string]any{
 				"terms": map[string]any{"field": "fit_direction"},
 				"aggs":  map[string]any{"shoppers": cardinality("shopper_hash")},
 			}},
 		},
 		"feedback": map[string]any{
-			"filter": term("settled_kind", "feedback"),
+			"filter": term("settled_kind", indexSettledFeedback),
 			"aggs": map[string]any{"verdict": map[string]any{
 				"terms": map[string]any{"field": "feedback_verdict"},
 			}},

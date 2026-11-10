@@ -17,7 +17,8 @@ var (
 	// ErrMissingIndex means a reader was built without an index.
 	ErrMissingIndex = errors.New("pool: missing index")
 	// ErrMissingQuery means a line or size field is empty, or the recent
-	// window has no start, so the query would match more than one bucket.
+	// window has no start: an empty field would match more than one line
+	// or size, and a window with no start would count every settled row.
 	ErrMissingQuery = errors.New("pool: incomplete product line, size or window")
 	// ErrUnavailable means the index could not be reached: the connection
 	// was refused, the request timed out, or the transport failed. Recall
