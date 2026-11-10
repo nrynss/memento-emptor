@@ -62,7 +62,8 @@ type Keyer struct {
 }
 
 // NewKeyer returns a Keyer for the given identity salt, as 64 hexadecimal
-// characters decoding to 32 bytes. The keyring holds the live salt and the
+// characters decoding to 32 bytes; uppercase hex is accepted and decodes to
+// the same bytes. The keyring holds the live salt, in lowercase, and the
 // value is never written down; SeedSaltHex is the published salt for seeded
 // rows. An empty salt returns ErrMissingSalt and anything malformed returns
 // ErrMalformedSalt; neither falls back to a default. The error never
