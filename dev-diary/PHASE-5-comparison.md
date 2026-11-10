@@ -28,7 +28,7 @@ requires:   [T1.3, T5.1]
 fixture-ok: yes
 size:       M · frontier
 owns:       bench/grader/
-status:     in-review
+status:     done
 ```
 Scores a run on the five measures in product.md, as counts: right size first time against the hidden answer; wrong-cause errors; corrections honoured on the very next recommendation; citations that really support the recommendation; tokens per recommendation.
 
