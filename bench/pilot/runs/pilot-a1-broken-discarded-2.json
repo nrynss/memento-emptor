@@ -1,0 +1,120 @@
+{
+  "run_id": "pilot-a1-broken-discarded-2",
+  "shopper_id": "cmp-broken",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "model": "claude-sonnet-4-6",
+  "deployment": "memento-agent",
+  "prompt": "Shopper: cmp-broken\nCandidate: a new Everyday Oxford Shirt from Brand C (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+  "arm_memory_tool": "",
+  "arm_memory_response": "response 0 chars, first line: ",
+  "agent_tool_spans": [
+    {
+      "name": "invoke_agent Memento Agent",
+      "type": "agent",
+      "latency_ms": 4669
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1549
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 4664
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_chunk Memento Agent",
+      "type": "span",
+      "latency_ms": 686
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "agent_step Memento Agent",
+      "type": "span",
+      "latency_ms": 3095
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_chunk Memento Agent",
+      "type": "span",
+      "latency_ms": 2393
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 3090
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "agent_step Memento Agent",
+      "type": "span",
+      "latency_ms": 1554
+    },
+    {
+      "name": "model_chunk Memento Agent",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "recall_for_purchase",
+      "type": "tool",
+      "latency_ms": 2
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**Recommended size: M**\n\nThe shopper's own correction (corr_3b7e52) overrides belief **blf_8f2c41** — which was built on 3 seeded fit-return refunds of Brand X oxford shirts in M (ev_6d1a09: too tight in the shoulders; ev_6d1a10: too tight across the chest; ev_6d1a11: sleeves too short) and concluded \"runs small, take L\" — but the shopper explicitly stated *\"I've lost weight, use M,\"* so **M** is the right call now.\n\n---\n\nOne quick question before we go further: I see there's an open refund on your account with no reason recorded yet — do you recall why you returned that item?",
+  "contaminated": true,
+  "contamination_hits": [
+    "Brand X",
+    "blf_",
+    "corr_",
+    "ev_"
+  ],
+  "trace_cost_usd": 0.023664,
+  "prompt_words": 65,
+  "reply_words": 98,
+  "capped": false,
+  "sent_at": "2026-11-10T09:24:01Z",
+  "trace_at": "2026-11-10T09:24:01Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "**Recommended size: M**",
+    "id_refs": null,
+    "notes": "DISCARDED — contaminated: the reply cites demo-shopper memory (corr_3b7e52, blf_8f2c41, ev_6d1a09-11) although the prompt names cmp-broken with no memory. The agent recalled shopper_01, its instruction default, instead of the named shopper. Kept as evidence; never graded. Send time unrecorded after the driver failure; sent_at set to trace time."
+  }
+}

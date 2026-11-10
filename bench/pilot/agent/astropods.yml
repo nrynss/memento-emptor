@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://astropods.com/schema/package.json
+spec: blueprint/v1
+name: pilot-baseline
+
+agent:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  interfaces:
+    messaging: true
+
+models:
+  # Astro AI Gateway — managed model access (injects ASTRO_GATEWAY_URL +
+  # ASTRO_GATEWAY_API_KEY at deploy time, deploy pick injected as
+  # MODEL_DEFAULT). The T3.1 model, so the pilot measures the same model
+  # the comparison will use in all three arms.
+  default:
+    provider: gateway
+    models: [claude-sonnet-4-6]
