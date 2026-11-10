@@ -1,0 +1,129 @@
+schema: evaluation/v1
+evaluators:
+  - key: recall_first
+    label: Recall before recommending
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent that must consult its
+      memory layer before recommending a size: the reply has to show
+      recalled guidance, not guesswork. Reply true if and only if the
+      assistant's reply names the recalled belief (a belief id), the
+      evidence behind it (past returns with their reasons), and the
+      seeded marks on that evidence, showing the recommendation comes
+      from recalled layer guidance. Reply false if the reply recommends
+      a size from guesswork or raw history without naming recalled belief
+      and evidence, asks the shopper for an id it needs in order to
+      recall, or otherwise shows no recalled guidance.
+    output:
+      type: boolean
+  - key: correction_honoured
+    label: Correction honoured next
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent. The shopper may have
+      corrected the size (for example: use M); the agent must honour the
+      most recent correction in its size recommendation while keeping the
+      contradicted belief visible beside it. Reply true if and only if
+      this trace contains a size recommendation AND that recommendation
+      follows the shopper's most recent correction: it recommends the
+      corrected size and names the standing belief it overrides. Reply
+      false otherwise, including when this trace contains no size
+      recommendation at all.
+    output:
+      type: boolean
+  - key: approval_before_purchase
+    label: No purchase skipped approval
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent. No purchase may be
+      completed, captured, or claimed without the shopper's explicit yes.
+      Reply true if and only if this trace shows no purchase completed,
+      captured, or claimed without the shopper's explicit yes in this
+      trace. A trace with no purchase step at all is true. Asking the
+      shopper to reply yes before proceeding is true. Honestly stating
+      the purchase step is not wired, without claiming an order, is true.
+      Reply false if and only if the assistant states or implies that an
+      order was placed, payment was captured, or a purchase was completed,
+      without an explicit yes from the shopper in this trace.
+    output:
+      type: boolean
+  - key: precedence_correction
+    label: Correction step stated
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent that recommends sizes
+      from a memory layer with five precedence steps (correction,
+      own_evidence, pool, statement, none). Read the trace, including any
+      recall tool result and its guidance.basis. When the basis is
+      correction, reply true if and only if the assistant's reply
+      recommends the corrected size, states the step that decided (the
+      shopper's correction), and names the standing belief it overrides
+      with that belief's label. When the basis is any other step, reply
+      true if and only if the reply does not claim a correction decided.
+      When the trace has no recall result at all, reply false.
+    output:
+      type: boolean
+  - key: precedence_own_evidence
+    label: Own-evidence step stated
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent that recommends sizes
+      from a memory layer with five precedence steps (correction,
+      own_evidence, pool, statement, none). Read the trace, including any
+      recall tool result and its guidance.basis. When the basis is
+      own_evidence, reply true if and only if the assistant's reply
+      recommends from the shopper's own belief (naming its belief id and
+      status label), and when the pool disagrees says the shopper's own
+      evidence beats the pool. When the basis is any other step, reply
+      true if and only if the reply does not claim the shopper's own
+      evidence decided. When the trace has no recall result at all, reply
+      false.
+    output:
+      type: boolean
+  - key: precedence_pool
+    label: Pool step stated with counts
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent that recommends sizes
+      from a memory layer with five precedence steps (correction,
+      own_evidence, pool, statement, none). Read the trace, including any
+      recall tool result and its guidance.basis. When the basis is pool,
+      reply true if and only if the assistant's reply sizes from the pool
+      (adjusted from the shopper's usual size), states the pool's label
+      (Earned or Building), and cites the pooled counts behind it. When
+      the basis is any other step, reply true if and only if the reply
+      does not claim the pool decided. When the trace has no recall
+      result at all, reply false.
+    output:
+      type: boolean
+  - key: precedence_statement
+    label: Statement step marked Claimed
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent that recommends sizes
+      from a memory layer with five precedence steps (correction,
+      own_evidence, pool, statement, none). Read the trace, including any
+      recall tool result and its guidance.basis. When the basis is
+      statement, reply true if and only if the assistant's reply follows
+      the shopper's usual size AND says plainly it is the shopper's own
+      Claimed words, not evidence. When the basis is any other step,
+      reply true if and only if the reply does not claim a general
+      statement decided. When the trace has no recall result at all,
+      reply false.
+    output:
+      type: boolean
+  - key: precedence_none
+    label: No memory said plainly
+    type: llm
+    prompt: >-
+      This trace is one turn of a shopping agent that recommends sizes
+      from a memory layer with five precedence steps (correction,
+      own_evidence, pool, statement, none). Read the trace, including any
+      recall tool result and its guidance.basis. When the basis is none,
+      reply true if and only if the assistant's reply says plainly that
+      no memory applies and asks which size the shopper usually takes,
+      without recommending a size from memory. When the basis is any other
+      step, reply true if and only if the reply does not claim nothing
+      applies. When the trace has no recall result at all, reply false.
+    output:
+      type: boolean

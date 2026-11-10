@@ -11,10 +11,10 @@
  * same model runs in all three comparison arms.
  *
  * Standing configuration: the memory tools are fake-backed (see memory.ts)
- * because the layer is not served yet. No purchase-execution tool exists
- * here on purpose: orders and double-buy protection belong to T3.3
- * (agent/orders/), so this agent can recommend and ask approval but cannot
- * move money.
+ * because the layer is not served to this agent yet (T9.6 wires it). No
+ * purchase-execution tool exists here on purpose: orders and double-buy
+ * protection belong to T3.3 (agent/orders/), so this agent can recommend
+ * and ask approval but cannot move money.
  */
 
 import { Agent } from "@mastra/core/agent";
@@ -78,11 +78,11 @@ const INSTRUCTIONS = `You are the Memento Emptor reference shopping agent. You r
 
 Turn pattern, every time:
 1. RECALL FIRST. Before any turn that may end in a recommendation, call recall_for_purchase. Never recommend from history or guesswork. The demo shopper is shopper_01: pass shopper_id "shopper_01" unless the user names another id, and never ask the user for a shopper id. If a tool call errors, retry it once with shopper_01 before saying anything about the error.
-2. Recommend from the guidance. When overriding_correction is present, recommend the correction's size, and say the belief still stands beside it: cite the belief id, its 3 fit returns, and the seeded mark on each.
-3. Pending refunds: when pending_count is above zero, call pending_questions and ask the shopper about the first one in one short question.
-4. Corrections: when the shopper corrects a size, call record_correction at once with the contradicted belief id, and the very next recommendation follows the correction.
-5. Reasons and feedback: send answers to record_reason and fit notes to record_feedback with the purchase custom id.
-6. When challenged ("why this size?"), call explain_belief and cite it, never the raw transaction history.
+2. Recommend from guidance.basis, the precedence step that decided, and state how sure you are from its label: Earned means many shoppers' documented returns point one way; Building means evidence is still accumulating; Claimed means the shopper said it and no evidence backs it; Out of true means a correction overrides the belief beside it. Never refuse when recall returns evidence: thin evidence labelled thin still decides. Only basis "none" means no memory applies, and then say so plainly and ask which size they usually take.
+3. Say what the answer rests on. When the basis is pool, cite the pooled counts with their seeded split. When the basis is statement, say it is the shopper's own Claimed words, not evidence. When a lower step rides along overridden, show both sides instead of hiding one.
+4. Corrections: when the shopper corrects a size, call record_correction at once, and the very next recommendation follows the correction. Pass the contradicted belief id when recall served a belief; when recall served no belief, call record_correction with no belief id so the correction stands on its own. A correction never travels in chat text only.
+5. Reasons and feedback: send answers to record_reason and fit notes to record_feedback with the purchase custom id. When challenged ("why this size?"), call explain_belief and cite it, never the raw transaction history.
+6. Pooling is opt-out: when the shopper asks out of (or back into) pooling, call set_pooling and report the rows removed.
 
 Approval: before any purchase, ask the shopper to reply "yes". You own no purchase tool, so after a "yes" say plainly the purchase step is not wired yet instead of claiming it happened. Keep replies short: one recommendation, its citations, one question at most.`;
 

@@ -1,4 +1,4 @@
-# memento-agent (T3.1)
+# memento-agent (T3.1; pivot behaviour T9.4)
 
 The Memento Emptor reference shopping agent as a deployed Astropods service.
 
@@ -13,6 +13,13 @@ The Memento Emptor reference shopping agent as a deployed Astropods service.
   order read. All fake-backed (see `agent/memory.ts`): tool names and shapes
   match the frozen contract, so the live swap changes no tool the agent
   reads.
+- Precedence (T9.4): the agent recommends from `guidance.basis` and states
+  confidence from the label (Earned, Building, Claimed, Out of true). It
+  never refuses when recall returns evidence; only `none` says plainly no
+  memory applies. A pool answer cites counts with their seeded split; a
+  statement answer says it is Claimed words, not evidence. A correction
+  with no belief behind it is recorded with no belief id and stands on its
+  own (container memory only), deciding again on the next turn.
 - Money: this task owns no purchase-execution tool on purpose. Orders and
   double-buy protection belong to T3.3 (`agent/orders/`). The agent asks for
   an explicit "yes" before any purchase and says plainly the purchase step
