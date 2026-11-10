@@ -349,11 +349,42 @@ requires:   [T2.8]
 fixture-ok: no
 size:       XS · frontier
 owns:       tests/live/rival/
-status:     claimed:t28b-live
+status:     in-review
 ```
 Re-prove the rival-birth rule against live Lambo (native embedder, 0.10.1+): three consecutive opposite-direction returns birth the rival; an interrupted streak does not. Throwaway session, deleted after.
 
 **Done when:** live inspect shows the rival born at 3 and absent when interrupted; transcript in the handoff log.
+
+note (worker t28b-live). `tests/live/rival/` holds the live driver
+(main-program `main.go`, no `*_test.go`, so CI builds it but never
+runs it), `run.sh`, `README.md`, and a git-ignored `out/`. The
+scripted client drives the frozen service over recording payments
+(`DemoStoryInputs` plus five extra same-shape refund events),
+the recorded classifier (`testdata/jev`, both answers at 1.00 — no
+live classification service runs), and a live Lambo 0.10.1 graph
+client over fresh sessions with native `.jina-embeddings-v3`; the
+evidence store is the in-memory lexical store. One case per session
+(belief contents carry no shopper id, so the cases would share
+concepts): birth in `t28b-rival-birth`, interrupted streak in
+`t28b-rival-gap`. Birth: two opposites land unattached
+(ledger: 1 fit belief), the third births rival `blf_000002`
+(`runs large, take size S`, Claimed/None, 1 row, not contradicted)
+while the runs-small belief keeps 1 row, standing None, no
+contradiction; live inspect holds the rival (`[Logic]`, blast radius
+1, `None -> Candidate refused`, no `Contradicts`, no `Dependency`
+to the old belief) and the old belief unchanged (blast radius 1, no
+`Contradicts`, no `Dependency` to the rival). Interrupted
+(opp, opp, same, opp): all three opposites unattached, 1 fit belief
+with 2 rows, 3 unattached too-large rows; rival inspect refuses
+(`no concept matching ... in session 't28b-rival-gap'`). Both
+sessions erased (birth 4 interactions/4 concepts/10 edges, gap
+3/3/7); post-erase inspect refuses; `t28b*` index listing empty.
+Spend $0. Surprises: the daemon links the near-duplicate belief
+wordings with a symmetric `Semantic` edge (its own similarity
+linking, not a service write), so "untouched" is asserted as no
+support/no contradiction with blast radius unchanged, not as no
+cross-reference; and the two cases need separate sessions (shared
+contents across shoppers). Full excerpts in the worker's report.
 
 ---
 
