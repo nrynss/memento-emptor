@@ -187,11 +187,31 @@ requires:   [T2.6, T3.2, T3.3, T3.4, T3.5, T1.3b]
 fixture-ok: no
 size:       M · frontier
 owns:       demo/
-status:     claimed:t36-demo
+status:     in-review
 ```
 Product.md's six demo steps, end to end, live on the real stack, starting from the seeded demo shopper. A reset script returns the demo to its starting state.
 
 **Done when:** a clean run from the reset script completes all six steps; the run is recorded in `demo/`; a second run from reset gives the same outcome.
+
+**Notes (worker).** Two clean runs from reset, both EXIT:0 with the
+built-in leak check clean, recorded in `demo/RUN-1.md`/`RUN-2.md`:
+live PayPal read-backs of the T1.3b cycles, live Jev (4 calls/run,
+pinned build, ~$0.00009), live Lambo sessions (Earned/Venerable,
+erased), live Channel3 details (free), 3 deployed-agent turns/run
+(recall-first spans, correction honoured, yes with no purchase
+tool), and one new sandbox purchase per run through the frozen
+orders machine (real explicit-yes + scripted shopper click,
+capture-before-approval refused, verified delivery ingested,
+fits-well feedback tied). Dispute read back live (reason
+NOT_ARRIVED), recall byte-identical, seller Claimed/1 row. Spend
+$0.57 new ($1.67 cap scale: $0.67 → $1.24), no turn over $0.10.
+Retry logic earned its keep: transient RETRY approval pages, a
+retryable 502, request-id 422s, and cross-run trace collisions each
+failed loudly once and were fixed in the driver. Known standing:
+the agent's tools are fake-backed at the post-correction fixture
+state, so the pre-correction L is served by the live layer recall
+(recorded, not conflated). Handoff text in the worker's report.
+
 
 ---
 
