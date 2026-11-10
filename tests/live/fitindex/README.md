@@ -63,7 +63,10 @@ index.
 
 The two delivery ids (`WH-T82B-CAPTURE-1`, `WH-T82B-REFUND-1`) key ingest's
 idempotency and name the deliveries; they are not purchase state. Every
-other id, amount and time is the recording's placeholder value.
+other id and amount is the recording's placeholder value, and so are the
+capture and refund times. The answer's time is the driver's own: it sits
+twenty minutes after the refund so the run is deterministic, and it is not
+a recorded moment.
 
 ## How to run
 

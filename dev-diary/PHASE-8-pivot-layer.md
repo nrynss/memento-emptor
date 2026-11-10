@@ -92,12 +92,14 @@ The run showed one document per purchase through every state: `captured` at rank
 
 Four things the next agent should not have to rediscover:
 
-- The recorded T0.4 cycle with line items is the first one: its order read carries the item and its refund's `up` link names its capture. The second cycle's order read stopped at `PAYER_ACTION_REQUIRED`, so it has no line items; a paired capture and refund can only be built from the first.
+- The recorded T0.4 cycle with line items is the first one: its order read carries the item and its refund's `up` link names its capture. The second cycle's recorded order read came back `PAYER_ACTION_REQUIRED`, so it carries no line items and does not show the purchase end to end; its capture and refund are recorded and pair the same way.
 - `fitindex.HTTPIndex` exposes `Create`, `Put` and `DeleteShopper` and nothing else, so the driver carries its own small read/delete probe (document read, `_count`, `_cat/indices`, `DELETE` index). T8.3b's pool reader will need the same shape for its empty-listing check.
 - The writer swallows `ErrOlderEvent` by design, so a fresh-process replay leaves no visible status. To show the refusal in a transcript, write the captured rank directly with the probe: the deployment's `409` names the current version, which is the refusal the writer received.
-- The driver's versions are deterministic because every event time is the recording's, so a rerun reproduces the same three version numbers and the same document.
+- The driver's versions are deterministic because the capture and refund times are the recording's and the answer's time is fixed twenty minutes after the refund, so a rerun reproduces the same three version numbers and the same document.
 
 The dev-diary report's transcript is the handoff log entry; it is not committed here.
+
+**Review (fresh eyes).** The review re-derived the three versions from the tree — rank × 1e12 plus the event's Unix seconds, the capture's and the refund's read from `capture-completed.json` and `refund-record.json` and the answer's placed twenty minutes past the refund — giving `1001794233521`, `2001794233529` and `3001794234729`, and read the run against them and against the row content, so the evidence is the tree's and not the report's word. Two inaccuracies were fixed in the notes, the first also in the driver's README: the answer's event time is the driver's own, not the recording's, and the second cycle's capture and refund are recorded and pair the same way, so what that cycle lacks is the order read with line items, not the pair. No change to the driver: its prefix check, its cleanup, its refusal to run over a non-empty prefix and its redaction hold as written, and nothing under `tests/live/` runs in CI or gates a build.
 
 ---
 
