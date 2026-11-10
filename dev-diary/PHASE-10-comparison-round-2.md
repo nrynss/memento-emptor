@@ -28,11 +28,15 @@ requires:   []
 fixture-ok: yes
 size:       XS · light
 owns:       bench/README.md
-status:     claimed:t102-relabel
+status:     in-review
 ```
 In `bench/README.md`, the round 1 arm called "raw history" is renamed **Memento evidence without beliefs**, with one paragraph saying why: its rows carried the layer's classified reasons, signal strength and write kind. No count changes, and no run file is touched. A pointer to round 2 is added.
 
 **Done when:** the relabel and the pointer are in, and the freeze check still passes.
+
+Worker notes (in-review): `bench/README.md` gains a "Round 1, relabelled" section between Limits and Setup that names the arm **Memento evidence without beliefs**, says why (its prompt carried the layer's per-purchase rows, so each row already held the classified reason, the signal strength and the write kind; only the beliefs over them were absent), and points at round 2 (`product.md` "The comparison" and this phase document). Every other mention uses the new name: title, Setup arms bullet, headline table row, headline prose, the "what this does and does not prove" paragraph, and lead-number candidates 1 and 3. No count changed, and no run file, scores file or freeze input was touched; `bench/freeze_check.sh` green (25 rows) and `./tools/check.sh` green.
+
+Surprises for the next agent: the committed round 1 run files keep `arm_name: "raw-history"` and the prompt line "Memory: raw history", because they are frozen T5.5 output and the manifest pins `bench/harness/harness.go`; the report label cannot be pushed into them, so a reader comparing this document to a run file will meet both names and should change neither. `bench/pilot/README.md` (the T5.3 record) and `dev-diary/PHASE-5-comparison.md` (its header and T5.9 notes) still say raw history; both are outside this task's owns. Separately, this round 1 record still reports the correction measure as nil and does not point at T5.9's 27 correction turns (9 of 9 honoured in every arm); fixing that changes counts, which this task forbids, so it is an orchestrator follow-up.
 
 ---
 

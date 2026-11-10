@@ -1,4 +1,4 @@
-# Comparison results: no memory vs raw history vs Memento Emptor
+# Comparison results: no memory vs Memento evidence without beliefs vs Memento Emptor
 
 ## Limits — read this first
 
@@ -14,12 +14,30 @@ No arm read the hidden answers. The grader (`bench/grader/`) scored each run
 against them after the fact. No hidden-answer rationale text is quoted
 anywhere in this document — only the already-published right/wrong tallies.
 
+## Round 1, relabelled
+
+The round 1 arm this document called "raw history" is **Memento evidence
+without beliefs**. Its prompt carried the layer's per-purchase rows, so every
+row already held the classified reason, the signal strength and the write kind;
+only the beliefs built over those rows were absent. Calling that "raw history"
+overstated what the arm was given and made the baseline's score look like it
+came from transaction data alone. Every mention here uses the honest name; the
+runs, scores and freeze inputs it reports are unchanged.
+
+Round 2 is the comparison `product.md` now asks for: four arms, including a
+PayPal history arm that gets exactly what the Agent Toolkit returns and nothing
+the layer made, against Memento shopper-only and Memento full. Its tasks and
+frozen inputs live in `dev-diary/PHASE-10-comparison-round-2.md`; this document
+remains the round 1 record.
+
 ## Setup
 
 - Frozen inputs: `bench/FROZEN.md` (21 sha256 rows: 5 arm-facing histories,
   hidden answers by hash only, seed generator, harness prompts, grader, pilot
   extraction rule + run schema + driver/grade commands, neutral instrument).
-- Arms: 1 = no memory, 2 = raw PayPal history handed to the agent directly,
+- Arms: 1 = no memory, 2 = Memento evidence without beliefs (the layer's
+  per-purchase rows handed to the agent directly: classified reason, signal
+  strength and write kind, no beliefs over them),
   3 = Memento layer recall (`recall_for_purchase` + `pending_questions`,
   live layer, real `recall_for_purchase` responses recorded in each run file).
 - Repeats: 3 live turns per shopper per arm, 45 turns total, all committed
@@ -46,13 +64,14 @@ anywhere in this document — only the already-published right/wrong tallies.
 | Arm | Right size first time | Wrong-cause errors | Corrections honoured | Supported / cited | Tokens (words, 15 runs) |
 |---|---|---|---|---|---|
 | 1 — no memory | 0 of 15 | 0 | nil (no corrections in set) | 0 of 0 | 1309 total, 83–97 per run |
-| 2 — raw history | 15 of 15 | 0 | nil (no corrections in set) | 6 of 40 | 3606 total, 216–289 per run |
+| 2 — Memento evidence without beliefs | 15 of 15 | 0 | nil (no corrections in set) | 6 of 40 | 3606 total, 216–289 per run |
 | 3 — Memento layer | 0 of 15 true recommendations (3 of 15 graded, all 3 an extractor artifact — see below) | 0 | nil (no corrections in set) | 0 of 0 | 2242 total, 130–215 per run |
 
 Arm 2 beats arm 3 on right-size recommendations on this frozen set: 15 of 15
 against 0 of 15 true recommendations. That is stated plainly and not spun:
-on these constructed cases, handing the agent the raw history got the size
-right every time, while the layer refused to recommend without Earned belief.
+on these constructed cases, the Memento evidence without beliefs arm got the
+size right every time, while the layer refused to recommend without Earned
+belief.
 Arm 2 matches arm 3 on wrong-cause errors: 0 in both arms. Arm 1 got 0 of 15
 right (12 empty replies, 3 wrong-size M recommendations on
 `cmp-never-arrived` against the hidden L).
@@ -135,10 +154,10 @@ cross-arm token comparisons hold on the frozen basis.
 Proves on these constructed cases: the refusal mechanism works as designed —
 with no Earned belief the layer says "no recommendation yet" instead of
 guessing, and it never once converted a non-fit outcome into a size move
-(0 wrong-cause in 15 arm-3 turns). Also proves: raw history is a strong
-baseline on small, clean histories — arm 2 reasoned correctly about damage,
-never-arrived, changed-mind, and vague rows 15 times out of 15 with 0
-wrong-cause.
+(0 wrong-cause in 15 arm-3 turns). Also proves: Memento evidence without
+beliefs is a strong baseline on small, clean histories — arm 2 reasoned
+correctly about damage, never-arrived, changed-mind, and vague rows 15 times
+out of 15 with 0 wrong-cause.
 
 Does not prove: real-world accuracy (we wrote the shoppers and the answers);
 correction handling (no corrections in the set); citation quality at scale
@@ -149,9 +168,9 @@ built); anything about cost beyond the recorded trace spend.
 
 ## Candidate lead numbers (the user picks one — none is chosen here)
 
-1. **"15 of 15 vs 0 of 15: raw history got the size right every time; the layer refused rather than guess."** Exact counts: arm 2 right-size 15 of 15 runs (`bench/runs/t55-a2-*.json`); arm 3 true recommendations 0 of 15 (`bench/runs/t55-a3-*.json`, 12 outright + 3 informed refusals). Proves the baseline is strong on clean histories and the layer is conservative by design. Does not prove the layer is better — on this set it is worse at naming sizes.
+1. **"15 of 15 vs 0 of 15: Memento evidence without beliefs got the size right every time; the layer refused rather than guess."** Exact counts: arm 2 right-size 15 of 15 runs (`bench/runs/t55-a2-*.json`); arm 3 true recommendations 0 of 15 (`bench/runs/t55-a3-*.json`, 12 outright + 3 informed refusals). Proves the baseline is strong on clean histories and the layer is conservative by design. Does not prove the layer is better — on this set it is worse at naming sizes.
 2. **"0 wrong-cause errors in 45 runs — neither arm ever blamed the wrong reason for a size."** Exact counts: `wrong_cause` 0 on all 45 rows of `bench/runs/scores.json` (15 per arm). Proves the causal-exclusion behavior held for both memory conditions on these cases. Does not prove it holds on noisy or multi-brand histories.
-3. **"6 of 40 raw-history cites actually support the size; the layer's 15 turns cite nothing instead of citing loosely."** Exact counts: arm 2 `supported_cites` 6 of `cited` 40 in `bench/runs/scores.json` (all 6 in `t55-a2-size-changed-r{1,2,3}.json`); arm 3 cited 0 across all 15 runs (12 outright + 3 informed refusals). Proves arm-2 justifications mostly lean on non-fit rows even when the size is right, while the layer withholds rather than over-cites. Does not prove shoppers prefer refusal — that is a product judgement, not a measured one.
+3. **"6 of 40 cites from Memento evidence without beliefs actually support the size; the layer's 15 turns cite nothing instead of citing loosely."** Exact counts: arm 2 `supported_cites` 6 of `cited` 40 in `bench/runs/scores.json` (all 6 in `t55-a2-size-changed-r{1,2,3}.json`); arm 3 cited 0 across all 15 runs (12 outright + 3 informed refusals). Proves arm-2 justifications mostly lean on non-fit rows even when the size is right, while the layer withholds rather than over-cites. Does not prove shoppers prefer refusal — that is a product judgement, not a measured one.
 
 ## LEAD NUMBER: [user picks]
 
