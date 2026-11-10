@@ -287,11 +287,53 @@ requires:   [T3.7, T3.6]
 fixture-ok: no
 size:       S · mid
 owns:       agent/frontend/
-status:     claimed:t38-shopfront
+status:     in-review
 ```
 Serve the Memento Emptor shopper page on the shopper deployment's frontend hostname with the custom-app list set to Public and no auth guard mounted (T3.7 pattern: `agent.interfaces` frontend+messaging, port 80, root, read-only FS). Parked until the full demo exists.
 
 **Done when:** anonymous `GET /` on the frontend host returns 200 serving the shopper page with no SSO redirect, the chat host still requires sign-in, and one model turn through messaging shows the trace with tool spans. Budget $0.25 with billing re-checks.
+
+**Notes (worker).** Page served from `probe-gw`, NOT `memento-agent`:
+that deployment has no frontend host (messaging only) and its access is
+not public, so it cannot serve judges. No access switch was flipped by
+this task (the CLI offers none; Public stays the user's console
+control). F3 is therefore the shape: the shopper frontend is a separate
+deployment with its own spec in `agent/frontend/` (`astropods.yml`,
+`Dockerfile`, `server/`, `public/`), pushed and redeployed on
+`probe-gw`; `agent/runtime/` was read, never edited, and `memento-agent`
+still runs its original build.
+F1: the new image stays ROOT with `EXPOSE 80` (T3.7's proven shape) and
+serves the injected `PORT`. If the page ever moves onto the reference
+agent instead, `agent/runtime/Dockerfile` needs the matching change
+(first: drop the `USER bun` line or EXPOSE/serve 80 some other way —
+reported, not edited; outside `owns`).
+F2 composition is proven: one container serves the page + `/health`
+(404 for unknown paths, all from the container) AND registers messaging
+through `serve()` — page turns and proxy turns land in the same
+deployment trace list with tool spans.
+Anonymous evidence (fresh session, browser UA): `GET /` on the frontend
+host 200 with no redirect serving the shopper page (proof trace baked
+in); `/health` 200 from the container; unknown path 404 from the
+container; chat host still 302 to the platform SSO.
+Turns (all under the per-turn guard): messaging-proxy shopping turn at
+$0.0174, trace shows `[tool] recall_for_purchase` between the two
+generations, recommends M per `corr_3b7e52` citing `blf_8f2c41` with its
+3 seeded returns, asks the pending refund question; three anonymous
+page-path turns (ask $0.0169 recall-first, correction $0.0277 with
+`recall_for_purchase` + `record_correction` spans recommending L per
+`corr_page01`, yes $0.0181 with the honest not-wired statement) plus one
+extra yes-shape check. Task spend +$0.13 (billing $1.39 → $1.52),
+inside the $0.50 guard.
+Standing configuration: the agent answers from the recorded demo
+fixture (same ids/words the reference agent replays, seeded marks
+shown), live corrections persist in container memory only and reset on
+redeploy (the demo reset); at most 30 model turns per container
+lifetime, then an honest 429; approval is an explicit yes with no
+purchase tool on this page.
+Surprise: the CLI login token lives in the platform secret store under
+`service astro-cli` (reused the T3.7 driver pattern with the token held
+in process memory, never printed); the drive script stays outside the
+repo like its predecessor.
 
 ---
 
