@@ -1,0 +1,119 @@
+{
+  "run_id": "t55-a2-never-arrived-r1",
+  "shopper_id": "cmp-never-arrived",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-never-arrived\nCandidate: a new Washed Oxford Shirt from Brand D (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-never-arrived: 3 rows over 8 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size L\nday 2 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand D oxford size L, no feedback\nday 6 | dispute OPEN | signal classified_outcome | source payment | Brand D Washed Oxford Shirt SKU BRD-OXF-L size L (dress-shirts) | reason not_arrived \"MERCHANDISE_OR_SERVICE_NOT_RECEIVED\" conf 1.00 | write record_action | seeded | Dispute opened: Brand D parcel never arrived; tracking stuck for weeks\n",
+  "arm_memory_tool": "read_history",
+  "arm_memory_response": "response 810 chars, first line: Raw history for cmp-never-arrived: 3 rows over 8 days.",
+  "agent_tool_spans": [
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1268
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 502
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1253
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1273
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1249
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 1
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**L** — The shopper self-reports as usually size L and previously kept a Brand D Washed Oxford Shirt in size L.",
+  "contaminated": false,
+  "trace_cost_usd": 0.001929,
+  "prompt_words": 195,
+  "reply_words": 21,
+  "capped": false,
+  "sent_at": "2026-11-10T10:34:08Z",
+  "trace_at": "2026-11-10T10:34:14Z",
+  "extraction": {
+    "size": "L",
+    "size_rule": "explicit-size",
+    "size_quote": "**L** — The shopper self-reports as usually size L and previously kept a Brand D Washed Oxford Shirt in size L.",
+    "id_refs": null,
+    "human_refs": [
+      {
+        "ref": "usually size L",
+        "quote": "self-reports as usually size L",
+        "reason": "sole history note containing the phrase is the day-0 general statement"
+      },
+      {
+        "ref": "Kept past the window",
+        "quote": "previously kept a Brand D Washed Oxford Shirt in size L",
+        "reason": "sole kept row is the day-2 kept-past-window row"
+      }
+    ]
+  },
+  "score": {
+    "ShopperID": "cmp-never-arrived",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 2,
+    "Cites": [
+      {
+        "Ref": "usually size L",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "Kept past the window",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      }
+    ],
+    "TokensFirst": 216,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

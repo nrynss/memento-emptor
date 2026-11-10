@@ -1,0 +1,131 @@
+{
+  "run_id": "t55-a2-changed-mind-r3",
+  "shopper_id": "cmp-changed-mind",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-changed-mind\nCandidate: a new Classic Oxford Shirt from Brand E (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-changed-mind: 3 rows over 7 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | kept PAST_WINDOW | signal kept_past_window | source payment | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason none | write observe | seeded | Kept past the window: Brand E oxford size M, no feedback\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand E Classic Oxford Shirt SKU BRE-OXF-M size M (dress-shirts) | reason changed_mind \"changed my mind\" conf 1.00 | write record_action | seeded | Refund: Brand E oxford size M; shopper changed their mind\n",
+  "arm_memory_tool": "read_history",
+  "arm_memory_response": "response 784 chars, first line: Raw history for cmp-changed-mind: 3 rows over 7 days.",
+  "agent_tool_spans": [
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1177
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 461
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1158
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1173
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1153
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**M** — The shopper states they are usually size M, and the only return was due to a change of mind, not a fit issue.",
+  "contaminated": false,
+  "trace_cost_usd": 0.001899,
+  "prompt_words": 196,
+  "reply_words": 25,
+  "capped": false,
+  "sent_at": "2026-11-10T10:36:42Z",
+  "trace_at": "2026-11-10T10:36:49Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "**M** — The shopper states they are usually size M, and the only return was due to a change of mind, not a fit issue.",
+    "id_refs": null,
+    "human_refs": [
+      {
+        "ref": "usually size M",
+        "quote": "states they are usually size M",
+        "reason": "sole history note containing the phrase is the day-0 general statement"
+      },
+      {
+        "ref": "Kept past the window",
+        "quote": "the only return was due to a change of mind",
+        "reason": "the kept-past-window row is day-1, the only kept row"
+      },
+      {
+        "ref": "changed their mind",
+        "quote": "change of mind, not a fit issue",
+        "reason": "the reply describes the day-5 changed-mind refund, the sole note about a changed mind"
+      }
+    ]
+  },
+  "score": {
+    "ShopperID": "cmp-changed-mind",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 3,
+    "Cites": [
+      {
+        "Ref": "usually size M",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "Kept past the window",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      },
+      {
+        "Ref": "changed their mind",
+        "Resolved": true,
+        "Kind": "",
+        "Supports": false,
+        "Reason": "resolves by note match but counts toward nothing, not fit"
+      }
+    ],
+    "TokensFirst": 221,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}
