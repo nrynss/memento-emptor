@@ -74,7 +74,7 @@
     "size_rule": "explicit-size",
     "size_quote": "I cannot make a confident size recommendation because the only signal available is a completed refund on size M, and the reason for that refund is unknown.",
     "id_refs": null,
-    "notes": "live layer seed, settled before recall: no beliefs seeded; nothing to settle human review: the reply recommends no size (refusal); the deterministic M names the refunded item, not a recommendation. The frozen rule provides no override-to-empty, so the mechanical M stands; RightSize on this run is an extractor artifact, see the task report. human review: the reply recommends no size (refusal); the deterministic M names the refunded item, not a recommendation. The frozen rule provides no override-to-empty, so the mechanical M stands; RightSize on this run is an extractor artifact, see the task report."
+    "notes": "live layer seed, settled before recall: no beliefs seeded; nothing to settle human review: the reply recommends no size (refusal); the deterministic M names the refunded item, not a recommendation. The frozen rule provides no override-to-empty, so the mechanical M stands; RightSize on this run is an extractor artifact, see the task report."
   },
   "score": {
     "ShopperID": "cmp-unclear",
