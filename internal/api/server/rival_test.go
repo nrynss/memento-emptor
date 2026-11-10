@@ -402,3 +402,45 @@ func TestRivalCorrectionResetsStreaks(t *testing.T) {
 		t.Errorf("graph saw %d against edges, want 1: only the correction declares against", got)
 	}
 }
+
+// TestRivalFourthOppositeJoinsRival proves the birth consumes the run: a
+// fourth consecutive opposite-direction answer attaches to the newborn
+// rival as a same-direction return instead of birthing a second rival.
+// The existing belief stays untouched and nothing declares against.
+func TestRivalFourthOppositeJoinsRival(t *testing.T) {
+	svc, spy := rivalHarness(t)
+	shopper := "shopper_rival_fourth"
+
+	first := answerOne(t, svc, shopper, "WH-2EV-01", rivalSmallAnswer)
+	if !first.Accepted || first.BeliefID == nil {
+		t.Fatalf("first return: accepted %v belief %v, want true and attached", first.Accepted, first.BeliefID)
+	}
+	smallID := *first.BeliefID
+
+	answerOne(t, svc, shopper, "WH-2EV-02", rivalLargeAnswer)
+	answerOne(t, svc, shopper, "WH-2EV-03", rivalLargeAnswer)
+	birth := answerOne(t, svc, shopper, "WH-2EV-05", rivalLargeAnswer)
+	if !birth.Accepted || birth.BeliefID == nil || *birth.BeliefID == smallID {
+		t.Fatalf("birth attaches to %v, want a new rival", birth.BeliefID)
+	}
+	rivalID := *birth.BeliefID
+
+	fourth := answerOne(t, svc, shopper, "WH-2EV-07", rivalLargeAnswer)
+	if !fourth.Accepted || fourth.BeliefID == nil || *fourth.BeliefID != rivalID {
+		t.Fatalf("fourth consecutive opposite attaches to %v, want the rival %q", fourth.BeliefID, rivalID)
+	}
+	if rows := ledgerFitBeliefs(t, svc, shopper); len(rows) != 2 {
+		t.Fatalf("after the fourth opposite the shopper holds %d fit beliefs, want 2: no second rival", len(rows))
+	}
+	rival := fitBelief(t, svc, shopper, "runs large, take size S")
+	if rival.EvidenceCount != 2 {
+		t.Errorf("rival holds %d rows, want 2: the fourth opposite joined it", rival.EvidenceCount)
+	}
+	small := fitBelief(t, svc, shopper, "runs small, take size L")
+	if small.EvidenceCount != 1 {
+		t.Errorf("existing belief holds %d rows, want 1: the opposites added no support", small.EvidenceCount)
+	}
+	if got := againstEdges(spy); got != 0 {
+		t.Errorf("graph saw %d against edges, want 0: birth declares nothing", got)
+	}
+}
