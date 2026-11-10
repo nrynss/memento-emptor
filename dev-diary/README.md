@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Paused for the pivot |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 1 / 10 | In progress |
+| P8 | 3 / 11 | In progress |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,22 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.6: Authenticated callers (done)
+
+**What exists.** `internal/auth/` stores hashed, revocable keys for three caller kinds, bound to one seller and its shoppers; `auth.IssueKey` mints them once, `Authenticate` scans every entry in constant time, and the guard refuses an unbound `shopper_id` with the same 401 as an unknown key. `deploy/edge` mounts the guard on every route of `auth.Surface()`; only `/healthz` and the webhook are public, refusals are byte-identical, and client `X-Memento-*`/`Authorization` headers are stripped. Review found and fixed one real defect: the guard asserted `X-Memento-Shopper` from the body even for out-of-scope or unknown tools, which a merchant key could exploit before T8.5 trusted the header.
+
+**What surprised.** The deployment can start with no key variables and stay `/healthz`-green while refusing every API call — fail-closed, but invisible in Render. Nothing invokes `IssueKey` yet. The webhook's only gate is still T2.1's replay fixture; a known event id can write evidence into any shopper's session (pollution, not disclosure). `/calls` is agent-only because the layer returns every entry unscoped. The guard forwards a body it cannot parse; the layer's strict single-object decoder rejects it today.
+
+**The next agent should not have to work out.** T9.6 wires the three `MEMENTO_*` variables into `deploy/render.yaml`, `.env.example` and `tools/env.sh`, mints keys with T8.5's command, and sets them as Render secrets. T8.5 adds the key command, scopes `/calls`, keeps the MCP decoder strict, and retries a partial opt-out. T8.7 replaces the fixture webhook verifier with a real signature check. T9.2 sends the demo shopper's link token as a bearer header.
+
+### T8.2: Fit index writer (done)
+
+**What exists.** `internal/fitindex/` is the layer's whole index interface (`Create`/`Put`/`DeleteShopper`) and a per-shopper `Writer` for captured → refunded → reason → settled/contested, `Record(domain.Evidence)`, `Forget(lines)` and an opt-out check; `Mapping()` is T0.12's mapping field for field. `internal/ingest/WithFitRecorder` writes the row beside capture and refund deliveries; disputes and shopper words write nothing. Tests cover every state ordered and shuffled, webhook replay, older-state refusal, a reasonless refund, corrections, opt-out across lines, and the mapping. Review APPROVE; the three low code findings (partial-delete success, consent/write race, unsettled time) were fixed on the task branch before landing.
+
+**What surprised.** The row key is the capture id with the order id as fallback, so a multi-item order shares one row; every demo and seed purchase is single-item. `domain.Item` has no fit handle, hence the `Lines` resolver. The mapping still declares `event_seq` while the writer never sets it: T7.1's rank-plus-time version supersedes it. `Record` drops a refund's attached reason, so a seed refund must be written `Refunded` then `Classified`. `refresh=true` on every write is a forced refresh per document.
+
+**The next agent should not have to work out.** T8.5 builds one writer per shopper in the server state and calls `Classified`/`Feedback`/`Contested`/`Forget`, resolving the same line the writer would; T8.2b proves the live adapter; T9.6 seeds through `Refunded` then `Classified` and measures the refresh cost. Owners: T8.5 for line duality, capture-id consistency, `captured_at` hydration and partial-delete retry; T9.6 for the refund reason and refresh cost; T7.4 for the rank-order edge.
 
 ### Finding owners (user, stands)
 

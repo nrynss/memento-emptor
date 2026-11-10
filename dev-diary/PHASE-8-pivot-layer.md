@@ -28,6 +28,8 @@ status:     not-started
 ```
 The T8.1 shape against the live Elastic recall tier: three shoppers created on demand, each recalls only its own concepts, and the ledger reader serves the allowlisted ones. Budget: under $0.20 of embedding spend. Run one shopper first and check its cost. Test sessions are erased afterwards.
 
+Also exercise the 503 + `Retry-After` refusal with all `max_attached` places full, and measure `--max-sessions 128` and `--rate-limit-rps 200` on the 0.5 CPU starter.
+
 **Done when:** the transcript is in the handoff log, with spend and the erase shown.
 
 ---
@@ -38,7 +40,7 @@ requires:   [T7.1, T7.2]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/fitindex/, internal/ingest/
-status:     in-review
+status:     done
 ```
 Ingest writes a fit row beside every Lambo write, from the same event: capture creates the row, a refund marks it returned, a classified reason gives it a category and direction, fit feedback and kept-past-the-window settle it, and a contested reason updates it. Each write replaces the whole document at the state-rank version with `external_gte` (T0.12: the partial `_update` API refuses external versioning). The index is created from T7.1's mapping. Only the layer's interface to the index is named in domain code (developer rule 6).
 
@@ -126,7 +128,7 @@ requires:   [T7.1, T7.2]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/auth/, deploy/edge/
-status:     in-review
+status:     done
 ```
 Today the MCP endpoint has no authentication: anyone who reaches the URL can read any shopper's memory by `shopper_id`. product.md ("How it is consumed") requires every caller to be authenticated before anything with real shoppers goes live.
 
@@ -153,6 +155,18 @@ Seven things the next agent should not have to rediscover:
 - **`TestEveryToolIsClassified` fails when the contract grows.** A new tool must be given a rule in `surface.go`; otherwise the guard would pass it to any authenticated caller.
 - **The webhook stays public on purpose, and the layer's verifier is the only gate there.** The guard refuses nobody on that path because T2.1's verification belongs to the payment source. Until that verification is real, a delivery naming any `shopper_id` is accepted if its event id verifies: a known event id can write evidence into any shopper's session, though reading that session still needs a key. The edge cannot turn this into a key requirement without breaking deliveries, so a real signature check is the fix, not a wider guard.
 
+### T8.7: Verified webhook deliveries
+```yaml
+requires:   [T2.1, T8.2]
+fixture-ok: no
+size:       M · frontier
+owns:       internal/payments/, internal/ingest/
+status:     not-started
+```
+The webhook path is public by design, and its only gate is T2.1's verifier, which today replays a fixture: a known event id can write evidence into any shopper's session. Build the real adapter against PayPal's `POST /v1/notifications/verify-webhook-signature` with the transmission id, timestamp, signature and raw body, using the sandbox app's credentials. Reject anything that does not verify, keep the delivery idempotency T2.1 built, and record a good, a tampered, a replayed and an unknown delivery. Budget: no model spend; sandbox calls are free.
+
+**Done when:** the four deliveries are recorded with their outcomes, a recorded PayPal delivery verifies live, a tampered body gets the same refusal as any unverified delivery, and the gate passes.
+
 ---
 
 ### T8.5: Recall never refuses ★
@@ -163,7 +177,13 @@ size:       M · frontier
 owns:       internal/api/server/, internal/precedence/, internal/standing/, cmd/memento/main.go
 status:     not-started
 ```
-Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Hold one `StandingCorrections` per shopper, serialised (two agents may speak for one shopper), and make the journal survive a restart: a layer-owned store or a Lambo enumeration/structured-attributes mechanism. A restart must not lose the ability to declare a standing correction against a later belief. Decide whether an identical repeated correction refreshes its event time, since precedence keys on recency. The standing branch of `record_correction` accepts an empty belief id, and every belief write calls `EnsureBeliefDeclaring`. Scope `/calls` to the caller's shopper (or document it agent-only), and confirm the production webhook path uses the real verifier, not a fixture.
+Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Hold one `StandingCorrections` per shopper, serialised (two agents may speak for one shopper), and make the journal survive a restart: a layer-owned store or a Lambo enumeration/structured-attributes mechanism. A restart must not lose the ability to declare a standing correction against a later belief. Decide whether an identical repeated correction refreshes its event time, since precedence keys on recency. The standing branch of `record_correction` accepts an empty belief id, and every belief write calls `EnsureBeliefDeclaring`. Scope `/calls` to the caller's shopper (or document it agent-only). Also:
+- resolve a purchase's line from one source for every writer call, so a caller cannot pool a row under the wrong product;
+- pass a consistent capture id through the writer, and decide the order-id fallback's two-row hazard;
+- hydrate `captured_at` after a restart or document the loss;
+- treat `fitindex.ErrIncompleteDelete` as not done and retry `Forget` with the session's full line list;
+- add a `memento key issue` command using `auth.IssueKey` that prints the token once;
+- keep the MCP decoder strict (single object, unknown fields rejected); if batches are ever accepted, the guard must scope them or refuse.
 
 **Done when:**
 - A table test covers every step deciding, every pair of disagreeing steps, and the unreachable pool.
@@ -191,5 +211,6 @@ The live layer through the hub and a test-prefixed fit index: one shopper per pr
 - [ ] Every purchase writes and updates its fit row at ingest, live (T8.2, T8.2b).
 - [ ] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
 - [x] A correction stands on its own (T8.4).
-- [ ] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).
+- [x] Every caller is authenticated, and no route returns a shopper's memory without a key (T8.6).
+- [ ] Webhook deliveries are verified against PayPal's signature, not a fixture (T8.7).
 - [ ] Recall never refuses, and says which step decided, live (T8.5, T8.5b).
