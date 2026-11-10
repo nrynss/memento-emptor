@@ -1,0 +1,121 @@
+{
+  "run_id": "pilot-a2-size-changed",
+  "shopper_id": "cmp-size-changed",
+  "arm": 2,
+  "arm_name": "raw-history",
+  "model": "claude-sonnet-4-6",
+  "deployment": "memento-agent",
+  "prompt": "Shopper: cmp-size-changed\nCandidate: a new Heritage Oxford Shirt from Brand F (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: raw history. The shopper's transactions and past messages, uninterpreted:\nRaw history for cmp-size-changed: 4 rows over 9 days.\nday 0 | statement (no outcome) | signal general_statement | source shopper | Brand F Heritage Oxford Shirt SKU BRF-OXF-M size M (dress-shirts) | reason none | write derive | seeded | Shopper says they are usually size M\nday 1 | capture COMPLETED | signal fit_feedback | source shopper | Brand F Heritage Oxford Shirt SKU BRF-OXF-M size M (dress-shirts) | reason none | write record_action | seeded | Fit feedback: Brand F oxford size M fits well, tied to this purchase\nday 5 | refund COMPLETED | signal classified_outcome | source payment | Brand F Heritage Oxford Shirt SKU BRF-OXF-M size M (dress-shirts) | reason fit_too_small \"too tight in the shoulders\" conf 1.00 | write record_action | seeded | Fit return 1: Brand F oxford size M refunded; too tight in the shoulders\nday 7 | refund COMPLETED | signal classified_outcome | source payment | Brand F Heritage Oxford Shirt SKU BRF-OXF-M size M (dress-shirts) | reason fit_too_small \"too tight across the chest\" conf 1.00 | write record_action | seeded | Fit return 2: Brand F oxford size M refunded; too tight across the chest\n",
+  "arm_memory_tool": "read_history",
+  "arm_memory_response": "response 1135 chars, first line: Raw history for cmp-size-changed: 4 rows over 9 days.",
+  "agent_tool_spans": [
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1450
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1443
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1380
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 59
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1348
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 722
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**L** — The shopper's size M Heritage Oxford Shirt was refunded twice for being too small (too tight in the shoulders and across the chest), so sizing up to L is warranted.",
+  "contaminated": false,
+  "trace_cost_usd": 0.002361,
+  "prompt_words": 256,
+  "reply_words": 32,
+  "capped": false,
+  "sent_at": "2026-11-10T09:37:43Z",
+  "trace_at": "2026-11-10T09:37:49Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "**L** — The shopper's size M Heritage Oxford Shirt was refunded twice for being too small (too tight in the shoulders and across the chest), so sizing up to L is warranted.",
+    "human_size": "L",
+    "human_size_reason": "deterministic 'size M' names the returned item ('The shopper's size M Heritage Oxford Shirt was refunded twice'); the recommendation is the bold L with 'sizing up to L is warranted'",
+    "id_refs": null,
+    "human_refs": [
+      {
+        "ref": "too tight in the shoulders",
+        "quote": "refunded twice for being too small (too tight in the shoulders and across the chest)",
+        "reason": "sole history note containing the phrase is fit return 1"
+      },
+      {
+        "ref": "too tight across the chest",
+        "quote": "refunded twice for being too small (too tight in the shoulders and across the chest)",
+        "reason": "sole history note containing the phrase is fit return 2"
+      }
+    ]
+  },
+  "score": {
+    "ShopperID": "cmp-size-changed",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 2,
+    "Cited": 2,
+    "Cites": [
+      {
+        "Ref": "too tight in the shoulders",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      },
+      {
+        "Ref": "too tight across the chest",
+        "Resolved": true,
+        "Kind": "fit",
+        "Supports": true,
+        "Reason": "resolves by note match to fit evidence"
+      }
+    ],
+    "TokensFirst": 288,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "run_id": "pilot-a1-changed-mind",
+  "shopper_id": "cmp-changed-mind",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "model": "claude-sonnet-4-6",
+  "deployment": "memento-agent",
+  "prompt": "Shopper: cmp-changed-mind\nCandidate: a new Classic Oxford Shirt from Brand E (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+  "arm_memory_tool": "",
+  "arm_memory_response": "response 0 chars, first line: ",
+  "agent_tool_spans": [
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1256
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1263
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1241
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 317
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 98
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1137
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 0
+    }
+  ],
+  "recall_observed": false,
+  "reply": "I cannot make a size recommendation because no sizing information, measurements, or preferences were provided for this shopper.",
+  "contaminated": false,
+  "trace_cost_usd": 0.00105,
+  "prompt_words": 65,
+  "reply_words": 18,
+  "capped": false,
+  "sent_at": "2026-11-10T09:35:54Z",
+  "trace_at": "2026-11-10T09:36:04Z",
+  "extraction": {
+    "size": "",
+    "size_rule": "none",
+    "size_quote": "",
+    "id_refs": null
+  },
+  "score": {
+    "ShopperID": "cmp-changed-mind",
+    "RightSize": false,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 83,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

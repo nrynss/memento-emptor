@@ -1,0 +1,92 @@
+{
+  "run_id": "pilot-a1-never-arrived",
+  "shopper_id": "cmp-never-arrived",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "model": "claude-sonnet-4-6",
+  "deployment": "memento-agent",
+  "prompt": "Shopper: cmp-never-arrived\nCandidate: a new Washed Oxford Shirt from Brand D (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+  "arm_memory_tool": "",
+  "arm_memory_response": "response 0 chars, first line: ",
+  "agent_tool_spans": [
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1491
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1498
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 797
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1529
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1513
+    }
+  ],
+  "recall_observed": false,
+  "reply": "Since no size information was provided for this shopper, I recommend **M** as a neutral default starting point, but note that no past purchase or size preference data was given to inform this choice.",
+  "contaminated": false,
+  "trace_cost_usd": 0.001326,
+  "prompt_words": 65,
+  "reply_words": 34,
+  "capped": false,
+  "sent_at": "2026-11-10T09:34:36Z",
+  "trace_at": "2026-11-10T09:34:44Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "standalone-token",
+    "size_quote": "Since no size information was provided for this shopper, I recommend **M** as a neutral default starting point, but note that no past purchase or size preference data was given to inform this choice.",
+    "id_refs": null
+  },
+  "score": {
+    "ShopperID": "cmp-never-arrived",
+    "RightSize": false,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 99,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

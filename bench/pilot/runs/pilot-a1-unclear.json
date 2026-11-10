@@ -1,0 +1,92 @@
+{
+  "run_id": "pilot-a1-unclear",
+  "shopper_id": "cmp-unclear",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "model": "claude-sonnet-4-6",
+  "deployment": "memento-agent",
+  "prompt": "Shopper: cmp-unclear\nCandidate: a new Slim Oxford Shirt from Brand G (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+  "arm_memory_tool": "",
+  "arm_memory_response": "response 0 chars, first line: ",
+  "agent_tool_spans": [
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1265
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 455
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1244
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1240
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1259
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    }
+  ],
+  "recall_observed": false,
+  "reply": "I cannot determine a size recommendation — no sizing information, body measurements, or past purchase history was provided for this shopper.",
+  "contaminated": false,
+  "trace_cost_usd": 0.001092,
+  "prompt_words": 65,
+  "reply_words": 21,
+  "capped": false,
+  "sent_at": "2026-11-10T09:38:25Z",
+  "trace_at": "2026-11-10T09:38:34Z",
+  "extraction": {
+    "size": "",
+    "size_rule": "none",
+    "size_quote": "",
+    "id_refs": null
+  },
+  "score": {
+    "ShopperID": "cmp-unclear",
+    "RightSize": false,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 86,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

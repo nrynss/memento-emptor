@@ -50,13 +50,15 @@ requires:   [T5.1, T5.2]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/pilot/
-status:     claimed:t53-pilot
+status:     in-review
 ```
 Arms 1 and 2 only, before any arm 3 run, to find out what a fair baseline does. If arm 2 scores perfectly, harden the shoppers with cases a real history would contain, or record that the lead is elsewhere. Don't weaken the baseline, and don't tune the cases against the layer.
 
 **User decision:** the spend, before the first run.
 
 **Done when:** the pilot's results are recorded, with any change to the shoppers and the reason for it.
+
+Worker notes (in-review): `bench/pilot/` carries the extraction rule (`pilot.go`, the T5.4 freeze input), the live driver (`cmd/drive`) and grader (`cmd/grade`), ten graded runs + scores, and the pilot record (`README.md` with the spend table). Arm 1: 0/5. Arm 2: 5/5 right-size, 0 wrong-cause — no shopper changes (thin n=1 signal; the baseline reasoned correctly; the lead is recorded as tokens + cites instead), with concrete hardening candidates for the freeze. Headline finding: the reference agent cannot drive the arms — its shopper_01 default contaminated 2/2 turns through it (kept as discarded evidence) — so the pilot measured through a neutral same-model instrument (`bench/pilot/agent/`, deployment left Running). No harness, grader, seed, or fixture file touched.
 
 ---
 
