@@ -296,7 +296,7 @@ requires:   [T8.1, T8.3, T8.3c, T8.4, T8.6]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/server/, internal/precedence/, internal/standing/, cmd/memento/main.go
-status:     in-review
+status:     done
 ```
 Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Hold one `StandingCorrections` per shopper, serialised (two agents may speak for one shopper), and make the journal survive a restart: a layer-owned store or a Lambo enumeration/structured-attributes mechanism. A restart must not lose the ability to declare a standing correction against a later belief. Decide whether an identical repeated correction refreshes its event time, since precedence keys on recency. The standing branch of `record_correction` accepts an empty belief id, and every belief write calls `EnsureBeliefDeclaring`. Scope `/calls` to the caller's shopper (or document it agent-only). Also:
 - resolve a purchase's line from one source for every writer call, so a caller cannot pool a row under the wrong product;

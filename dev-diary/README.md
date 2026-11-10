@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 10 / 12 | In progress (T8.5) |
+| P8 | 11 / 12 | In progress (T8.5b) |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -259,6 +259,14 @@ PASS T8.3b live pool: seeded pool read warm and cold; index deleted
 **What surprised.** The index's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the eight-shopper floor: 10 shoppers with only `too_small` feedback read Building where the rule says Earned. That is T8.3c (new): union the counts or narrow the rule — the latter is a contract change and the orchestrator's call. The T0.12 recording predates the `fit_shoppers` filter, so the fixture test derives 63/55/8 from the recorded counts. The index predates `settled_at`-window reads; the recent window is a separate top-level aggregation.
 
 **The next agent should not have to work out.** T8.5 builds the reader in the layer, calls `Warm` at boot (a nil return is not "the pool is configured" — a wrong key shows up on the first `Fit`), maps `ErrUnavailable` to `contract.PoolUnavailable`, and maps `Counts.Reasons` to the contract views. T8.3b does the live read. T8.3c resolves the union question before the pool is served.
+
+### T8.5: Recall never refuses (done)
+
+**What exists.** `internal/precedence/` resolves the five steps as a pure function (singles, all six disagreeing pairs, three-way, unreachable pool, `View` marking). `internal/api/server/` serves the pivot: recall with pool/pool_lookup/per-item precedence, `record_correction` with the optional belief, `product_fit`, `set_pooling` (opt-out, `Forget` with retry), the raw-body webhook joined via `custom_id`, `/calls` honoring `X-Memento-Shopper`, a strict MCP decoder, and a `memento key issue` command. `internal/standing/` persists one journal per shopper (only undeclared entries; atomic save/restore; service lock serialises). Repeat corrections return the stored entry without refreshing time. One `fitindex.Writer` per shopper resolves one line for every call. Review APPROVE with no code changes.
+
+**What surprised.** The serving line excludes a lone return (Claimed, no promotion), so recall answers `GuidanceNone` — a soft refusal where product.md promises thin evidence; changing it moves the story, so it is structural (T7.4, after a product call). Declared-correction views dangle after restart (beliefs get fresh ids; the correction degrades to unscoped) — T8.5b should pin or fix re-linking by content match. No `Kept` writer call exists on any served path: kept-settling needs a return-window sweeper no task owns yet (orchestrator to task it). The seed's unserved general statement now renders beside the contradicted belief; T7.4's tightening must match the guidance texts pinned in the tests.
+
+**The next agent should not have to work out.** T7.4 can now require the pool and precedence fields, add Claimed/Building examples, resolve the `GuidanceBelief` alias, add JSON tags to `domain.Subject`, and settle the rank-order question — nothing here contradicts it. T8.5b proves the live layer and pins the dangling-view behaviour.
 
 ### T8.1b: Lambo hub, live (done)
 
