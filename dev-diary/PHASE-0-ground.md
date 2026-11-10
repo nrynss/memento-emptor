@@ -297,7 +297,7 @@ requires:   [T0.3]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/lambo-multi.md, testdata/lambo-multi/
-status:     in-review
+status:     done
 ```
 **The gate on per-shopper memory after the pivot.** product.md now keeps every shopper in their own Lambo session, keyed by a salted hash of their PayPal payer ID. T0.3 proved two sessions don't see each other, on one writer each. The deploy runs one writer for one session (`deploy/start.sh`, `LAMBO_SESSION`). Find out, on the Lambo release the deploy pins (`deploy/Dockerfile`), how the layer serves many shoppers:
 
@@ -323,7 +323,7 @@ requires:   [T0.6]
 fixture-ok: no
 size:       M · frontier
 owns:       dev-diary/research/elastic-fit.md, testdata/elastic-fit/
-status:     in-review
+status:     done
 ```
 **The gate on pooled product fit and the merchant view.** product.md (the evidence model, "Lambo holds the shopper; Elastic holds the pool") settles the row: one document per purchase, keyed by a hash of the transaction ID, updated in place, written at ingest. Only settled rows count: returned with a classified reason, fit feedback, or kept past the return window. The shopper key is a salted hash per (shopper, product line). Seeded and live rows share one index, with the seeded mark on every row. Prove that design on the existing Serverless deployment (`research/elastic.md`):
 
@@ -378,5 +378,5 @@ Evidence in `research/elastic-fit.md`, recordings in `testdata/elastic-fit/`.
 - [x] Channel3, Elastic, Jev and Astropods each measured and recorded (T0.5 to T0.8).
 - [x] Hosting decided (T0.9).
 - [x] AG Grid confirmed inside Chaaya (T0.10).
-- [ ] Lambo serves many shoppers, each isolated, with a recommended deploy shape (T0.11).
-- [ ] The Elastic fit index updates per purchase in place and aggregates settled rows exactly (T0.12).
+- [x] Lambo serves many shoppers, each isolated, with a recommended deploy shape (T0.11).
+- [x] The Elastic fit index updates per purchase in place and aggregates settled rows exactly (T0.12).

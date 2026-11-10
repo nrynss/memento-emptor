@@ -15,7 +15,7 @@ Each phase document gives an engineer starting cold the complete context for its
 
 **This diary is public.** The repository goes public for submission. Nothing private goes in here: no key, no account detail, no IP address, no personal path beyond `~`, no private repository's name.
 
-**Current status:** P0 to P5 are done as first built. product.md now carries a proposed pivot (the reason layer, pooled product fit in Elastic, a merchant view). Two new ground probes come before any pivot work: T0.11 (Lambo serving many shoppers) and T0.12 (the Elastic fit index). Both are ready and independent. P6 waits on the pivot.
+**Current status:** P0 to P5 are done as first built, and P0 is complete including the pivot's two gates: T0.11 proved Lambo v0.10.1 serves many isolated shopper sessions from one hub, and T0.12 proved the pooled fit index on Elastic with settled-only aggregations. product.md carries the pivot (the reason layer, pooled product fit in Elastic, a merchant view). The pivot's implementation phases are not yet written; P6 waits on them.
 
 ---
 
@@ -138,7 +138,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 10 / 12 | In progress (T0.11, T0.12 ready) |
+| P0 | 12 / 12 | Done |
 | P1 | 5 / 5 | Done |
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
@@ -152,9 +152,25 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### T0.12: Elastic fit index (done)
+
+**What exists.** `dev-diary/research/elastic-fit.md` records all eight checks with requests, responses and results, the exact mapping (18 structured keyword/boolean/integer/date fields, `dynamic: strict`, no text or vector), the reusable line-and-size aggregation, and the write rule: whole-document `PUT` to `_id = sha256("txn|" + transaction id)` with `version = event_seq` and `external_gte` (a `409` is an older event that must not win; the same version is a harmless retry). `testdata/elastic-fit/` holds the generator/harness and ten redacted recordings; `t012-*` indices were deleted (live check: empty listing). Review passed with non-blocking findings; fixes committed.
+
+**What surprised.** The deployment is an Elasticsearch **Vector Database** project, not general Serverless: only `vectordb_document` index mode, `_update` refuses external versioning (whole-row rewrite is the path), and billing is storage/Search Power/ingest rather than VCU. Cold TLS repeats at ~6.9 s against ~236 ms warm, so the client needs the 20 s timeout T0.6 settled. `cardinality` is exact at the 588-shopper pool under the default 3000 threshold; 3000 and 40000 are its practical exactness bounds.
+
+**The next agent should not have to work out.** Do not invent a different hash: `sha256("txn|" + id)` is what the recording pins. Set `event_seq` to the purchase's event sequence (the review found the committed `states.json` request bodies are the final row, not per-step snapshots, and rows kept `event_seq: 1` while `_version` advanced; the mechanism rests on the GETs and counts, and the next live state run must copy the body per step). Settled means a classified return reason, fit feedback, or kept past the window; a no-reason refund and an in-window purchase count toward nothing; `fit_direction` exists only on fit returns and fit feedback; the denominator is the settled filter's `doc_count`. Give the client `timeout_ms: 20000` and a kept-alive pool.
+
+### T0.11: Lambo serving many shoppers (done)
+
+**What exists.** `dev-diary/research/lambo-multi.md` and `testdata/lambo-multi/` (harness, eight transcripts, eight reports). Lambo v0.10.1 multiplexes: one `lambo serve --transport http` hosts one writer per session and many sessions, attaching a session on its first request under a credential `session_prefix` (`shopper-`) with `create = true`. Measured: 21.1 MiB hub, about 0.4 MiB per attached small session, about 29.7 KiB per concept; eight concurrent writers lost nothing; the Elastic recall tier shares one contract index filtered by `session_id`; 20 sessions over 380 pairs leaked nothing; interleaved promotion stayed isolated. Deploy shape: one hub in `start.sh`, `max_attached: 16`, sessions `shopper-<64-hex>`, the layer on `/mcp/s/<session>`, the ledger on `/s/<session>/api/inspect`. Spend $0.00.
+
+**What surprised.** The deploy's "one writer per session" is only half true: one *process* can own many sessions. A second writer on a held session silently becomes a proxy into the holder, not a refusal. `max_attached` includes the one pinned session HTTP requires, so 15 shoppers attach beside it. `serve-web`'s allowlist is fixed at start: a shopper created later is a 404 until restart; the issue text is in the research file for the user to file. Review findings, non-blocking: `serve-web`'s own RSS was not measured (16 is safe; 20 is an upper bound only, so measure the reader before raising `max_attached`), `--max-sessions` and `--rate-limit-rps` are unmeasured on the 0.5 CPU starter, check 4's cleanup is not in a `finally`, the 503 refusal path is not recorded, and `serve-web`'s default `max_loaded_sessions` is 4 (tune it in the ledger work).
+
+**The next agent should not have to work out.** Keep the seed-then-hub order in `start.sh`: the seeder's short-lived stdio writer must own its session alone while it runs. Do not pin every shopper; pinned sessions never idle-detach and each spends a `max_attached` place. The Elastic tier keeps one data index per embedding contract, filtered by `session_id`.
+
 ### Pivot proposed after P5 (user, under discussion)
 
-The comparison's "raw history" arm was handed rows the layer had already classified (reason, signal strength, write kind), so its 15/15 and 4/4 measure Memento's evidence without beliefs, not raw PayPal history. The arm that gated on Earned refused and lost. product.md now proposes: recall never refuses (status is a label), corrections stand alone, a real PayPal-only arm 2, pooled product fit across shoppers, and a merchant view (decided: ships). Per shopper stays in Lambo, one session each; the pool goes to an Elastic fit index, written at ingest, one row per purchase, settled rows only (kept past the window counts), a per-product-line shopper hash, seeded and live in one index. T0.11 and T0.12 test both halves before any pivot task is written. Open: consent for pooling, and which headline the new comparison supports.
+The comparison's "raw history" arm was handed rows the layer had already classified (reason, signal strength, write kind), so its 15/15 and 4/4 measure Memento's evidence without beliefs, not raw PayPal history. The arm that gated on Earned refused and lost. product.md now proposes: recall never refuses (status is a label), corrections stand alone, a real PayPal-only arm 2, pooled product fit across shoppers, and a merchant view (decided: ships). Per shopper stays in Lambo, one session each; the pool goes to an Elastic fit index, written at ingest, one row per purchase, settled rows only (kept past the window counts), a per-product-line shopper hash, seeded and live in one index. T0.11 and T0.12 tested both halves and both passed (entries above), so the pivot's implementation phases can now be written. Open: consent for pooling, and which headline the new comparison supports.
 
 ### T5.9: Correction round (done)
 
