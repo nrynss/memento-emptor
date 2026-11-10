@@ -166,7 +166,7 @@ requires:   [T5.8]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/runs/
-status:     in-review
+status:     done
 ```
 Every shopper, every arm, one correction turn: after the arm's first recommendation (or refusal), the shopper says "Actually I take L now" (uniform text naming an explicit size that differs from what the arm just gave; where the arm already recommended L, the text names M instead so the correction always contradicts). Then re-ask once. Grade with the frozen grader: honoured-on-next-turn, belief/state kept (arm 3: prior belief retained beside the correction, per the decision-vs-belief rule), history intact (arm 2), no fabrication. This is the signature move raw history has no mechanism for — run it honestly and report whatever happens, including arm 2 honouring it too.
 

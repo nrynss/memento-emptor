@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
-| P5 | 9 / 10 | In progress |
+| P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | In progress |
 
 ---
@@ -151,6 +151,16 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T5.9: Correction round (done)
+
+**What exists.** 27 committed correction turns (9 shoppers × 3 arms) graded against the frozen grader: 27/27 honoured, 0 wrong-cause everywhere. Arm 3 routed only 2/9 corrections through the real `record_correction` path (both noisy-shopper Venerable beliefs, post-recall asserted); elsewhere every arm just followed the in-conversation correction. Review APPROVE, no fixes (verified the uniform rule, the contamination exception, and the honest headline from committed files).
+
+**What surprised.** Corrections do not discriminate the arms — obedience is universal, mechanism differs. The layer's signature move engaged in only 2 of 27 turns. T5.6's lead-number pick stays parked: nothing here unlocks an arm-3 win either.
+
+### Custom domain decision (user, stands)
+
+`memento.nryn.dev` was added to Render and then removed again per the user's call: keep the Render URL for the demo — it reads better for the hackathon. Cleaned up (204 on delete, domain list empty, render URL 200). No DNS was ever pointed at it, so nothing to unwind on the Cloudflare side.
 
 ### T3.8: Public shopper page (done)
 
