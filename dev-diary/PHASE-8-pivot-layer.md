@@ -38,7 +38,7 @@ requires:   [T8.1]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/hub/
-status:     not-started
+status:     claimed:t81b-live-hub
 ```
 The T8.1 shape against the live Elastic recall tier: three shoppers created on demand, each recalls only its own concepts, and the ledger reader serves the allowlisted ones. Budget: under $0.20 of embedding spend. Run one shopper first and check its cost. Test sessions are erased afterwards.
 
@@ -130,7 +130,7 @@ requires:   [T8.3]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/pool/
-status:     not-started
+status:     claimed:t83b-live-pool
 ```
 A small seeded population in a test-prefixed index, read back through `product_fit`, with warm and cold latency recorded. No model spend. Test indices deleted afterwards.
 
@@ -144,7 +144,7 @@ requires:   [T8.3]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/pool/
-status:     not-started
+status:     claimed:t83c-union-shoppers
 ```
 T8.3's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the rule's eight-shopper floor: 10 shoppers whose only small evidence is `feedback: too_small` read Building where the documented rule says Earned. Either add a second per-direction filter+cardinality that unions fit returns with fit feedback verdicts (and decide what the recorded fixture then pins), or narrow `domain.PoolCounts`/`ShopperCountsView` to returns-only — the latter is a contract change and the orchestrator's call.
 
@@ -245,11 +245,11 @@ Four things the next agent should not have to rediscover:
 
 ### T8.5: Recall never refuses ★
 ```yaml
-requires:   [T8.1, T8.3, T8.4, T8.6]
+requires:   [T8.1, T8.3, T8.3c, T8.4, T8.6]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/api/server/, internal/precedence/, internal/standing/, cmd/memento/main.go
-status:     not-started
+status:     claimed:t85-recall
 ```
 Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's session and the pool, and resolves the five-step precedence order as a pure function in `internal/precedence/`: correction, own evidence, pool (adjusted from the usual size), statement, nothing. Every item carries its label. When steps disagree, both come back with the lower one marked overridden. `record_correction` takes the optional belief. `product_fit` and `set_pooling` are served. Thin evidence comes back labelled thin, never as a refusal. Hold one `StandingCorrections` per shopper, serialised (two agents may speak for one shopper), and make the journal survive a restart: a layer-owned store or a Lambo enumeration/structured-attributes mechanism. A restart must not lose the ability to declare a standing correction against a later belief. Decide whether an identical repeated correction refreshes its event time, since precedence keys on recency. The standing branch of `record_correction` accepts an empty belief id, and every belief write calls `EnsureBeliefDeclaring`. Scope `/calls` to the caller's shopper (or document it agent-only). Also:
 - resolve a purchase's line from one source for every writer call, so a caller cannot pool a row under the wrong product;
