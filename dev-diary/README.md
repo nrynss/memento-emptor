@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 2 / 4 | In progress (T7.2) |
 | P8 | 0 / 10 | Waits on P7 |
 | P9 | 0 / 8 | Waits on P7, P8 |
-| P10 | 2 / 6 | In progress (T10.1) |
+| P10 | 3 / 6 | In progress |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T10.1: What arm 2 actually gets (done)
+
+**What exists.** `bench/round2/arm2/` holds the MCP-run recordings (transactions succeeded/pending, three orders, two refunds, one dispute, a 28-tool list, untouched envelopes), `extract.go`, `doc.go`, `extract_test.go` and a README. `arm2.Load(dir)` plus `arm2.Extract(recordings, Selector{CustomID|PayerEmail})` return arm 2's prompt block: returned fields only, trimmed, ordered. The test proves no invented field (mutations fail), and the demo extraction pins 6 transactions (5 successful + 1 pending hold), 3 orders with line items, 2 refunds and 1 dispute with its reason code. Review found and closed a provenance gap: a fresh `tools/list` (28 tools, `get_order` included) and one `get_order` envelope, matching `get-order-1.json` field for field.
+
+**What surprised.** `list_transactions` returns `transaction_info` only — no line items, no payer block; line items need `get_order`, and only for order ids the caller already holds. The default `transaction_status=S` hides the pending dispute hold; a second call with `P` is needed. The listing is merchant-wide with no shopper filter: the only per-shopper key is `custom_field` (the seller's `custom_id`), so T10.3 must set it on generated orders. Refund free text (`note_to_payer`, `transaction_subject`) reaches arm 2 through the plain listing; the demo says "fit return", so generated notes must stay fit-neutral or case 3 is unfair. `list_disputes` now returns this merchant's disputes, unlike T0.4.
+
+**The next agent should not have to work out.** Feed `arm2.Extract` verbatim as arm 2's prompt memory. Use a 31-day reporting window and `transaction_status` S and P. Do not add a reason or signal to the extraction. T10.3 owns the fairness checks: set `custom_field`, keep notes fit-neutral, and decide whether line items and order ids are supplied to every arm. The `get_order` envelope proves the tool call; the other two order bodies are the same tool's output kept as recorded.
 
 ### Identity salt created (user, stands)
 

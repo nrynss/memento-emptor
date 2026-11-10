@@ -14,7 +14,7 @@ requires:   []
 fixture-ok: no
 size:       S · mid
 owns:       bench/round2/arm2/
-status:     in-review
+status:     done
 ```
 Record exactly what the Agent Toolkit returns for a shopper's history: transaction listing, line items, refund and dispute status, dispute reason codes. Start from T0.4's recordings (`research/paypal.md`) and fill any gap with sandbox reads. Transaction Search is enabled on the sandbox app and the token carries `https://uri.paypal.com/services/reporting/search/read`; the reporting read must use a date range of 31 days or less (`400` otherwise). Stop if the scope disappears before the run. Write the extraction that turns that, and only that, into arm 2's prompt input: no refund reason, no classification, no signal strength, nothing the layer produced. No model spend.
 
@@ -113,7 +113,7 @@ The results as counts, each linked to its runs, with the limits first: we wrote 
 
 ## Exit Criteria
 
-- [ ] Arm 2 gets exactly what the Agent Toolkit returns, and nothing the layer made (T10.1).
+- [x] Arm 2 gets exactly what the Agent Toolkit returns, and nothing the layer made (T10.1).
 - [x] Round 1 is relabelled honestly (T10.2).
 - [ ] Four fair cases frozen before any arm 3 or 4 run (T10.3).
 - [ ] Every run published and graded (T10.4).
