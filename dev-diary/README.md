@@ -143,7 +143,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 12 / 12 | Done |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
-| P5 | 4 / 7 | In progress |
+| P5 | 6 / 7 | In progress |
 | P6 | 0 / 7 | Not started |
 
 ---
@@ -199,6 +199,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `web/src/lib/contest/` (CorrectionButton column, ContestEditor form, correction-path-only transport, state helpers, source-scan + mount tests — 19/19 with reviewer's additions). Edit moves Earned→Out of true, standing kept, row visible; three layers of proof that only `record_correction` fires.
 
 **What surprised.** Review caught a real rendered bug: file-header `//` comments in Svelte compile to visible text nodes (fixed; same pattern pre-exists frozen in T4.2's `LedgerGrid.svelte` — follow-up task to sweep all `.svelte` files, not a silent fix). T4.4's own mount tests needed a client-entry import path (Vitest resolves `svelte` to server build here).
+
+### T5.5: All arms on the frozen set (done) ★
+
+**What exists.** 45 committed runs (5 shoppers × 3 arms × 3 repeats) with full records, graded by the frozen grader: arm 1 0/15 (one M-default guess), arm 2 15/15 0 wrong-cause, arm 3 0/15 real recommendations (12 outright + 3 informed refusals; graded 3/15 on the mention-artifact — T5.6 presents both numbers). Real `recall_for_purchase` + pending per run; cumulative $5 cap enforced in code ($0.08 total spend). Freeze verified green before and after.
+
+**What surprised.** Review confirmed the headline with an independent recompute; the only fix was doc dedup. Arm 2 wins honestly (causal algebra from raw rows); arm 3's layer compacts to nothing on thin histories (max 1–2 same-direction rows, never Earned) and refuses instead of guessing — the honesty T5.6 must report: arm 2 beats arm 3 here *because the layer refuses without Earned belief*. Neutral instrument for all arms (reference agent contaminates).
 
 ### T5.4b: Freeze-check script (done)
 

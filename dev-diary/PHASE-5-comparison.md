@@ -100,7 +100,7 @@ requires:   [T5.4, T2.6, T3.6]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/runs/
-status:     in-review
+status:     done
 ```
 All three arms on the frozen set, with the repeat count fixed in `FROZEN.md`.
 
