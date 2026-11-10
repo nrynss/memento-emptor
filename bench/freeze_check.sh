@@ -12,7 +12,7 @@
 # add or drop rows fail here rather than passing a weaker check.
 #
 # Offline: no keys, no network, no spend. Only POSIX shell plus coreutils
-# (sed, grep, wc, sha256sum) already present wherever tools/check.sh runs.
+# (sed, grep, sha256sum) already present wherever tools/check.sh runs.
 
 set -euo pipefail
 cd "$(dirname "$0")/.."
