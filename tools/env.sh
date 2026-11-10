@@ -40,6 +40,9 @@ LAMBO_ES_API_KEY|elastic|api-key
 ELASTIC_URL|elastic|url
 RENDER_API_KEY|render|
 MEMENTO_IDENTITY_SALT|identity|salt
+MEMENTO_AGENT_KEYS|memento-keys|agent
+MEMENTO_SHOPPER_TOKENS|memento-keys|shopper
+MEMENTO_MERCHANT_KEYS|memento-keys|merchant
 KEYS
 
 	if ! command -v secret-tool >/dev/null 2>&1; then
