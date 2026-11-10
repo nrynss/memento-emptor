@@ -98,6 +98,22 @@ Also align the `product_fit` example counts with T9.1's seeded population (or la
 
 **Done when:** the schemas and Go types require the pool and precedence fields; the Claimed and Building examples validate and are pinned; every fixture and doc block is updated; the docs are byte-pinned; the gate passes; no other contract behaviour changes.
 
+Staged: the tightened schemas, types, fixtures, examples and byte-pinned docs land with T7.4. The served-layer comparison and the frozen replay refresh ride with it (T8.5c's comparison update and T7.5 below) so `main` never goes red.
+
+---
+
+### T7.5: Refresh the frozen replay for the tightened contract
+```yaml
+requires:   [T7.4]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/fakes/, testdata/replay/
+status:     not-started
+```
+T7.4 requires the pivot's pool and precedence fields, but the replay builds contract Go values directly, so its marshaled output already emits the new null keys while frozen `testdata/replay/p3-turns.json` and `p4-ledger.json` do not have them. Update the fakes to emit the required fields where they do not already, and refresh the two frozen replay fixtures to the tightened shape in the same commit (orchestrator's call under rule 1; the freeze manifest gains no new files). Do not change what the replay proves — only the wire shape.
+
+**Done when:** `TestReplayMatchesFixtures`, `TestReplayMatchesContract` and `TestP3TurnsMatchContract` pass against the tightened contract; the refreshed fixtures differ from the old ones only by the required pivot fields; the gate passes.
+
 ---
 
 ## Exit Criteria
