@@ -60,4 +60,27 @@ before deploy:  usage $0.29, credit left $9.71
 after deploy:   usage $0.30, credit left $9.70
 after turn 1:   trace $0.0056
 after turn 2:   trace $0.0057, usage $0.35, credit left $9.65
-# Task-period delta $0.06, inside the $0.25 budget.
+# Post-flip verification (user switched Public ON in the console)
+
+$ ast billing get
+usage $0.60 (up from $0.35; the delta is concurrent tasks' spend, not
+this check — anonymous GETs and billing reads cost nothing)
+
+$ ast agent get --name probe-gw --json   # read-only: TWO external URLs
+messaging: https://<chat-host>      (built-in chat; always signed in)
+frontend:  https://<frontend-host>   (dedicated container hostname; NEW —
+           the earlier probes hit the chat host, not the page)
+
+$ curl anonymous https://<frontend-host>/ https://<frontend-host>/health
+code=302 redirect=https://login.<host>/oauth2/authorize?client_id=<client-id>&redirect_uri=https%3A%2F%2F<frontend-host>%2Foauth2%2Fidpresponse&... (both paths)
+$ sleep 180; curl again -> still 302 to the SSO login on both paths.
+
+$ ast agent access get --name probe-gw   # read-only, unchanged
+web     user=<user-id>
+slack   members of the agent's account (no grants set)
+custom  members of the agent's account (no grants set)
+# CLI shows no Public flag; the toggle is console-only and not reflected here.
+
+Outcome: the flip did NOT take effect on anonymous traffic. No-login
+serving is NOT proven. Nothing was changed on the deployment (no push,
+no redeploy, no access set) — verification was GETs only.

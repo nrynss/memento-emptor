@@ -173,6 +173,13 @@ Configure, custom-app access section). Evidence in
 `research/astropods.md` + `testdata/astropods/15-public-probe.txt`.
 Billing $0.29 → $0.35, inside budget. Remaining: user flips Public, then
 re-run the anonymous 200 check.
+
+**Notes (follow-up).** Post-flip verification: STILL 302. The deploy has
+two hostnames (chat + dedicated frontend); anonymous `GET /` and
+`/health` on the frontend host 302 to SSO both immediately and after a
+3-minute wait; `access get` unchanged. Flip has not taken effect; no-login
+serving NOT proven. Nothing changed (GETs only). Next: user re-confirms
+the toggle on the right deployment/interface, else a platform gap.
 Prove whether an Astropods agent can be reached with no login, on `probe-gw` only (never `memento-agent`). Deploy a minimal page with one chat endpoint on port 80 declaring `agent.interfaces: {frontend: true, messaging: true}` (both: `messaging` defaults to false once `interfaces` is declared; production filesystem is read-only). Report the exact Configure screen and Public setting for the user to switch. With no cookies, confirm 200 from our container with no login redirect. Send one short model turn through the page; confirm gateway, trace and tool spans. Budget $0.25 with billing re-checks. Record with evidence in `research/astropods.md`.
 
 **Done when:** the no-login reachability question is answered with evidence in `research/astropods.md`; if reachable, a follow-up dev-diary task for the public shopper page exists (orchestrator decides when).

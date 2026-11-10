@@ -319,9 +319,21 @@ everything below is the evidence for both halves.
   switch **Public** on. That is distinct from granting `anyone`, which
   keeps sign-in. After the flip, the check to re-run is the anonymous
   `GET /`: expect 200 serving the page with no SSO redirect.
+- Post-flip check (user switched Public on in the console): the deploy
+  exposes **two** hostnames — the messaging (chat) host and a dedicated
+  frontend host (the earlier probes hit the chat host, not the page).
+  Anonymous `GET /` and `/health` on the **frontend** host still answer
+  302 to the platform SSO login, immediately and after a 3-minute wait;
+  `access get` is unchanged and shows no Public flag. So the flip has not
+  taken effect on anonymous traffic, and no-login serving is NOT proven.
+  Nothing was changed for this check (GETs only). Next: the user
+  re-confirms the toggle persisted on the right deployment/interface, else
+  this becomes a platform gap for the handoff log.
 - Billing for the probe: usage $0.29 before the deploy, $0.35 after
   (two model turns $0.0056 + $0.0057, the rest platform compute), inside
-  the $0.25 task budget. Scrub rule for every recording: hosts, deployment
+  the $0.25 task budget. Account usage later rose to $0.60 from concurrent
+  tasks' spend; the post-flip verification itself (anonymous GETs plus
+  billing reads) cost nothing. Scrub rule for every recording: hosts, deployment
   and build ids, conversation/message/session/user ids, and the SSO URLs
   are placeholders; spend amounts are kept.
 
