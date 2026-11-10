@@ -38,7 +38,7 @@ requires:   [T8.1]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/hub/
-status:     in-review
+status:     done
 ```
 The T8.1 shape against the live Elastic recall tier: three shoppers created on demand, each recalls only its own concepts, and the ledger reader serves the allowlisted ones. Budget: under $0.20 of embedding spend. Run one shopper first and check its cost. Test sessions are erased afterwards.
 
@@ -328,7 +328,7 @@ The live layer through the hub and a test-prefixed fit index: one shopper per pr
 
 ## Exit Criteria
 
-- [ ] One Lambo process serves every shopper, live (T8.1, T8.1b).
+- [x] One Lambo process serves every shopper, live (T8.1, T8.1b).
 - [x] Every purchase writes and updates its fit row at ingest, live (T8.2, T8.2b).
 - [x] The pool reads back settled-only counts and its status, live (T8.3, T8.3b).
 - [x] A correction stands on its own (T8.4).

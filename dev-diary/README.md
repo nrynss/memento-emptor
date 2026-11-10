@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 9 / 12 | In progress (T8.1b, T8.5) |
+| P8 | 10 / 12 | In progress (T8.5) |
 | P9 | 1 / 8 | In progress |
 | P10 | 3 / 6 | In progress |
 
@@ -259,6 +259,79 @@ PASS T8.3b live pool: seeded pool read warm and cold; index deleted
 **What surprised.** The index's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the eight-shopper floor: 10 shoppers with only `too_small` feedback read Building where the rule says Earned. That is T8.3c (new): union the counts or narrow the rule — the latter is a contract change and the orchestrator's call. The T0.12 recording predates the `fit_shoppers` filter, so the fixture test derives 63/55/8 from the recorded counts. The index predates `settled_at`-window reads; the recent window is a separate top-level aggregation.
 
 **The next agent should not have to work out.** T8.5 builds the reader in the layer, calls `Warm` at boot (a nil return is not "the pool is configured" — a wrong key shows up on the first `Fit`), maps `ErrUnavailable` to `contract.PoolUnavailable`, and maps `Counts.Reasons` to the contract views. T8.3b does the live read. T8.3c resolves the union question before the pool is served.
+
+### T8.1b: Lambo hub, live (done)
+
+**What exists.** `tests/live/hub/` (driver, `run.sh`, README, git-ignored `out/`) drives the T8.1 shape against the live Elastic recall tier: three shoppers created on demand, each recalling only its own marker; the seeded demo session holds none; the reader serves the allowlisted ones (200s) and 404s a late shopper; the 503 + `Retry-After: 5` fires with every `max_attached` place full; 130 concurrent `initialize` hold exactly 128 with 7 refused; 600 stats calls over shared sessions serve 98 req/s with 0 throttled. Hub RSS 22.2 MiB → 37.2 MiB with 5 sessions. Review APPROVE with doc fixes (reader serves demo + three, not three; ordered pairs, not every pair; temp config carries the URL, removed at end).
+
+**Live transcript** (verbatim from `bash tests/live/hub/run.sh`; test indices deleted, prefix empty before and after):
+
+```
+T8.1b live hub: one process for every shopper, against the live recall tier
+hub binary: lambo 0.10.1
+deployment: <deployment> (elastic, T0.12's project)
+embedder: fixture (in-process vectors; the tier mirrors them live)
+machine: linux/amd64, 12 CPUs
+flags under measure: --max-sessions 128 --rate-limit-rps 200
+budget: under $0.20 of embedding spend; test sessions erased afterwards
+
+== 0. the test namespace is clean, and the demo session is the package's
+-- prefix listing before: GET /_cat/indices/t81b-* -> []
+-- demo session: package builds shopper-00895719…; start.sh pins the same 72 bytes
+
+== hub up: addr=127.0.0.1:35155 (one pinned session, max_attached=16, credential prefix shopper-, create=true)
+-- hub RSS at start: 22.2 MiB
+
+== 1. one shopper first, then its cost
+-- shopper-t81b-alpha recalls "Vexilhold": found its own marker
+-- spend after one shopper: $0.00 of embedding (fixture computes in process; no embedding endpoint called)
+-- under the $0.20 budget; continuing with the other two shoppers
+
+== 2. two more shoppers, each recalling only its own concepts
+-- shopper-t81b-alpha: own marker "Vexilhold" found; no other session's marker in its recalls
+-- shopper-t81b-bravo: own marker "Brasswren" found; no other session's marker in its recalls
+-- shopper-t81b-charlie: own marker "Codlefirth" found; no other session's marker in its recalls
+-- every cross-session exact-content inspect: no concept matching
+
+== 3. the seeded demo session holds none of their markers
+-- demo session: no test marker recalled, no test belief inspected; stats: (concepts=0)
+
+== 4. the ledger reader serves the allowlisted ones
+-- reader with the demo shopper plus [alpha bravo charlie]
+-- GET /s/alpha/api/inspect for its own belief: 200 found=true
+-- GET /s/bravo/api/inspect for its own belief: 200 found=true
+-- GET /s/charlie/api/inspect for its own belief: 200 found=false
+-- GET /s/bravo/api/inspect for alpha's belief: 200 found=false
+-- GET /api/inspect for a test belief: 200 found=false (default session is the demo shopper)
+-- GET /api/sessions -> [demo alpha bravo charlie]
+-- late shopper attached on the hub after the reader started
+-- GET /s/late/api/inspect: 404 (uniform; the allowlist is start-time state)
+
+== 5. the 503 + Retry-After refusal with every place full
+-- second hub (max_attached=2: the pinned demo plus one shopper)
+-- newcomer attach with every place full: HTTP 503, Retry-After="5"
+-- the hot session still answers; a caller must retry after 5 seconds
+
+== 6. --max-sessions 128 and --rate-limit-rps 200
+-- 130 concurrent initialize with 5 already live: 123x200, 7x503, 0 other
+-- the 503s past the ceiling are the bound working: 7 refused of 130 (ceiling 128)
+-- 600 stats calls over 8 workers: 600 ok, 0 throttled (429), 0 other = 98 req/s served
+-- no call throttled: the hub served 98 req/s without touching the 200rps ceiling
+-- hub RSS with 5 attached sessions: 37.2 MiB (started at 22.2 MiB)
+
+-- hub stopped (one SIGTERM, then waited, so the write-behind log drains)
+
+model spend: $0.00 (no model call: the fixture embedder computes vectors in process)
+elastic: test-prefixed indices only, deleted below; no billable resource beyond the existing project
+
+-- cleanup: deleted 2 index(es) under t81b-
+-- prefix listing after: GET /_cat/indices/t81b-* -> []
+-- run dir removed (store, configs, child logs); nothing keyed survives locally
+
+PASS T8.1b live hub: three shoppers isolated, the reader allowlisted, the 503 recorded, the ceilings measured, the namespace erased
+```
+
+**Spend.** $0.00 embedding; test indices created, read, deleted. The 128/200 and RSS numbers are 12-CPU machine numbers; T9.6 must measure them on the 0.5 CPU starter.
 
 ### T8.2b: Fit index writer, live (done)
 
