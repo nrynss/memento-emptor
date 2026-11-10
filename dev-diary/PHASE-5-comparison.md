@@ -120,9 +120,9 @@ status:     done
 ```
 The results as counts, never percentages, each linked to its runs. The limits are stated up front: we wrote both the shoppers and the hidden answers, so this shows the mechanism on constructed cases and not real-world accuracy. If arm 2 matches arm 3 on a measure, the document says so.
 
-**User decision:** which number the video leads with, chosen after seeing the results.
+**User decision (PARKED by user): the lead-number pick is blocked until the comparison is decisive — i.e. until some honest run shows arm 3 winning where raw history fails (earned-level evidence and/or a correction round). No number is chosen until then. This gates T6.4 (video script), not T5.6: the results document is complete as written.
 
-**Done when:** every claim links to a run; the limits are stated; the user has chosen the lead number.
+**Done when:** every claim links to a run; the limits are stated.
 
 Worker notes (in-review): `bench/README.md` written offline ($0 spend): limits up front; arm 1 right-size 0/15, arm 2 15/15 with 0 wrong-cause, arm 3 true recommendations 0/15 (12 outright + 3 informed refusals; graded 3/15 is the frozen-rule extractor artifact on `t55-a3-unclear-r{1,2,3}.json`) with 0 wrong-cause; correction measure nil across arms; cites 40/6 arm 2, 0/0 arms 1 and 3; tokens 1309/3606/2242 words; arm 2 beats arm 3 on right-size stated plainly. Three lead-number candidates with exact counts, none chosen (`LEAD NUMBER: [user picks]`). Every claim links to run files + `bench/runs/scores.json`.
 
