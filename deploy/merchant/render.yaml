@@ -1,0 +1,24 @@
+# Settled shape for the merchant service (T9.3d): a stateless web service
+# on the smallest paid plan, region virginia, no disk. It serves the
+# merchant single-page app and proxies the layer's product_fit read with
+# the merchant key, which travels as a Render secret, never a file.
+#
+# Cost: starter (0.5c-512mb) $7.00/mo, no disk, Hobby workspace ($0).
+# Together with the main demo service ($7.25/mo): $14.25/mo against the
+# $50 credit, about 3.5 months of runway. Record any change in the handoff
+# log; the user has pre-approved this service.
+services:
+  - type: web
+    name: memento-merchant
+    runtime: docker
+    plan: starter # dashboard name for 0.5c-512mb
+    region: virginia # same region as the layer service
+    dockerfilePath: ./deploy/merchant/Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: MEMENTO_LAYER_URL
+        value: https://memento-emptor.onrender.com
+      - key: MEMENTO_MERCHANT_KEY
+        sync: false

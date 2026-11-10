@@ -1,0 +1,19 @@
+{
+  "_note": "Settled-pair example for merchant guard.sh --snapshot. Ids are placeholders, never real resources: memento (starter + 1 GB disk) plus memento-merchant (starter, stateless) = $14.25/mo against the $15.00/mo ceiling.",
+  "services": [
+    {
+      "id": "svc-TESTSETTLED00000001",
+      "name": "memento",
+      "type": "web_service",
+      "serviceDetails": {"plan": "starter", "region": "virginia", "runtime": "docker",
+        "disk": {"name": "lambo-data", "mountPath": "/var/lambo-data", "sizeGB": 1}}
+    },
+    {
+      "id": "svc-TESTSETTLED00000003",
+      "name": "memento-merchant",
+      "type": "web_service",
+      "serviceDetails": {"plan": "starter", "region": "virginia", "runtime": "docker"}
+    }
+  ],
+  "disks": [{"id": "dsk-TEST000000000001", "sizeGB": 1}]
+}

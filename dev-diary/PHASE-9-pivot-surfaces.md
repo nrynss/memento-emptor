@@ -94,11 +94,20 @@ requires:   [T9.3, T6.1]
 fixture-ok: no
 size:       S · mid
 owns:       deploy/merchant/
-status:     claimed:t93d-merchant-deploy
+status:     in-review
 ```
 Its own Render service, following T6.1's provision and guard pattern. It reaches the layer's `product_fit` and nothing else. The user has pre-approved new services for the pivot: record the service's monthly cost in the brief and the handoff log, and keep the guard, but do not stop for a second approval.
 
 **Done when:** the public URL serves the app; the guard reports it; the cost is recorded in the handoff log.
+
+**Notes (worker).** `deploy/merchant/` holds the whole shape: `main.go` (+`main_test.go`) is a small edge serving the merchant build and proxying only `POST /tools/product_fit` to `MEMENTO_LAYER_URL` with `MEMENTO_MERCHANT_KEY` injected server-side (any other `/tools/` path 404s before any backend is touched; the browser never sees the key); `Dockerfile` builds the merchant app plus the edge into one stateless image; `render.yaml` is the blueprint; `provision.sh` replays the API create; `guard.sh` audits the new two-service settled shape. Monthly cost: **$7.00** for this service (starter, no disk), **$14.25** combined with the main demo service ($7.25) against the $50 credit — recorded here and in the handoff log. Live: service `memento-merchant` (`srv-dbposse7bikc73au5i9g`), `https://memento-merchant.onrender.com`, starter/virginia/docker, no disk; `guard.sh --check` reads 2 services, 1 GB disk, $14.25/mo against the $15.00/mo ceiling, exit 0. The merchant key was minted with `memento key issue --kind merchant --id merchant-app`, installed as a Render secret; the entry for the layer's `MEMENTO_MERCHANT_KEYS` is in the handoff log. The image is proved locally: `/healthz` 200, `/` serves the app, the proxy injects the service key (a wrong caller key still gets the layer's answer), other tools 404 untouched, and keyless boot serves the app with the read at 503. The gate passes. First deploy is `build_failed` on purpose — Render builds branch `main`, which has no `Dockerfile` until this lands; the green deploy auto-follows the land (the T6.1 pattern).
+
+Three things the next agent should not have to rediscover:
+
+- The merchant build imports the frozen `product_fit` example from the repo-root `testdata/api`, so the image's web stage copies `testdata/api` beside `merchant/`; copying `merchant/` alone fails the build.
+- The old single-service guard (`deploy/guard.sh`, T9.6) trips (exit 2, nothing suspended) once this service exists, until its ceiling is raised to the combined $14.25 shape; `deploy/merchant/guard.sh` is the green guard for the pair.
+- Live reads need two follow-ups outside this `owns`: the layer must carry the handoff entry in `MEMENTO_MERCHANT_KEYS` (T9.6), and the page must be wired to same-origin `/tools/product_fit` (a `merchant/` change, T9.3 follow-up). Until both, the proxy answers 502/503 and the app reads its bundled snapshot.
+
 
 ---
 

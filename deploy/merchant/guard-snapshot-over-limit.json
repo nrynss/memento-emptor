@@ -1,0 +1,19 @@
+{
+  "_note": "Recorded-shape example for merchant guard.sh --snapshot (dry-run trip only). Ids are placeholders, never real resources.",
+  "services": [
+    {
+      "id": "svc-TESTSETTLED00000001",
+      "name": "memento",
+      "type": "web_service",
+      "serviceDetails": {"plan": "starter", "region": "virginia", "runtime": "docker",
+        "disk": {"name": "lambo-data", "mountPath": "/var/lambo-data", "sizeGB": 1}}
+    },
+    {
+      "id": "svc-TESTDRIFT000000002",
+      "name": "memento-merchant",
+      "type": "web_service",
+      "serviceDetails": {"plan": "standard", "region": "virginia", "runtime": "docker"}
+    }
+  ],
+  "disks": [{"id": "dsk-TEST000000000001", "sizeGB": 1}]
+}
