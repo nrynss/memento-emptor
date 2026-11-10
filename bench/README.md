@@ -163,10 +163,12 @@ cross-arm token comparisons hold on the frozen basis.
 
 T5.9 added one correction turn to every cell after the T5.5 and T5.8 sweeps: 9
 shoppers × 3 arms = 27 turns. Each reuses the published first turn
-(`source_run_id` in the run file), then the shopper names a different size than
-the arm just gave ("Actually I take L now", or M where the arm had already
-named L, so the correction always contradicts), then one re-ask. Run files and
-grades: `bench/runs/t59/`, scores in `bench/runs/t59/t59-scores.json`.
+(`source_run_id` in the run file), then the shopper names the size they now
+take ("Actually I take L now", or M where the arm's first turn had named L),
+then one re-ask. That contradicts the first turn's size wherever it gave one;
+where it gave none (a refusal or a reply naming no size), the correction
+supplies the size instead. Run files and grades: `bench/runs/t59/`, scores in
+`bench/runs/t59/t59-scores.json`.
 
 - Honoured on the next recommendation: 27 of 27, 9 of 9 in every arm.
 - Wrong-cause errors: 0 across all 27 turns.
@@ -200,12 +202,13 @@ out of 15 with 0 wrong-cause.
 
 Does not prove: real-world accuracy (we wrote the shoppers and the answers);
 correction handling beyond one stated correction on the next turn (T5.9's 27
-turns are in Corrections; a correction that changes something other than a
-size, or arrives mid-conversation, is unmeasured); citation quality at scale
-(arm-2 cites are mostly human-mapped prose, and 34 of 40 resolve to non-fit
-rows); behavior on long histories where signal drowns in noise or on
-multi-brand histories (recorded as hardening candidates in the freeze, not
-built); anything about cost beyond the recorded trace spend.
+turns are in Corrections; a correction to anything other than a size, one
+arriving before a recommendation, or one in a longer conversation, is
+unmeasured); citation quality at scale (arm-2 cites are mostly human-mapped
+prose, and 34 of 40 resolve to non-fit rows); behavior on long histories where
+signal drowns in noise or on multi-brand histories (recorded as hardening
+candidates in the freeze, not built); anything about cost beyond the recorded
+trace spend.
 
 ## Candidate lead numbers (the user picks one — none is chosen here)
 
