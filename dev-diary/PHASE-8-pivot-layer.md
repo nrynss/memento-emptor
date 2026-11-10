@@ -213,11 +213,33 @@ requires:   [T2.1, T8.2]
 fixture-ok: no
 size:       M · frontier
 owns:       internal/payments/, internal/ingest/
-status:     claimed:t87-webhook-verify
+status:     in-review
 ```
 The webhook path is public by design, and its only gate is T2.1's verifier, which today replays a fixture: a known event id can write evidence into any shopper's session. Build the real adapter against PayPal's `POST /v1/notifications/verify-webhook-signature` with the transmission id, timestamp, signature and raw body, using the sandbox app's credentials. Reject anything that does not verify, keep the delivery idempotency T2.1 built, and record a good, a tampered, a replayed and an unknown delivery. Budget: no model spend; sandbox calls are free.
 
 **Done when:** the four deliveries are recorded with their outcomes, a recorded PayPal delivery verifies live, a tampered body gets the same refusal as any unverified delivery, and the gate passes.
+
+**Notes (in-review).** `internal/payments/` is the real gate. `Delivery{Header, Body}` carries the request headers and the exact body bytes; `Client.Verify` refuses locally when a transmission header or the body is missing, then posts to `/v1/notifications/verify-webhook-signature` and returns nil only for `SUCCESS`. Everything else refuses: `ErrNotVerified` for `FAILURE` or any other verdict, `ErrUnavailable` for a missing credential, a failed token grant, an unreachable endpoint or a non-200 answer, `ErrNoWebhook` when no subscription can be named. The verify request embeds the delivered bytes verbatim — the payload is assembled around them and never re-encoded — because the signature covers exactly those bytes. The access token is cached to `expires_in` less 60 seconds and renewed once when the source rejects a cached token with 401; the candidate subscription ids are listed from `GET /v1/notifications/webhooks` and cached. A configured `PUBLIC_URL` narrows the candidates to its own `/webhooks/paypal` subscription, so a deployment refuses deliveries signed for a stale subscription; without one, every subscription the app holds is tried, and the source answers `SUCCESS` only for the one that signed the delivery. Credentials come from `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`; no error carries either, and a test asserts it.
+
+`internal/ingest/delivery.go` is the webhook path in the layer. `HandleDelivery(ctx, Delivery)` verifies first, then reads the event id and calls T2.1's `Handle`, so rows and idempotency are unchanged. Verification before the duplicate check matters: a forged body naming a stored event id is refused, not answered as a duplicate. `NewService` installs `payments.New()` as the default gate, so production runs the real adapter with no extra wiring; `WithVerifier` replaces it and every test injects a fake, so the suite stays offline. Every verification failure is one refusal, `ErrBadSignature`, whose text names neither the delivery nor the reason; the cause stays matchable underneath with `errors.Is` (`payments.ErrNotVerified`, `ErrUnavailable`, `ErrNoWebhook`).
+
+Recorded run. `internal/payments/cmd/livecheck` (`source tools/env.sh`, then `bash internal/payments/cmd/livecheck/run.sh`) reads one refund delivery PayPal already posted to the sandbox test endpoint, writes it byte-exact to `out/delivery.json`, re-verifies that recorded copy live, then drives four deliveries through `ingest.Service` with no verifier injected:
+
+| Delivery | Live verdict | Ingest outcome |
+|---|---|---|
+| good | SUCCESS | one row, pending question |
+| tampered (refunded amount changed after signing) | FAILURE | refused, store unchanged |
+| replayed (headers and body unchanged) | SUCCESS | duplicate, the same one row |
+| unknown (transmission id and signature from no delivery) | FAILURE | refused, store unchanged |
+
+The tampered and unknown refusals are byte-identical: `ingest: delivery failed verification: payments: the delivery did not verify: verification status "FAILURE"`. `internal/ingest/testdata/recorded-deliveries.json` records the same four cases with their live verdicts, and `TestRecordedDeliveries` replays them through a fake verifier, so the gate checks the four outcomes offline. Full values stay in the git-ignored `out/`; stdout is redacted, and the run refuses to finish if a credential survives.
+
+Four things the next agent should not have to rediscover:
+
+- **The deployed webhook route still bypasses the gate.** `internal/api/server`'s `handleWebhook` decodes `{shopper_id, event_id}` and calls `IngestWebhook`; a real PayPal body never reaches `HandleDelivery`. That route must read the raw body and pass `ingest.Delivery{Header: r.Header, Body: raw}` to the shopper's service (the delivery's `custom_id` is the shopper join). It is a change in `internal/api/server/`, outside this task's `owns`, so **this is unmet here**: until a task owning the server lands it, the deployed path keeps T2.1's fixture gate while every wired caller of `HandleDelivery` is verified for real.
+- **A redacted recording cannot verify live.** `testdata/paypal/webhook-delivery-*.json` keeps real transmission headers but redacts body ids, and the signature covers the exact bytes, so re-verifying one of those files answers FAILURE. The live run keeps its byte-exact delivery in `out/` and the committed fixture records shapes only.
+- **Subscription discovery needs no new configuration, by design.** No environment variable names the subscription (adding one touches `tools/env.sh`, `.env.example` and the deployment, all outside `owns`). The sandbox app still holds its test-endpoint subscription beside any the Render deploy registers; with `PUBLIC_URL` unset on the service both are candidates, which cannot widen what verifies but costs one verify call per candidate. Setting `PUBLIC_URL` on the service is the tighter configuration.
+- **The read leg of the live run is the recorded demo refund keyed to the live event id.** Live transaction reads are T2.1b's subject; what this run measures is the gate and idempotency, not the rows' provenance. One surprise from the sandbox store is worth keeping: an old `INVOICING.INVOICE.SENT` delivery that is still stored answers FAILURE because its subscription was replaced, which is direct evidence that a signature is bound to the subscription id, not just the body.
 
 ---
 

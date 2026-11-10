@@ -26,8 +26,13 @@
 // says the item did not arrive, which is about the seller and not how the
 // product fits.
 //
-// Verification itself happens in the payment source's VerifyWebhook
-// call, which replays the source's signature check. The HTTP transport
-// that extracts the event id from a delivery body belongs to the server
-// layer; this package owns verification-to-row.
+// Verification itself happens before anything is read from a delivery.
+// HandleDelivery takes the transport's raw bytes, asks the delivery gate
+// (the real signature verifier by default) to check them, and only then
+// reads the event id and stores rows. A delivery that does not verify is
+// refused with ErrBadSignature and stores nothing, whether its body was
+// tampered with, its signature belongs to no delivery, or the verifier
+// could not answer. Handle names an event id directly and is the recorded
+// path; the HTTP transport that builds a Delivery belongs to the server
+// layer, and this package owns verification-to-row.
 package ingest

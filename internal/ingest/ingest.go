@@ -9,6 +9,7 @@ import (
 
 	"github.com/nrynss/memento-emptor/internal/domain"
 	"github.com/nrynss/memento-emptor/internal/fakes"
+	"github.com/nrynss/memento-emptor/internal/payments"
 )
 
 // PendingQuestion is a refund still missing its reason. The refund row is
@@ -85,6 +86,7 @@ func WithFitRecorder(rec FitRecorder) Option {
 // is safe for concurrent use.
 type Service struct {
 	payments fakes.PaymentSource
+	verifier Verifier
 	clock    func(eventID string) time.Time
 	fit      FitRecorder
 
@@ -96,10 +98,12 @@ type Service struct {
 // NewService builds a Service over the payment source. The source is the
 // fakes.PaymentSource interface the real client implements, so callers
 // code to the interface and the swap from replay to live touches no
-// caller.
-func NewService(payments fakes.PaymentSource, opts ...Option) *Service {
+// caller. The delivery gate is the real payment-source adapter unless a
+// caller replaces it with WithVerifier.
+func NewService(source fakes.PaymentSource, opts ...Option) *Service {
 	s := &Service{
-		payments: payments,
+		payments: source,
+		verifier: payments.New(),
 		clock:    fakes.OccurredAt,
 		rows:     make(map[string][]domain.Evidence),
 		pending:  make(map[string]PendingQuestion),

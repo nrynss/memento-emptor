@@ -1,0 +1,113 @@
+{
+  "note": "Four webhook deliveries, recorded against the sandbox verify API. The recorded_verdict is what the live endpoint answered for a delivery of this shape: SUCCESS for a delivery PayPal issued, FAILURE for a body tampered after signing and for a delivery PayPal never issued. Account detail and ids are replaced with fixed placeholders; the bodies are stand-ins that keep the shape, so the live adapter, not this file, holds the real bytes.",
+  "deliveries": [
+    {
+      "name": "good",
+      "why": "A delivery PayPal issued and signed. The signature covers the body as posted.",
+      "headers": {
+        "Paypal-Transmission-Id": ["TRANSMISSION-ID-1"],
+        "Paypal-Transmission-Time": ["2026-11-10T06:57:39Z"],
+        "Paypal-Cert-Url": ["https://api.sandbox.paypal.com/v1/notifications/certs/CERT-1"],
+        "Paypal-Auth-Algo": ["SHA256withRSA"],
+        "Paypal-Transmission-Sig": ["TRANSMISSION-SIG-1"]
+      },
+      "body": {
+        "id": "WH-2EV-01",
+        "event_version": "1.0",
+        "create_time": "2026-10-14T10:00:00Z",
+        "resource_type": "refund",
+        "event_type": "PAYMENT.CAPTURE.REFUNDED",
+        "summary": "A USD 195.00 capture payment was refunded",
+        "resource": {
+          "id": "RFD-7XK-01",
+          "amount": {"currency_code": "USD", "value": "195.00"},
+          "custom_id": "memento-shopper01-01",
+          "status": "COMPLETED"
+        }
+      },
+      "recorded_verdict": "SUCCESS",
+      "recorded_ingest": "rows"
+    },
+    {
+      "name": "tampered",
+      "why": "The good delivery with its refunded amount changed after signing. The signature no longer matches the body.",
+      "headers": {
+        "Paypal-Transmission-Id": ["TRANSMISSION-ID-1"],
+        "Paypal-Transmission-Time": ["2026-11-10T06:57:39Z"],
+        "Paypal-Cert-Url": ["https://api.sandbox.paypal.com/v1/notifications/certs/CERT-1"],
+        "Paypal-Auth-Algo": ["SHA256withRSA"],
+        "Paypal-Transmission-Sig": ["TRANSMISSION-SIG-1"]
+      },
+      "body": {
+        "id": "WH-2EV-01",
+        "event_version": "1.0",
+        "create_time": "2026-10-14T10:00:00Z",
+        "resource_type": "refund",
+        "event_type": "PAYMENT.CAPTURE.REFUNDED",
+        "summary": "A USD 1.00 capture payment was refunded",
+        "resource": {
+          "id": "RFD-7XK-01",
+          "amount": {"currency_code": "USD", "value": "1.00"},
+          "custom_id": "memento-shopper01-01",
+          "status": "COMPLETED"
+        }
+      },
+      "recorded_verdict": "FAILURE",
+      "recorded_ingest": "refused"
+    },
+    {
+      "name": "replayed",
+      "why": "The good delivery posted a second time, headers and body unchanged. Its signature still verifies; ingest answers with the stored rows.",
+      "headers": {
+        "Paypal-Transmission-Id": ["TRANSMISSION-ID-1"],
+        "Paypal-Transmission-Time": ["2026-11-10T06:57:39Z"],
+        "Paypal-Cert-Url": ["https://api.sandbox.paypal.com/v1/notifications/certs/CERT-1"],
+        "Paypal-Auth-Algo": ["SHA256withRSA"],
+        "Paypal-Transmission-Sig": ["TRANSMISSION-SIG-1"]
+      },
+      "body": {
+        "id": "WH-2EV-01",
+        "event_version": "1.0",
+        "create_time": "2026-10-14T10:00:00Z",
+        "resource_type": "refund",
+        "event_type": "PAYMENT.CAPTURE.REFUNDED",
+        "summary": "A USD 195.00 capture payment was refunded",
+        "resource": {
+          "id": "RFD-7XK-01",
+          "amount": {"currency_code": "USD", "value": "195.00"},
+          "custom_id": "memento-shopper01-01",
+          "status": "COMPLETED"
+        }
+      },
+      "recorded_verdict": "SUCCESS",
+      "recorded_ingest": "duplicate"
+    },
+    {
+      "name": "unknown",
+      "why": "A body carrying an event id PayPal never delivered, signed with a transmission id and signature from no delivery.",
+      "headers": {
+        "Paypal-Transmission-Id": ["00000000-0000-0000-0000-000000000000"],
+        "Paypal-Transmission-Time": ["2026-11-10T06:57:39Z"],
+        "Paypal-Cert-Url": ["https://api.sandbox.paypal.com/v1/notifications/certs/CERT-1"],
+        "Paypal-Auth-Algo": ["SHA256withRSA"],
+        "Paypal-Transmission-Sig": ["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=="]
+      },
+      "body": {
+        "id": "WH-NEVER-ISSUED",
+        "event_version": "1.0",
+        "create_time": "2026-10-14T10:00:00Z",
+        "resource_type": "refund",
+        "event_type": "PAYMENT.CAPTURE.REFUNDED",
+        "summary": "A USD 195.00 capture payment was refunded",
+        "resource": {
+          "id": "REFUND-NEVER-ISSUED",
+          "amount": {"currency_code": "USD", "value": "195.00"},
+          "custom_id": "memento-shopper01-01",
+          "status": "COMPLETED"
+        }
+      },
+      "recorded_verdict": "FAILURE",
+      "recorded_ingest": "refused"
+    }
+  ]
+}
