@@ -492,8 +492,10 @@ func questionForEvent(ctx context.Context, svc *server.Service, eventID string) 
 	return ""
 }
 
-// answerReason records one classified answer for one event's question.
-func answerReason(ctx context.Context, svc *server.Service, eventID, answer string) contract.RecordReasonResponse {
+// answerReason records one classified answer for one event's question,
+// then guards that live call's model string and cost before proceeding.
+// The guard lives here so no live classification can pass unguarded.
+func answerReason(ctx context.Context, svc *server.Service, reply *liveReply, eventID, answer string) contract.RecordReasonResponse {
 	res, err := svc.RecordReason(ctx, contract.RecordReasonRequest{
 		ShopperID: shopper, QuestionID: questionForEvent(ctx, svc, eventID), AnswerText: answer,
 	})
@@ -506,6 +508,7 @@ func answerReason(ctx context.Context, svc *server.Service, eventID, answer stri
 	}
 	fmt.Printf("reason %s %q: category=%s conf=%.2f accepted=%t ask_again=%t belief=%s\n",
 		eventID, answer, res.Category, res.Confidence, res.Accepted, res.AskAgain, belief)
+	guard(*reply)
 	return res
 }
 
@@ -615,12 +618,14 @@ func run(bin, session, agent, out string) error {
 	}
 	fmt.Printf("pending: %d open questions\n", len(pending.Questions))
 
-	fmt.Println("--- live reasons in: two too-small, one too-large ---")
-	first := answerReason(ctx, svc, "WH-2EV-01", "too tight in the shoulders")
+	fmt.Println("--- live reasons in: three too-small, matching the frozen story ---")
+	first := answerReason(ctx, svc, &reply, "WH-2EV-01", "too tight in the shoulders")
 	if !first.Accepted || first.AskAgain {
 		return fmt.Errorf("first return: accepted %v ask again %v, want true false", first.Accepted, first.AskAgain)
 	}
-	guard(reply)
+	if first.Category != domain.CategoryFitTooSmall {
+		return fmt.Errorf("first return: category %s, want fit_too_small", first.Category)
+	}
 	recall, err := svc.Recall(ctx, contract.RecallRequest{ShopperID: shopper, BrandID: "brand-x-001"})
 	if err != nil {
 		return fmt.Errorf("recall after one return: %w", err)
@@ -631,12 +636,17 @@ func run(bin, session, agent, out string) error {
 	}
 	fmt.Println("recall after one return: no belief, no guidance (vote 1 of 3)")
 
-	answerReason(ctx, svc, "WH-2EV-02", "the sleeves are way too short and I can't button it")
-	third := answerReason(ctx, svc, "WH-2EV-03", "it swims on me, far too big")
+	answerReason(ctx, svc, &reply, "WH-2EV-02", "the sleeves are way too short and I can't button it")
+	// The frozen story's third answer (internal/fakes/replay.go ReturnThree,
+	// final.go r3): same too-small direction as the first two. An opposite
+	// direction must not count toward the runs-small belief in the demo run.
+	third := answerReason(ctx, svc, &reply, "WH-2EV-03", "sleeves too short in M")
 	if !third.Accepted {
 		return fmt.Errorf("third return was not accepted as evidence")
 	}
-	guard(reply)
+	if third.Category != domain.CategoryFitTooSmall {
+		return fmt.Errorf("third return: category %s, want fit_too_small", third.Category)
+	}
 	sizingID := ""
 	if third.BeliefID != nil {
 		sizingID = *third.BeliefID
@@ -670,12 +680,11 @@ func run(bin, session, agent, out string) error {
 
 	fmt.Println("--- vague answer stays pending ---")
 	must(ctx, svc, "WH-2EV-05", 1, true)
-	vague := answerReason(ctx, svc, "WH-2EV-05", "not great")
+	vague := answerReason(ctx, svc, &reply, "WH-2EV-05", "not great")
 	if vague.Accepted || !vague.AskAgain || vague.BeliefID != nil {
 		return fmt.Errorf("vague answer: accepted %v ask again %v belief %v, want false true nil",
 			vague.Accepted, vague.AskAgain, vague.BeliefID)
 	}
-	guard(reply)
 
 	fmt.Println("--- dispute counts only against the seller ---")
 	before, err := svc.Recall(ctx, contract.RecallRequest{ShopperID: shopper, BrandID: "brand-x-001"})

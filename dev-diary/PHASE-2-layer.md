@@ -228,13 +228,27 @@ through the T2.5 service with recording payments (DemoStoryInputs,
 whose shapes leg 1 proves identical to live), a live Jev classifier,
 and a live Lambo 0.10.1 graph client (`lamboGraph` over MCP stdio,
 native `.jina-embeddings-v3`, session `t26-layer` erased afterward):
-three refunds in, three live classifications (small/small/large at
-1.00), Earned/Venerable with `Take size L` guidance, vague "not
-great" ask-again, dispute leaves sizing recall byte-identical while
+three refunds in, three live classifications all `fit_too_small` at
+1.00 — "too tight in the shoulders" ($0.000021336), "the sleeves are
+way too short and I can't button it" ($0.000021630), "sleeves too
+short in M" ($0.000021420, the frozen story's exact third answer per
+`internal/fakes/replay.go` ReturnThree) — Earned/Venerable with `Take
+size L` guidance, vague "not great" ask-again (`unclear` 0.94,
+$0.000021210), dispute leaves sizing recall byte-identical while
 the seller reads Claimed, correction overrides to M at once with
 standing Venerable, fits-well feedback accepted, trace-R orders
-recall before correction. Spend: Jev $0.000085638 (4 calls, pinned
-build, 10x-cost guard armed); PayPal/Elastic/Lambo $0 billable.
+recall before correction. Spend: Jev $0.000085596 for 4 calls
+(0.000021336 + 0.000021630 + 0.000021420 + 0.000021210, pinned build
+`typesafe/jev-1.14-20261014`, per-call model+cost guard on every
+call); PayPal/Elastic/Lambo $0 billable.
+Review follow-ups, all closed: F1 — the third answer was
+`fit_too_large` ("it swims on me, far too big") while the frozen
+story uses three `fit_too_small` answers; fixed to the exact fixture
+wording above and re-run live, Venerable proof intact. F2 — the
+spend/model guard skipped the 2nd Jev call (one overwritten `reply`
+var); the guard now lives inside `answerReason`, so every live call
+is guarded before proceeding. F3 — per-call costs and confidences
+are quoted above so the total recomputes.
 Surprises: an erased Lambo session id is tombstoned and can never be
 served again, so the driver never pre-erases (re-runs need fresh OUT
 or SESSION); `grep --exclude-dir` must precede the path or it is
