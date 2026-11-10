@@ -390,8 +390,10 @@ type RecordReasonRequest struct {
 }
 
 // RecordReasonResponse returns the classification. When Accepted is
-// false the answer counted toward nothing and AskAgain is true: the
-// question stays in pending_questions.
+// false the answer counted toward nothing: either AskAgain is true and
+// the question stays in pending_questions (unclear or below-floor
+// answer), or the classified reason matched no belief direction and
+// the question closes.
 type RecordReasonResponse struct {
 	// ReasonID identifies the recorded reason.
 	ReasonID string `json:"reason_id"`

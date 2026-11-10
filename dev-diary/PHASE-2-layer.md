@@ -265,7 +265,7 @@ requires:   [T2.5]
 fixture-ok: yes
 size:       M · frontier
 owns:       internal/domain/, internal/memory/, internal/api/server/
-status:     in-review
+status:     done
 ```
 The writer and the server attach any fit-kind reason to the most-supported fit belief with no direction check (R2 finding F1). Change the rule: a reason's direction must match the belief's direction to count toward it. A `fit_too_large` return does not attach to a runs-small belief; it attaches to an existing same-kind opposite-direction belief if one is present, otherwise it counts toward nothing (visible as unattached with its reason, never silent). No automatic `against` edges — contradictions stay shopper-driven so Venerable semantics are untouched. Update the domain mapping, the memory writer check, and the server's `beliefForReason`; align the offline story's third answer with the frozen all-small fixtures; add mixed-direction tests proving a "too big" return neither supports nor contradicts the runs-small belief. Contract change (user decision): frozen fixtures move in the same commit if the contract shape changes.
 

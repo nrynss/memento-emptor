@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://memento-emptor.local/testdata/api/record_reason.response.schema.json",
   "title": "record_reason response",
-  "description": "The classification. When accepted is false the answer counted toward nothing, ask_again is true, and the question stays open.",
+  "description": "The classification. When accepted is false the answer counted toward nothing: either ask_again is true and the question stays open (unclear or below-floor answer), or the classified reason matched no belief direction and the question closes.",
   "type": "object",
   "required": ["reason_id", "question_id", "category", "confidence", "counts_toward", "accepted", "ask_again", "belief_id", "trace_id"],
   "additionalProperties": false,

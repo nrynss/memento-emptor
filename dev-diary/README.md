@@ -140,7 +140,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 10 / 10 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 10 / 12 | In progress |
+| P2 | 11 / 12 | In progress |
 | P3 | 5 / 6 | In progress |
 | P4 | 4 / 4 | Done |
 | P5 | 2 / 6 | In progress |
@@ -221,6 +221,12 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 **What exists.** `tests/live/ingest/` driver (reads only — zero new sandbox records): token, webhook config, 20-entry ledger, two deliveries re-fetched and re-verified (`SUCCESS`, SHA256withRSA), refund→capture→order and dispute→capture→order chains. Refund row nil-reason → pending; dispute `not_arrived` 1.0 → seller; redeliveries duplicate-safe. A T0.4-recorded body against the current webhook id correctly returns FAILURE — the crypto is really checked.
 
 **What surprised.** Verify API field is `webhook_event`, not `request_body` (the latter 400s) — noted for whoever next touches `research/paypal.md`. Capture GET's `up` link yields the order id, so the existing T1.3b records sufficed with nothing created; driver catalogs the SKUs and fails on unknown ones.
+
+### T2.7: Direction-aware reason matching (done) ★
+
+**What exists.** Direction is part of the match: `Category.Direction()` vs stored belief direction; mismatch attaches to an existing opposite-direction belief if present, else counts toward nothing visibly (`accepted:false/ask_again:false`, reason kept, unattached in ledger evidence); never auto-`against`. Writer backstops with `ErrDirectionMismatch`. Mixed-direction tests both levels; offline story all-small matching frozen fixtures; contract shape unchanged (F2 prose fixed: accepted:false no longer implies ask_again:true).
+
+**What surprised.** Review confirmed the pinned rule's unreachable branch: opposite-direction beliefs can't arise via the service (creation needs zero existing fit beliefs) — genuine direction reversal (shopper's size changed, three "far too big" returns) stays unattached forever. With the user on F1: needs a rival-birth rule (see question below).
 
 ### T2.6: The layer end to end, live (done) ★
 
