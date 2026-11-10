@@ -43,6 +43,17 @@ type Result struct {
 	Duplicate bool
 }
 
+// FitRecorder is the second write path: the fit row one delivery writes
+// beside its evidence rows, from the same event. The fit index itself sits
+// behind it, so ingest names no store. A capture creates the row, a refund
+// marks it returned, a kept outcome settles it, and a dispute writes
+// nothing because it is about the seller, not the purchase.
+type FitRecorder interface {
+	// Record writes the fit row for one evidence row. It is idempotent on
+	// the purchase's state: a redelivered event rewrites the same row.
+	Record(ctx context.Context, ev domain.Evidence) error
+}
+
 // Option configures a Service.
 type Option func(*Service)
 
@@ -56,6 +67,18 @@ func WithClock(clock func(eventID string) time.Time) Option {
 	}
 }
 
+// WithFitRecorder turns on the second write path: every delivery that
+// records a purchase also records that purchase's fit row, from the same
+// event, so the pool is written at ingest and nothing reads a shopper's
+// memory to build it. When the recorder fails, the delivery fails and the
+// payment source's retry writes both again; a retry is harmless because
+// the fit row is written at the purchase state's version.
+func WithFitRecorder(rec FitRecorder) Option {
+	return func(s *Service) {
+		s.fit = rec
+	}
+}
+
 // Service ingests verified deliveries into durable rows. Rows are keyed
 // by the payment source's event id: ingesting the same id twice returns
 // the stored rows with Duplicate set and writes nothing new. A Service
@@ -63,6 +86,7 @@ func WithClock(clock func(eventID string) time.Time) Option {
 type Service struct {
 	payments fakes.PaymentSource
 	clock    func(eventID string) time.Time
+	fit      FitRecorder
 
 	mu      sync.Mutex
 	rows    map[string][]domain.Evidence
@@ -188,6 +212,9 @@ func (s *Service) handleRefund(ctx context.Context, event fakes.WebhookEvent) (R
 		Link:       link,
 		OccurredAt: occurred,
 	}
+	if err := s.recordFit(ctx, rows); err != nil {
+		return Result{}, err
+	}
 	return Result{Rows: rows, Pending: question}, nil
 }
 
@@ -240,6 +267,8 @@ func (s *Service) handleDispute(ctx context.Context, event fakes.WebhookEvent) (
 			OccurredAt: occurred,
 		}
 	}
+	// A dispute writes no fit row: it says the purchase did not arrive,
+	// which is about the seller, not how the product fits.
 	return Result{Rows: rows}, nil
 }
 
@@ -270,7 +299,24 @@ func (s *Service) handleCapture(ctx context.Context, event fakes.WebhookEvent) (
 			OccurredAt: occurred,
 		}
 	}
+	if err := s.recordFit(ctx, rows); err != nil {
+		return Result{}, err
+	}
 	return Result{Rows: rows}, nil
+}
+
+// recordFit writes each row's fit row from the same event. A delivery
+// without a recorder, or one that touches no purchase, writes nothing.
+func (s *Service) recordFit(ctx context.Context, rows []domain.Evidence) error {
+	if s.fit == nil {
+		return nil
+	}
+	for _, row := range rows {
+		if err := s.fit.Record(ctx, row); err != nil {
+			return fmt.Errorf("ingest: record fit row for event %q: %w", row.Link.EventID, err)
+		}
+	}
+	return nil
 }
 
 // stamp returns the event time for one event id: the clock's answer, or

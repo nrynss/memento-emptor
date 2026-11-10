@@ -20,6 +20,12 @@
 // before its capture loses nothing and a later capture adds its own row
 // without double-counting.
 //
+// A delivery that touches a purchase also writes that purchase's fit row
+// through a FitRecorder, from the same event: a capture creates the row
+// and a refund marks it returned. A dispute writes no fit row, because it
+// says the item did not arrive, which is about the seller and not how the
+// product fits.
+//
 // Verification itself happens in the payment source's VerifyWebhook
 // call, which replays the source's signature check. The HTTP transport
 // that extracts the event id from a delivery body belongs to the server
