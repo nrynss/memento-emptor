@@ -142,7 +142,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 5 / 5 | Done |
 | P2 | 10 / 10 | Done |
 | P3 | 5 / 6 | In progress |
-| P4 | 3 / 4 | In progress |
+| P4 | 4 / 4 | Done |
 | P5 | 1 / 6 | In progress |
 | P6 | 0 / 7 | Not started |
 
@@ -151,6 +151,12 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T4.3: The why view (done) ★
+
+**What exists.** `web/src/lib/why/` + belief route: per-belief evidence with outcome/item/reason, correction beside the belief in plain words ("you said M; three returns said L"), non-counted items each with their exclusion reason, seeded marks with tooltip, pending question shown open, trace anchors marked as fixtures, back-to-ledger link on every state. Step walk 2→3→4→5 verified against fixtures.
+
+**What surprised.** Review approved with one CSS-class rename (graph vocabulary out of user-facing names). Mount-testing gap confirmed real (Vitest resolves svelte to server build; needs a test-alias change outside any task's owns — recorded, not worked around). Confirmed follow-ups: ledger→belief deep links need a ledger-route edit (new task); ledger-wide evidence search is server-side work. Simplicity bar held: no standing/Venerable/Canonical in user strings, `untrack()`-guarded refresh (reactive subscribes on any read — loops otherwise).
 
 ### T4.4: Contesting a belief (done)
 
