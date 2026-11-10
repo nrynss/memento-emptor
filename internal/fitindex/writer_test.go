@@ -369,6 +369,135 @@ func TestDisputeWritesNoRow(t *testing.T) {
 	}
 }
 
+// TestRecordMapsTheKeptOutcome drives a kept outcome through the recorder
+// ingest calls. Kept is a purchase state the recorder must reach, and it
+// settles the row as kept without claiming a reason or a verdict.
+func TestRecordMapsTheKeptOutcome(t *testing.T) {
+	index := newFakeIndex()
+	writer := writerFor(t, index, "payer-0001")
+	keptAt := time.Date(2026, 8, 31, 10, 0, 0, 0, time.UTC)
+	kept := domain.Evidence{
+		Source:     domain.SourcePayment,
+		Outcome:    domain.Outcome{Kind: domain.OutcomeKept, Status: "PAST_WINDOW"},
+		Item:       domain.Item{BrandID: testLine.Brand, Category: testLine.Category, Size: "M", SKU: "SKU-KEPT"},
+		Link:       domain.TransactionLink{OrderID: "ORD-T82-KEPT", CaptureID: "CAP-T82-KEPT"},
+		OccurredAt: keptAt,
+	}
+	if err := writer.Record(context.Background(), kept); err != nil {
+		t.Fatalf("record kept outcome: %v", err)
+	}
+	row := index.only(t)
+	if row.State != domain.FitStateKept {
+		t.Errorf("state = %q, want kept", row.State)
+	}
+	if !row.Settled || row.SettledKind != domain.FitSettledByKept {
+		t.Errorf("settled = %v/%q, want true/kept", row.Settled, row.SettledKind)
+	}
+	if !row.SettledAt.Equal(keptAt) {
+		t.Errorf("settled_at = %s, want the kept event's time %s", row.SettledAt, keptAt)
+	}
+	if row.Reason != "" || row.Verdict != "" || row.Direction != domain.FitDirectionNone {
+		t.Errorf("kept row carries reason %q, verdict %q, direction %q; it carries none",
+			row.Reason, row.Verdict, row.Direction)
+	}
+	if !row.CapturedAt.IsZero() || !row.RefundedAt.IsZero() {
+		t.Errorf("kept-only row claims captured_at %s and refunded_at %s", row.CapturedAt, row.RefundedAt)
+	}
+	if got, want := row.TxnHash, mustTxnHash(t, "CAP-T82-KEPT"); got != want {
+		t.Errorf("row id = %s, want the capture's %s", got, want)
+	}
+}
+
+// TestRecordRefusesAnUnknownOutcome keeps a payment outcome the fit row
+// does not track from writing anything or being defaulted to another state.
+func TestRecordRefusesAnUnknownOutcome(t *testing.T) {
+	index := newFakeIndex()
+	writer := writerFor(t, index, "payer-0001")
+	unknown := domain.Evidence{
+		Source:  domain.SourcePayment,
+		Outcome: domain.Outcome{Kind: "chargeback"},
+		Link:    domain.TransactionLink{CaptureID: "CAP-T82-UNKNOWN"},
+	}
+	err := writer.Record(context.Background(), unknown)
+	if !errors.Is(err, ErrUnknownOutcome) {
+		t.Fatalf("unknown outcome error = %v, want ErrUnknownOutcome", err)
+	}
+	if index.writes != 0 || len(index.docs) != 0 {
+		t.Errorf("index took %d writes for an unknown outcome, want 0", index.writes)
+	}
+}
+
+// TestTransactionIDPrefersTheCapture pins the purchase's row id: the
+// capture's id when the link carries one, and the order's id only when it
+// does not.
+func TestTransactionIDPrefersTheCapture(t *testing.T) {
+	cases := []struct {
+		name string
+		link domain.TransactionLink
+		want string
+	}{
+		{"capture and order", domain.TransactionLink{OrderID: "ORD-T82", CaptureID: "CAP-T82"}, "CAP-T82"},
+		{"capture only", domain.TransactionLink{CaptureID: "CAP-T82"}, "CAP-T82"},
+		{"order only", domain.TransactionLink{OrderID: "ORD-T82"}, "ORD-T82"},
+		{"neither", domain.TransactionLink{}, ""},
+	}
+	for _, tc := range cases {
+		if got := transactionID(tc.link); got != tc.want {
+			t.Errorf("%s: id = %q, want %q", tc.name, got, tc.want)
+		}
+	}
+}
+
+// TestClassifiedWithoutACauseStaysUnsettled classifies a returned purchase
+// with the two answers that name no cause. Each is stored and leaves the
+// row unsettled, and the document claims no settlement time, so the refund
+// stays a pending question.
+func TestClassifiedWithoutACauseStaysUnsettled(t *testing.T) {
+	for _, reason := range []domain.Category{domain.CategoryUnclear, domain.CategoryNone} {
+		t.Run(string(reason), func(t *testing.T) {
+			index := newFakeIndex()
+			writer := writerFor(t, index, "payer-0001")
+			ctx := context.Background()
+			purchase := testPurchase("CAP-T82-0011")
+			for _, apply := range []func() error{
+				func() error { return writer.Captured(ctx, purchase, captureTime) },
+				func() error { return writer.Refunded(ctx, purchase, refundTime) },
+				func() error { return writer.Classified(ctx, purchase, reason, classifyTime) },
+			} {
+				if err := apply(); err != nil {
+					t.Fatalf("drive purchase: %v", err)
+				}
+			}
+			row := index.only(t)
+			if row.State != domain.FitStateReasonClassified {
+				t.Errorf("state = %q, want reason_classified", row.State)
+			}
+			if row.Reason != reason {
+				t.Errorf("reason = %q, want the stored %q", row.Reason, reason)
+			}
+			if row.Settled || row.SettledKind != "" || !row.SettledAt.IsZero() {
+				t.Errorf("row settled = %v/%q at %s; a reason without a cause counts toward nothing",
+					row.Settled, row.SettledKind, row.SettledAt)
+			}
+			encoded, err := json.Marshal(documentFor(row))
+			if err != nil {
+				t.Fatalf("encode document: %v", err)
+			}
+			document := decodeObject(t, encoded)
+			if _, ok := document["settled_at"]; ok {
+				t.Error("document claims a settlement time for an unsettled row")
+			}
+			category, hasCategory := document["reason_category"]
+			if reason == domain.CategoryNone && hasCategory {
+				t.Errorf("document claims reason_category %v for no reason", category)
+			}
+			if reason != domain.CategoryNone && category != string(reason) {
+				t.Errorf("document reason_category = %v, want %q", category, reason)
+			}
+		})
+	}
+}
+
 // TestOptedOutShopperWritesNoRow turns pooling off and records a capture
 // and a refund. Neither writes a row, and the row written before the
 // opt-out was removed by Forget.

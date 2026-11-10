@@ -407,7 +407,9 @@ func (w *Writer) purchaseFor(ctx context.Context, ev domain.Evidence) (Purchase,
 }
 
 // transactionID names the transaction a purchase is keyed by: the capture
-// id, or the order id when the capture is not known.
+// id, or the order id when the capture is not known. The two hash to
+// different rows, so a purchase whose events disagree about the capture id
+// gets two rows; every event for one purchase must carry it.
 func transactionID(link domain.TransactionLink) string {
 	if link.CaptureID != "" {
 		return link.CaptureID
