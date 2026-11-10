@@ -56,7 +56,12 @@
 
     <h2>Traces</h2>
     <p>Every chat turn here is traced on the deployment with the recall/tool
-    spans in order; each reply shows its turn id. Proof turn: REPLACE_WITH_PROOF_TRACE.</p>
+    spans in order; each reply shows its turn id. Verified proof turn
+    <code>a89f4f49</code> ($0.0174): recall_for_purchase between the two
+    generations, recommends M per <code>corr_3b7e52</code> citing
+    <code>blf_8f2c41</code> with its three seeded returns, and asks the
+    pending refund question. Look the turn up in the deployment trace
+    list.</p>
 
     <script>
       const chat = document.getElementById("chat");
