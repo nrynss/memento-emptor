@@ -105,10 +105,12 @@ func Cases() []Case {
 			Separates: "The pool is Earned small at size M on the candidate line, so arm 4's pool step " +
 				"alone points one rung up. Both shoppers' own fit evidence points large, and the own-evidence " +
 				"step outranks the pool, so arms 3 and 4 hold S while a pool-only answer is L and wrong. " +
-				"Arm 2 holds nothing: the too-large returns sit beside non-fit refunds at the same size and " +
-				"the toolkit returns no refund reason, so its input cannot say which returns were about fit. " +
-				"Arm 1 holds nothing. The first shopper's answer also depends on the rival-birth threshold: " +
-				"below three consecutive opposites the same history would keep its earlier small belief.",
+				"Arm 2 holds nothing: every candidate-line purchase on the first shopper came back, and the " +
+				"toolkit returns no refund reason, so its input cannot say which returns were about fit; the " +
+				"second shopper's records hold a kept M beside an S purchase that has not come back, so the " +
+				"kept tally ties and decides nothing. Arm 1 holds nothing. The first shopper's answer also " +
+				"depends on the rival-birth threshold: below three consecutive opposites the same history " +
+				"would keep its earlier small belief.",
 		},
 		{
 			ID:       seed.Round2CaseNoisyRefunds,
@@ -117,11 +119,12 @@ func Cases() []Case {
 			Shoppers: []string{"r2-noisy-up", "r2-noisy-down"},
 			Separates: "Each history carries three fit returns of one direction among damage, non-arrival, " +
 				"changed-mind, vague and unexplained refunds at the same size. Arm 2 sees the same refund " +
-				"rows for every cause, so its input holds no answer; a reader that treats a refund's status " +
-				"as a fit signal sizes the wrong way. Arms 3 and 4 hold the answer from the three classified " +
-				"returns, and their pool is Claimed for these lines, so the case separates reasoned memory " +
-				"from raw outcomes rather than the pool from the shopper. One shopper sizes up and one down, " +
-				"so an input that only ever adjusts one way cannot pass.",
+				"rows for every cause, and no purchase on either candidate line stayed, so its input holds " +
+				"no answer; a reader that treats a refund's status as a fit signal sizes the wrong way. " +
+				"Arms 3 and 4 hold the answer from the three classified returns, and their pool is Claimed " +
+				"for these lines, so the case separates reasoned memory from raw outcomes rather than the " +
+				"pool from the shopper. One shopper sizes up and one down, so an input that only ever " +
+				"adjusts one way cannot pass.",
 		},
 		{
 			ID:       seed.Round2CaseCorrection,
@@ -129,9 +132,11 @@ func Cases() []Case {
 			Tests:    "A correction made to agent A; agent B asks next, with PayPal access but not A's conversation.",
 			Shoppers: []string{"r2-corr-belief", "r2-corr-standing"},
 			Separates: "The correction travels through the layer, not through a conversation, so arms 3 and " +
-				"4 hold the corrected size for an agent that never saw agent A's turn. Arm 2 holds no answer: " +
-				"the correction appears in no PayPal field, so an agent with the transaction history alone " +
-				"cannot know it, and arm 1 holds nothing. The first shopper's belief is earned and stands " +
+				"4 hold the corrected size for an agent that never saw agent A's turn. Arm 2 carries the " +
+				"correction in no field: on the first shopper it holds no answer at all, because every " +
+				"candidate-line purchase came back and no reason says why, and on the second its kept M holds " +
+				"the first answer M but not the corrected one, so after the correction it still says M where " +
+				"the layer says S. Arm 1 holds nothing. The first shopper's belief is earned and stands " +
 				"contradicted beside the correction rather than deleted; the second has no belief, so the " +
 				"correction stands on its own and still decides.",
 		},
@@ -151,13 +156,19 @@ type HoldExpectation struct {
 	// After maps each arm to whether its input holds the answer after the
 	// correction. It is empty for shoppers with no correction.
 	After map[Arm]bool
-	// Missing names, per arm, the fact the input lacks when it holds no
-	// answer. It is the reference reasoner's own text (the Missing*
-	// constants in reason.go), and TestFairness requires the two to match,
-	// so the freeze's stated reason and the code cannot drift apart. It is
-	// empty where the input holds the answer, and non-empty where the input
-	// decides a weaker size that is not the answer.
+	// Missing names, per arm, the fact the input lacks on the first turn
+	// when it holds no answer. It is the reference reasoner's own text (the
+	// Missing* constants in reason.go), and TestFairness requires the two to
+	// match, so the freeze's stated reason and the code cannot drift apart.
+	// It is empty where the input holds the answer, and non-empty where the
+	// input decides a weaker size that is not the answer.
 	Missing map[Arm]string
+	// MissingAfter is Missing for the after-correction turn, and is read the
+	// same way. It exists for the shopper whose records hold the first
+	// answer and not the corrected one: arm 2 keeps deciding its kept size
+	// after the correction, so the first-turn reason and the later one are
+	// different facts.
+	MissingAfter map[Arm]string
 }
 
 // Expectations returns the frozen hold table.
@@ -179,7 +190,7 @@ func Expectations() []HoldExpectation {
 			},
 		}
 	}
-	ownEvidence := func(shopper string) HoldExpectation {
+	ownEvidence := func(shopper, armTwoMissing string) HoldExpectation {
 		return HoldExpectation{
 			ShopperID: shopper,
 			First: map[Arm]bool{
@@ -190,29 +201,34 @@ func Expectations() []HoldExpectation {
 			},
 			Missing: map[Arm]string{
 				ArmNoMemory:      MissingNoMemory,
-				ArmPayPalHistory: MissingNoCause,
+				ArmPayPalHistory: armTwoMissing,
 			},
 		}
 	}
-	corrected := func(shopper string) HoldExpectation {
-		expectation := ownEvidence(shopper)
+	corrected := func(shopper string, armTwoFirstHolds bool, armTwoFirst, armTwoAfter string) HoldExpectation {
+		expectation := ownEvidence(shopper, armTwoFirst)
+		expectation.First[ArmPayPalHistory] = armTwoFirstHolds
 		expectation.After = map[Arm]bool{
 			ArmNoMemory:           false,
 			ArmPayPalHistory:      false,
 			ArmMementoShopperOnly: true,
 			ArmMementoFull:        true,
 		}
+		expectation.MissingAfter = map[Arm]string{
+			ArmNoMemory:      MissingNoMemory,
+			ArmPayPalHistory: armTwoAfter,
+		}
 		return expectation
 	}
 	return []HoldExpectation{
 		newToBrand("r2-new-plain"),
 		newToBrand("r2-new-otherbrand"),
-		ownEvidence("r2-crowd-rival"),
-		ownEvidence("r2-crowd-plain"),
-		ownEvidence("r2-noisy-up"),
-		ownEvidence("r2-noisy-down"),
-		corrected("r2-corr-belief"),
-		corrected("r2-corr-standing"),
+		ownEvidence("r2-crowd-rival", MissingNoCause),
+		ownEvidence("r2-crowd-plain", MissingKeptTie),
+		ownEvidence("r2-noisy-up", MissingNoCause),
+		ownEvidence("r2-noisy-down", MissingNoCause),
+		corrected("r2-corr-belief", false, MissingNoCause, MissingNoCause),
+		corrected("r2-corr-standing", true, "", MissingKeptNotCorrected),
 	}
 }
 

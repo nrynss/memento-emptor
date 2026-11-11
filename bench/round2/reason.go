@@ -39,9 +39,18 @@ const (
 	// MissingNoBrandHistory is arm 2's reason on a brand the shopper has
 	// never bought: the toolkit holds no purchase on that line.
 	MissingNoBrandHistory = "no history with the candidate brand at all: the toolkit holds no purchase on that line"
-	// MissingNoCause is arm 2's reason on every other shopper: the returns
-	// at one size mix fit with causes the toolkit never returns.
-	MissingNoCause = "no refund reason: the returns at one size mix fit with damage, non-arrival, changed mind and no reason at all"
+	// MissingNoCause is arm 2's reason where every candidate-line purchase
+	// came back: the returns at one size mix fit with causes the toolkit
+	// never returns, and no purchase stayed.
+	MissingNoCause = "no refund reason: the returns at one size mix fit with damage, non-arrival, changed mind and no reason at all, and no purchase on the line stayed"
+	// MissingKeptTie is arm 2's reason where more than one unreturned
+	// purchase sits on the candidate line in different sizes, so the kept
+	// count cannot choose between them.
+	MissingKeptTie = "more than one unreturned purchase on the candidate line, in different sizes, and nothing in the records chooses between them: PayPal carries no refund reason, and the records carry no return window"
+	// MissingKeptNotCorrected is the hold table's reason for arm 2 after a
+	// correction: the records' one positive signal is a kept purchase, and
+	// the correction appears in no PayPal field.
+	MissingKeptNotCorrected = "the correction appears in no PayPal field: the records' only positive signal is the kept purchase it replaces"
 	// MissingNoRecord is arm 2's reason when the toolkit holds nothing.
 	MissingNoRecord = "no history at all"
 	// MissingStatementOnly is the shopper-only arm's reason on a brand the
@@ -266,10 +275,17 @@ func decide(shopper seed.Round2Shopper, arm Arm, population seed.Population, cor
 
 // decidePayPal reads arm 2's input as the agent receives it: the toolkit's
 // records, with sizes, statuses and PayPal's dispute reason codes but no
-// refund reason. It holds no size: a refund's status cannot say whether the
-// return was about fit, and every size that carries a fit return carries
-// non-fit returns too. A cause word appearing in the records is a leak, and
-// the decision names it rather than pretending the arm is blind.
+// refund reason. A refund's status cannot say whether the return was about
+// fit, so a returned purchase carries no direction. A purchase that stayed
+// is different: the records show a capture with no refund and no dispute,
+// which is the observable the layer settles as SignalKeptPastWindow and
+// FitSettledByKept, a reason-free positive signal that the size worn was
+// right. The reasoner counts those purchases the way the layer's usual-size
+// rule does (domain.UsualSizeFor over the kept tally) and answers the size
+// most often kept on the candidate line. Where kept purchases disagree the
+// rule has no size, and the decision says so. A cause word appearing in the
+// records is a leak, and the decision names it rather than pretending the
+// arm is blind.
 func decidePayPal(shopper seed.Round2Shopper) (Decision, error) {
 	input, err := ArmTwoInput(shopper)
 	if err != nil {
@@ -299,11 +315,158 @@ func decidePayPal(shopper seed.Round2Shopper) (Decision, error) {
 			Missing: MissingNoBrandHistory,
 		}, nil
 	}
-	return Decision{
-		Hold:    false,
-		Rung:    RungNone,
-		Missing: MissingNoCause,
-	}, nil
+	kept := payPalKeptSizes(shopper, records)
+	if len(kept) == 0 {
+		return Decision{
+			Hold:    false,
+			Rung:    RungNone,
+			Missing: MissingNoCause,
+		}, nil
+	}
+	usual := domain.UsualSizeFor(kept, "")
+	if usual.Size == "" {
+		return Decision{
+			Hold:    false,
+			Rung:    RungNone,
+			Missing: MissingKeptTie,
+		}, nil
+	}
+	return Decision{Hold: true, Size: usual.Size, Rung: RungOwnEvidence}, nil
+}
+
+// payPalPurchase is one purchase as arm 2's records show it: the size of
+// its line item, whether that item is on the candidate line, and whether a
+// refund or a dispute came back for its capture.
+type payPalPurchase struct {
+	size      string
+	candidate bool
+	returned  bool
+}
+
+// payPalPurchases reads every purchase arm 2's records carry. The order
+// body names the line item and its size; the transaction listing holds the
+// capture and, for a refund, the capture it refers back to; a dispute's
+// disputed transaction names the capture it holds. An order is paired with
+// its capture by the time both report, which is the only field the two
+// share. An order that cannot be tied to exactly one capture is left out:
+// without its capture the records cannot show the purchase stayed.
+func payPalPurchases(shopper seed.Round2Shopper, records []map[string]any) []payPalPurchase {
+	returned := map[string]bool{}
+	captures := map[string][]string{}
+	for _, record := range records {
+		info, ok := record["transaction_info"].(map[string]any)
+		if !ok {
+			continue
+		}
+		id := payPalString(info, "transaction_id")
+		switch payPalString(info, "transaction_event_code") {
+		case "T0006":
+			if at := payPalString(info, "transaction_initiation_date"); id != "" && at != "" {
+				captures[at] = append(captures[at], id)
+			}
+		case "T1107":
+			if reference := payPalString(info, "paypal_reference_id"); reference != "" {
+				returned[reference] = true
+			}
+		}
+	}
+	for _, record := range records {
+		disputed, ok := record["disputed_transactions"].([]any)
+		if !ok {
+			continue
+		}
+		for _, item := range disputed {
+			fields, ok := item.(map[string]any)
+			if !ok {
+				continue
+			}
+			if id := payPalString(fields, "seller_transaction_id"); id != "" {
+				returned[id] = true
+			}
+		}
+	}
+	var out []payPalPurchase
+	for _, record := range records {
+		units, ok := record["purchase_units"].([]any)
+		if !ok {
+			continue
+		}
+		ids := captures[payPalString(record, "create_time")]
+		if len(ids) != 1 {
+			continue
+		}
+		for _, unit := range units {
+			fields, ok := unit.(map[string]any)
+			if !ok {
+				continue
+			}
+			items, _ := fields["items"].([]any)
+			for _, item := range items {
+				line, ok := item.(map[string]any)
+				if !ok {
+					continue
+				}
+				out = append(out, payPalPurchase{
+					size:      payPalItemSize(line),
+					candidate: payPalNamesCandidate(shopper, payPalString(line, "name")),
+					returned:  returned[ids[0]],
+				})
+			}
+		}
+	}
+	return out
+}
+
+// payPalNamesCandidate reports whether one line item's name is the
+// candidate product. The records carry no brand id, so the name the toolkit
+// returns is what the shopper's question names too.
+func payPalNamesCandidate(shopper seed.Round2Shopper, name string) bool {
+	return strings.Contains(name, shopper.Candidate.BrandName) &&
+		strings.Contains(name, shopper.Candidate.LineName)
+}
+
+// payPalItemSize reads the size a line item names, or the empty string when
+// its description carries none.
+func payPalItemSize(line map[string]any) string {
+	size, ok := strings.CutPrefix(payPalString(line, "description"), "Size ")
+	if !ok {
+		return ""
+	}
+	return strings.TrimSpace(size)
+}
+
+// payPalKeptSizes tallies the unreturned purchases on the candidate line by
+// size, in the shape the layer's usual-size rule reads: a purchase whose
+// capture came back with no refund and no dispute is one kept purchase of
+// the size its line item names. The records carry no return window, so this
+// is the kept signal's observable, not a claim that each window has closed.
+func payPalKeptSizes(shopper seed.Round2Shopper, records []map[string]any) []domain.SizeTally {
+	tallies := map[string]*domain.SizeTally{}
+	order := []string{}
+	for _, purchase := range payPalPurchases(shopper, records) {
+		if !purchase.candidate || purchase.returned || purchase.size == "" {
+			continue
+		}
+		tally, ok := tallies[purchase.size]
+		if !ok {
+			tally = &domain.SizeTally{Size: purchase.size}
+			tallies[purchase.size] = tally
+			order = append(order, purchase.size)
+		}
+		tally.Kept++
+	}
+	out := make([]domain.SizeTally, 0, len(order))
+	for _, size := range order {
+		out = append(out, *tallies[size])
+	}
+	return out
+}
+
+// payPalString reads one string field from a decoded record, or the empty
+// string.
+func payPalString(record map[string]any, key string) string {
+	value, _ := record[key].(string)
+	return value
 }
 
 // fitWords are the words that would hand arm 2 a cause. The extraction

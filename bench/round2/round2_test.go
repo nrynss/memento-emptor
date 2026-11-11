@@ -207,7 +207,7 @@ func TestFairness(t *testing.T) {
 					t.Errorf("%s arm %d after correction: reasoner decides %q (hold %v), hidden answer is %q",
 						shopper.ShopperID, int(arm), after.Size, after.Hold, answer.RightSizeAfterCorrection)
 				}
-				if declared := expectation.Missing[arm]; declared != "" {
+				if declared := expectation.MissingAfter[arm]; declared != "" {
 					t.Errorf("%s arm %d after correction: the table holds the answer but names a missing fact %q",
 						shopper.ShopperID, int(arm), declared)
 				}
@@ -217,7 +217,7 @@ func TestFairness(t *testing.T) {
 				t.Errorf("%s arm %d: after the correction the input decides the hidden answer %q, and the frozen table says it does not hold it",
 					shopper.ShopperID, int(arm), answer.RightSizeAfterCorrection)
 			}
-			if declared := strings.TrimSpace(expectation.Missing[arm]); declared == "" {
+			if declared := strings.TrimSpace(expectation.MissingAfter[arm]); declared == "" {
 				t.Errorf("%s arm %d after correction: the table says the input holds no answer but names no reason", shopper.ShopperID, int(arm))
 			} else if !after.Hold && after.Missing != declared {
 				t.Errorf("%s arm %d after correction: the reasoner names the missing fact %q, the frozen table says %q",
@@ -332,8 +332,11 @@ func TestTheCasesSeparateTheArms(t *testing.T) {
 				if err != nil {
 					t.Fatalf("%s: %v", shopper.ShopperID, err)
 				}
-				if missing.Hold {
-					t.Errorf("%s arm %d holds the answer after the correction; the correction is in no PayPal field",
+				// Arm 2 may keep deciding the size its kept purchase holds;
+				// what neither arm can do is reach the corrected size, which
+				// arrives in no PayPal field.
+				if missing.Hold && missing.Size == answer.RightSizeAfterCorrection {
+					t.Errorf("%s arm %d holds the corrected size after the correction; the correction is in no PayPal field",
 						shopper.ShopperID, int(arm))
 				}
 			}
@@ -559,6 +562,92 @@ func TestArmTwoInputCarriesNoCause(t *testing.T) {
 		if captures != orders {
 			t.Errorf("%s: %d captures and %d orders; every order needs its line items", shopper.ShopperID, captures, orders)
 		}
+	}
+}
+
+// TestArmTwoReadsKeptPurchases pins the one reason-free positive signal
+// arm 2's records hold: a candidate-line purchase that never came back is
+// the observable the layer settles as kept, and the reasoner counts it the
+// way the layer's usual-size rule does. It is measured on the frozen
+// records rather than asserted, because the hold table rests on it.
+func TestArmTwoReadsKeptPurchases(t *testing.T) {
+	frozen := loadFixture(t)
+	// The two shoppers whose records hold an unreturned purchase on the
+	// candidate line, with the sizes their records show. A fixture change
+	// that moves either is a change to the freeze's claims.
+	wantKept := map[string]map[string]int{
+		"r2-crowd-plain":   {"M": 1, "S": 1},
+		"r2-corr-standing": {"M": 1},
+	}
+	for _, shopper := range frozen.shoppers {
+		input, err := LoadArmTwoInput(fixturePath("."), shopper.ShopperID)
+		if err != nil {
+			t.Fatalf("%s: committed arm 2 input: %v", shopper.ShopperID, err)
+		}
+		var records []map[string]any
+		if err := json.Unmarshal(input, &records); err != nil {
+			t.Fatalf("%s: decode arm 2 input: %v", shopper.ShopperID, err)
+		}
+		got := map[string]int{}
+		for _, tally := range payPalKeptSizes(shopper, records) {
+			got[tally.Size] = tally.Kept
+		}
+		want := wantKept[shopper.ShopperID]
+		if len(got) != len(want) {
+			t.Errorf("%s: the records hold kept purchases %v, the freeze says %v", shopper.ShopperID, got, want)
+		}
+		for size, count := range want {
+			if got[size] != count {
+				t.Errorf("%s: the records hold %d kept purchases in %s, the freeze says %d",
+					shopper.ShopperID, got[size], size, count)
+			}
+		}
+		// Every kept purchase the records show must be one the frozen
+		// history carries as a purchase that did not come back, and every
+		// such row must reach the records. This is what makes the reading
+		// the records' own rather than a second account of the history.
+		fromHistory := map[string]int{}
+		for _, row := range shopper.History.Rows {
+			if row.Outcome == nil || row.Item.BrandID != shopper.Candidate.BrandID {
+				continue
+			}
+			if row.Outcome.Kind == domain.OutcomeRefund || row.Outcome.Kind == domain.OutcomeDispute {
+				continue
+			}
+			fromHistory[row.Item.Size]++
+		}
+		for size, count := range fromHistory {
+			if got[size] != count {
+				t.Errorf("%s: the history keeps %d purchases in %s, the records show %d",
+					shopper.ShopperID, count, size, got[size])
+			}
+		}
+		for size, count := range got {
+			if fromHistory[size] != count {
+				t.Errorf("%s: the records show %d kept purchases in %s, the history keeps %d",
+					shopper.ShopperID, count, size, fromHistory[size])
+			}
+		}
+	}
+	// The two decisions the reading forces: the kept M is r2-corr-standing's
+	// first answer, and r2-crowd-plain's kept tally ties, so arm 2 holds
+	// nothing there even though one of its unreturned purchases is in the
+	// answer's size.
+	standing, err := Decide(frozen.byID["r2-corr-standing"], ArmPayPalHistory, frozen.population)
+	if err != nil {
+		t.Fatalf("r2-corr-standing: %v", err)
+	}
+	if !standing.Hold || standing.Size != frozen.answers["r2-corr-standing"].RightSize {
+		t.Errorf("r2-corr-standing: arm 2 decides %q (hold %v), its kept M is the frozen answer %q",
+			standing.Size, standing.Hold, frozen.answers["r2-corr-standing"].RightSize)
+	}
+	plain, err := Decide(frozen.byID["r2-crowd-plain"], ArmPayPalHistory, frozen.population)
+	if err != nil {
+		t.Fatalf("r2-crowd-plain: %v", err)
+	}
+	if plain.Hold || plain.Missing != MissingKeptTie {
+		t.Errorf("r2-crowd-plain: arm 2 decides %q (hold %v, %q), a tied kept tally decides nothing",
+			plain.Size, plain.Hold, plain.Missing)
 	}
 }
 

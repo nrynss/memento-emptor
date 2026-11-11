@@ -126,13 +126,13 @@ f52efeb5508b330a608d08cf0f933db933594b55fbdb9037de20f8075093c837  bench/round2/p
 92b1c25b99bdd67fdb8a0ae8905cecdce3fcf490576b65fd0f48d758f92cea37  bench/round2/paypal/r2-noisy-up/list-transactions-pending.json
 4d362ee7e6b8fe5522f5ea5c57670a90ee1cf2e1be23d299d540cd7b3ef98136  bench/round2/paypal/r2-noisy-up/list-transactions-succeeded.json
 f90e5f9743accf1213b71d6a152e528ccdddb3c19de3618f2bcbabc5b34dcac4  seed/round2.go
-20eeef1f433346af8170ff1fb60839e3d59a259b5013fd5b67d4c308c8a3f1d4  bench/round2/cases.go
+5315f95db276d32f1e4c3691c985002fdf49360f2e24cfae6de4d86d89e1af86  bench/round2/cases.go
 2decee7b36d67e7eefe84151a72bb0fd58afec9e7d558b7f23b326b043b703a5  bench/round2/doc.go
 33ad363b76718ea849bc1a5f15a800b9cff952f9a07b0877b68eb8195b4f43aa  bench/round2/facts.go
 31b79b0ef1234bead9402cbf0791d74aaeffd5c19c2ff222938cdd796fd60428  bench/round2/grade.go
 1b51fb0306353f499eabaecbe71816b3a02e9efa71ee6da01546406e3ed4822a  bench/round2/paypal.go
 507be8782d82e39e65286e0b9185f97dfd118f8877fe6d9ecacae54ac814c5ee  bench/round2/prompt.go
-ec8c3606faeac40055b834a241faa07d095841004a37fbc9000fae750d020431  bench/round2/reason.go
+723439884d877abbbaa72ef9812745d47698f18b2cc49ce9c455e4eba5b79f46  bench/round2/reason.go
 fabfedfe9f76da16009133bba06818d4d9230d8cf1d3f8907f9ea58b61831242  bench/round2/recall.go
 7c1f7c408e4bf48d2d068b5ae8bb93b8fbfa318df7a2f778f9275f63eaca518d  bench/round2/runs.go
 940bea8c758311e80b6a7071747eabef641f7ee29d95ce30a5b9a5fbfa30170d  bench/round2/arm2/extract.go
@@ -168,14 +168,14 @@ sha256sum -c <(sed -n '/^```manifest$/,/^```$/p' bench/round2/FROZEN.md | grep '
 
 ## 2. Scale, fixed before any run
 
-- **Repeat count: two turns per shopper per arm.** Three was the task text's
-  plan, and the budget does not hold it: the P9 run mean is $0.0337 per turn,
-  so three repeats is 168 turns (96 first turns plus 72 correction turns) at
-  about **$5.66**, over T10.4's $5.00 cap before any overrun. Two repeats is
-  112 turns (64 first turns plus 48 correction turns) at about **$3.77**,
-  which leaves room for a discarded turn or two. Two still separates a stable
-  answer from a lucky one on eight constructed shoppers, and the pilot's n=1
-  is the thin signal this improves on.
+- **Repeat count: two turns per shopper per arm.** An earlier draft of the
+  task text planned three, and the budget does not hold it: the P9 run mean is
+  $0.0337 per turn, so three repeats is 168 turns (96 first turns plus 72
+  correction turns) at about **$5.66**, over T10.4's $5.00 cap before any
+  overrun. Two repeats is 112 turns (64 first turns plus 48 correction turns)
+  at about **$3.77**, which leaves room for a discarded turn or two. Two still
+  separates a stable answer from a lucky one on eight constructed shoppers,
+  and the pilot's n=1 is the thin signal this improves on.
 - **Shoppers per case: exactly two.** Eight shoppers in all, four cases. The
   pair in each case exists so a single idiosyncratic history cannot carry the
   case: each pair disagrees about what makes the answer hard (a brand with no
@@ -198,15 +198,16 @@ arm's input.
 | Case | Shoppers | Why it separates the arms |
 |---|---|---|
 | New to the brand | `r2-new-plain`, `r2-new-otherbrand` | Neither shopper has a row on the candidate line. Arms 1 and 2 hold nothing (and arm 2 has no record on that line at all); arm 3 holds only the general statement, so it answers the usual size M; only arm 4's pool (Earned small at M) holds the answer, one rung up to L. The second shopper carries another brand's large cut, so an input that maps sizes across brands answers down and is wrong. |
-| Unlike the crowd | `r2-crowd-rival`, `r2-crowd-plain` | The pool is Earned small at M, so the pool step alone answers L and is wrong. Both shoppers' own fit evidence points large and outranks the pool: arms 3 and 4 hold S. Arm 2 holds nothing, because the too-large returns sit beside non-fit refunds at the same size and the toolkit returns no refund reason. The first shopper's answer depends on the rival-birth threshold (section 5). |
-| Noisy refunds | `r2-noisy-up`, `r2-noisy-down` | Each history carries three fit returns of one direction among damage, non-arrival, changed-mind, vague and unexplained refunds at the same size, so arm 2's records cannot say which returns were about fit and it holds nothing. Arms 3 and 4 hold the answer from the reasons; their pool is Claimed, so the pool plays no part. One shopper sizes up and one down, so an input that only ever adjusts one way cannot pass. |
-| Correction, then another agent | `r2-corr-belief`, `r2-corr-standing` | The correction travels through the layer, not through a conversation, so arms 3 and 4 hold the corrected size for an agent that never saw agent A's turn; arm 2 holds nothing because the correction appears in no PayPal field, and arm 1 holds nothing. The first shopper's belief is earned and stands contradicted beside the correction rather than deleted; the second has no belief, so the correction stands on its own and still decides. |
+| Unlike the crowd | `r2-crowd-rival`, `r2-crowd-plain` | The pool is Earned small at M, so the pool step alone answers L and is wrong. Both shoppers' own fit evidence points large and outranks the pool: arms 3 and 4 hold S. Arm 2 holds nothing on either: the first shopper's every candidate-line purchase came back and the toolkit returns no refund reason, and the second shopper's one kept M ties with an S purchase that has not come back, so the kept tally decides nothing. The first shopper's answer depends on the rival-birth threshold (section 5). |
+| Noisy refunds | `r2-noisy-up`, `r2-noisy-down` | Each history carries three fit returns of one direction among damage, non-arrival, changed-mind, vague and unexplained refunds at the same size. Arm 2 sees the same refund rows for every cause and no purchase on either candidate line stayed, so its input cannot say which returns were about fit and it holds nothing. Arms 3 and 4 hold the answer from the reasons; their pool is Claimed, so the pool plays no part. One shopper sizes up and one down, so an input that only ever adjusts one way cannot pass. |
+| Correction, then another agent | `r2-corr-belief`, `r2-corr-standing` | The correction travels through the layer, not through a conversation, so arms 3 and 4 hold the corrected size for an agent that never saw agent A's turn. Arm 2 has the correction in no field: on the first shopper it holds nothing (every candidate-line purchase came back with no reason), and on the second its kept M holds the first answer M but not the corrected S, so it still says M after the correction. Arm 1 holds nothing. The first shopper's belief is earned and stands contradicted beside the correction rather than deleted; the second has no belief, so the correction stands on its own and still decides. |
 
 ## 4. Fairness: a perfect reasoner on each arm's input
 
 `bench/round2/reason.go` is the frozen reference reasoner: product.md's
 precedence order over exactly the memory each arm carries, reading the frozen
-history and population and never the hidden answer. `TestFairness` runs it for
+history, the frozen arm-2 records and the frozen population, and never the
+hidden answer. `TestFairness` runs it for
 every shopper and every arm and checks it against the frozen hold table in
 `cases.go`, on the first recommendation and again after the correction. Where
 the table says an input holds the answer, the reasoner must produce the hidden
@@ -215,7 +216,9 @@ must name the fact the input lacks.
 
 The "Missing" column of the code table is not prose: each entry is one of the
 `Missing*` constants in `reason.go`, the exact text the reasoner returns, and
-`TestFairness` requires the two to match character for character. An entry is
+`TestFairness` requires the two to match character for character. The
+after-correction turn reads its own column, `MissingAfter`, for the shopper
+whose records hold the first answer and not the corrected one. An entry is
 also required wherever the table says an input holds no answer, and forbidden
 where it says the input holds one, so the freeze cannot record an arm as
 unanswerable without saying why, and cannot quietly answer it later. The table
@@ -226,11 +229,11 @@ the reasoner satisfies:
 | `r2-new-plain` | L | no answer | no answer, no record on the line | statement only: M, not the answer | pool: L |
 | `r2-new-otherbrand` | L | no answer | no answer, no record on the line | statement only: M, not the answer | pool: L |
 | `r2-crowd-rival` | S | no answer | no answer, no cause | own evidence: S | own evidence: S |
-| `r2-crowd-plain` | S | no answer | no answer, no cause | own evidence: S | own evidence: S |
+| `r2-crowd-plain` | S | no answer | kept M ties with an unreturned S: no answer | own evidence: S | own evidence: S |
 | `r2-noisy-up` | L | no answer | no answer, no cause | own evidence: L | own evidence: L |
 | `r2-noisy-down` | S | no answer | no answer, no cause | own evidence: S | own evidence: S |
 | `r2-corr-belief` | L, then M | no answer | no answer, no cause | own evidence L, then the correction M | own evidence L, then the correction M |
-| `r2-corr-standing` | M, then S | no answer | no answer, no cause | statement M, then the correction S | statement M, then the correction S |
+| `r2-corr-standing` | M, then S | no answer | kept M: M, then still M where the answer is S | statement M, then the correction S | statement M, then the correction S |
 
 Two consequences are part of the freeze, not a surprise to report later:
 
@@ -241,13 +244,31 @@ Two consequences are part of the freeze, not a surprise to report later:
   answer", and the fairness test accepts a decided size there only when it
   differs from the hidden one. That is what makes the case a measurement of the
   pool rather than of the model's guessing.
-- **No shopper's answer is derivable from PayPal's records alone.** A perfect
-  reader of arm 2's input refuses on every one of the eight, and a test pins
-  why: every fit return on a candidate line shares its line and size with a
-  non-fit outcome, so the number and status of refunds cannot separate fit from
-  damage, non-arrival, changed mind or an unexplained return. A fits-well
-  verdict is exempt because PayPal shows it exactly as it shows a kept
-  purchase, which says nothing about why anything came back.
+- **One shopper's answer is in PayPal's records alone, and it is not the one
+  its case turns on.** Arm 2's records cannot say why anything came back, but
+  they do show what never did: a capture with no refund and no dispute, which
+  is the observable the layer settles as `SignalKeptPastWindow` and
+  `FitSettledByKept` — a reason-free positive signal that the size worn was
+  right. `bench/round2/reason.go` reads those purchases on the candidate line
+  and applies the layer's usual-size rule to them (`domain.UsualSizeFor`: the
+  size most often kept; a tie falls through to a statement, and arm 2 has none,
+  so it decides nothing). Measured on the frozen records, `TestArmTwoReadsKeptPurchases`
+  pins all three outcomes:
+  - `r2-corr-standing` holds one, a kept M, which is that shopper's first
+    answer. Arm 2 therefore holds M before the correction and still says M
+    after it, where the layer says S.
+  - `r2-crowd-plain` holds a kept M and an S purchase that has not come back,
+    so the kept tally ties and arm 2 holds no answer. The S purchase is the one
+    the shopper said fits; PayPal shows a fits-well verdict exactly as it shows
+    any unremarked purchase, which is why the tie exists and why the verdict
+    itself stays out of arm 2's reach.
+  - The other six hold none, because every candidate-line purchase came back.
+
+  A kept purchase on another brand is not read: it names the shopper's usual
+  size rather than the candidate line's fit, and arm 2 has neither a statement
+  nor a pool to carry a usual size into an answer. A refund's status still says
+  nothing about fit, so nothing in the records separates a fit return from
+  damage, non-arrival, changed mind or an unexplained return.
 
 ## 5. The rival-birth threshold is mirrored, not approximated
 
@@ -432,9 +453,19 @@ before `record_correction`.
 - The gate's round-2 call is conditional: it adds `--allow-runs` only when the
   run marker exists (section 8). That is the one place this round's wiring
   differs from round 1's, which has no run directory to open.
-- The repeat count is two, not the task text's three, because the budget does
-  not hold three (section 2). T10.4's task text still says three; the freeze
-  wins until the orchestrator reconciles it.
+- The repeat count is two, not the three an earlier draft of the task text
+  planned, because the budget does not hold three (section 2). T10.4's task
+  text says two, so task text and freeze agree.
+- **Arm 2's hold is derived, not asserted (P10 review, Medium).** The
+  reference reasoner read no kept purchase, so the freeze claimed arm 2 held
+  nothing on every shopper, and the premise test covered returns only. It now
+  reads a candidate-line purchase that came back with no refund and no dispute
+  — the observable the layer settles as kept — and applies the layer's
+  usual-size rule to the kept tally (section 4). `r2-corr-standing`'s kept M is
+  that shopper's first answer, and `r2-crowd-plain`'s kept M ties with its
+  unreturned S purchase, so the hold table, the case statements and section 4
+  say so. No fixture changed; the manifest is re-frozen at 116 rows because
+  `cases.go` and `reason.go` changed.
 - No sandbox call was made for this task. The PayPal records are generated from
   the frozen histories in the shape T10.1 recorded; T10.1's recordings remain
   the evidence for that shape.
