@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 8 / 8 | Done |
 | P2 | 17 / 18 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
-| P4 | 9 / 11 | In progress (T4.10, T4.11) |
+| P4 | 10 / 11 | In progress (T4.11) |
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T4.10: The ledger loads only what it shows (done)
+
+**What exists.** `LedgerState.refresh` loads beliefs and pending questions only; the evidence getter and field are gone, so a failed `ledger_evidence` read cannot label the ledger failed over data it never renders. Evidence reads stay on `LedgerClient` and the why view fetches its own for one belief. Tests pin the two-call load in live and fixture modes, a refusing evidence transport that changes nothing, and the live page rendering while the edge refuses that tool; re-adding the read fails six tests. Review mutation-checked both the read and the why view's own evidence call, and annotated T4.8's now-stale finding in place.
+
+**What surprised.** The retry test hard-coded three refused requests (a load used to be three reads), so it moved with the read count. T4.1's frozen wire fixtures are untouched; `LedgerState` is a web-internal observable, not a frozen shape.
+
+**The next agent should not have to work out.** The read count is stated in the retry test's comment; a future read-count change moves it again.
 
 ### T10.7: Arm 2 reads kept purchases (done)
 
