@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/nrynss/memento-emptor/internal/domain"
@@ -11,12 +12,15 @@ import (
 )
 
 // Store is the raw-evidence store: shopper messages, classified reasons
-// and product texts with their vectors, behind one embedding contract.
-// It implements the fakes.EvidenceStore seam as-is, so the replay that
-// runs on the fake runs unchanged on this store.
+// and product texts, behind one embedding contract. It keeps the texts,
+// not vectors: a vector belongs to the contract the store was built
+// under, and a re-embed recomputes it from the text. It implements the
+// fakes.EvidenceStore seam as-is, so the replay that runs on the fake runs
+// unchanged on this store.
 type Store struct {
 	contractKind string
 	docs         []Document
+	next         int
 }
 
 // Verify at compile time that the store adopts the seam: the replay runs
@@ -32,7 +36,7 @@ func NewStore(contract domain.EmbedderContract) (*Store, error) {
 	if err := checkContract(contract); err != nil {
 		return nil, err
 	}
-	return &Store{contractKind: contract.EmbeddingKind()}, nil
+	return &Store{contractKind: contract.EmbeddingKind(), next: 1}, nil
 }
 
 // checkContract reports whether the contract is usable.
@@ -91,9 +95,54 @@ func (s *Store) IndexDocument(ctx context.Context, doc Document) (string, error)
 	if err := doc.Validate(); err != nil {
 		return "", err
 	}
-	doc.DocID = fmt.Sprintf("doc-%04d", len(s.docs)+1)
+	doc.DocID = fmt.Sprintf("doc-%04d", s.next)
+	s.next++
 	s.docs = append(s.docs, doc)
 	return doc.DocID, nil
+}
+
+// RestoreDocuments installs documents read from a journal under the ids
+// they were stored with, in index order, so a restarted store keeps the
+// graph stubs' targets and mints its next id after them instead of
+// reusing one. A document already held under its id is kept once, so a
+// repeated restore is harmless. A document with no id, or with no text,
+// fails rather than enter the store unnamed or empty.
+func (s *Store) RestoreDocuments(docs []Document) error {
+	held := make(map[string]bool, len(s.docs))
+	for _, doc := range s.docs {
+		held[doc.DocID] = true
+	}
+	for _, doc := range docs {
+		if strings.TrimSpace(doc.DocID) == "" {
+			return fmt.Errorf("%w: restored document names no id", ErrNoDocID)
+		}
+		if err := doc.Validate(); err != nil {
+			return err
+		}
+		if held[doc.DocID] {
+			continue
+		}
+		held[doc.DocID] = true
+		s.docs = append(s.docs, doc)
+		if n, ok := docNumber(doc.DocID); ok && n >= s.next {
+			s.next = n + 1
+		}
+	}
+	return nil
+}
+
+// docNumber reads the sequence number out of a store-assigned document
+// id, reporting false for an id in another shape.
+func docNumber(id string) (int, bool) {
+	digits, ok := strings.CutPrefix(id, "doc-")
+	if !ok || digits == "" {
+		return 0, false
+	}
+	n, err := strconv.Atoi(digits)
+	if err != nil || n < 1 {
+		return 0, false
+	}
+	return n, true
 }
 
 // IndexDoc stores one evidence text and returns its document id. It is

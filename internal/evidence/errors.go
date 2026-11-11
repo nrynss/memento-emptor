@@ -28,3 +28,16 @@ var ErrContractMismatch = errors.New("evidence: embedding contract does not matc
 // ErrInvalidContract is returned when the embedding contract is nil,
 // fails its own validation, or names no kind. Match it with errors.Is.
 var ErrInvalidContract = errors.New("evidence: embedding contract is not usable")
+
+// ErrBadJournalShopper is returned when a shopper id cannot name a
+// journal file: it is empty or carries a character outside the file-safe
+// set. Match it with errors.Is.
+var ErrBadJournalShopper = errors.New("evidence: shopper id cannot name a journal file")
+
+// ErrBadJournalDir is returned when the journal directory is missing.
+var ErrBadJournalDir = errors.New("evidence: missing journal directory")
+
+// ErrCorruptJournal is returned when a stored evidence journal does not
+// decode or names a layout version this code does not know. It is refused
+// rather than guessed at. Match it with errors.Is.
+var ErrCorruptJournal = errors.New("evidence: stored journal does not decode")

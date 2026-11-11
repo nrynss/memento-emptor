@@ -235,20 +235,27 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 			if ev.CountsToward != nil {
 				counts = *ev.CountsToward
 			}
-			evRec := &evidenceRecord{
-				id:        ev.EvidenceID,
-				row:       row,
-				counts:    counts,
-				writeOp:   ev.WriteOp,
-				beliefIDs: append([]string(nil), seed.Links[ev.EvidenceID]...),
+			// A row the journal restored is the same row this fixture
+			// names: the seed keeps it once instead of adding a second,
+			// and its doc id, feedback marker and links stay as the live
+			// boot wrote them.
+			evRec, restored := st.evidence[ev.EvidenceID]
+			if !restored {
+				evRec = &evidenceRecord{
+					id:        ev.EvidenceID,
+					row:       row,
+					counts:    counts,
+					writeOp:   ev.WriteOp,
+					beliefIDs: append([]string(nil), seed.Links[ev.EvidenceID]...),
+				}
+				st.evidence[evRec.id] = evRec
 			}
 			if len(evRec.beliefIDs) == 0 {
 				evRec.beliefIDs = []string{rec.id}
 			}
-			st.evidence[evRec.id] = evRec
 			rec.evIDs = append(rec.evIDs, evRec.id)
-			if row.Outcome.Kind == domain.OutcomeCapture {
-				st.captures[row.Link.CustomID] = append(st.captures[row.Link.CustomID], evRec.id)
+			if evRec.row.Outcome.Kind == domain.OutcomeCapture {
+				st.addCapture(evRec.row.Link.CustomID, evRec.id)
 			}
 			ordered = append(ordered, &pendingEvidence{belief: rec, rec: evRec})
 		}
@@ -258,15 +265,22 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 		return ordered[i].rec.row.OccurredAt.Before(ordered[j].rec.row.OccurredAt)
 	})
 	for _, item := range ordered {
-		docID, err := s.indexEvidence(ctx, item.rec.row, "")
-		if err != nil {
-			return err
+		// A restored row already holds the document behind its stub, so
+		// the seed reuses it instead of indexing a second copy and
+		// re-minting the id the graph carries.
+		docID := item.rec.docID
+		if docID == "" {
+			var err error
+			docID, err = s.indexEvidence(ctx, item.rec.row, "")
+			if err != nil {
+				return err
+			}
+			item.rec.docID = docID
 		}
 		stub, err := evidence.GraphStub(docID, stubKey(item.rec.row))
 		if err != nil {
 			return err
 		}
-		item.rec.docID = docID
 		if item.rec.row.Outcome.Kind == domain.OutcomeCapture {
 			verdict, ok := seed.FeedbackVerdicts[item.rec.id]
 			if !ok {
@@ -283,11 +297,14 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 				// The history holds this purchase's feedback already, so
 				// the row carries its identity: a later delivery for the
 				// purchase is a repeat, not that purchase's first
-				// feedback.
-				item.rec.feedback = &recordedFeedback{
-					id:       seed.FeedbackIDs[item.rec.id],
-					verdict:  verdict,
-					beliefID: item.belief.id,
+				// feedback. A marker the journal restored is already the
+				// live boot's answer and stays.
+				if item.rec.feedback == nil {
+					item.rec.feedback = &recordedFeedback{
+						id:       seed.FeedbackIDs[item.rec.id],
+						verdict:  verdict,
+						beliefID: item.belief.id,
+					}
 				}
 			}
 			continue
@@ -333,6 +350,11 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 		st.notices[id] = notice
 	}
 	for _, question := range seed.Pending.Questions {
+		if _, restored := st.pending[question.QuestionID]; restored {
+			// The journal already holds this question, with the ask
+			// count the live boot gave it; the fixture names it once.
+			continue
+		}
 		awaiting, err := parseTime(question.AwaitingSince, "question "+question.QuestionID)
 		if err != nil {
 			return err
@@ -376,6 +398,11 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 			awaitingSince: awaiting,
 		}
 	}
+	// The beliefs are rebuilt, so the journal's citations and timelines
+	// merge in only now: each restored row is named once, after the rows
+	// the seed restored, and each restored event rides beside the
+	// replayed history.
+	st.applyRestoredEvidence()
 	return nil
 }
 

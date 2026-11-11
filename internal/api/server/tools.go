@@ -707,6 +707,11 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 	reason, askAgain := reasons.Settle(req.AnswerText, class)
 	id := st.mint("rsn")
 	if askAgain {
+		// The question stays open with one more ask on it, so the ask is
+		// part of the partition and survives a restart with it.
+		if err := s.persistIfJournal(ctx, st, req.ShopperID); err != nil {
+			return contract.RecordReasonResponse{}, err
+		}
 		return contract.RecordReasonResponse{
 			ReasonID:     id,
 			QuestionID:   question.id,

@@ -89,11 +89,13 @@ func (s *Service) recordFitRows(ctx context.Context, st *shopperState, rows []do
 }
 
 // persistIfJournal saves the shopper's durable state when a journal
-// exists to save. Belief writes declare matching standings; without the
-// save a restart would lose the declaration.
+// exists to save it to. The evidence partition is written after every
+// mutation; the standing snapshot is written when the shopper holds
+// journal entries, because only those can be declared against a later
+// belief. Without a standing directory both stay in memory.
 func (s *Service) persistIfJournal(ctx context.Context, st *shopperState, shopper string) error {
 	if st.journal.Len() == 0 {
-		return nil
+		return s.persistEvidence(ctx, st, shopper)
 	}
 	return s.persistStanding(ctx, st, shopper)
 }

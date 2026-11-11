@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"strings"
 	"sync"
@@ -102,9 +103,12 @@ func storyAllowlist() []string {
 		"refund WH-2EV-01", "refund WH-2EV-02", "refund WH-2EV-03",
 		"dispute WH-2EV-04", "refund WH-2EV-05", "capture WH-2EV-06",
 	}
+	// A boot that restores a journal continues the store's document
+	// sequence instead of re-minting it, so a restarted harness can write
+	// stubs past the ids one fresh store would hand out.
 	for _, key := range keys {
-		for i := 1; i <= 8; i++ {
-			out = append(out, "evidence[doc-000"+string(rune('0'+i))+"] "+key)
+		for i := 1; i <= 32; i++ {
+			out = append(out, fmt.Sprintf("evidence[doc-%04d] %s", i, key))
 		}
 	}
 	return out

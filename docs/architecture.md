@@ -214,16 +214,25 @@ are the second audience", `docs/interface.md` "product_fit")
 | Store | Holds | Never holds |
 |---|---|---|
 | **Evidence graph** | Short, keyed beliefs and evidence stubs; contradiction flags; supersession; provenance; per-agent attribution. One session per shopper isolates them on a shared store file. | Prose. The graph holds stubs; the documents live in the layer's evidence store. Pooled beliefs: a pooled session would break shopper isolation. |
-| **Evidence store (the layer)** | Each shopper's raw evidence texts, held in the layer process: one per classified outcome, the reason in words joined to its item, with the lexical search seam beside them. A restart loses them until events replay, and the ledger's evidence panel is empty until then (T2.3c). | Beliefs, and the pooled counts. Search finds evidence; promotion decides belief. |
-| **Fit index (Elastic)** | One structured row per purchase, aggregated into the pooled product-fit belief and read by the merchant app. Not the graph's recall tier: the deploy leaves `[recall]` unset, so the hub recalls from its own store's exact scan (T8.1c). | Beliefs, shopper identity, row detail, prose. The raw evidence documents are not written here either: their hybrid text-plus-vector search is a design direction, not the served shape (T2.3c). |
+| **Evidence store (the layer)** | Each shopper's raw evidence texts and ledger rows, held in the layer process and journalled under the standing directory: one file per shopper beside the corrections journal, holding the documents, rows, reasons, links, write operations, feedback markers and doc ids, the open questions, and each belief's citations and history in order. It is written after every live write that changes it and read back before the boot seed replays, so a restart keeps the ledger and its citations; a boot that restores it writes nothing. A service with no standing directory keeps them in memory only. | Beliefs, and the pooled counts. Search finds evidence; promotion decides belief. |
+| **Fit index (Elastic)** | One structured row per purchase, aggregated into the pooled product-fit belief and read by the merchant app. Not the graph's recall tier: the deploy leaves `[recall]` unset, so the hub recalls from its own store's exact scan (T8.1c). | Beliefs, shopper identity, row detail, prose. The raw evidence documents are not written here: the layer journals them per shopper, and their hybrid text-plus-vector search is a design direction, not the served shape (T2.3c). |
 | **App's own store** | Durable order state (proposed → approved → captured, or failed and refunded) with one open order per shopper and need; webhook event ids for idempotency; seeded marks; ledger reads. | Money movement. Orders and captures are issued from the reference agent, never from the layer. |
 
 The hosted deployment holds the pool's fit index; no index is
 self-hosted. The layer keeps each shopper's raw evidence in its own
-process instead of in Elastic: the documents are texts, no vectors, and
-nothing writes evidence documents to the deployment, so the hybrid
-text-plus-vector search measured there is a design direction, not the
-served shape (T2.3c). The hub does not use its recall tier: `start.sh`
+process store and journals it under the standing directory, one file per
+shopper beside the corrections journal: the documents behind the doc ids,
+the ledger rows with their ids, reasons, links, write operations,
+feedback markers and ordering, the open questions, and each belief's
+evidence citations and history in order. The journal is written after
+every live write that changes it and read back before the boot seed
+replays, so a restart keeps the ledger and recall citations; the seed
+names a row it also restores once, so no row, id or citation is
+duplicated. A boot that restores it writes nothing, so a second restart
+leaves the file as it was. Nothing
+writes evidence documents to the deployment, so the hybrid text-plus-vector
+search measured there is a design direction, not the served shape. The hub
+does not use its recall tier: `start.sh`
 writes no `[recall]` section, so the vector leg of recall is the store's
 exact scan and the deployment holds the layer's `fit-rows` pool rather
 than a graph index. The served reads never ask the graph for a vector
@@ -239,15 +248,16 @@ handshake; the failure mode without it is a dropped error source,
 recorded for the graph's maintainers. (`research/elastic.md`,
 `research/lambo.md` check 6)
 
-The ledger's evidence panel is read from the layer's own in-process
-rows, so a restart keeps none of what did not replay: the demo story's
-rows return when the layer replays its seed at boot, and a live event's
-row is gone until the event arrives again. Recall still answers, and
-never refuses, from the pool and the corrections the standing file
-restored, with the belief-backed steps returning as events replay.
-T2.3c decides whether raw evidence persists — an Elastic evidence index
-with its mapping and contract, or a disk-backed store — or whether that
-loss is recorded and shown plainly in the ledger.
+The ledger's evidence panel is read from the layer's own record, so a
+restart keeps both the live rows the journal restored and the demo
+story's rows the boot replay restores. Each row keeps the seeded mark it
+was written with, and each belief keeps the citations the journal
+restored, so the panel shows the same marks, counts and order instead of
+an empty until-the-event-returns state. No new field was needed: the
+frozen evidence row already carries its seeded mark, and the belief read
+already carries its evidence. explain_belief reads the same restored
+citations and history. A service with no standing directory keeps the
+in-memory shape: only the boot replay's rows and citations come back.
 
 ## Configuration
 
@@ -282,7 +292,7 @@ floor measurement. (`research/lambo.md`, `research/jev.md`)
 |---|---|---|
 | **Payment evidence source** | Outcomes with reason codes, line items, webhooks; the approved purchase | Nothing happens and nothing is evidenced |
 | **Evidence graph** | Short, keyed, evidence-gated beliefs; contradiction flags; provenance | The agent can store facts but cannot tell an earned belief from a claim |
-| **Fit index (Elastic)** | One structured row per purchase on the hosted deployment, behind the pooled belief and the merchant app. Not the graph's recall tier: the hub runs store-only (T8.1c). Not the raw evidence store either: the layer keeps that in process (T2.3c) | Prose ends up in the graph, and nothing learns across shoppers |
+| **Fit index (Elastic)** | One structured row per purchase on the hosted deployment, behind the pooled belief and the merchant app. Not the graph's recall tier: the hub runs store-only (T8.1c). Not the raw evidence store either: the layer journals that per shopper (T2.3c) | Prose ends up in the graph, and nothing learns across shoppers |
 | **Reason classifier** | Return text to category with calibrated confidence | Every refund is a guess about its cause |
 | **Catalog and agent host** | Candidate products; the reference agent as a service with approval, correction forms, feedback tied to traces, and evals | There is nothing to recommend and no independent proof the agent checked memory first |
 

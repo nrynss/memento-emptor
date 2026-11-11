@@ -53,15 +53,16 @@ func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper
 }
 
 // persistStanding saves one shopper's durable state after a mutation: the
-// pooling choice, the correction views, the journal entries a later
-// belief may declare against, and the links pairing each declared view
-// with its entry. Declared entries are saved as standings (with no
-// against): the restart forgot the beliefs they were declared against,
-// so they wait for the rewritten belief to declare them again. A declared
-// view with no journal entry — a correction recorded straight against its
-// belief — gains a synthesized cover entry from the live belief's subject,
-// or it could never re-link after a restart. Entries are deduplicated by
-// their words and subject, so a cover never doubles a journal entry. Each
+// evidence partition beside the corrections journal, then the pooling
+// choice, the correction views, the journal entries a later belief may
+// declare against, and the links pairing each declared view with its
+// entry. Declared entries are saved as standings (with no against): the
+// restart forgot the beliefs they were declared against, so they wait for
+// the rewritten belief to declare them again. A declared view with no
+// journal entry — a correction recorded straight against its belief —
+// gains a synthesized cover entry from the live belief's subject, or it
+// could never re-link after a restart. Entries are deduplicated by their
+// words and subject, so a cover never doubles a journal entry. Each
 // declared view is paired with the entry it was declared against — the
 // journal entry carrying the same words against the cited belief's
 // content, or the cover when the correction never journalled — so a
@@ -115,6 +116,13 @@ func (s *Service) persistStanding(ctx context.Context, st *shopperState, shopper
 		if link, ok := st.pairing[id]; ok {
 			links = append(links, link)
 		}
+	}
+	// The evidence partition is written first: the standing snapshot
+	// carries corrections, but the evidence journal is the record the
+	// ledger and recall read, and a failed save there is the one to
+	// report before the correction file moves.
+	if err := s.persistEvidence(ctx, st, shopper); err != nil {
+		return err
 	}
 	snap := standing.Snapshot{Pooling: st.pooling.Load(), Corrections: views, Journal: journal, Links: links}
 	if err := s.standing.Save(ctx, shopper, snap); err != nil {

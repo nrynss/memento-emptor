@@ -151,11 +151,73 @@ requires:   [T2.3, T8.5]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/evidence/, internal/api/server/, internal/memory/, cmd/memento/, product.md, docs/architecture.md, dev-diary/PHASE-2-layer.md
-status:     claimed:t23c-persist
+status:     in-review
 ```
 The served layer builds `internal/evidence.NewStore`, which holds documents in process (`docs []Document`), so a restart loses every shopper's raw evidence while the hub keeps beliefs and the pool keeps rows. `product.md` and `docs/architecture.md` describe Elastic as storing and searching raw evidence, but no code path writes evidence documents to Elastic: the live Elastic path is the `fit-rows` pool. Decide and record: persist raw evidence (an Elastic evidence index with its mapping and contract, or a disk-backed store) so a restart keeps the ledger and recall citations, or record the loss in the docs and make the ledger show it plainly instead of an empty panel.
 
 **Done when:** either evidence survives a layer restart with a test that proves it (ledger and recall citations still answer after the restart), or the loss is documented in `product.md` and `docs/architecture.md` with the decision recorded and the ledger's post-restart state stated; no product doc claims Elastic stores raw evidence unless the served layer does; the gate passes.
+
+note: worker branch task/t23c; the decision is to persist, through the
+existing per-shopper standing journal and not a new Elastic index.
+`internal/evidence/journal.go` writes `<shopper>.evidence.json` beside the
+corrections journal under `StandingDir`, holding the documents behind the
+doc ids, the ledger rows (ids, outcomes, items, reasons, transaction
+links, write ops, feedback markers, doc ids, belief links), the open
+questions, the mint counters, each belief's citations in order with its
+last change, the timelines the evidence wrote, and the last brand
+context. `Store.RestoreDocuments` installs the texts under their own ids
+and continues the sequence, so a restarted store never re-mints one. The
+journal is written at the mutation points the service already persists
+at — webhook ingest, `record_reason` including the ask-again path,
+`record_feedback`, `record_correction` and `set_pooling` — and read when
+a partition is created, before `LoadSeed` replays the seed. An empty
+`StandingDir` builds no journal, so the offline demo keeps its in-memory
+shape.
+
+Idempotence with the seed: `LoadSeed` reuses a restored row under the
+same id instead of inserting a second, reuses its doc id instead of
+re-indexing, keeps a restored question's ask count and a restored
+feedback marker, and merges the journal's citations and timelines only
+after the beliefs are rebuilt, so an id the seed also restores is named
+once and no id is re-minted. A restored seed row is still written to the
+graph: every pivot boot already rebuilds the graph's edges that way, and
+skipping it would drop the fake graph's promotion state. The ledger needs
+no new field: restored rows keep their own seeded mark, and the belief
+read's evidence carries the restored citations and count.
+
+Proven: `TestEvidenceJournalSurvivesRestart` drives a live refund and its
+classified reason over a temp `StandingDir`, then boots a fresh service
+over the same dir — ledger beliefs, ledger evidence, recall,
+`explain_belief` and pending questions compare equal, the live row is
+still cited last behind the belief, the store holds the six documents
+(five seeded plus the live one), and a second boot answers the same
+while the journal file stays byte-identical (a boot writes nothing).
+`TestEvidenceRestartWithoutJournalKeepsMemoryBehaviour` proves the old
+shape: with no directory the live row and its citation are gone after a
+restart. `internal/evidence`'s journal tests cover the round trip, the
+file beside the corrections journal, bad shopper ids, a corrupt or newer
+file, and document restore with sequence continuation. The package's
+vectors comment is corrected: the store keeps texts, not vectors.
+
+Handoff. (1) Only evidence is journalled. Belief records still come back
+from the boot seed alone, so a live-created belief's own record (value,
+subject, direction, citations) is not restored; its evidence rows are,
+but a belief the seed does not rebuild keeps them only in the ledger.
+`product.md` and `docs/architecture.md` say so. (2) The ingest service's
+event table is not journalled, so a pre-restart event redelivered after a
+restart is ingested again and the ledger holds both rows. A guard on the
+stored event id was written and reverted: the pivot restart tests and the
+deployed restart path rebuild the layer's belief records by re-ingesting
+events, and the guard stopped that replay. The fix belongs with a task
+that restores belief records independently; the orchestrator owns the
+choice of task. (3) The journal rewrites the whole partition at each
+mutation; that is fine at demo volume and a later task can make it
+append-only. (4) The store restores only documents a live row cites, so
+an orphan left by a failed graph write is dropped. (5) The existing
+restart tests' graph allowlist covered `doc-0001` to `doc-0008` for one
+fresh store; a restoring boot continues the sequence, so the test-only
+allowlist now covers 1 to 32. No wire shape, frozen fixture or `testdata/`
+file moved. `./tools/check.sh` passes in the worktree.
 
 ---
 

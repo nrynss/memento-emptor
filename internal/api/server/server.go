@@ -127,8 +127,10 @@ type Deps struct {
 	// writes off: without the catalog the layer cannot key a row.
 	Lines fitindex.Lines
 	// StandingDir persists per-shopper journals under one file per
-	// shopper. Empty keeps them in memory: a restart then loses the
-	// ability to declare a standing correction against a later belief.
+	// shopper: the corrections journal and, beside it, the evidence
+	// journal. Empty keeps both in memory: a restart then loses the raw
+	// evidence and the ability to declare a standing correction against
+	// a later belief.
 	StandingDir string
 	// Verifier checks raw webhook deliveries on the deployed route. Nil
 	// keeps the payment source's default gate.
@@ -245,6 +247,11 @@ type shopperState struct {
 	writer      *fitindex.Writer
 	pooling     atomic.Bool
 	lastBrand   domain.Subject
+	// restoredLinks and restoredTimelines hold the evidence journal's
+	// belief-facing state until the boot seed has rebuilt the beliefs it
+	// belongs to; applyRestoredEvidence merges them then.
+	restoredLinks     []evidence.BeliefEvidence
+	restoredTimelines []evidence.BeliefTimeline
 	// pairing links each declared correction view to the journal entry
 	// it was declared against, by the entry's words, subject, line and
 	// size. The belief id is not the link: a restart mints fresh ids, but
@@ -290,16 +297,17 @@ func (st *shopperState) streakFor(kind domain.BeliefKind, subjectID string) *dom
 // for the same reason: it carries every shopper's entries and the layer
 // does not scope it per shopper.
 type Service struct {
-	deps     Deps
-	graph    memory.Graph
-	mu       sync.Mutex
-	shoppers map[string]*shopperState
-	calls    []CallEntry
-	schemas  map[string]string
-	pool     *pool.Reader
-	keyer    *identity.Keyer
-	lines    fitindex.Lines
-	standing standing.Store
+	deps            Deps
+	graph           memory.Graph
+	mu              sync.Mutex
+	shoppers        map[string]*shopperState
+	calls           []CallEntry
+	schemas         map[string]string
+	pool            *pool.Reader
+	keyer           *identity.Keyer
+	lines           fitindex.Lines
+	standing        standing.Store
+	evidenceJournal *evidence.Journal
 }
 
 // NewService builds the service over its deps. It fails closed when a
@@ -356,6 +364,11 @@ func NewService(deps Deps) (*Service, error) {
 			return nil, fmt.Errorf("server: standing store: %w", err)
 		}
 		svc.standing = store
+		journal, err := evidence.NewJournal(deps.StandingDir)
+		if err != nil {
+			return nil, fmt.Errorf("server: evidence journal: %w", err)
+		}
+		svc.evidenceJournal = journal
 	} else {
 		svc.standing = standing.NewMemStore()
 	}
@@ -363,11 +376,14 @@ func NewService(deps Deps) (*Service, error) {
 }
 
 // state returns the shopper's partition, creating it on first use. The
-// journal is restored from the standing store when one exists: undeclared
-// standings are re-recorded so a later belief declares them, and the
-// pooling choice and correction views come back with them. A caller that
-// fails the restore fails the call: starting empty would silently lose
-// the ability to declare.
+// evidence journal is restored when one exists: the documents go back into
+// the store under their ids, and the rows, questions, mint counters,
+// citations and timelines come back into the partition before the boot
+// seed replays, so the seed names what is already held once. The standing
+// journal is restored after it: undeclared standings are re-recorded so a
+// later belief declares them, and the pooling choice and correction views
+// come back with them. A caller that fails a restore fails the call:
+// starting empty would silently lose evidence or the ability to declare.
 func (s *Service) state(ctx context.Context, shopper string) (*shopperState, error) {
 	st, ok := s.shoppers[shopper]
 	if !ok {
@@ -394,6 +410,9 @@ func (s *Service) state(ctx context.Context, shopper string) (*shopperState, err
 				return nil, fmt.Errorf("server: fit writer for %q: %w", shopper, err)
 			}
 			st.writer = writer
+		}
+		if err := s.restoreEvidence(ctx, st, shopper); err != nil {
+			return nil, err
 		}
 		if err := s.restoreStanding(ctx, st, shopper); err != nil {
 			return nil, err

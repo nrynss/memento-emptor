@@ -32,12 +32,12 @@ var Kinds = []Kind{KindMessage, KindReason, KindProduct}
 // line can carry divergent fit labels per product.
 type Line struct {
 	// BrandID identifies the brand. Fit beliefs are keyed per brand.
-	BrandID string
+	BrandID string `json:"brand_id"`
 	// Category is the product category slug, such as dress-shirts.
-	Category string
+	Category string `json:"category"`
 	// FitHandle is the category-specific fit label from the catalog's
 	// structured attributes, such as top-fit on shirts.
-	FitHandle string
+	FitHandle string `json:"fit_handle"`
 }
 
 // Complete reports whether the line names all three parts. An incomplete
@@ -61,17 +61,17 @@ func (l Line) Matches(candidate Candidate) bool {
 type Document struct {
 	// DocID is the store-assigned id. Empty until the document is indexed;
 	// graph stubs carry this id so prose stays out of the graph.
-	DocID string
+	DocID string `json:"doc_id"`
 	// Kind names which source text the document was built from.
-	Kind Kind
+	Kind Kind `json:"kind"`
 	// Text is the storable prose: a message, a reason joined to its
 	// outcome and item, or a product title with its description.
-	Text string
+	Text string `json:"text"`
 	// Line is the cut the text is about. Zero when the text names none,
 	// such as a bare shopper message.
-	Line Line
+	Line Line `json:"line"`
 	// Seeded marks generated history. Every seeded row carries the mark.
-	Seeded bool
+	Seeded bool `json:"seeded"`
 }
 
 // Validate reports whether the document is storable: it must carry text.

@@ -162,7 +162,7 @@ func main() {
 	jevDir := flag.String("jev-dir", "testdata/jev", "directory holding the classifier recordings")
 	seedFlag := flag.Bool("seed", false, "load the frozen demo history before serving")
 	shopper := flag.String("shopper", "shopper_01", "shopper the seed loads for")
-	standingDir := flag.String("standing-dir", "", "directory holding the per-shopper standing journals (empty keeps them in memory)")
+	standingDir := flag.String("standing-dir", "", "directory holding the per-shopper journals: corrections and evidence (empty keeps them in memory)")
 	fitIndex := flag.String("fit-index", envOr("MEMENTO_FIT_INDEX", liveFitIndex), "fit index the pool reader and fit writer use")
 	flag.Parse()
 
@@ -324,7 +324,7 @@ func runOffline(addr, schemaDir, jevDir string, seedFlag bool, shopper, standing
 		// The demo leaves the pool unwired: no index, no salt and no
 		// catalog adapter, so no pool fields and no fit rows. A deploy
 		// wires them; the standing directory alone decides whether the
-		// journals survive a restart.
+		// journals — corrections and evidence — survive a restart.
 		StandingDir: standingDir,
 	})
 	if err != nil {
