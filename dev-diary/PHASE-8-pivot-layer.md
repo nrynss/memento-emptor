@@ -424,7 +424,7 @@ requires:   [T8.5d]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/precedence/
-status:     not-started
+status:     claimed:t85e-tripwires
 ```
 The T8.5b driver pins the defect shapes (loss of force after restart; `pool absent with lookup` rejection). After T8.5d lands, flip both tripwires to pin the fix, live against the hub. Budget: under $0.20 of embedding spend.
 
