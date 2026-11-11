@@ -963,8 +963,8 @@ Gap (external, owner: Astropods; the user files it). In two turns of the same ho
 requires:   [T9.7]
 fixture-ok: yes
 size:       S · mid
-owns:       internal/api/server/, agent/runtime/, agent/second/
-status:     not-started
+owns:       internal/api/server/, agent/runtime/, agent/second/, product.md, demo/README.md, demo/evidence/run-6/
+status:     claimed:t924-dispute
 ```
 The P9 review found product.md's step 5 has no live agent path: `recallBeliefs` serves fit beliefs only, so the seller belief from the not-arrived dispute (`blf_1a5e09`) never reaches recall, and agent keys are refused on ledger reads by design. No live turn can mention the dispute the step requires; the demo record substitutes free reads. Decide: serve seller beliefs alongside fit ones for the asked brand (with their subject and step), or add an agent-admitted read for the shopper's seller evidence, or record the step as a read-only demonstration.
 
