@@ -18,7 +18,10 @@ const (
 	// ToolRecordReason records the shopper's answer to a pending
 	// question, classified on the layer's side.
 	ToolRecordReason ToolName = "record_reason"
-	// ToolRecordFeedback records fit feedback tied to a purchase.
+	// ToolRecordFeedback records explicit feedback tied to a purchase: a
+	// fit verdict counts toward fit, a seller verdict toward seller
+	// reliability, and unclear or changed-mind toward nothing. A repeat
+	// answers the recorded verdict and id; a different verdict is refused.
 	ToolRecordFeedback ToolName = "record_feedback"
 	// ToolExplainBelief explains a belief: every piece of evidence and
 	// its reason, every correction, the history in order.
@@ -95,7 +98,7 @@ func Tools() []ToolDescriptor {
 		},
 		{
 			Name:           ToolRecordFeedback,
-			Description:    "Record explicit fit feedback tied to a specific purchase, joined on the transaction's custom id. Counts toward fit as evidence for the worn size.",
+			Description:    "Record explicit feedback tied to a specific purchase, joined on the transaction's custom id. A fit verdict (fits_well, too_small, too_large) counts toward fit as evidence for the worn size; a seller verdict (damaged_or_defective, not_arrived) counts toward seller reliability, never toward fit; unclear and changed_mind count toward nothing. A repeat of the recorded verdict answers that verdict and feedback id and writes nothing; a different verdict for a purchase already holding one is refused.",
 			RequestSchema:  "record_feedback.request.schema.json",
 			ResponseSchema: "record_feedback.response.schema.json",
 		},

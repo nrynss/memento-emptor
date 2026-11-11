@@ -98,13 +98,13 @@ export function createTools(layer: Layer, catalog: Catalog) {
   const recordFeedbackTool = createTool({
     id: "record_feedback",
     description:
-      "Record explicit fit feedback tied to a specific purchase, joined on the transaction's custom id. Counts toward fit as evidence for the worn size.",
+      "Record explicit feedback tied to a specific purchase, joined on the transaction's custom id. A fit verdict (fits_well, too_small, too_large) counts toward fit as evidence for the worn size; a seller verdict (damaged_or_defective, not_arrived) counts toward seller reliability, never toward fit; unclear and changed_mind count toward nothing. A repeat of the recorded verdict answers that verdict and feedback id and writes nothing; a different verdict for a purchase already holding one is refused.",
     inputSchema: z.object({
       shopper_id: z.string(),
       custom_id: z.string(),
       sku: z.string(),
       size: z.string(),
-      feedback_text: z.string().describe("The shopper's verbatim words about the fit"),
+      feedback_text: z.string().describe("The shopper's verbatim words about the purchase"),
       trace_id: optionalTrace,
     }),
     outputSchema: z.object({}).passthrough(),

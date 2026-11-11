@@ -43,14 +43,14 @@ the recording that proves it.
    returned 1.00 and every vague one fell below the floor.
    (`research/jev.md`, `testdata/jev/`)
 6. **Structural write.** The write rule maps each signal to its graph
-   operation: a classified return or dispute and explicit fit feedback
-   are structural writes linked to the transaction; a general statement
-   is an assertion that never promotes; a kept item is an observation
-   with no edge. The shopper's correction is a structural write applied
-   at once with precedence while the belief stays, and it declares
-   `against` the belief rather than depending on it, so it adds no
-   evidence; with no belief to declare against, it is kept as a standing
-   record until a matching belief appears.
+   operation: a classified return or dispute and explicit feedback — fit
+   or seller — are structural writes linked to the transaction; a general
+   statement is an assertion that never promotes; a kept item is an
+   observation with no edge. The shopper's correction is a structural
+   write applied at once with precedence while the belief stays, and it
+   declares `against` the belief rather than depending on it, so it adds
+   no evidence; with no belief to declare against, it is kept as a
+   standing record until a matching belief appears.
    (`internal/domain`, `research/lambo.md` checks 3–4)
 7. **Promotion.** The graph admits candidates on evidence alone and
    promotes on the stage's verdict. Three fit returns citing the belief,

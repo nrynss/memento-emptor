@@ -804,7 +804,7 @@ Mutation-checked, each reverted: the pre-fix tree fails all five tests with the 
 requires:   [T8.5l]
 fixture-ok: yes
 size:       S · mid
-owns:       internal/api/server/, internal/api/contract/types.go, docs/interface.md, dev-diary/PHASE-8-pivot-layer.md
+owns:       internal/api/server/, internal/api/contract/, testdata/api/, docs/interface.md, docs/architecture.md, agent/runtime/agent/, agent/second/agent/, dev-diary/PHASE-8-pivot-layer.md
 status:     in-review
 ```
 A repeat feedback whose new words read as a different verdict (another fit verdict, `changed_mind`, or a seller verdict) is answered with the recorded one and `accepted: true`, silently dropping the new words; `record_feedback` cannot record `damaged_or_defective`/`not_arrived` at all. The same shape: an `unclear`/`changed_mind` first delivery marks no row, so every resend mints a fresh `fb_` id. Decide and implement: refuse the conflicting repeat honestly, record it as a second distinct feedback, or widen the tool — the response shape is frozen, so this is the orchestrator's call.
@@ -825,13 +825,13 @@ The tests are in `internal/api/server/feedback_test.go`: `TestSellerFeedbackWrit
 
 On the parent commit these fail at exactly the defects: a seller delivery errors with `memory: evidence counts toward a different belief kind: feedback counts toward "seller_reliability", offered to "fit"` after already deriving a fit belief; a conflicting repeat answers `accepted: true` with the recorded verdict and no error; and a no-count delivery answers an id it never records, so its first resend mints a second.
 
-No response shape and no schema changed, and no fixture changed: the frozen `record_feedback` pair is a fits-well repeat, still `accepted: true` on `fb_51c2d8`, so `TestInterfaceDocExamples` stays byte-exact. The `recordedFeedback` marker and the new sentinel are internal to `internal/api/server/`.
+Neither response shape changed and no example changed: the frozen `record_feedback` pair is a fits-well repeat, still `accepted: true` on `fb_51c2d8`, so `TestInterfaceDocExamples` stays byte-exact. The review follow-up updates the request schema's description, with no property, required entry or type changed. The `recordedFeedback` marker and the new sentinel are internal to `internal/api/server/`.
 
-**Follow-up (orchestrator).** The `owns` line now also covers `internal/api/contract/types.go` and `docs/interface.md`, and both state the three shapes: the response comment names the fit, seller and no-count verdicts and the repeat and conflict rules, and the interface document's `record_feedback` section says the same without moving any `validate=` block. T8.5l's finding now names T8.5o as its owner and says this task closes it. Comment and prose only: no type, field, tag, schema or fixture changed, and `TestInterfaceDocExamples` stays byte-exact. The ungated `tests/live/layer/main.go` feedback step is one first fits-well delivery on a purchase the seed does not hold, so it reads the same answer it always did.
+**Follow-up (orchestrator).** The `owns` line now also covers `internal/api/contract/types.go` and `docs/interface.md`, and both state the three shapes: the response comment names the fit, seller and no-count verdicts and the repeat and conflict rules, and the interface document's `record_feedback` section says the same without moving any `validate=` block. T8.5l's finding now names T8.5o as its owner and says this task closes it. The second task commit is comment and prose only: no type, field, tag or schema shape changed, and `TestInterfaceDocExamples` stays byte-exact. The review follow-up updates the tool descriptions and the request schema's description, with no property, required entry, type or example changed. The ungated `tests/live/layer/main.go` feedback step is one first fits-well delivery on a purchase the seed does not hold, so it reads the same answer it always did.
 
 Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree), ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
-**Review (fresh eyes).** APPROVE, with the fixes below committed on the review branch, all inside `owns` plus the comments and prose in `internal/api/contract/types.go` and `docs/interface.md`. Re-verified from the tree, not from these notes; no live call, $0. Scope holds: against the task tip (`2f865a7`) the two task commits touch only `internal/api/server/`, `internal/api/contract/types.go` (comments), `docs/interface.md` (prose; every `validate=` block byte-identical) and this file's T8.5o/T8.5l lines. No schema and no fixture changed.
+**Review (fresh eyes).** APPROVE, with the fixes below committed on the review branch, all inside the `owns` line the orchestrator widened for the follow-up. Re-verified from the tree, not from these notes; no live call, $0. Scope holds: against the task tip (`2f865a7`) the task touches only `internal/api/server/`, `internal/api/contract/` (comments and the one `record_feedback` description), `testdata/api/record_feedback.request.schema.json` (description only), `docs/interface.md` and `docs/architecture.md` (prose), `agent/runtime/agent/tools.ts` and `agent/second/agent/tools.ts` (the `record_feedback` description and `feedback_text` field description), and this file's T8.5o/T8.5l lines. No response shape, schema property, required entry, type or example changed.
 
 The four shapes hold. A seller verdict takes `ensureSellerBelief` and the evidence-row write `writeEvidenceRowAt` (the same path `writeEvidenceRow` delegates to), the same belief helper `record_reason`'s seller branch uses, with the domain category `damaged_or_defective` or `not_arrived`; the response's `counts_toward` and `belief_id` are the seller belief the stored row names, and the row's `beliefIDs` and the belief's `evIDs` agree. It creates or joins no fit belief and puts no fit row: `TestSellerFeedbackWritesSellerEvidence` reads `st.beliefs`, the purchase row and the fit index's rows and `puts`, not only the response. A same-verdict repeat answers the first id and writes no action. A different verdict returns `ErrFeedbackConflict` before `st.mint` and before any write; the conflict cases read the store — actions, derives where one existed, beliefs, links, reasons, marker, mint sequence and fit rows — after the refusal. A no-count first delivery mints one id and marks the capture row, so a resend answers that id with `accepted: false` and `counts_toward: null`, and a different-verdict resend after it is the same conflict. The sentinel maps to 400, now pinned by `TestFeedbackConflictIsRefusedAsAnInvalidRequest`.
 
@@ -842,9 +842,35 @@ Fixes committed on the review branch:
 - The seller write dated the belief's last change at the purchase's capture time, before the belief's own creation in the test clock, while the fit path uses the feedback time. `writeEvidenceRow` now delegates to `writeEvidenceRowAt`, which takes the event time; the seller branch passes the delivery's `now`, and the reason and ingest paths keep the row's own time. `TestSellerFeedbackWritesSellerEvidence` pins it; reverting the call fails it.
 - Comments and prose that still said feedback is fit-only, or that a changed-mind answer asks again: `FeedbackVerdict`, `RecordFeedbackRequest`, `TimelineFeedback`, `TimelineEvidence` and the response comment in `internal/api/contract/types.go`; `evidenceRecord.Counts`, `recordedFeedback` and `ErrFeedbackMismatch` in `server.go`; the `Seed.FeedbackIDs` comment, which still said a seed naming no id answers with none — the T8.5l behaviour this task closes; and `docs/interface.md`'s opening, no-count sentence, write table and ledger note.
 
-Finding, outside `owns`, folded into T8.5o's landing: the machine description agents read is still fit-only. `internal/api/contract/tools.go`'s `ToolRecordFeedback` doc and its `Tools()` description, the two copied descriptions and their `feedback_text` field descriptions in `agent/runtime/agent/tools.ts` and `agent/second/agent/tools.ts`, and `docs/architecture.md`'s structural-write sentence say explicit fit feedback counts toward fit and do not mention seller verdicts. The layer and the human interface document are updated; an agent reading only `tools/list` is still told the tool records fit feedback, so it may never send damage or non-arrival. Changing the MCP description is a contract-surface edit outside `owns`, so **owner: T8.5o's landing (orchestrator)**, which can widen `owns` to `internal/api/contract/tools.go` and the two agent copies in its landing commit; no new task id is needed. `agent/loops/loops.go`'s `Feedback` comment has the same narrow wording and is outside `owns`. The frozen `record_feedback.request.schema.json` description still says fit feedback; it is a fixture, and this task's no-fixture rule leaves it, so the machine description and the agent copies are the fixable surfaces.
+**Orchestrator call on the review finding.** Folded into this task rather than deferred. The `owns` line now covers `internal/api/contract/`, `testdata/api/`, `docs/architecture.md` and both agents' `agent/` directories. `ToolRecordFeedback`'s doc comment and `Tools()` description, the two copied descriptions and their `feedback_text` field descriptions, the request schema's description and `docs/architecture.md`'s structural-write sentence now state the fit, seller and no-count verdicts and the repeat/conflict rule. Every other tool description is byte-identical; the schema keeps every property, required entry and type, and `TestInterfaceDocExamples` stays byte-exact. `agent/loops/loops.go`'s `Feedback` comment still says fit feedback and remains outside `owns`; it is not a machine description an agent reads from `tools/list`.
 
-Gate green in the review worktree after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`. Spend $0.00: no live call, no key.
+The deployed agents still carry the old descriptions until they are redeployed; this branch made no redeploy. The exact commands, each from the repository root after the layer lands:
+
+Reference agent (`memento-agent`):
+
+```sh
+cd agent/runtime
+bun agent/offline-check.ts
+ast spec validate
+ast push -V private -y
+ast agent redeploy --id <deployment-id> --latest \
+  --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY \
+  --var CHANNEL3_API_KEY=@CHANNEL3_API_KEY --wait
+```
+
+Second agent (`memento-second`):
+
+```sh
+cd agent/second
+bun agent/check.ts
+ast spec validate
+ast push -V private -y
+ast agent redeploy --id <deployment-id> --latest --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY --wait
+```
+
+The deployment ids stay out of the diary; `<deployment-id>` is the operator's own id. Both packages' offline checks and `./node_modules/.bin/tsc --noEmit -p tsconfig.json` pass on this branch.
+
+Gate green in the review worktree after `npm ci` in `web/` and `merchant/` and `bun install --frozen-lockfile` in both agent packages; the gate ran both agents' offline checks and both typechecks, ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 
