@@ -1109,6 +1109,12 @@ belief:
 }
 ```
 
+A repeat delivery for a purchase whose feedback is already on record — a
+retry, a duplicated turn, or the history's own copy — answers with the
+feedback on record, the id it was recorded under and the belief it counts
+toward, and changes nothing: no evidence is added again, no id is minted
+and the belief's status stays where it is.
+
 ## explain_belief
 
 Call it when challenged — by the shopper ("why do you think that?") or
