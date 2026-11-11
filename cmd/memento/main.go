@@ -37,12 +37,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -91,6 +93,54 @@ const receiptWait = 5 * time.Minute
 
 // receiptPoll is the per-call wait carried on one lambo_stats poll.
 const receiptPoll = 60000
+
+// attachAttempts bounds how many times one call retries an attach the
+// hub's bound refused, so a full hub costs a handful of requests and one
+// stated wait each, never a retry storm.
+const attachAttempts = 3
+
+// attachRetryDefault is the wait used when a refusal carries no usable
+// Retry-After: one second.
+const attachRetryDefault = time.Second
+
+// errAttachBound reports the hub refusing a session attach because every
+// max_attached place is taken. The client retries it after the delay the
+// hub stated; when the refusal persists, the last attempt returns an
+// error matching errors.Is(err, errAttachBound).
+var errAttachBound = errors.New("memento: hub attach bound refused the session")
+
+// attachBoundError carries one attach refusal: the call that met it, the
+// status, the delay the hub asked for and an excerpt of its body.
+type attachBoundError struct {
+	tool       string
+	status     int
+	retryAfter time.Duration
+	excerpt    string
+}
+
+// Error renders the refusal with the wait the client honours.
+func (e *attachBoundError) Error() string {
+	return fmt.Sprintf("memento: hub %s: attach bound: HTTP %d, retry after %s: %s",
+		e.tool, e.status, e.retryAfter, e.excerpt)
+}
+
+// Unwrap reports the sentinel every attach refusal matches.
+func (e *attachBoundError) Unwrap() error { return errAttachBound }
+
+// attachRetry reads the Retry-After header as whole seconds, falling back
+// to attachRetryDefault when the header is absent, names a date, or is not
+// a count of seconds.
+func attachRetry(header http.Header) time.Duration {
+	raw := strings.TrimSpace(header.Get("Retry-After"))
+	if raw == "" {
+		return attachRetryDefault
+	}
+	seconds, err := strconv.Atoi(raw)
+	if err != nil || seconds < 0 {
+		return attachRetryDefault
+	}
+	return time.Duration(seconds) * time.Second
+}
 
 func main() {
 	if len(os.Args) > 1 && os.Args[1] == "key" {
@@ -696,6 +746,10 @@ type hubGraph struct {
 	httpClient *http.Client
 	mcpSession string
 	nextID     int
+	// wait spends one attach-bound delay and stops early when the context
+	// ends. It is a field so a test can record the delay the client
+	// honours without spending it.
+	wait func(context.Context, time.Duration) error
 }
 
 // newHubGraph builds the graph client for one hub session: the hub's
@@ -707,6 +761,23 @@ func newHubGraph(baseURL, token, session string) *hubGraph {
 		token:      token,
 		session:    session,
 		httpClient: &http.Client{Timeout: 120 * time.Second},
+		wait:       waitContext,
+	}
+}
+
+// waitContext sleeps for one attach-bound delay and returns the context's
+// error when the context ends first.
+func waitContext(ctx context.Context, delay time.Duration) error {
+	if delay <= 0 {
+		return ctx.Err()
+	}
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-timer.C:
+		return nil
 	}
 }
 
@@ -783,12 +854,12 @@ func (g *hubGraph) Inspect(ctx context.Context, content string) (fakes.BeliefRep
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "no concept matching") {
-			return fakes.BeliefReport{Content: content}, nil
+			return fakes.BeliefReport{Content: content, State: domain.GraphNone}, nil
 		}
 		return fakes.BeliefReport{}, err
 	}
 	if strings.Contains(hubTexts(result), "no concept matching") {
-		return fakes.BeliefReport{Content: content}, nil
+		return fakes.BeliefReport{Content: content, State: domain.GraphNone}, nil
 	}
 	report := fakes.BeliefReport{Content: content}
 	switch strings.ToLower(fmt.Sprint(navigate(result, "structuredContent", "admission", "status"))) {
@@ -892,24 +963,63 @@ func (g *hubGraph) waitApplied(ctx context.Context, receipt, what string) error 
 	return fmt.Errorf("memento: receipt for %s did not settle", what)
 }
 
-// call makes one hub tools/call, opening the MCP connection on first use
-// and re-opening it once after a failure. The hub detaches idle sessions,
-// so a stale client session fails once and the retry carries on.
+// call makes one hub tools/call, opening the MCP connection on first use,
+// re-opening it once after a stale session fails, and retrying an attach
+// the hub's bound refused after the delay the hub states. The hub detaches
+// idle sessions, so a stale client session fails once and the retry
+// carries on. A full hub answers 503 with Retry-After: only the open can
+// relieve it, so the wait is followed by another attempt. attachAttempts
+// bounds those waits, and a refusal that persists returns an error
+// matching errAttachBound.
 func (g *hubGraph) call(ctx context.Context, name string, args map[string]any) (map[string]any, error) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
+	for attempt := 1; ; attempt++ {
+		result, err := g.callOnceLocked(ctx, name, args)
+		if err == nil {
+			return result, nil
+		}
+		if !errors.Is(err, errAttachBound) || attempt >= attachAttempts {
+			return nil, err
+		}
+		if err := g.waitBound(ctx, err); err != nil {
+			return nil, err
+		}
+	}
+}
+
+// callOnceLocked runs one call over the held client session, opening it
+// when none is held and re-opening it once when a request fails for a
+// reason other than the attach bound.
+func (g *hubGraph) callOnceLocked(ctx context.Context, name string, args map[string]any) (map[string]any, error) {
 	if err := g.ensureInitLocked(ctx); err != nil {
 		return nil, err
 	}
 	result, err := g.postLocked(ctx, name, args)
-	if err != nil {
-		g.mcpSession = ""
-		if err := g.ensureInitLocked(ctx); err != nil {
-			return nil, err
-		}
-		return g.postLocked(ctx, name, args)
+	if err == nil {
+		return result, nil
 	}
-	return result, nil
+	g.mcpSession = ""
+	if errors.Is(err, errAttachBound) {
+		return nil, err
+	}
+	if err := g.ensureInitLocked(ctx); err != nil {
+		return nil, err
+	}
+	return g.postLocked(ctx, name, args)
+}
+
+// waitBound spends the delay one attach refusal stated.
+func (g *hubGraph) waitBound(ctx context.Context, err error) error {
+	delay := attachRetryDefault
+	var bound *attachBoundError
+	if errors.As(err, &bound) {
+		delay = bound.retryAfter
+	}
+	if g.wait == nil {
+		return waitContext(ctx, delay)
+	}
+	return g.wait(ctx, delay)
 }
 
 // ensureInitLocked runs the MCP open when no client session is held.
@@ -933,6 +1043,14 @@ func (g *hubGraph) ensureInitLocked(ctx context.Context) error {
 	})
 	if err != nil {
 		return fmt.Errorf("memento: hub initialize: %w", err)
+	}
+	if status == http.StatusServiceUnavailable {
+		return &attachBoundError{
+			tool:       "initialize",
+			status:     status,
+			retryAfter: attachRetry(headers),
+			excerpt:    hubExcerpt(raw),
+		}
 	}
 	if status != http.StatusOK {
 		return fmt.Errorf("memento: hub initialize: HTTP %d", status)
@@ -979,6 +1097,14 @@ func (g *hubGraph) postLocked(ctx context.Context, name string, args map[string]
 	})
 	if err != nil {
 		return nil, err
+	}
+	if status == http.StatusServiceUnavailable {
+		return nil, &attachBoundError{
+			tool:       name,
+			status:     status,
+			retryAfter: attachRetry(headers),
+			excerpt:    hubExcerpt(raw),
+		}
 	}
 	if status != http.StatusOK {
 		return nil, fmt.Errorf("memento: hub %s: HTTP %d: %s", name, status, hubExcerpt(raw))
