@@ -904,6 +904,67 @@ func TestRequiredFieldsSerialize(t *testing.T) {
 	}
 }
 
+// requiredKeys reads one schema entry's "required" list: the file's own
+// root for a per-call schema, or a $defs entry in the shared schema.
+func requiredKeys(t *testing.T, dir, file, def string) []string {
+	t.Helper()
+	schema, ok := loadJSON(t, filepath.Join(dir, file)).(map[string]any)
+	if !ok {
+		t.Fatalf("%s: schema is not an object", file)
+	}
+	if def != "" {
+		defs, ok := schema["$defs"].(map[string]any)
+		if !ok {
+			t.Fatalf("%s: no $defs", file)
+		}
+		schema, ok = defs[def].(map[string]any)
+		if !ok {
+			t.Fatalf("%s: no $defs.%s", file, def)
+		}
+	}
+	raw, ok := schema["required"].([]any)
+	if !ok {
+		t.Fatalf("%s %s: no required list", file, def)
+	}
+	keys := make([]string, 0, len(raw))
+	for _, entry := range raw {
+		if name, ok := entry.(string); ok {
+			keys = append(keys, name)
+		}
+	}
+	return keys
+}
+
+// TestSchemasRequirePivotFields pins the schema half of the tightening.
+// TestRequiredFieldsSerialize pins the Go side: the type always emits the
+// key, and this test makes the schema demand it. Without it, dropping one
+// of these keys from a required list would pass every example, because
+// every example carries the key.
+func TestSchemasRequirePivotFields(t *testing.T) {
+	dir := apiDir(t)
+	cases := []struct {
+		file string
+		def  string
+		keys []string
+	}{
+		{"recall_for_purchase.response.schema.json", "", []string{"pool", "pool_lookup"}},
+		{"common.schema.json", "Belief", []string{"precedence"}},
+		{"common.schema.json", "Pool", []string{"precedence"}},
+		{"product_fit.response.schema.json", "", []string{"pool"}},
+	}
+	for _, tc := range cases {
+		have := map[string]bool{}
+		for _, key := range requiredKeys(t, dir, tc.file, tc.def) {
+			have[key] = true
+		}
+		for _, key := range tc.keys {
+			if !have[key] {
+				t.Errorf("%s %s: %q is not required", tc.file, tc.def, key)
+			}
+		}
+	}
+}
+
 // TestProductFitCarriesNoShopperRows pins the pool's privacy: no shopper
 // identity, no purchase row and no free text.
 func TestProductFitCarriesNoShopperRows(t *testing.T) {

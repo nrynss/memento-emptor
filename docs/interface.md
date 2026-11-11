@@ -254,8 +254,10 @@ Building belief can beat the pool, and a pool at Building can still be
 the best thing the layer knows.
 
 `pool_lookup` says whether the pool was consulted: `consulted` when the
-index answered, `unavailable` when it could not be reached. Recall
-carries on without a pool and never pretends an empty one.
+index answered, with `pool` null when it had nothing to say; `unavailable`
+when nothing could be consulted — no index is wired, the request named no
+full line and size, or the index could not be reached. Recall carries on
+without a pool and never pretends an empty one.
 
 ### Where the general statement comes from
 

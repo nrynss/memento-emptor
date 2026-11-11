@@ -191,3 +191,103 @@ Limits: the re-run scope is read from the types and the committed records, not o
 - [x] Every stored key is built in one place, with the salt from the keyring (T7.2).
 - [x] Consent for pooling is decided: opt-out (T7.3).
 - [x] The contract requires the pool and per-item precedence once the served layer supports them (T7.4).
+
+---
+
+## E2E review of the phase, fresh eyes: FINDINGS
+
+One Medium and five Low, all owned; the three this branch can make are fixed on it.
+Re-derived from the committed tree on a branch cut at `09866ef`, with no live call and
+$0.00 spend.
+
+**What holds, with the evidence.** Eleven tools with a descriptor and both schemas each, and
+one request and one response example behind every descriptor (`TestToolsFrozen`,
+`TestEveryToolHasExamples`). All 33 examples validate against their schemas, decode into their
+Go types with unknown fields rejected, and marshal back to a schema-valid shape; a scratch test
+(since deleted) also decoded and re-marshaled every one and found it deep-equal to its file, so
+no fixture is only schema-valid. Every object in every schema closes with
+`additionalProperties: false`, checked by a walk over all the schema files. `pool`, `pool_lookup`
+and per-belief `precedence` are required, with the null convention stated where each is defined:
+`product_fit` and the ledger reads carry `precedence: null`, recall sets it, and a null pool rides
+with `consulted` (the wired index answered Claimed) or `unavailable` (no index wired, no full line
+named, or the index refused) — the served `lookupPool`, `poolViewOf` and `assembleRecall` produce
+exactly those pairs, and the base recall example is the unwired shape while `example-none` is the
+consulted-empty one. The web ledger and merchant decoders both require the key and accept null,
+and the web recall decoder requires `pool` and the `pool_lookup` enum, so the frontends cannot
+drift quietly. The docs' 33 blocks are byte-pinned, the count is pinned, and a one-character
+change fails `TestInterfaceDocExamples`. The pool table test covers 2/3 and 7/8 shoppers, 59/60%,
+exactly and under twice the opposite, a recent window that earns the opposite, one that fails,
+one that holds, and a quiet one; the thresholds are one definition in `internal/domain` and the
+served reader uses `PoolRecentWindow`. The fit-row version is state rank × 10¹² plus event Unix
+seconds, with the rank-4 limit documented in `docs/architecture.md`; the usual-size rule's tie
+falls through to the statement. T7.5's refresh is eight added lines across the two replay
+fixtures and nothing else, exactly the required pivot fields. T7.6's tags left `testdata/`
+untouched in both commits, and no `fixSubjectKeys`, `renameKey` or `normalizeWire` survives under
+`internal/`. T7.7's decision reads as recorded: no run file moved (`git log` on `bench/runs/`
+shows only the driver), the four files carrying a subject re-derive from the committed records —
+the t58 pair inside `prompt` and `arm_memory_response`, the t59 pair inside the two structured
+arm-3 recall blocks — and `bench/freeze_check.sh` answers 25 rows. The Claimed and
+Building pooled examples are the seeded population's own rows at their lines, re-derived here
+from `testdata/seed/population/population.json` (2 rows 1/1 and 8 rows 6/1/1, recent 2 and 5),
+and the Earned example's status and direction match that population (22 settled, 12 too small,
+3 too large, 4 fits well) while its counts are labelled illustrative. `./tools/check.sh` is green
+at the tip and again after the fixes below, offline, with `npm ci` run in both frontends. Mutations,
+each reverted: dropping `pool` from the recall schema's required list passed every test before
+this review's fix and fails `TestSchemasRequirePivotFields` after it (the same for `Pool`'s
+`precedence`); `PoolBuildingShoppers` 3 → 4 fails `TestDecidePool` and `TestPoolThresholds`;
+one added space in `set_pooling.response.example`'s block fails the byte pin; Claimed → Building
+in `product_fit.response.example-claimed.json` fails `TestPoolFixturesMatchTheRule`.
+
+**Findings.**
+
+1. **Medium — a pool with no direction still decides recall, and tells the shopper to size down.**
+   `lookupPool` serves any non-Claimed pool and `tools.go` sets `presence.Pool` from the view
+   alone, so a Building pool with no leading direction wins precedence step 3 and
+   `guidanceForPool` reads "no direction" as "runs large". Proved with a scratch test (deleted):
+   four distinct shoppers, all `fits_well`, no returns, a shopper with no history — recall returns
+   the pool deciding, `direction: null`, and the guidance "Size down to S for brand-x-001: 0 of the
+   4 fit-classified settled purchases at size M came back too large, against 0 too small." A level
+   Building pool (2 too small, 2 too large) takes the same path. `product.md`'s step 3 says the pool
+   adjusts "only when the pool says the product runs off-size", and the pool's own doc says
+   `direction` is null when no direction leads, so the served behaviour is the defect. The fix is a
+   guard where presence is set, not a contract change; it needs a served-layer task, and no open
+   one covers it. **Owner: a new T8.5-series task (proposed T8.5o), `owns: internal/api/server/`**,
+   with the two counts above as its regression cases.
+2. **Low — the schemas' required lists were unpinned (fixed here).** `TestRequiredFieldsSerialize`
+   pins the Go side, and `TestExamplesMarshalBackToSchema` only fails a *missing* key, so deleting
+   `pool` or `precedence` from a required list passed the whole suite — proved, then fixed by
+   `TestSchemasRequirePivotFields`, which reads the required lists of the four placements T7.4
+   tightened. Test only: no type, schema or fixture changed.
+3. **Low — `docs/architecture.md` documented the pre-T7.2 shopper key (fixed here).** It stated
+   `sha256(<line salt> + "#" + shopper id)`, while `internal/identity` builds an HMAC-SHA256 keyed
+   with the identity salt over a version tag and length-prefixed line fields and payer id. T7.2's own
+   note records the refinement, and the sentence survived a later review of that file. An
+   implementer following the doc would compute different hashes than the layer stores. The bullet
+   now states the real construction, keeps the research's sketch as the thing it refines, and names
+   `internal/identity`.
+4. **Low — the docs and the contract comments defined `unavailable` too narrowly (fixed here).**
+   They said "the index could not be reached", while the served layer also answers `unavailable`
+   when no index is wired or the request named no full line and size; the document's own "unwired
+   shape" section already said "because no index was consulted", so the two passages disagreed.
+   Both now name all three reasons, and the `PoolUnavailable` and `PoolLookup` comments in
+   `internal/api/contract/types.go` say the same. Comments and prose only: no type, schema or
+   behaviour changed.
+5. **Low — `README.md`'s status line and the phase's exit boxes lag the tree (owner: orchestrator).**
+   The diary's "Current status" still says "T7.2 waits on the identity salt" and that T10.1 is in
+   final review, both false; and this phase's first exit box is unticked while `README.md` records
+   P7 as 7 / 7 Done and the tree proves the box (the 33 pinned examples and the three table-tested
+   rules recorded above). `dev-diary/README.md` is the orchestrator's alone, so neither is touched
+   here. **Owner: orchestrator, landing edit.**
+6. **Low — the T7.6 note above still says two round-1 files (owner: orchestrator).** T7.7 and its
+   review re-derived four, and the diary's T7.6 entry already says four, so this document
+   contradicts itself at the T7.6 bullet; T7.7's review delegated the fix to the orchestrator and
+   it was not made. **Owner: orchestrator, landing edit** — the same one-clause correction the T7.7
+   review named.
+
+**Limits.** No live service was called and no suite was re-run against a deployment, so served-layer
+behaviour is read from its code and its offline tests, plus the one scratch proof in finding 1. The
+replay fixtures were not regenerated; T7.5's shape was checked by its diff. The merchant app mirrors
+the thresholds in TypeScript, which no test ties to `internal/domain`; the frozen Earned example is
+re-decided by that mirror, but a threshold change near the boundaries would not fail the mirror's
+own tests, so the "one definition" claim holds for the layer and is a documented mirror in the app.
+

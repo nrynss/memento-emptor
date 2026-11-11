@@ -390,9 +390,11 @@ type RecallResponse struct {
 	// always present: an absent pool is null, never a missing key.
 	Pool *PoolView `json:"pool"`
 	// PoolLookup says whether recall consulted the pool: consulted when the
-	// index answered, unavailable when it could not be reached. It is
-	// always present. Recall carries on without a pool and never pretends
-	// an empty one.
+	// index answered, with Pool null when it had nothing to say;
+	// unavailable when nothing could be consulted — no index is wired, the
+	// request named no full line and size, or the index could not be
+	// reached. It is always present. Recall carries on without a pool and
+	// never pretends an empty one.
 	PoolLookup PoolLookup `json:"pool_lookup"`
 	// OverridingCorrection is the correction the agent must honour
 	// first, or null when none applies.
@@ -632,8 +634,10 @@ const (
 	// present when the pool has something to say and absent when it does
 	// not.
 	PoolConsulted PoolLookup = "consulted"
-	// PoolUnavailable means the pool index could not be reached. Recall
-	// carries on without it and never pretends an empty pool.
+	// PoolUnavailable means nothing could be consulted: no pool index is
+	// wired, the request named no full line and size, or the index could
+	// not be reached. Recall carries on without it and never pretends an
+	// empty pool.
 	PoolUnavailable PoolLookup = "unavailable"
 )
 

@@ -118,10 +118,14 @@ the fit index (Elastic), not a belief in the graph. One purchase is one row.
   window. A purchase still inside its window, and a refund with no reason
   yet, are stored but count toward nothing.
   (`research/elastic-fit.md` check 3)
-- **The shopper key is salted per line.** `sha256(<line salt> + "#" +
-  shopper id)` counts distinct shoppers within one line and cannot link
-  one shopper's rows across lines. The salt is a key; it is never
-  written to a file. (`research/elastic-fit.md` checks 1 and 4)
+- **The shopper key is salted per line.** The key is an HMAC-SHA256 keyed
+  with the identity salt over a version tag and the length-prefixed
+  brand, category, fit handle and payer id, in that order. It counts
+  distinct shoppers within one line and cannot link one shopper's rows
+  across lines. This refines the research's sketch
+  (`sha256(<line salt> + "#" + shopper id)`) with the same meaning; the
+  builder is `internal/identity`. The salt is a key; it is never written
+  to a file. (`research/elastic-fit.md` checks 1 and 4)
 - **Seeded and live rows share one index.** Every seeded row carries the
   mark, and every aggregation splits on it, so the seeded population is
   shown as seeded. (`research/elastic-fit.md` check 5)
