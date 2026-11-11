@@ -81,6 +81,8 @@ Each case states, before any run, why it separates the arms, and is checked for 
 
 **Done when:** the shoppers, answers and population are generated and tested for fairness. The freeze manifest and check are committed, and the gate runs the check. No arm 3 or 4 run exists before this commit.
 
+The P2 review found `bench/runs/cmd/t{55,58,59}` mirror the direction rule but not the rival-birth threshold: every opposite-direction row lands unattached with no streak, while the driver claims it lands "below the rival-birth threshold". No frozen history reaches three consecutive opposites, so no published run is wrong, but a frozen-set extension would diverge from the layer. Mirror `RivalBirthThreshold` in the round-2 arms, or state the limitation in the run's notes.
+
 ---
 
 ### T10.4: All four arms ★

@@ -570,6 +570,20 @@ The precedence order's fourth rung is a general statement, and the served layer 
 
 ---
 
+### T8.5i: Recall never withholds thin evidence
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/, tests/live/layer/
+status:     not-started
+```
+The P2 review found `internal/api/server/recall.go` serves Venerable/Candidate fit beliefs and evidenceless statements but drops a fit belief with one return (`GraphNone`, one evidence), with a comment saying "recall never withholds, but one return is a question, not an answer" — which is withholding. `product.md` says it never refuses, thin evidence comes back labelled thin, status is a label never a gate, and own evidence counts at any status. The T8.5 handoff recorded this and assigned it to T7.4, which could not reach this package and never mentioned it, so the finding is now owned here. Round 2's arm 4 relies on thin evidence being served.
+
+**Done when:** a one-return fit belief is served, labelled with its status and precedence, with the pool beside it exactly as thin evidence is served elsewhere; the live layer tripwire that pinned the withholding is flipped; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).

@@ -161,13 +161,13 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 12 / 12 | Done |
 | P1 | 5 / 6 | In progress (T1.1b) |
-| P2 | 12 / 13 | In progress (T2.3c) |
+| P2 | 12 / 15 | In progress (T2.2c, T2.3c, T2.5b) |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 6 | In progress (T7.6) |
-| P8 | 18 / 19 | In progress (T8.5h) |
+| P8 | 18 / 20 | In progress (T8.5h, T8.5i) |
 | P9 | 14 / 17 | In progress (T9.3i, T9.7, T9.9) |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P2 E2E review: FINDINGS, fixes landed
+
+**What exists.** The P2 review verified all twelve landed tasks from code, recordings and tests, re-derived the T2.2b/T2.3b/T2.4b numbers from committed evidence, and landed seven fixes on `4aa80d3`: the reasons driver's per-call spend guard now runs on every call and its model line is no longer tautological; the deployed-route replay assertion (same delivery twice → one question); the dispute test fails when the frozen code table grows; the memory README and the layer driver/README/phase notes no longer overstate what "leg 1 proves"; and T2.3's note records the built store shape. All six P2 exit boxes now tick, with the third reworded (raw evidence lives outside the graph, in the layer's own store — not Elastic). Mutation checks covered the write mapping (rule 2), both idempotency guards, the direction table, the rival threshold and the classifier's ask-again path.
+
+**What surprised.** The Medium finding: recall withholds a one-return Claimed fit belief, though product.md says thin evidence comes back labelled thin and status is never a gate. The T8.5 handoff had assigned it to T7.4, which could not reach the package and never recorded it, so it had become ownerless; it is now **T8.5i**, and round 2's arm 4 depends on the fix.
+
+**Findings with owners.** (Medium) recall withholds thin evidence → **T8.5i**. (Low) the frozen story's third answer has no classifier recording → **T2.2c**. (Low) two T2.5 items have no owner (redundant Keel import; seller-subject derivation) → **T2.5b**. (Low) the comparison arms mirror the direction rule but not the rival-birth threshold → recorded in T10.3's brief. (Low) the b-tasks' transcripts live in worker reports, not the handoff log → the phase intro now says so and the reviewed numbers are re-derived from committed evidence.
 
 ### T9.8: Agents read the served layer (done)
 

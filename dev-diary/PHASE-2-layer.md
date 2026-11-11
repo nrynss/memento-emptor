@@ -2,6 +2,8 @@
 
 The product. Evidence arrives from PayPal, reasons are classified, beliefs are earned in Lambo, and any agent can ask what applies. It depends only on PayPal, Lambo, Elastic and Jev.
 
+The live (`b`) tasks below record their transcripts in the worker reports rather than pasting them into the handoff log; the reviewed T2.2b/T2.3b/T2.4b numbers are re-derived from committed recordings or committed transcripts, and every driver is committed with its own assertions. Their Done-when lines were met that way.
+
 Read first: [`../product.md`](../product.md), `../docs/architecture.md`, `../docs/interface.md`.
 
 ---
@@ -412,11 +414,39 @@ contents across shoppers). Full excerpts in the worker's report.
 
 ---
 
+### T2.2c: Record the frozen story's third classifier answer
+```yaml
+requires:   [T2.2]
+fixture-ok: yes
+size:       XS · mid
+owns:       testdata/jev/, internal/fakes/
+status:     not-started
+```
+The frozen story's third answer ("sleeves too short in M") has no Jev recording in `testdata/jev/`, so `TestStoryEndToEnd` reuses the "too tight in the shoulders" reply and `fakes.Run` hard-codes its category; the frozen phrase is validated only by T2.6's live leg. Record one classification for that phrase, add it to the fixture set, and let the story replay its own answer.
+
+**Done when:** the third answer has its own recording with the same shape as the other eleven; the replay uses it and the pinned phrase count moves with it; the gate passes.
+
+---
+
+### T2.5b: Two ownerless T2.5 items
+```yaml
+requires:   [T2.5]
+fixture-ok: yes
+size:       XS · mid
+owns:       internal/version/, internal/domain/, docs/architecture.md
+status:     not-started
+```
+`internal/version/pin.go`'s blank Keel import is redundant (the server and auth import `keel/wire` for real) and its comment ("until the first package imports Keel for real") is now false. Seller subjects are `seller-for-{brand}` because dispute records carry no seller id; decide the seller-id source or record the derivation as the decision.
+
+**Done when:** the redundant import and comment are gone or justified; the seller-subject derivation is either replaced by a real seller id or recorded as the deliberate shape with its reason; the gate passes.
+
+---
+
 ## Exit Criteria
 
-- [ ] PayPal events become evidence, idempotently (T2.1, T2.1b).
-- [ ] Reasons are classified, and unclear ones ask again (T2.2, T2.2b).
-- [ ] Raw evidence lives in Elastic, not in Lambo (T2.3, T2.3b).
-- [ ] Beliefs are earned, contradicted and kept as product.md says (T2.4, T2.4b).
-- [ ] The interface serves any MCP client (T2.5).
-- [ ] The whole story works live with no agent (T2.6).
+- [x] PayPal events become evidence, idempotently (T2.1, T2.1b).
+- [x] Reasons are classified, and unclear ones ask again (T2.2, T2.2b).
+- [x] Raw evidence lives outside the graph, in the layer's own store (T2.3, T2.3b).
+- [x] Beliefs are earned, contradicted and kept as product.md says (T2.4, T2.4b).
+- [x] The interface serves any MCP client (T2.5).
+- [x] The whole story works live with no agent (T2.6).
