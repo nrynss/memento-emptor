@@ -606,6 +606,20 @@ The T9.7 run found product.md's demo step 2 has no live path: the reference agen
 
 ---
 
+### T9.18: The deploy README's pin section covers bun
+```yaml
+requires:   [T9.16]
+fixture-ok: yes
+size:       XS · mid
+owns:       deploy/README.md
+status:     not-started
+```
+`tools/pincheck` now compares Go, Node and bun, but `deploy/README.md`'s toolchain section still lists only Go and Node and still says what the gate reads. Add bun's pin and its sources, and correct the paragraph about what the check covers.
+
+**Done when:** the pin section lists all three toolchains with their sources and the check's coverage; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
