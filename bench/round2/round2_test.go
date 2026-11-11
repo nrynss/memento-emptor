@@ -393,6 +393,21 @@ func TestExpectedRecallIsWhatTheMementoArmsSee(t *testing.T) {
 					t.Errorf("%s %s: arm 4's memory carries no pool, and the case needs one", shopper.ShopperID, phase)
 				}
 			}
+			// The two Memento arms differ only in the pool: null it on
+			// arm 4's view and the two memories must be byte-identical, so
+			// no other field can drift between the conditions.
+			fullView["pool"] = nil
+			encodedFull, err := json.Marshal(fullView)
+			if err != nil {
+				t.Fatalf("%s %s: encode arm 4 memory: %v", shopper.ShopperID, phase, err)
+			}
+			encodedShopper, err := json.Marshal(shopperView)
+			if err != nil {
+				t.Fatalf("%s %s: encode arm 3 memory: %v", shopper.ShopperID, phase, err)
+			}
+			if !bytes.Equal(encodedFull, encodedShopper) {
+				t.Errorf("%s %s: arms 3 and 4 carry memories that differ in more than the pool", shopper.ShopperID, phase)
+			}
 			if shopper.Correction == nil {
 				continue
 			}
