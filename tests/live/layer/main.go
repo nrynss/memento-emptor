@@ -630,11 +630,29 @@ func run(bin, session, agent, out string) error {
 	if err != nil {
 		return fmt.Errorf("recall after one return: %w", err)
 	}
-	if len(recall.Beliefs) != 0 || recall.Guidance.Basis != contract.GuidanceNone {
-		return fmt.Errorf("one return earns nothing, recall serves %d beliefs with %q guidance",
-			len(recall.Beliefs), recall.Guidance.Basis)
+	// One return is thin evidence, and recall never withholds it: the
+	// belief comes back with its Claimed label, its one row and the
+	// own-evidence step that decides. A lone return is labelled thin, never
+	// hidden behind an empty list.
+	if len(recall.Beliefs) != 1 {
+		return fmt.Errorf("one return serves %d beliefs, want the 1 thin fit belief", len(recall.Beliefs))
 	}
-	fmt.Println("recall after one return: no belief, no guidance (vote 1 of 3)")
+	thin := recall.Beliefs[0]
+	if thin.Status != domain.StatusClaimed || thin.Standing != domain.GraphNone {
+		return fmt.Errorf("one return reads %q/%q, want Claimed/None: thin evidence is labelled, not withheld",
+			thin.Status, thin.Standing)
+	}
+	if len(thin.Evidence) != 1 {
+		return fmt.Errorf("one return carries %d evidence rows, want its one", len(thin.Evidence))
+	}
+	if thin.Precedence == nil || thin.Precedence.Step != contract.GuidanceOwnEvidence || thin.Precedence.Overridden {
+		return fmt.Errorf("one return precedence %+v, want the deciding own-evidence step", thin.Precedence)
+	}
+	if recall.Guidance.Basis != contract.GuidanceOwnEvidence || recall.Guidance.Text != "Take size L for Brand X" {
+		return fmt.Errorf("one-return guidance %+v, want own evidence toward size L", recall.Guidance)
+	}
+	fmt.Printf("recall after one return: belief %s %s/%s, 1 row, guidance %q (vote 1 of 3)\n",
+		thin.BeliefID, thin.Status, thin.Standing, recall.Guidance.Text)
 
 	answerReason(ctx, svc, &reply, "WH-2EV-02", "the sleeves are way too short and I can't button it")
 	// The frozen story's third answer (internal/fakes/replay.go ReturnThree,
@@ -776,10 +794,18 @@ func run(bin, session, agent, out string) error {
 	if err != nil {
 		return fmt.Errorf("final recall: %w", err)
 	}
-	if len(final.Beliefs) != 1 || final.Beliefs[0].BeliefID != sizingID {
-		return fmt.Errorf("feedback grew a rival belief but recall still serves only the earned sizing belief")
+	if len(final.Beliefs) != 2 || final.Beliefs[0].BeliefID != sizingID {
+		return fmt.Errorf("final recall serves %d beliefs, want the sizing belief first and the fits-well feedback beside it",
+			len(final.Beliefs))
 	}
-	fmt.Printf("feedback: verdict %s, recall still serves the earned sizing belief\n", feedback.Verdict)
+	// The feedback grew a belief with one row. Recall serves it with its
+	// label rather than holding it back, ranked after the sizing belief.
+	rival := final.Beliefs[1]
+	if rival.Status != domain.StatusClaimed || len(rival.Evidence) != 1 {
+		return fmt.Errorf("fits-well belief reads %q with %d rows, want Claimed with its one: thin evidence is served",
+			rival.Status, len(rival.Evidence))
+	}
+	fmt.Printf("feedback: verdict %s, recall serves the earned sizing belief and the Claimed fits-well one\n", feedback.Verdict)
 
 	calls := svc.Calls("trace-R")
 	if len(calls) != 2 || calls[0].Tool != string(contract.ToolRecallForPurchase) || calls[1].Tool != string(contract.ToolRecordCorrection) {

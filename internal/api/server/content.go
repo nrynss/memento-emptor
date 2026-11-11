@@ -151,7 +151,7 @@ func guidanceForOwnEvidence(view contract.BeliefView, poolDisagrees bool) contra
 		if domain.DirectionForValue(view.Value) == domain.FitDirectionLarge {
 			direction = "runs large"
 		}
-		text = fmt.Sprintf("%s: your own %s say it %s, ahead of the pool.", text, evidenceCount(len(view.Evidence)), direction)
+		text = fmt.Sprintf("%s: %s %s, ahead of the pool.", text, ownEvidenceClause(len(view.Evidence)), direction)
 	}
 	beliefID := view.BeliefID
 	return contract.GuidanceView{
@@ -159,6 +159,15 @@ func guidanceForOwnEvidence(view contract.BeliefView, poolDisagrees bool) contra
 		Basis:    contract.GuidanceOwnEvidence,
 		BeliefID: &beliefID,
 	}
+}
+
+// ownEvidenceClause states the shopper's own rows behind a recommendation,
+// with the verb agreeing with the count: one return says, several say.
+func ownEvidenceClause(n int) string {
+	if n == 1 {
+		return "your own one return says it"
+	}
+	return fmt.Sprintf("your own %s say it", evidenceCount(n))
 }
 
 // evidenceCount states how many evidence rows back a recommendation, in

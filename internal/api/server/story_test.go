@@ -210,8 +210,29 @@ func TestStoryEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("recall after one return: %v", err)
 	}
-	if len(recall.Beliefs) != 0 || recall.Guidance.Basis != contract.GuidanceNone {
-		t.Fatalf("one return earns nothing, recall serves %d beliefs with %q guidance", len(recall.Beliefs), recall.Guidance.Basis)
+	// One return is thin evidence, not grounds for silence: recall serves
+	// the belief with its Claimed label, its one row and the own-evidence
+	// step that decides, and the agent shows the shopper how sure the
+	// layer is instead of being told nothing.
+	if len(recall.Beliefs) != 1 {
+		t.Fatalf("one return serves %d beliefs, want the 1 thin fit belief", len(recall.Beliefs))
+	}
+	thin := recall.Beliefs[0]
+	if thin.Status != domain.StatusClaimed || thin.Standing != domain.GraphNone {
+		t.Errorf("thin fit belief reads %q/%q, want Claimed/None: a label, never a gate",
+			thin.Status, thin.Standing)
+	}
+	if len(thin.Evidence) != 1 {
+		t.Fatalf("thin fit belief carries %d evidence rows, want its one", len(thin.Evidence))
+	}
+	if thin.Evidence[0].Reason == nil || thin.Evidence[0].Reason.Category != domain.CategoryFitTooSmall {
+		t.Errorf("thin fit belief's row reads %+v, want the too-small return", thin.Evidence[0].Reason)
+	}
+	if thin.Precedence == nil || thin.Precedence.Step != contract.GuidanceOwnEvidence || thin.Precedence.Overridden {
+		t.Errorf("thin fit belief precedence %+v, want the deciding own-evidence step", thin.Precedence)
+	}
+	if recall.Guidance.Basis != contract.GuidanceOwnEvidence || recall.Guidance.Text != "Take size L for Brand X" {
+		t.Errorf("one-return guidance %+v, want own evidence toward size L", recall.Guidance)
 	}
 
 	answerReason(t, svc, shopper, "WH-2EV-02", "the sleeves are way too short and I can't button it")
@@ -358,8 +379,20 @@ func TestStoryEndToEnd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("final recall: %v", err)
 	}
-	if len(final.Beliefs) != 1 || final.Beliefs[0].BeliefID != sizingID {
-		t.Error("feedback grew a rival belief but recall still serves only the earned sizing belief")
+	if len(final.Beliefs) != 2 || final.Beliefs[0].BeliefID != sizingID {
+		t.Fatalf("final recall serves %d beliefs, want the sizing belief first and the fits-well feedback beside it",
+			len(final.Beliefs))
+	}
+	// The feedback's belief carries one row, which is thin, and thin is
+	// served: labelled Claimed, after the belief with more evidence.
+	rival := final.Beliefs[1]
+	if rival.Value != feedbackBeliefValue("M") || rival.Status != domain.StatusClaimed {
+		t.Errorf("rival belief reads %q/%q, want the Claimed %q",
+			rival.Value, rival.Status, feedbackBeliefValue("M"))
+	}
+	if len(rival.Evidence) != 1 || rival.Precedence == nil || rival.Precedence.Step != contract.GuidanceOwnEvidence {
+		t.Errorf("rival belief carries %d rows and precedence %+v, want its one row on the own-evidence step",
+			len(rival.Evidence), rival.Precedence)
 	}
 
 	calls := svc.Calls("trace-R")

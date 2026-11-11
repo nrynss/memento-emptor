@@ -112,23 +112,11 @@ func TestHTTPTransport(t *testing.T) {
 		}
 		// The base fixture carries the tightened shape: a null pool with
 		// an unavailable lookup and every belief's precedence step. The
-		// served recall carries the shopper's general statement beside
-		// the sizing belief; filter the statement here, as server_test
-		// pins it, and compare everything else byte-exact.
-		if beliefs, ok := actual["beliefs"].([]any); ok {
-			kept := beliefs[:0]
-			for _, belief := range beliefs {
-				view, ok := belief.(map[string]any)
-				if !ok {
-					continue
-				}
-				if view["belief_id"] == "blf_77c310" {
-					continue
-				}
-				kept = append(kept, belief)
-			}
-			actual["beliefs"] = kept
-		}
+		// served recall carries thin beliefs beside the sizing belief —
+		// the shopper's general statement and the one-evidence fits-well
+		// feedback — so filter those here, as server_test pins them, and
+		// compare everything else byte-exact.
+		baseRecallBeliefs(actual)
 		wantRaw, _ := os.ReadFile(filepath.Join(apiDir(t), "recall_for_purchase.response.example.json"))
 		var want map[string]any
 		if err := json.Unmarshal(wantRaw, &want); err != nil {

@@ -196,44 +196,58 @@ func compareExample(t *testing.T, svc *Service, tool, reqFile, respFile string, 
 		delete(wantMap, field)
 	}
 	if tool == "recall_for_purchase" {
-		// The seeded recall serves the shopper's general statement beside
-		// the contradicted sizing belief; the base fixture carries only
-		// the sizing belief. The comparison filters the statement here
-		// and pins the served shape separately, while the pool, the pool
-		// lookup and every precedence step compare byte-exact against
-		// the tightened fixture.
+		// The seeded recall serves the thin beliefs the base fixture does
+		// not carry: the shopper's general statement and the one-evidence
+		// fits-well feedback. The comparison filters those here and pins
+		// the served shape separately, while the pool, the pool lookup
+		// and every precedence step compare byte-exact against the
+		// tightened fixture.
 		assertRecallPivot(t, actualMap)
-		if beliefs, ok := actualMap["beliefs"].([]any); ok {
-			kept := beliefs[:0]
-			for _, belief := range beliefs {
-				view, ok := belief.(map[string]any)
-				if !ok {
-					continue
-				}
-				if view["belief_id"] == "blf_77c310" {
-					continue
-				}
-				kept = append(kept, belief)
-			}
-			actualMap["beliefs"] = kept
-		}
+		baseRecallBeliefs(actualMap)
 	}
 	if !reflect.DeepEqual(actualMap, wantMap) {
 		t.Fatalf("%s with %s differs from %s:\nactual:   %s\nwant: %s", tool, reqFile, respFile, pretty(actualMap), pretty(wantMap))
 	}
 }
 
+// baseRecallBeliefs filters a served recall down to the beliefs the frozen
+// base fixture carries. That fixture predates the pivot: it holds the
+// contradicted sizing belief alone, while recall also serves the shopper's
+// general statement and the thin fits-well feedback a status label never
+// withholds. assertRecallPivot pins both separately, so this filter keeps
+// the byte-exact comparison to the shape the fixture describes.
+func baseRecallBeliefs(actual map[string]any) {
+	beliefs, ok := actual["beliefs"].([]any)
+	if !ok {
+		return
+	}
+	kept := beliefs[:0]
+	for _, belief := range beliefs {
+		view, ok := belief.(map[string]any)
+		if !ok {
+			continue
+		}
+		switch view["belief_id"] {
+		case "blf_77c310", "blf_2b9d60":
+			continue
+		}
+		kept = append(kept, belief)
+	}
+	actual["beliefs"] = kept
+}
+
 // assertRecallPivot pins the pivot fields the served recall carries
 // beside the frozen base shape: the pool is null with an unavailable
 // lookup, because no pool index is wired, and every belief names its
 // precedence step, with the overridden beliefs pointing at the correction
-// that won. The seeded recall serves the contradicted sizing belief and
-// the shopper's general statement, both overridden by the correction.
+// that won. The seeded recall serves the contradicted sizing belief, the
+// one-evidence fits-well feedback and the shopper's general statement, all
+// three overridden by the correction.
 func assertRecallPivot(t *testing.T, actual map[string]any) {
 	t.Helper()
 	beliefs, ok := actual["beliefs"].([]any)
-	if !ok || len(beliefs) != 2 {
-		t.Fatalf("seeded recall carries %v beliefs, want the sizing belief and the statement", len(beliefs))
+	if !ok || len(beliefs) != 3 {
+		t.Fatalf("seeded recall carries %v beliefs, want the sizing belief, the thin feedback and the statement", len(beliefs))
 	}
 	steps := map[string]map[string]any{}
 	for _, belief := range beliefs {
@@ -247,15 +261,30 @@ func assertRecallPivot(t *testing.T, actual map[string]any) {
 			t.Fatalf("recall belief %v names no precedence step", id)
 		}
 		steps[id] = precedence
-		if id == "blf_77c310" {
+		switch id {
+		case "blf_77c310":
 			if view["value"] != "shopper says they are usually size M" {
 				t.Fatalf("statement belief value %v, want the usual-size statement", view["value"])
+			}
+		case "blf_2b9d60":
+			// One evidence row is thin, not grounds for silence: the
+			// belief is served with its Claimed label and its row.
+			if view["status"] != "Claimed" || view["standing"] != "None" {
+				t.Fatalf("thin feedback belief reads %v/%v, want Claimed/None",
+					view["status"], view["standing"])
+			}
+			if evidence, _ := view["evidence"].([]any); len(evidence) != 1 {
+				t.Fatalf("thin feedback belief carries %d evidence rows, want its one", len(evidence))
 			}
 		}
 	}
 	sizing, ok := steps["blf_8f2c41"]
 	if !ok || sizing["step"] != "own_evidence" || sizing["overridden"] != true || sizing["overridden_by"] != "correction" {
 		t.Fatalf("sizing belief precedence %+v, want own_evidence overridden by correction", sizing)
+	}
+	thin, ok := steps["blf_2b9d60"]
+	if !ok || thin["step"] != "own_evidence" || thin["overridden"] != true || thin["overridden_by"] != "correction" {
+		t.Fatalf("thin feedback belief precedence %+v, want own_evidence overridden by correction", thin)
 	}
 	statement, ok := steps["blf_77c310"]
 	if !ok || statement["step"] != "statement" || statement["overridden"] != true || statement["overridden_by"] != "correction" {

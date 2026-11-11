@@ -598,11 +598,23 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, tests/live/layer/
-status:     claimed:t85i-thin-evidence
+status:     in-review
 ```
 The P2 review found `internal/api/server/recall.go` serves Venerable/Candidate fit beliefs and evidenceless statements but drops a fit belief with one return (`GraphNone`, one evidence), with a comment saying "recall never withholds, but one return is a question, not an answer" — which is withholding. `product.md` says it never refuses, thin evidence comes back labelled thin, status is a label never a gate, and own evidence counts at any status. The T8.5 handoff recorded this and assigned it to T7.4, which could not reach this package and never mentioned it, so the finding is now owned here. Round 2's arm 4 relies on thin evidence being served.
 
 **Done when:** a one-return fit belief is served, labelled with its status and precedence, with the pool beside it exactly as thin evidence is served elsewhere; the live layer tripwire that pinned the withholding is flipped; the gate passes.
+
+**Notes (in-review).** The gate in `recallBeliefs` is gone. It selects every fit belief the shopper holds for the requested brand at any standing; only the kind and the brand filter anything out. A lone return therefore comes back as the graph reads it — Claimed/None, its one evidence row attached, its step named `own_evidence` — and `usualSize`, the pool query and the precedence order see it exactly as they see a Venerable belief, so the pool rides beside it and is marked overridden by own evidence. The correction rule is untouched: `overridingCorrection` and `assembleRecall` are unchanged, and the assembler still refuses a contradicted belief without its override.
+
+The seeded recall now serves three beliefs instead of two: the Earned sizing belief, the one-evidence fits-well feedback (`blf_2b9d60`, Claimed/None), and the general statement. `assertRecallPivot` pins the thin one — Claimed/None, one row, `own_evidence` overridden by the correction — and the byte-exact comparison against the frozen base fixture filters both thin beliefs through one helper, `baseRecallBeliefs`, which `http_test.go` also uses, so the fixture's two filters cannot drift apart. The story test's one-return step now asserts the served thin belief (one belief, Claimed/None, one too-small row, own-evidence step deciding, guidance "Take size L for Brand X"), and its final recall expects the fits-well belief beside the Earned sizing one.
+
+One wording fix the new serving made reachable: `guidanceForOwnEvidence` produced "your own one return say it runs small" because only counts of two or more could reach it before. `ownEvidenceClause` now agrees the verb, so a lone return reads "your own one return says it runs large, ahead of the pool." The two- and three-return texts are byte-identical to before, which the frozen pivot fixture, `TestRecallUnlikeCrowdDecidedByOwnEvidence` and the live precedence driver already pin.
+
+The new service test is `TestRecallServesOneReturnBesideThePool`: a wired Earned-small pool, one too-large return, and the recall must carry the thin belief with its own-evidence step, the pool overridden beside it, and that guidance sentence. Against the old `recallBeliefs` it fails at "one return serves 0 beliefs", and the story test fails the same way; both pass on this commit. The live tripwire in `tests/live/layer/main.go` is flipped to match: the one-return step asserts the served Claimed belief with its one row, its precedence and its guidance, and the final recall expects the Claimed fits-well belief beside the sizing one. No live call was made (spend $0.00); that driver is outside CI and needs the hub, the deployment URL and a key.
+
+Gate green after `npm ci` in `web/` and `merchant/`: `gofmt`, `go vet`, `go test -race` over every Go package, both lockfile checks, both Svelte checks, both lints, both test runs and both builds, ending `OK all checks passed`. Spend $0.00: no live call, no key.
+
+Handoff finding with no home in this task's `owns`: `demo/driver/main.go` carries the same two pins — one-return "no belief, no guidance" and "final recall serves only the Earned sizing belief" — so that driver would fail at those steps now. `demo/` is outside T8.5i's paths; it needs its own task (a small one over `demo/driver/`) to make the same two assertions. Until then the demo driver and the live layer driver disagree about the served shape.
 
 ---
 

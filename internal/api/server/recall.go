@@ -76,13 +76,14 @@ func assembleRecall(shopper string, beliefs []contract.BeliefView, poolView *con
 	return out, nil
 }
 
-// recallBeliefs selects the beliefs a recall serves for one brand: the
-// fit beliefs the evidence is earning or earned (Candidate and above),
-// strongest first, plus the shopper's general statements (evidenceless
-// Claimed notes), which decide only when nothing stronger does. A lone
-// return stays on the ledger until a second moves the belief to Building:
-// recall never withholds, but one return is a question, not an answer.
-// Seller beliefs surface through the ledger and explain reads, never
+// recallBeliefs selects the beliefs a recall serves for one brand: every
+// fit belief the shopper holds for it, at any standing, strongest first.
+// Status is a label, never a gate: a lone return is Claimed with one
+// evidence row, and it comes back labelled Claimed with its evidence and
+// its precedence step, beside the pool, so the agent weighs thin evidence
+// instead of being told nothing. A fit belief with no evidence is the
+// shopper's general statement and decides only when nothing stronger
+// does. Seller beliefs surface through the ledger and explain reads, never
 // through a sizing recall. A contradicted belief is served with its
 // warning inline, never alone: the assembler beside this function
 // enforces the override.
@@ -93,12 +94,6 @@ func recallBeliefs(views []contract.BeliefView, brandID string) []contract.Belie
 			continue
 		}
 		if brandID != "" && view.Subject.ID != brandID {
-			continue
-		}
-		switch {
-		case view.Standing == domain.GraphVenerable, view.Standing == domain.GraphCandidate:
-		case view.Standing == domain.GraphNone && len(view.Evidence) == 0:
-		default:
 			continue
 		}
 		out = append(out, view)

@@ -302,6 +302,57 @@ func TestRecallUnlikeCrowdDecidedByOwnEvidence(t *testing.T) {
 	}
 }
 
+// TestRecallServesOneReturnBesideThePool proves thin evidence is served,
+// never withheld: a lone too-large return makes a Claimed belief with one
+// row, recall carries it with its own-evidence step, and the Earned pool
+// rides beside it marked overridden. Before this rule the one-return belief
+// was dropped, so the pool decided a shopper whose own history disagreed
+// with it.
+func TestRecallServesOneReturnBesideThePool(t *testing.T) {
+	ctx := context.Background()
+	poolIdx := &fakePoolIndex{result: earnedSmallPool()}
+	svc, _ := pivotHarness(t, poolIdx, &fakeFitIndex{}, "")
+	shopper := "thin_shopper"
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-01"); err != nil {
+		t.Fatalf("ingest: %v", err)
+	}
+	if res := answerReason(t, svc, shopper, "WH-2EV-01", "it swims on me, far too big"); !res.Accepted {
+		t.Fatal("the too-large answer was not accepted")
+	}
+	recall, err := svc.Recall(ctx, contract.RecallRequest{
+		ShopperID: shopper, BrandID: "brand-x-001",
+		Category: "shirts", FitHandle: "regular", SizeConsidered: "M",
+	})
+	if err != nil {
+		t.Fatalf("recall: %v", err)
+	}
+	if len(recall.Beliefs) != 1 {
+		t.Fatalf("one return serves %d beliefs, want the 1 thin fit belief", len(recall.Beliefs))
+	}
+	belief := recall.Beliefs[0]
+	if belief.Status != domain.StatusClaimed || belief.Standing != domain.GraphNone {
+		t.Fatalf("thin belief reads %q/%q, want Claimed/None: thin evidence is labelled, not withheld",
+			belief.Status, belief.Standing)
+	}
+	if len(belief.Evidence) != 1 {
+		t.Fatalf("thin belief carries %d evidence rows, want its one", len(belief.Evidence))
+	}
+	if belief.Precedence == nil || belief.Precedence.Step != contract.GuidanceOwnEvidence || belief.Precedence.Overridden {
+		t.Fatalf("thin belief precedence %+v, want the deciding own-evidence step", belief.Precedence)
+	}
+	if recall.Pool == nil || recall.Pool.Precedence == nil ||
+		!recall.Pool.Precedence.Overridden || *recall.Pool.Precedence.OverriddenBy != contract.GuidanceOwnEvidence {
+		t.Fatalf("pool precedence %+v, want the pool beside it overridden by own_evidence", recall.Pool.Precedence)
+	}
+	if recall.Guidance.Basis != contract.GuidanceOwnEvidence {
+		t.Fatalf("guidance %+v, want own_evidence", recall.Guidance)
+	}
+	want := "Take size S for Brand X: your own one return says it runs large, ahead of the pool."
+	if recall.Guidance.Text != want {
+		t.Fatalf("guidance text %q, want %q", recall.Guidance.Text, want)
+	}
+}
+
 // TestRecallUnreachablePoolCarriesOn proves recall never pretends an
 // empty pool: when the index cannot be reached the lookup reads
 // unavailable, the pool object is absent, and the shopper's own evidence
