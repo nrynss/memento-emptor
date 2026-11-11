@@ -28,7 +28,7 @@ import {
 	fixtureShopperId,
 	type LedgerFixtureStep
 } from './fixture';
-import { createFixtureState } from './state';
+import { createFixtureState, LedgerState } from './state';
 
 function clientAt(step: LedgerFixtureStep): LedgerClient {
 	return new LedgerClient(createFixtureTransport(step));
@@ -243,7 +243,7 @@ describe('client honors the request shapes', () => {
 });
 
 describe('ledger state', () => {
-	it('loads every row for the shopper and notifies', async () => {
+	it('loads the rows the table renders and notifies', async () => {
 		const state = createFixtureState(fixtureShopperId, 9);
 		expect(state.status).toBe('idle');
 		const listener = vi.fn();
@@ -251,17 +251,43 @@ describe('ledger state', () => {
 		await state.refresh();
 		expect(state.status).toBe('ready');
 		expect(state.beliefs).toHaveLength(4);
-		expect(state.evidence).toHaveLength(5);
 		expect(state.pending.map((question) => question.question_id)).toEqual(['q_9f04ab']);
 		expect(state.error).toBeNull();
 		expect(listener).toHaveBeenCalled();
+	});
+
+	it('never reads evidence, which no ledger row renders', async () => {
+		// The why view reads the evidence for the belief it explains, and the
+		// table's per-row count comes from the belief row. A read here would
+		// be a round trip for nothing, and because the reads share one
+		// Promise.all a failure on it would label the table failed while
+		// nothing displayed came from it.
+		const asked: string[] = [];
+		const client = new LedgerClient({
+			call: (tool) => {
+				asked.push(tool);
+				if (tool === 'ledger_evidence') {
+					return Promise.reject(new Error('evidence read refused'));
+				}
+				const bodies: Record<string, unknown> = {
+					ledger_beliefs: beliefsExample,
+					pending_questions: pendingExample
+				};
+				return Promise.resolve(bodies[tool]);
+			}
+		});
+		const state = new LedgerState(client, fixtureShopperId);
+		await state.refresh();
+		expect(state.status).toBe('ready');
+		expect(state.beliefs).toHaveLength(4);
+		expect(state.pending).toHaveLength(1);
+		expect(asked.sort()).toEqual(['ledger_beliefs', 'pending_questions']);
 	});
 
 	it('keeps the old rows and reports the failure', async () => {
 		const failing = new LedgerClient({
 			call: () => Promise.reject(new Error('layer is down'))
 		});
-		const { LedgerState } = await import('./state');
 		const state = new LedgerState(failing, fixtureShopperId);
 		await state.refresh();
 		expect(state.status).toBe('error');

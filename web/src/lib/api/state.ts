@@ -2,11 +2,17 @@
 // framework-neutral: a view wraps it with Chaaya's reactive() and reads
 // the getters in a template or $derived, and notify() re-runs them. One
 // state instance serves one step; a step picker builds a new one.
+//
+// The state holds the rows the ledger table renders: the beliefs, and the
+// refunds still missing a reason. The evidence behind a belief is not one of
+// them: the why view reads it for the one belief it explains, and the table's
+// per-row count comes from the belief row. A failed evidence read therefore
+// never labels the table failed over data it does not show.
 
 import { Notifier } from '@nrynss/chaaya/core';
 import { LedgerClient } from './client';
 import { createFixtureTransport, type LedgerFixtureStep } from './fixture';
-import type { LedgerBeliefRow, LedgerEvidenceRow, QuestionView } from './types';
+import type { LedgerBeliefRow, QuestionView } from './types';
 
 /** Where a load stands. It starts idle and never returns there. */
 export type LedgerLoadStatus = 'idle' | 'loading' | 'ready' | 'error';
@@ -17,7 +23,6 @@ export class LedgerState extends Notifier {
 	private readonly shopperId: string;
 	private loadStatus: LedgerLoadStatus = 'idle';
 	private beliefRows: LedgerBeliefRow[] = [];
-	private evidenceRows: LedgerEvidenceRow[] = [];
 	private pendingRows: QuestionView[] = [];
 	private loadError: string | null = null;
 
@@ -37,11 +42,6 @@ export class LedgerState extends Notifier {
 		return this.beliefRows;
 	}
 
-	/** The evidence rows, newest first. Empty until ready. */
-	get evidence(): LedgerEvidenceRow[] {
-		return this.evidenceRows;
-	}
-
 	/** The refunds still missing a reason. Empty until ready. */
 	get pending(): QuestionView[] {
 		return this.pendingRows;
@@ -52,19 +52,21 @@ export class LedgerState extends Notifier {
 		return this.loadError;
 	}
 
-	/** Loads every row for the shopper. A failure keeps the old rows. */
+	/**
+	 * Loads the rows the ledger table shows. A failed read reports an error
+	 * and keeps the old rows. Evidence is not read here: no ledger row
+	 * renders it, so it is not part of what this load promises.
+	 */
 	async refresh(): Promise<void> {
 		this.loadStatus = 'loading';
 		this.loadError = null;
 		this.notify();
 		try {
-			const [beliefs, evidence, pending] = await Promise.all([
+			const [beliefs, pending] = await Promise.all([
 				this.client.listBeliefs({ shopper_id: this.shopperId, include_seeded: true }),
-				this.client.listEvidence({ shopper_id: this.shopperId }),
 				this.client.listPendingQuestions({ shopper_id: this.shopperId })
 			]);
 			this.beliefRows = beliefs.beliefs;
-			this.evidenceRows = evidence.evidence;
 			this.pendingRows = pending.questions;
 			this.loadStatus = 'ready';
 		} catch (error) {

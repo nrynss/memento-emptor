@@ -13,8 +13,8 @@ interface Call {
 	init: RequestInit | undefined;
 }
 
-/** Serves the frozen read examples by tool, recording what arrived. */
-function stubLiveEdge(): Call[] {
+/** Serves the frozen read examples by tool, recording what arrived. A named tool can refuse. */
+function stubLiveEdge(refuse: string | null = null): Call[] {
 	const calls: Call[] = [];
 	const bodies: Record<string, unknown> = {
 		ledger_beliefs: beliefsExample,
@@ -25,6 +25,14 @@ function stubLiveEdge(): Call[] {
 		const url = String(input);
 		calls.push({ url, init });
 		const tool = url.split('/').pop() ?? '';
+		if (tool === refuse) {
+			return Promise.resolve({
+				ok: false,
+				status: 401,
+				text: () =>
+					Promise.resolve('{"error":{"code":"unauthenticated","message":"unauthorized"}}')
+			} as unknown as Response);
+		}
 		const body = JSON.stringify(bodies[tool] ?? {});
 		return Promise.resolve({
 			ok: true,
@@ -70,18 +78,16 @@ describe('the shopper link', () => {
 });
 
 describe('the live ledger state', () => {
-	it('reads every row from the edge as its shopper', async () => {
+	it('reads the rows the table renders from the edge as its shopper', async () => {
 		const calls = stubLiveEdge();
 		const state = createLiveState({ token: 'memento_shop_abc', shopperId: 'shopper_09' });
 		await state.refresh();
 
 		expect(state.status).toBe('ready');
 		expect(state.beliefs).toHaveLength(4);
-		expect(state.evidence).toHaveLength(5);
 		expect(state.pending).toHaveLength(1);
 		expect(calls.map((call) => call.url).sort()).toEqual([
 			'/tools/ledger_beliefs',
-			'/tools/ledger_evidence',
 			'/tools/pending_questions'
 		]);
 		for (const call of calls) {
@@ -89,6 +95,17 @@ describe('the live ledger state', () => {
 			expect(headers['Authorization']).toBe('Bearer memento_shop_abc');
 			expect(JSON.parse(String(call.init?.body))['shopper_id']).toBe('shopper_09');
 		}
+	});
+
+	it('loads when an evidence read would refuse, because it never asks for one', async () => {
+		const calls = stubLiveEdge('ledger_evidence');
+		const state = createLiveState({ token: 'memento_shop_abc', shopperId: 'shopper_09' });
+		await state.refresh();
+
+		expect(state.status).toBe('ready');
+		expect(state.error).toBeNull();
+		expect(state.beliefs).toHaveLength(4);
+		expect(calls.map((call) => call.url)).not.toContain('/tools/ledger_evidence');
 	});
 
 	it('reports a refused read as an error and keeps no rows', async () => {
@@ -105,7 +122,6 @@ describe('the live ledger state', () => {
 		expect(state.status).toBe('error');
 		expect(state.error).toBe('unauthenticated: unauthorized');
 		expect(state.beliefs).toEqual([]);
-		expect(state.evidence).toEqual([]);
 		expect(state.pending).toEqual([]);
 	});
 });

@@ -160,7 +160,8 @@ requires:   [T4.8]
 fixture-ok: yes
 size:       XS · mid
 owns:       web/src/lib/api/, web/src/routes/ledger/
-status:     claimed:t410-evidence-read
+status:     in-review
+notes:      The evidence read is gone from the shared loader. `LedgerState.refresh` loads the belief rows and the pending questions only, and its `evidence` getter and field are removed, so no path can hold evidence the table does not render. Nothing on `/ledger` shows evidence (the per-row count comes from the belief row) and the why view reads its own evidence for the one belief it explains, so a lazy read had no caller. `LedgerClient.listEvidence` and `LedgerEvidenceRow` stay for the why view and the fixture transport. Tests — the state never asks for `ledger_evidence` and stays ready when a transport refuses it; the live state makes two reads and loads when an evidence read would refuse; the ledger page renders when the edge refuses `ledger_evidence` and its calls never include it; the why page's live test still asserts its own evidence read and counted rows. Mutation — re-adding the read to `refresh` fails six tests. Gate green, web 216 tests in 23 files, no live call. Branch task/t410.
 ```
 `LedgerState.refresh` fetches `ledger_evidence` on every load, but the ledger table renders none of it (the per-row count comes from the belief row; the evidence lives in the why view). Because the three reads share one `Promise.all`, a failed evidence read labels the whole page failed although nothing from it is displayed. Decide: drop the read, or load it lazily for the row that needs it, or record why the shared loader is deliberate.
 

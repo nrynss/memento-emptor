@@ -9,7 +9,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 // @ts-expect-error: deep client entry ships no types; same signature as 'svelte'.
 import { mount, tick, unmount } from '../../../node_modules/svelte/src/index-client.js';
 import beliefsExample from '../../../../testdata/api/ledger_beliefs.response.example.json';
-import evidenceExample from '../../../../testdata/api/ledger_evidence.response.example.json';
 import pendingExample from '../../../../testdata/api/pending_questions.response.example.json';
 import LedgerPage from './+page.svelte';
 
@@ -31,18 +30,25 @@ interface Call {
 	init: RequestInit | undefined;
 }
 
-/** The frozen read answers, served by tool path. */
-function liveEdge(): { calls: Call[]; fetch: typeof fetch } {
+/** The frozen read answers, served by tool path. A named tool can refuse. */
+function liveEdge(refuse: string | null = null): { calls: Call[]; fetch: typeof fetch } {
 	const calls: Call[] = [];
 	const bodies: Record<string, unknown> = {
 		ledger_beliefs: beliefsExample,
-		ledger_evidence: evidenceExample,
 		pending_questions: pendingExample
 	};
 	const send = ((input: RequestInfo | URL, init?: RequestInit) => {
 		const url = String(input);
 		calls.push({ url, init });
 		const tool = url.split('/').pop() ?? '';
+		if (tool === refuse) {
+			return Promise.resolve({
+				ok: false,
+				status: 401,
+				text: () =>
+					Promise.resolve('{"error":{"code":"unauthenticated","message":"unauthorized"}}')
+			} as unknown as Response);
+		}
 		return Promise.resolve({
 			ok: true,
 			status: 200,
@@ -110,8 +116,13 @@ describe('the ledger page reads live from a shopper link', () => {
 			rowFor(host, 'blf_8f2c41')?.querySelector('[col-id="status"] .ledger-out-of-true')
 				?.textContent
 		).toBe('Out of true');
-		// The three reads went to the edge with the link's token and shopper.
-		expect(edge.calls).toHaveLength(3);
+		// The two reads the table renders went to the edge with the link's
+		// token and shopper. Evidence is not one of them: no ledger row
+		// renders it, so the table never loads it.
+		expect(edge.calls.map((call) => call.url.split('/').pop()).sort()).toEqual([
+			'ledger_beliefs',
+			'pending_questions'
+		]);
 		for (const call of edge.calls) {
 			const headers = call.init?.headers as Record<string, string>;
 			expect(headers['Authorization']).toBe(`Bearer ${token}`);
@@ -127,6 +138,27 @@ describe('the ledger page reads live from a shopper link', () => {
 			`/belief?belief=blf_8f2c41&t=${token}&s=shopper_01`
 		);
 		expect(host.textContent ?? '').not.toContain(token);
+	});
+
+	it('shows the table when an evidence read would refuse, because it never asks', async () => {
+		// The why view reads a belief's evidence for the one belief it
+		// explains. The table renders none of it, so a refused evidence read
+		// cannot label the page failed over data no row shows.
+		const edge = liveEdge('ledger_evidence');
+		vi.stubGlobal('fetch', edge.fetch);
+
+		const host = render(`http://localhost/ledger?t=${token}&s=shopper_01`);
+		await waitFor(
+			() => rowFor(host, 'blf_8f2c41')?.textContent?.includes('runs small, take size L') === true,
+			'the live sizing row'
+		);
+		await waitFor(
+			() => host.querySelector('[data-ledger-source="live"]')?.textContent?.includes('Live') === true,
+			'the live source label'
+		);
+
+		expect(host.querySelector('[role="alert"]')).toBeNull();
+		expect(edge.calls.map((call) => call.url.split('/').pop())).not.toContain('ledger_evidence');
 	});
 
 	it('labels a failed live read as a failure and shows no data', async () => {
@@ -153,10 +185,12 @@ describe('the ledger page reads live from a shopper link', () => {
 	});
 	it('reads again after a failure when the shopper asks', async () => {
 		const edge = liveEdge();
+		// A load is two reads, so the first two answers are refused and every
+		// answer after the reader asks again is served.
 		let asked = 0;
 		const flaky = ((input: RequestInfo | URL, init?: RequestInit) => {
 			asked += 1;
-			if (asked <= 3) {
+			if (asked <= 2) {
 				return Promise.resolve({
 					ok: false,
 					status: 503,
