@@ -658,7 +658,7 @@ status:     not-started
 ```
 The T9.7 live run found `restoreStanding` restores the journal's correction ids but not the mint sequence, so after a restart the next `record_correction` minted `corr_000001` over a restored one. A correction id must identify one correction for the life of the store.
 
-**Done when:** the mint sequence resumes past every restored id (or ids are minted from a source that cannot collide); a restart test proves the next correction gets a fresh id and the restored one still resolves; the gate passes.
+**Done when:** the mint sequence resumes past every restored id (or ids are minted from a source that cannot collide); a restart test proves the next correction gets a fresh id and the restored one still resolves; `explain_belief` lists each correction once after a restore (the T9.7 review saw seven rows for five ids, because `restoreStanding` and `LoadSeed` both append the seeded entry and a reused id is appended again); the gate passes.
 
 ---
 

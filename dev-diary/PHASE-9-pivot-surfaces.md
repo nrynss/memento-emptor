@@ -569,6 +569,20 @@ T9.13 made CI's `bun-version: '1.3.14'` the repository's first toolchain pin wit
 
 ---
 
+### T9.17: The reference agent searches the catalog
+```yaml
+requires:   [T9.8]
+fixture-ok: yes
+size:       S · mid
+owns:       agent/runtime/
+status:     not-started
+```
+The T9.7 run found product.md's demo step 2 has no live path: the reference agent exposes no product-search tool, so the Channel3 candidate never appears in a turn and the SKU exists only in step 4's capture. Add a catalog search tool (backed by `agent/catalog`, which already replays the Channel3 recordings) to the reference agent, bind it to the live layer's edge as the other tools are, and prove one live turn that names a real candidate line and SKU before recall.
+
+**Done when:** a live reference-agent turn searches the catalog and names the matched candidate (line, size, SKU) before its recommendation; the tool's output carries no field Channel3 did not return; the offline checks cover it; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
