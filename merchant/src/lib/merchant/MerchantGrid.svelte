@@ -1,10 +1,10 @@
-// The merchant grid as a Svelte 5 component. The grid is created once in
-// an effect and destroyed in its teardown; row updates, theme switches and
-// the selected row arrive through grid options, so in-flight state survives
-// a theme toggle. A row click reports its id to the page, which opens the
-// why panel beside the grid.
-
 <script lang="ts">
+	// The merchant grid as a Svelte 5 component. The grid is created once in
+	// an effect and destroyed in its teardown; row updates, theme switches and
+	// the selected row arrive through grid options, so in-flight state survives
+	// a theme toggle. A row click reports its id to the page, which opens the
+	// why panel beside the grid.
+
 	import { theme as themeStore } from '@nrynss/chaaya/theme';
 	import { reactive } from '@nrynss/chaaya/svelte';
 	import type { GridApi } from 'ag-grid-community';

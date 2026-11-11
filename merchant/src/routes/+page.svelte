@@ -1,11 +1,11 @@
-// The merchant page: one read-only table over the seller's lines, and the
-// why for the selected row. Every row comes from product_fit through the
-// same-origin proxy, with no caller credential: counts and a status, never
-// a personal row. Until the proxy answers, the grid reads the bundled
-// snapshot. Selecting a row opens the counts behind its status and the
-// rule it was judged by.
-
 <script lang="ts">
+	// The merchant page: one read-only table over the seller's lines, and the
+	// why for the selected row. Every row comes from product_fit through the
+	// same-origin proxy, with no caller credential: counts and a status, never
+	// a personal row. Until the proxy answers, the grid reads the bundled
+	// snapshot. Selecting a row opens the counts behind its status and the
+	// rule it was judged by.
+
 	import {
 		createFixtureTransport,
 		createSameOriginTransport,

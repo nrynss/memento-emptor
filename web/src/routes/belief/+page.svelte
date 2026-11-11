@@ -1,13 +1,13 @@
-// The why view page. One belief at a time, replayed from fixtures: a step
-// picker walks the demo story, a belief picker walks the rows at that step,
-// and the view shows what counts toward the belief, what was deliberately
-// not counted and why, the correction beside it, and the trace placeholders.
-// Below it, the pivot's reads for one shopper at a time: which precedence
-// step decided the recommendation with any overridden step beside the one
-// that won, the pooled belief as counts with its seeded split, a standing
-// correction with no belief, and the pooling opt-out with rows removed.
-
 <script lang="ts">
+	// The why view page. One belief at a time, replayed from fixtures: a step
+	// picker walks the demo story, a belief picker walks the rows at that step,
+	// and the view shows what counts toward the belief, what was deliberately
+	// not counted and why, the correction beside it, and the trace placeholders.
+	// Below it, the pivot's reads for one shopper at a time: which precedence
+	// step decided the recommendation with any overridden step beside the one
+	// that won, the pooled belief as counts with its seeded split, a standing
+	// correction with no belief, and the pooling opt-out with rows removed.
+
 	import { resolve } from '$app/paths';
 	import {
 		createFixtureTransport,

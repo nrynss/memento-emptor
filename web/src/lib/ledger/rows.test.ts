@@ -123,6 +123,38 @@ describe('ledger grid rows', () => {
 		]);
 	});
 
+	it('carries no shopper identity or transaction link', async () => {
+		const rows = await gridRowsAt(9);
+		const serialised = JSON.stringify(rows).toLowerCase();
+		for (const token of [
+			'shopper_',
+			'payer',
+			'custom_id',
+			'event_id',
+			'order_id',
+			'capture_id',
+			'refund_id',
+			'dispute_id'
+		]) {
+			expect(serialised).not.toContain(token);
+		}
+		expect(Object.keys(rows[0] ?? {}).sort()).toEqual(
+			[
+				'correction',
+				'evidenceCount',
+				'id',
+				'kindLabel',
+				'lastChange',
+				'lastChangeFull',
+				'seeded',
+				'status',
+				'subject',
+				'value',
+				'weakSignal'
+			].sort()
+		);
+	});
+
 	it('labels kept-without-feedback as a weak inferred signal', () => {
 		expect(hasWeakSignal(keptBeliefRow().belief)).toBe(true);
 		const [row] = toLedgerGridRows([keptBeliefRow()]);

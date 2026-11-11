@@ -15,6 +15,7 @@ import {
 	createLedgerGrid,
 	evidenceCellRenderer,
 	lastChangeCellRenderer,
+	ledgerColumnDefs,
 	seededCellRenderer,
 	statusCellRenderer,
 	statusPillClass
@@ -101,17 +102,17 @@ const expectedCounts = [1, 2, 2, 2, 2, 3, 3, 3, 4] as const;
 describe('ledger grid story', () => {
 	const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 	for (const [index, step] of steps.entries()) {
-		it(`renders step ${String(step)} with ${String(expectedCounts[index])} rows`, async () => {
-			const { api, host } = await mountAt(step, {
-				mode: step % 2 === 0 ? 'dark' : 'light'
-			});
-			try {
-				expect(api.getDisplayedRowCount()).toBe(expectedCounts[index]);
-				const texts = cellTexts(host);
-				expect(texts.join(' ')).toContain('Brand X');
-				expect(host.querySelectorAll('.ag-row[row-id]').length).toBe(expectedCounts[index]);
-			} finally {
-				api.destroy();
+		it(`renders step ${String(step)} with ${String(expectedCounts[index])} rows in both themes`, async () => {
+			for (const mode of ['light', 'dark'] as const) {
+				const { api, host } = await mountAt(step, { mode });
+				try {
+					expect(api.getDisplayedRowCount()).toBe(expectedCounts[index]);
+					const texts = cellTexts(host);
+					expect(texts.join(' ')).toContain('Brand X');
+					expect(host.querySelectorAll('.ag-row[row-id]').length).toBe(expectedCounts[index]);
+				} finally {
+					api.destroy();
+				}
 			}
 		});
 	}
@@ -223,6 +224,32 @@ describe('ledger grid keyboard', () => {
 					(cell) => cell.hasAttribute('tabindex')
 				);
 				expect(focusable).toBe(true);
+			}
+		} finally {
+			api.destroy();
+		}
+	});
+});
+
+describe('ledger grid columns and rows', () => {
+	it('keeps the six ledger columns plus the seeded mark', () => {
+		expect(ledgerColumnDefs().map((column) => [column.field, column.headerName])).toEqual([
+			['kindLabel', 'Kind'],
+			['subject', 'Subject'],
+			['value', 'Belief'],
+			['status', 'Status'],
+			['evidenceCount', 'Evidence'],
+			['lastChange', 'Last change'],
+			['seeded', 'Seeded']
+		]);
+	});
+
+	it('renders no shopper identity or transaction link in any cell', async () => {
+		const { api, host } = await mountAt(9);
+		try {
+			const rendered = host.textContent ?? '';
+			for (const token of ['shopper_', 'custom_id', 'event_id', 'order_id', 'payer']) {
+				expect(rendered).not.toContain(token);
 			}
 		} finally {
 			api.destroy();

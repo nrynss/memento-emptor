@@ -1,8 +1,8 @@
 // The gate for T4.1: the client's types are checked against
-// testdata/api. The JSON examples import as typed literals, so assigning
-// them to the client interfaces proves the shapes match under
-// svelte-check; the equality tests prove the embedded fixture snapshots
-// equal the frozen files; the step tests prove the fixture replays the
+// testdata/api. Every frozen example is decoded through the client's own
+// decoders, and step 9's embedded fixture is pinned equal to the frozen
+// files, so a field that moves in testdata/api fails this suite until the
+// types, decoders and fixture move together. The step tests replay the
 // demo story at every step.
 
 import { describe, expect, it, vi } from 'vitest';

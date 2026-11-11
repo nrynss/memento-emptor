@@ -72,3 +72,24 @@ Editable rows: a shopper's edit goes through `record_correction`, so it follows 
 - [ ] The four statuses render, seeded rows marked (T4.2).
 - [ ] Every belief can be explained, including what wasn't counted (T4.3).
 - [ ] A shopper can contest a belief (T4.4).
+
+---
+
+## Review (fresh eyes, after the pivot)
+
+Re-verified every Done-when clause and the four exit criteria against the tree, with T9.2's precedence and pool surfaces in view. Mutation checks: dropping `contradicts_belief_id` from the correction request fails five contest tests; adding a shopper-id field to a grid row failed no test before this review and fails the new no-leak test after it; a reintroduced page-header comment fails the new header guard.
+
+**Fixed on the review branch.** (1) The four P4 Svelte files opened with a `//` header that Svelte compiles as visible page text; each header now sits inside `<script>`, and `web/src/lib/ledger/svelte-headers.test.ts` guards every web component and route. The merchant app's two files had the same defect, fixed with the same guard in `merchant/`. (2) `grid.test.ts` now renders every step in both themes; it previously alternated one theme per step, so T4.2's "both themes" claim was tested only at step 9. (3) `rows.test.ts` and `grid.test.ts` pin the grid's key set, column set and rendered text against shopper ids and transaction links; a row could carry a shopper id with no test failing before this. (4) `api.test.ts` no longer claims a static assignment the test does not make; the decoders and the step-9 equality are the actual gate.
+
+**Findings with owners.**
+
+- **High — the contest path has no route.** `/ledger` is read-only and `/belief` renders only the standing editor, so a shopper cannot contest a belief in the app even though the state, client and editor tests pass. This is exit criterion 4 unmet, and R4's finding 2, still without an owner. **T4.5** (proposed) owns `web/src/routes/ledger/`, `web/src/lib/ledger/`, `web/src/lib/contest/`: add the contest column beside `ledgerColumnDefs()`, open the editor for the clicked row with a per-belief form id, and let the existing state apply the layer's answer.
+- **Medium — the belief page mixes shoppers on two pivot surfaces.** The pooling state and the standing-correction state are built for the recall case's shopper (`shopper_02`, `shopper_04`, `shopper_05`), but both fixtures answer only the demo shopper: a `shopper_02` pooling call returns `shopper_01`'s answer (3 rows removed), and a `shopper_02` standing correction fails with "fixture knows only the demo shopper". `PoolingToggle` also keeps its opening choice in local state and is not keyed, so switching cases leaves the previous shopper's result on screen. T9.2's rejection rule does not cover pooling: the transport is built for whichever shopper a case names and still returns the demo shopper's frozen answer. **T4.6** (proposed) owns `web/src/routes/belief/`, `web/src/lib/ledger/pooling.ts`, `web/src/lib/contest/fixture.ts`.
+- **Low — the why cards print raw reason categories** (`fit_too_small`) above the shopper's words, and the trace note promises a "live mode" the fixture-only ledger does not have. This is R4's finding 4, still without an owner. **T4.7** (proposed) owns `web/src/lib/why/`.
+- **Low — T9.2's task line says the shopper's ledger shows precedence, the pool and the opt-out; the table at `/ledger` shows none of them.** All four surfaces live on `/belief`, which T9.2's note states but the task text does not. **T4.5** should either move the surfaces or correct the task line.
+- **Low — the ledger table has no path to the why view.** `/belief` links back to `/ledger`, but `/ledger` has no per-row or header link, and `/belief` ignores a belief query parameter, so a judge reaches the explanation only by typing the route. This is R4's finding 3, still without an owner. **T4.5** owns the link and the parameter.
+- **Low — the frozen standing request example is `shopper_02`'s, while the standing fixture accepts only `shopper_01`.** The test named "exactly as frozen" replays the response for a different shopper's request. **T4.6** owns the fixture side; the contract example is the orchestrator's to change.
+
+R4's findings are adopted by T4.5 (contest UI, deep links), T4.7 (reason wording) and T4.6 (the remaining fixture and page surfaces); the orchestrator should annotate that handoff entry with them.
+
+**Exit criteria.** 1, 2 and 3 are proved by the tree and should be ticked. 4 is not, and should be ticked when T4.5 lands.

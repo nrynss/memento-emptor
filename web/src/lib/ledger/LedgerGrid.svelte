@@ -1,8 +1,8 @@
-// The ledger grid as a Svelte 5 component. The grid is created once in an
-// effect and destroyed in its teardown; row updates and theme switches
-// arrive through grid options, so in-flight state survives a theme toggle.
-
 <script lang="ts">
+	// The ledger grid as a Svelte 5 component. The grid is created once in an
+	// effect and destroyed in its teardown; row updates and theme switches
+	// arrive through grid options, so in-flight state survives a theme toggle.
+
 	import { theme as themeStore } from '@nrynss/chaaya/theme';
 	import { reactive } from '@nrynss/chaaya/svelte';
 	import type { GridApi } from 'ag-grid-community';

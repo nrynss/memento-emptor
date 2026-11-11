@@ -1,11 +1,11 @@
-// One belief, explained: the correction beside the belief it contradicts,
-// each counted piece of evidence with its outcome, item and reason side by
-// side, the evidence deliberately not counted with why not, and the agent
-// turns behind each recommendation. Plain HTML over Chaaya tokens, so both
-// themes hold without a theme switch of its own; the evidence columns stack
-// below phone width.
-
 <script lang="ts">
+	// One belief, explained: the correction beside the belief it contradicts,
+	// each counted piece of evidence with its outcome, item and reason side by
+	// side, the evidence deliberately not counted with why not, and the agent
+	// turns behind each recommendation. Plain HTML over Chaaya tokens, so both
+	// themes hold without a theme switch of its own; the evidence columns stack
+	// below phone width.
+
 	import { kindLabelFor, OUT_OF_TRUE_TOOLTIP, SEEDED_MARK_LABEL, SEEDED_MARK_TOOLTIP } from '$lib/ledger/rows';
 	import { filterWhyView, type WhyViewData } from './why';
 

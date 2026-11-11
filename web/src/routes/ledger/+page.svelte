@@ -1,8 +1,8 @@
-// The evidence ledger page. Beliefs render in AG Grid; the grid component
-// loads lazily so the landing page never pays for the grid bundle. The step
-// picker replays the demo story from fixtures, one step at a time.
-
 <script lang="ts">
+	// The evidence ledger page. Beliefs render in AG Grid; the grid component
+	// loads lazily so the landing page never pays for the grid bundle. The step
+	// picker replays the demo story from fixtures, one step at a time.
+
 	import { untrack, type Component } from 'svelte';
 	import { reactive } from '@nrynss/chaaya/svelte';
 	import {
