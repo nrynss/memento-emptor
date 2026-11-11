@@ -1081,8 +1081,12 @@ Response when the answer is vague. It counted toward nothing,
 After delivery, ask how the purchased size worked out and send the
 verbatim answer tied to the purchase. The join key is the `custom_id`
 that propagates across the order, capture, refund and dispute records.
-A fits-well verdict counts toward fit as supporting evidence for the
-worn size. A verdict of unclear counts toward nothing.
+A fit verdict — `fits_well`, `too_small` or `too_large` — counts toward
+fit as supporting evidence for the worn size. A seller verdict —
+`damaged_or_defective` or `not_arrived` — counts toward seller
+reliability and never toward fit: it names the seller belief and adds no
+fit evidence and no fit row. A verdict of `unclear` or `changed_mind`
+counts toward nothing and the agent asks again.
 
 Request:
 
@@ -1111,11 +1115,16 @@ belief:
 }
 ```
 
-A repeat delivery for a purchase whose feedback is already on record — a
-retry, a duplicated turn, or the history's own copy — answers with the
-feedback on record, the id it was recorded under and the belief it counts
-toward, and changes nothing: no evidence is added again, no id is minted
-and the belief's status stays where it is.
+A repeat delivery of the recorded verdict for a purchase whose feedback
+is already on record — a retry, a duplicated turn, or the history's own
+copy — answers with that verdict and the id it was recorded under, and
+changes nothing: no evidence is added again, no id is minted and the
+belief's status stays where it is. `accepted` reports whether the
+recorded verdict counts toward anything, so a repeat of `unclear` or
+`changed_mind` answers `false` with the same id. Words that read as a
+different verdict for a purchase that already holds one are refused with
+the feedback conflict error and write nothing: the purchase keeps its
+recorded verdict.
 
 ## explain_belief
 

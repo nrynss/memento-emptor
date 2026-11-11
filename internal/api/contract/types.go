@@ -533,9 +533,14 @@ type RecordFeedbackRequest struct {
 	TraceID string `json:"trace_id,omitempty"`
 }
 
-// RecordFeedbackResponse returns the verdict. A fits-well verdict counts
-// toward fit as supporting evidence for the worn size; an unclear
-// verdict counts toward nothing and the agent asks again.
+// RecordFeedbackResponse returns the verdict. A fit verdict — fits well,
+// too small or too large — counts toward fit as supporting evidence for
+// the worn size; a seller verdict — damaged or defective, or not arrived
+// — counts toward seller reliability; unclear and changed-mind verdicts
+// count toward nothing and the agent asks again. A repeat delivery of the
+// recorded verdict answers with that verdict and the id it was recorded
+// under; words that read as a different verdict for a purchase already
+// holding one are refused with the feedback conflict error.
 type RecordFeedbackResponse struct {
 	// FeedbackID identifies the recorded feedback.
 	FeedbackID string `json:"feedback_id"`
