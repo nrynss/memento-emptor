@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 30 / 35 | In progress (T8.5k, T8.5o, T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
+| P8 | 31 / 35 | In progress (T8.5o, T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5k: not-as-described reads as damage (done)
+
+**What exists.** `reasonCountsView` counts the recorded population's `not_as_described` label as damage, matching T1.1b's disposition of the dispute code, and keeps both legacy spellings as read-side aliases for an index that predates the fit writer. No served write path can emit either: the classifier refuses any choice outside `domain.Categories`, the fit writer validates every stored category against the same set, disputes write no fit row, and `LoadSeed` writes no pool row. The served population carries domain words only. `TestReasonCountsViewGivesEachCauseOneField` pins the mapping; `TestServedFitWriterRefusesTheLegacyPoolLabels` pins that the writer refuses the aliases, so widening the vocabulary fails a test. My rule-1 call moved the frozen example with the view: `product_fit.response.example.json`, the three recall examples that repeat its pool block, and four `docs/interface.md` blocks now read damage 3 / non-arrival 0 (seeded 2 / 0), with the doc pin and the arithmetic tests green.
+
+**What surprised.** The fold looked live in CI only because the server's fake pool serves the recorded population's legacy spellings; no served path produces them. The review found the mapping test fed five of the seven categories and extended it to all seven.
+
+**The next agent should not have to work out.** The two spellings are read-side only; do not add them to `domain.Categories`. An index that already holds them reads correctly without a code change, and a producer that bypasses the fit writer would be invisible to the reachability test.
 
 ### T8.5v: The own-evidence sentence tells the truth (done)
 

@@ -646,7 +646,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/, internal/fitindex/, testdata/api/, docs/interface.md, dev-diary/PHASE-8-pivot-layer.md
-status:     in-review
+status:     done
 ```
 `internal/api/server/recall.go` folds a literal `"not_as_described"` reason category into `not_arrived` counts, a seam for the recorded Elastic population's labels. Since T1.1b, a not-as-described dispute counts under `damaged_or_defective`, so the same cause would read as non-arrival in one path and damage in the other if a classifier label ever reaches evidence. Disputes write no fit rows, so the pool never sees them today; decide and record whether the fold stays (with its reason) or maps to damage.
 
