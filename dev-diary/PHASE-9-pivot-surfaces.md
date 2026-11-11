@@ -856,6 +856,20 @@ Two claims in the notes above were corrected here. The skip is the guard's own, 
 
 ---
 
+### T9.22: Search the catalog after recall, excluding returned SKUs
+```yaml
+requires:   [T9.17]
+fixture-ok: yes
+size:       XS · mid
+owns:       agent/runtime/
+status:     not-started
+```
+T9.20's live turn proved the mechanism but named `tbnrl46`, a SKU the three seeded returns carry: the agent issued `search_catalog` 3 ms after recall started and before recall answered, so it had no returned SKUs to exclude, and its step-2 instruction never asks for sequencing or exclusion (the tool description offers `exclude_skus`; the instruction does not). product.md's step 2 wants a *different* SKU sharing the cut. Change the instruction: recall answers first, then `search_catalog` with `exclude_skus` from the returned rows' `item.sku`, and name only a SKU the search returned.
+
+**Done when:** the instruction sequences recall before the catalog search and passes the returned SKUs as `exclude_skus`; the offline check covers the sequencing rule; the deployment is redeployed from the committed code; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
