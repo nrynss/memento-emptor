@@ -677,6 +677,20 @@ Proof. Two table cases are added: `bun drifts in the readme table` (wants `bun: 
 
 Finding (Low), owner **T9.19**, whose `owns` is `tools/check.sh`: that file's pin comment still says "Bun's live in every Dockerfile's `oven/bun:` build stage and CI's setup-bun", which is now one source short — the table row is bun's third. The fix is that sentence plus the count it states for Go and Node, and it belongs to the task that is already editing that file's prose.
 
+**Review (fresh eyes).** Re-verified from the committed files on a branch cut at the task tip, no live call and no key, $0. Against the task's base the branch is `deploy/README.md`, `tools/pincheck`'s two files and this task's own lines, and nothing else. The table states Go, Node, Bun and Lambo, and the Bun row names the tree's bun stages exactly: `agent/frontend/Dockerfile` line 9, and lines 2 and 21 of `agent/runtime/`, `agent/second/` and `bench/pilot/agent/` (`oven/bun:1`, `oven/bun:1-slim`); CI's `setup-bun` is line 33 at `1.3.14`. `go run ./tools/pincheck` prints `go 1.27, node 26 and bun 1 agree across 18 declarations`, and the count is the code's own: the two deploy images' Go and Node stages (4), the seven `oven/bun:` stages (7), CI's three keys (3), `go.mod` (1) and the table's three rows (3).
+
+Mutation-checked on the real tree, each reverted with `git checkout` and a clean `git status` after: the Bun row at `| Bun | 2 |` fails `bun: deploy/README.md's toolchain table bun row (line 30) says 2, but agent/frontend/Dockerfile's bun build stage (line 9) says 1`; the row deleted fails `deploy/README.md: no bun row in the toolchain table, so the table states no bun pin`; the row at `1.3` stays green, the major comparison the section states; the row at `1.3.0` fails against CI's `1.3.14`, because `disagreements` also holds pins that state a patch to exact agreement. The last of those corrects the notes: "a 1.x patch drift in the row alone would stay green" holds for `1.3` and not for `1.3.0`.
+
+`go test ./tools/pincheck/` is green over the 25 table cases, and both new ones bite: cutting `readmeKinds` back to Go and Node fails exactly `bun drifts in the readme table` and `the table loses its bun row`.
+
+Fixes landed in this review, both in `deploy/README.md`. The paragraph quoted the check's output as `go 1.27, node 26 and bun 1 agree`, a prefix of the line it prints, beside a count stated twice; it now quotes the printed line with the count inside it. The opening called the bun-pinning images "the reference agents' images", which is short one: `bench/pilot/agent/` pins bun and is neither agent's deployed image, so it now says "the four agent images".
+
+Findings, with owners: none new. The task's Low finding is right that `tools/check.sh`'s pin comment names bun's two sources where the check now reads three, and T9.19 owns that file. Its brief does not mention the comment, only the agent steps, so the orchestrator should carry that sentence into the brief rather than leave it for that worker to find; the `owns` line already covers it. One clause of the finding is not right: the Go and Node count of six places is still six (both images' stages, `setup-go`, `setup-node`, `go.mod` and the table), so only the bun sentence needs the third source.
+
+Limits. No GitHub Actions run backs this, and the task changes no workflow. The 18 is a snapshot of the tree: a Dockerfile added later keeps the check green and makes the line stale, which is why it now reads as what the command prints. Bun is compared by major, as the section states, and only a row that states a patch is held exactly. `./tools/check.sh` is green with `npm ci` in `web/` and `merchant/`; `agent/frontend/node_modules` is absent here, so the frontend step takes its no-modules fallback, which T9.19's brief covers.
+
+Approve: scope is clean, the Bun row is a required source that fails on drift and on loss, both cases are proved by a table test and by mutation on the tree, the section states what the check reads and its coverage, and the gate passes.
+
 ---
 
 ### T9.19: The gate runs the agents' offline checks

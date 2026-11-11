@@ -19,9 +19,9 @@ region and cost are unchanged: $0 delta.
 ## Toolchain pins
 
 The two deploy images choose three toolchain versions between them, and
-the reference agents' images the fourth. Go and Node must match the
-versions the contract (T0.2) records, bun must match the one CI
-installs, and no build may pass in one place and fail in another:
+the four agent images the fourth. Go and Node must match the versions
+the contract (T0.2) records, bun must match the one CI installs, and
+no build may pass in one place and fail in another:
 
 | Tool | Pin | Where the images pin it | Where the pin is checked |
 |---|---|---|---|
@@ -38,8 +38,8 @@ which reads both deploy images' `FROM` lines, the `oven/bun:` `FROM`
 line of every Dockerfile in the tree, CI's `go-version`, `node-version`
 and `bun-version`, `go.mod` and all three rows of this table, and fails
 naming the file and version that drift. It also fails when a source
-stops stating its pin, so it cannot pass by reading less: over this tree
-it reads 18 declarations and prints `go 1.27, node 26 and bun 1 agree`.
+stops stating its pin, so it cannot pass by reading less. Over this tree
+it prints `go 1.27, node 26 and bun 1 agree across 18 declarations`.
 
 The Node major is the whole frontend pin: neither `web/package.json` nor
 `merchant/package.json` declares an `engines` field, so nothing but the
