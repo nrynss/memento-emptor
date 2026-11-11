@@ -927,7 +927,7 @@ requires:   [T8.5j]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/precedence/
-status:     not-started
+status:     claimed:t85q-live
 ```
 T8.5j's Done-when says a live run still passes after the harness marks its seeded statement. The offline check proves the mark path up to the served belief, but only a live run proves the seeded statement reaches `Recall` on the real hub. Run `tests/live/precedence/run.sh` once with the keys loaded, paste the transcript (redacted), and record the spend. Budget: under $0.20 of embedding spend (the fixture embedder spends $0).
 
