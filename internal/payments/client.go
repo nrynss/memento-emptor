@@ -55,6 +55,7 @@ type Client struct {
 	clientID  string
 	secret    string
 	webhookID string
+	catalog   Catalog
 
 	tokenMu    sync.Mutex
 	token      string

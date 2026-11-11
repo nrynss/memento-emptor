@@ -755,11 +755,132 @@ requires:   [T8.7, T8.5]
 fixture-ok: no
 size:       M · frontier
 owns:       cmd/memento/, internal/payments/, internal/ingest/, deploy/paypal-webhook.sh
-status:     claimed:t87b-live
+status:     in-review
 ```
 The T9.7 run found the served layer cannot ingest a live PayPal outcome: the verifier is real, but `cmd/memento` builds the ingest service with the recording demo source, and the PayPal app's only webhook subscription does not point at the layer. So a new purchase or dispute cannot be recorded live; the demo re-read the existing capture and wrote feedback through the layer instead. Build the real REST source (order, capture, refund and dispute reads) behind the existing seam, wire it in `cmd/memento`, point the sandbox app's subscription at the public webhook route, and prove one live delivery end to end. Budget: no model spend; sandbox calls only.
 
 **Done when:** a real sandbox capture and a real refund delivery reach the layer, write their evidence and fit rows, and are idempotent on redelivery; an unknown event is refused; the gate passes.
+
+**Notes (T8.7b, in-review, staged).** Everything except the one live delivery is built and proved. The hosted layer must not restart while the round-2 paid run uses it, so the delivery half is left with exact resume steps below.
+
+**What exists.** `internal/payments/source.go` is the real REST source behind `fakes.PaymentSource`. `VerifyWebhook` reads `GET /v1/notifications/webhooks-events/{id}` and maps a completed capture, a refunded capture or a created dispute into `fakes.WebhookEvent`; `GetOrder` reads `GET /v2/checkout/orders/{id}` and maps its line items; `GetCapture` reads `GET /v2/payments/captures/{id}`; `GetRefund` reads `GET /v2/payments/refunds/{id}` and follows its capture to the order; `GetDispute` reads `GET /v1/customer/disputes/{id}` and maps the code through `domain.StoredCategoryForDispute`, so an unknown code keeps its spelling and counts toward nothing. The event types are exactly the subscription's three (`PAYMENT.CAPTURE.COMPLETED`, `PAYMENT.CAPTURE.REFUNDED`, `CUSTOMER.DISPUTE.CREATED`); any other type is refused with `payments.ErrUnknownEvent`, which is distinct from `ingest.ErrUnknownEvent` (an unknown outcome kind). Every read is a GET, bounded by a 15 s deadline per public call and the client's 15 s HTTP timeout, with one access token shared with the verifier. A 404, a refused credential, a source failure and an unreadable record are separate sentinels (`ErrNotFound`, `ErrUnauthorized`, `ErrUnavailable`, `ErrMalformedRecord`); no error carries a credential or a secret. Order lines are joined through `payments.Catalog`: `payments.DemoCatalog()` is the sandbox demo's SKU join (PSW8GeK and `BRX-OXF-*` to Brand X oxford, `BRY-TEE-*` to Brand Y tee, `BRZ-CAP-*` to Brand Z cap), and a line the catalog does not know falls back to the order's own name/SKU/category so a purchase is never dropped.
+
+`cmd/memento` builds the seams in one place: with no PayPal credential it keeps `fakes.NewRecordingPaymentSource(fakes.DemoStoryInputs())` and the default gate; with either credential set it builds `payments.New(payments.WithCatalog(payments.DemoCatalog()))` and passes that same client as the delivery `Verifier`, in both the offline boot and the pivoted director. A half-configured pair stays live and refuses rather than silently replaying the recording. No new configuration was added: the credentials are the ones `deploy/render.yaml` already sets.
+
+**Offline proof.** `internal/payments/source_test.go` drives every read against the recorded fixtures in `testdata/paypal/`: the approved order (`order-get-approved-line-items.json`), the capture (`capture-get.json`, `capture2-get.json`), the refund (`refund-record.json`, `webhook-delivery-refunded.json`), the dispute (`dispute-get.json`, `webhook-delivery-dispute.json`), and capture events built around the recorded capture shape. It pins the event shapes, the links, the unknown-event sentinel, the 404/401/500 mapping, the timeout, the no-credential-in-error rule, the demo catalog and its fallback, and amount parsing. `internal/ingest/real_source_test.go` runs the production source through `Handle`: a capture and a refund each write one row and their fit rows once, a redelivery is answered before the source is read again, `HandleDelivery` with a fake verifier proves the deployed order (verify first, then read) and duplicate on the second delivery, an unknown event is `payments.ErrUnknownEvent` and not `ingest.ErrUnknownEvent`, and a malformed source record stores nothing. `cmd/memento/payment_test.go` pins the recording path with no credentials, the REST path with credentials, and the half-configured path staying live. The existing verifier tests in `client_test.go` and `delivery_test.go` are unchanged. No test reaches the network. `./tools/check.sh` ends `OK all checks passed`; `npm ci` was run in `web/` and `merchant/` first. The gate's two agent checks are skipped on this workstation because their bun modules are absent, exactly as the gate says; the Go, web and merchant checks all ran.
+
+**Live read-only proof.** `internal/payments/cmd/sourcecheck/` (a main program, no test, git-ignored `out/`) reads the sandbox's event ledger, picks the newest capture, refund and dispute, calls the production source's four reads, then drives `ingest.Handle` twice for the capture and refund and once for the dispute in memory. Every PayPal call is a GET (plus the OAuth token grant); nothing is created, no webhook is sent, no model is called. Command, from the repository root:
+
+```sh
+source tools/env.sh
+bash internal/payments/cmd/sourcecheck/run.sh
+```
+
+Redacted output (real ids in the git-ignored `out/transcript.json`):
+
+```text
+T8.7b live payment source (sandbox; GET only; real ids in out/transcript.json)
+events: capture WH-CAPTURE-LIVE, refund WH-REFUND-LIVE, dispute WH-DISPUTE-LIVE
+capture event: type=PAYMENT.CAPTURE.COMPLETED verified=true outcome=capture/COMPLETED/19500/USD link={order=ORD-CAPTURE capture=CAP-CAPTURE refund= dispute= custom=CUSTOM-CAPTURE}
+capture read: capture=CAP-CAPTURE order=ORD-CAPTURE custom=CUSTOM-CAPTURE outcome=capture/COMPLETED/19500/USD
+capture order: order=ORD-CAPTURE custom=CUSTOM-CAPTURE items=1
+  capture item: brand=brand-x-001 name=Brand X line=oxford shirt sku=PSW8GeK size=M category=shirts
+refund event: type=PAYMENT.CAPTURE.REFUNDED verified=true outcome=refund/COMPLETED/19500/USD link={order=ORD-REFUND capture=CAP-REFUND refund=RFD-REFUND dispute= custom=CUSTOM-REFUND}
+refund read: refund=RFD-REFUND order=ORD-REFUND capture=CAP-REFUND custom=CUSTOM-REFUND outcome=refund/COMPLETED/19500/USD has_reason=false
+refund order: order=ORD-REFUND custom=CUSTOM-REFUND items=1
+  refund item: brand=brand-x-001 name=Brand X line=oxford shirt sku=BRX-OXF-STR size=M category=shirts
+dispute event: type=CUSTOMER.DISPUTE.CREATED verified=true outcome=dispute/UNDER_REVIEW/19500/USD code=MERCHANDISE_OR_SERVICE_NOT_RECEIVED link={order=ORD-DISPUTE capture=CAP-DISPUTE refund= dispute=DISPUTE-LIVE custom=CUSTOM-DISPUTE}
+dispute read: dispute=DISPUTE-LIVE code=MERCHANDISE_OR_SERVICE_NOT_RECEIVED category=not_arrived item={brand=brand-x-001 name=Brand X line=oxford shirt sku=BRX-OXF-WHT size=M category=shirts} link={order=ORD-DISPUTE capture=CAP-DISPUTE refund= dispute=DISPUTE-LIVE custom=CUSTOM-DISPUTE}
+dispute order: order=ORD-DISPUTE custom=CUSTOM-DISPUTE items=1
+  dispute item: brand=brand-x-001 name=Brand X line=oxford shirt sku=BRX-OXF-WHT size=M category=shirts
+ingest capture: rows=1 pending=false duplicate=false fit_rows=1
+ingest capture again: rows=1 pending=false duplicate=true fit_rows=1
+ingest refund: rows=1 pending=true duplicate=false fit_rows=2
+ingest refund again: rows=1 pending=true duplicate=true fit_rows=2
+ingest dispute: rows=1 pending=false duplicate=false fit_rows=2
+LIVE READ OK: three events mapped and ingested, redelivery is a duplicate; no money moved, no webhook sent, no model spend
+```
+
+**Registration.** The event list is unchanged (the three types above), but `deploy/paypal-webhook.sh` is now idempotent on the event list as well as the URL: a subscription already at the URL gets missing event types added by PATCH while keeping every event it already carries, a complete one is left alone, and no subscription is created twice. It also had a latent bash syntax error (an apostrophe in the `${PUBLIC_URL:?...}` message made `bash -n` fail); that is fixed. Command:
+
+```sh
+source tools/env.sh
+PUBLIC_URL=https://<service>.onrender.com bash deploy/paypal-webhook.sh
+```
+
+First run creates the subscription; a later run prints `already subscribed with the three event types` and the id. The script registers `https://<service>.onrender.com/webhooks/paypal` (the hosting brief's public pattern); the edge rewrites it to the layer's `/webhooks/payment`. The edge also serves `/webhooks/payment` directly, so either public URL reaches the same route. Redaction rule for the diary: the subscription id is account detail and is written `SUBSCRIPTION-ID-REDACTED`; never paste the raw JSON, a real subscription/event/order/capture/refund id, an email or a token. The expected first-run output is:
+
+```text
+webhook: creating https://<service>.onrender.com/webhooks/paypal
+webhook: https://<service>.onrender.com/webhooks/paypal
+subscription: SUBSCRIPTION-ID-REDACTED
+events: CUSTOMER.DISPUTE.CREATED, PAYMENT.CAPTURE.COMPLETED, PAYMENT.CAPTURE.REFUNDED
+```
+
+**Deliberately left: the one live delivery.** It needs the layer redeployed from this branch, and the current deployment must not restart while the round-2 paid run uses it. After the orchestrator redeploys, the exact resume is:
+
+1. Confirm the public service is up: `GET https://<service>.onrender.com/healthz` answers `{"ok":true}`.
+2. Register the public subscription with the command above. This leaves the test-endpoint subscription beside it; the verifier tries every subscription when `PUBLIC_URL` is unset, and the source answers SUCCESS only for the one that signed a delivery, so the extra candidate cannot widen what verifies. Register before the first delivery after the redeploy: the verifier caches the app's subscription ids for the life of the process, so a subscription created after its first verification is not a candidate until the next restart.
+3. Create a fresh sandbox capture; this is the one new sandbox money movement and it is free. A fresh capture is needed because PayPal does not backfill a new subscription with old events. The order carries `custom_id: shopper_01` deliberately: the existing agent and shopper keys bind `shopper_01`, so the rows are readable through the deployed layer; the reference agent's own orders mint `memento-<shopper>-<sequence>`, which would land in a separate partition. Exact create, with `$token` from `source tools/env.sh` as in the research's §1:
+
+```sh
+API=https://api-m.sandbox.paypal.com
+token=$(curl -fsSL -u "$PAYPAL_CLIENT_ID:$PAYPAL_CLIENT_SECRET" \
+  -d grant_type=client_credentials "$API/v1/oauth2/token" |
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["access_token"])')
+cat > /tmp/t87b-order.json <<'JSON'
+{"intent":"CAPTURE","purchase_units":[{"reference_id":"shopper_01","custom_id":"shopper_01","description":"oxford shirt size M","amount":{"currency_code":"USD","value":"195.00","breakdown":{"item_total":{"currency_code":"USD","value":"195.00"}}},"items":[{"name":"Brand X Button Down Oxford Shirt size M","sku":"PSW8GeK","quantity":"1","unit_amount":{"currency_code":"USD","value":"195.00"}}]}],"payment_source":{"paypal":{"return_url":"https://example.com/return","cancel_url":"https://example.com/cancel"}}}
+JSON
+curl -fsSL -X POST -H "Authorization: Bearer $token" -H "Content-Type: application/json" \
+  -H "PayPal-Request-Id: t87b-capture-1" \
+  --data-binary @/tmp/t87b-order.json "$API/v2/checkout/orders" | python3 -m json.tool
+```
+
+Open the returned `payer-action` link with the sandbox shopper login (the one-click wallet approval from `dev-diary/research/paypal.md` §1), then capture and refund:
+
+```sh
+curl -fsSL -X POST -H "Authorization: Bearer $token" -H "Content-Type: application/json" \
+  -H "PayPal-Request-Id: t87b-capture-1" \
+  "$API/v2/checkout/orders/<order-id>/capture" | python3 -m json.tool
+curl -fsSL -X POST -H "Authorization: Bearer $token" -H "Content-Type: application/json" \
+  -H "PayPal-Request-Id: t87b-refund-1" \
+  -d '{"amount":{"currency_code":"USD","value":"195.00"},"note_to_payer":"T8.7b live refund delivery"}' \
+  "$API/v2/payments/captures/<capture-id>/refund" | python3 -m json.tool
+```
+
+4. Read the two events from the ledger (`GET /v1/notifications/webhooks-events?page_size=20`): one `PAYMENT.CAPTURE.COMPLETED` and one `PAYMENT.CAPTURE.REFUNDED`, each with `resource.custom_id == "shopper_01"`. PayPal delivers within about a minute; the research's watched window is the reference.
+
+5. Prove the layer wrote them. The capture files no pending question and a capture row is not surfaced by `ledger_evidence`, so read the fit row directly from the pool index and the refund through the pending question:
+
+```sh
+agent_token=$(secret-tool lookup service memento-tokens account memento-emptor kind agent)
+curl -fsSL -X POST -H "Authorization: Bearer $agent_token" -H "Content-Type: application/json" \
+  -d '{"shopper_id":"shopper_01"}' "https://<service>.onrender.com/tools/pending_questions" | python3 -m json.tool
+curl -fsSL -H "Authorization: Bearer $agent_token" "https://<service>.onrender.com/calls" | python3 -m json.tool
+curl -fsSL -H "Authorization: ApiKey $LAMBO_ES_API_KEY" -H "Content-Type: application/json" \
+  "$ELASTIC_URL/fit-rows/_search" -d '{"size":3,"version":true,"query":{"bool":{"filter":[
+    {"term":{"brand":"brand-x-001"}},{"term":{"size":"M"}},{"term":{"seeded":false}}
+  ]}},"sort":[{"captured_at":"desc"}]}' | python3 -m json.tool
+```
+
+Expected: one pending question whose `outcome.kind` is `refund` and whose `link` names the order, capture and refund with `custom_id: shopper_01`; two `webhook_ingest` entries for `shopper_01` in `/calls`; one `fit-rows` hit with `_source.brand == "brand-x-001"`, `_source.size == "M"`, `_source.purchase_state == "refunded"`, `_source.settled == false`, and `refunded_at` set. Redact `_id`, `txn_hash`, `shopper_hash` and the real transaction ids in the diary. The row is one document: the capture wrote `captured`, the refund moved it to `refunded`.
+
+6. Prove idempotency on redelivery. Resend both events:
+
+```sh
+curl -fsSL -X POST -H "Authorization: Bearer $token" \
+  "$API/v1/notifications/webhooks-events/<capture-event-id>/resend" | python3 -m json.tool
+curl -fsSL -X POST -H "Authorization: Bearer $token" \
+  "$API/v1/notifications/webhooks-events/<refund-event-id>/resend" | python3 -m json.tool
+```
+
+Expected: each answers `202` with the event's `id`, `event_type` and `summary`. Then repeat the three reads: still one pending question, the same `_version` on the fit row (a duplicate is answered before the fit write), and two more `webhook_ingest` entries in `/calls`. The layer's own answer to the resend is `duplicate:true`; that answer travels to PayPal, so the unchanged rows and fit-row version are the operator's proof.
+
+7. If the delivery does not arrive, the source's typed errors name the cause: `ErrNotFound` (the event id is not in the ledger), `ErrUnauthorized` (the app's credentials), `ErrUnavailable` (a token or transport failure), `ErrMalformedRecord` (a record the mapper cannot describe), `ErrUnknownEvent` (an event type outside the three). The layer's answer travels to PayPal, so reproduce the read with `internal/payments/cmd/sourcecheck` (it prints the typed error) or read the edge's request log for the status; no key is printed by either.
+
+**Findings for the orchestrator.** The dispute **read** is complete and proved live, but a real dispute **delivery** still cannot route: both `cmd/memento`'s and `internal/api/server`'s webhook shopper join read `resource.custom_id`, while a `CUSTOMER.DISPUTE.CREATED` resource carries `custom` per disputed transaction. A dispute delivery therefore lands on the default service and is refused. `internal/api/server/` is outside this task's `owns`, so it is recorded, not changed. The remaining step above sends only a capture and a refund, so it is not blocked by this; the orchestrator should assign the dispute-aware join to a future task (no new task id is created here). A second finding, recorded rather than worked around: the reference agent's `custom_id` is `memento-<shopper>-<sequence>`, not the shopper id, so a live delivery would land in a partition named by the custom id; the resume step avoids that by creating the capture with `custom_id: shopper_01`, and a later task can decide whether the route should resolve the agent's convention or the agent should set the contract's join.
+
+**Spend.** $0. The live proof made sandbox GETs and one token grant only; no model, no Render use, no money moved, no webhook sent.
 
 ---
 

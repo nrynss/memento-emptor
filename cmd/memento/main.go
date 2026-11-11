@@ -56,6 +56,7 @@ import (
 	"github.com/nrynss/memento-emptor/internal/fakes"
 	"github.com/nrynss/memento-emptor/internal/fitindex"
 	"github.com/nrynss/memento-emptor/internal/identity"
+	"github.com/nrynss/memento-emptor/internal/payments"
 	"github.com/nrynss/memento-emptor/internal/pool"
 	"github.com/nrynss/memento-emptor/seed"
 )
@@ -279,6 +280,27 @@ func elasticWired() bool {
 	return os.Getenv("ELASTIC_URL") != "" && os.Getenv("LAMBO_ES_API_KEY") != ""
 }
 
+// paypalWired reports whether the sandbox app's credentials are in the
+// environment. Either one switches the source live: a half-configured pair
+// is the source's refusal to answer, never a silent replay of the recording.
+func paypalWired() bool {
+	return os.Getenv("PAYPAL_CLIENT_ID") != "" || os.Getenv("PAYPAL_CLIENT_SECRET") != ""
+}
+
+// paymentSeams returns the payment source and, when live, the delivery
+// gate over the same client so one access token serves both. No credentials
+// is the recording demo source, which is the offline path and every test.
+func paymentSeams() (fakes.PaymentSource, *payments.Client) {
+	if !paypalWired() {
+		return fakes.NewRecordingPaymentSource(fakes.DemoStoryInputs()), nil
+	}
+	if os.Getenv("PAYPAL_CLIENT_ID") == "" || os.Getenv("PAYPAL_CLIENT_SECRET") == "" {
+		log.Print("memento: WARNING only one PayPal credential is set; live payment reads and the webhook gate will refuse")
+	}
+	client := payments.New(payments.WithCatalog(payments.DemoCatalog()))
+	return client, client
+}
+
 func run(addr, schemaDir, jevDir string, seedFlag bool, shopper, standingDir, fitIndex string) error {
 	if hubWired() {
 		if os.Getenv("MEMENTO_IDENTITY_SALT") == "" {
@@ -314,8 +336,9 @@ func runOffline(addr, schemaDir, jevDir string, seedFlag bool, shopper, standing
 	if seedFlag {
 		graphContents = append(graphContents, server.SeedGraphContents(seed)...)
 	}
-	svc, err := server.NewService(server.Deps{
-		Payments:   fakes.NewRecordingPaymentSource(fakes.DemoStoryInputs()),
+	source, gate := paymentSeams()
+	deps := server.Deps{
+		Payments:   source,
 		Classifier: classifier,
 		Store:      store,
 		Graph:      fakes.NewRecordingEvidenceGraph(graphContents, fakes.StoryRecalls()),
@@ -326,7 +349,11 @@ func runOffline(addr, schemaDir, jevDir string, seedFlag bool, shopper, standing
 		// wires them; the standing directory alone decides whether the
 		// journals — corrections and evidence — survive a restart.
 		StandingDir: standingDir,
-	})
+	}
+	if gate != nil {
+		deps.Verifier = gate
+	}
+	svc, err := server.NewService(deps)
 	if err != nil {
 		return err
 	}
@@ -382,6 +409,7 @@ func runPivoted(addr, schemaDir, jevDir string, seedFlag bool, shopper, standing
 	if err != nil {
 		return err
 	}
+	source, gate := paymentSeams()
 	shared := pivotedShared{
 		schemaDir:  schemaDir,
 		classifier: classifier,
@@ -390,6 +418,8 @@ func runPivoted(addr, schemaDir, jevDir string, seedFlag bool, shopper, standing
 		keyer:      keyer,
 		lines:      lines,
 		standing:   standingDir,
+		payments:   source,
+		gate:       gate,
 	}
 	director, err := newDirector(shared)
 	if err != nil {
@@ -431,6 +461,8 @@ type pivotedShared struct {
 	keyer      *identity.Keyer
 	lines      fitindex.Lines
 	standing   string
+	payments   fakes.PaymentSource
+	gate       *payments.Client
 }
 
 // director routes each request to one Service per shopper, creating it on
@@ -477,8 +509,8 @@ func (d *director) newService(shopper string) (*server.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	svc, err := server.NewService(server.Deps{
-		Payments:     fakes.NewRecordingPaymentSource(fakes.DemoStoryInputs()),
+	deps := server.Deps{
+		Payments:     d.shared.payments,
 		Classifier:   d.shared.classifier,
 		Store:        store,
 		Graph:        graph,
@@ -489,7 +521,11 @@ func (d *director) newService(shopper string) (*server.Service, error) {
 		IdentitySalt: os.Getenv("MEMENTO_IDENTITY_SALT"),
 		Lines:        d.shared.lines,
 		StandingDir:  d.shared.standing,
-	})
+	}
+	if d.shared.gate != nil {
+		deps.Verifier = d.shared.gate
+	}
+	svc, err := server.NewService(deps)
 	if err != nil {
 		return nil, fmt.Errorf("memento: service for %q: %w", shopper, err)
 	}
