@@ -59,6 +59,9 @@ request ids. The layer only remembers what happened to the money.
 4. **Record what the shopper says.** Corrections go to
    `record_correction` at once; answers go to `record_reason`; how the
    purchased size worked out goes to `record_feedback` after delivery.
+   A general statement — "I'm usually an M" — has no tool: statements
+   arrive only from the seed (see "Where the general statement comes
+   from").
 5. **Honour consent.** Pooling is opt-out. When the shopper asks to be
    left out of it, call `set_pooling` with `pooling: false`; their rows
    leave the pool and no new ones are written.
@@ -232,7 +235,7 @@ used. The steps are ordered, strongest first:
 | 1. The correction | `correction` | An explicit, recent, first-person correction is in force. It wins at once; waiting for evidence would make the agent stubborn |
 | 2. The shopper's own evidence | `own_evidence` | The shopper's own fit evidence for this brand, at any status. Fit is personal: a shopper who needs L where everyone else needs M keeps their L |
 | 3. The pool | `pool` | The pooled product-fit belief, adjusted from the shopper's usual size only when the pool says the product runs off-size |
-| 4. The statement | `statement` | The shopper's general statement. It is Claimed and never promotes |
+| 4. The statement | `statement` | The shopper's general statement, which only the seed supplies. It is Claimed and never promotes |
 | 5. Nothing | `none` | None of the above applies, and the response says so |
 
 The own-evidence step's `basis` is `own_evidence`. The pre-pivot schema
@@ -254,11 +257,36 @@ the best thing the layer knows.
 index answered, `unavailable` when it could not be reached. Recall
 carries on without a pool and never pretends an empty one.
 
+### Where the general statement comes from
+
+Rung 4 needs a general statement, and no tool on this surface records
+one. Statements reach a shopper's memory only through the seed: replaying
+it derives each seeded belief that carries no evidence as a note, and
+those notes are the statements recall serves. The statement in the
+example below is one of them, and it carries the seeded mark like every
+other seeded row.
+
+The reason is the rule rung 4 rests on. A statement is a Claimed label,
+never evidence: it is the shopper's word about themselves, not something
+a payment outcome or a purchase-tied answer established, so no code path
+may turn one into a belief. Recording it through a tool would mean a new
+frozen tool name with its request and response schemas, a route that
+derives the note and never writes a structural edge, and every fixture
+and tool list in the build updated in the same commit. That is a
+contract change, and this surface does not have it. A builder who needs
+the shopper's usual size recorded seeds it with the shopper's history.
+
+When a statement is there, recall serves it at step 4 as Claimed with
+standing None and no evidence: own evidence and the pool both override
+it, and it decides only when nothing stronger applies. It is also where
+the shopper's usual size comes from, when no kept or fits-well purchase
+names one or those purchases tie.
+
 ### A new shopper, decided by the pool
 
 No history with the brand, no correction, no fit evidence — only a
-general statement, Claimed. The request names the brand, category and fit
-handle, so the pool answers for the line:
+general statement from the seed, Claimed. The request names the brand,
+category and fit handle, so the pool answers for the line:
 
 ```json validate=recall_for_purchase.request.example-pool
 {
@@ -292,7 +320,7 @@ This is the move no single shopper's history can make:
       "contradicted_by": null,
       "evidence": [],
       "precedence": {"step": "statement", "overridden": true, "overridden_by": "pool"},
-      "seeded": false,
+      "seeded": true,
       "updated_at": "2026-11-08T09:20:00Z"
     }
   ],
@@ -1540,8 +1568,12 @@ How a signal is written:
 |---|---|---|
 | Classified return or dispute, fit feedback | record_action | yes |
 | The shopper's correction | record_action, citing the belief in `against` only | never: it overrides, it adds no evidence |
-| General statement | derive | never |
+| General statement | derive, from the seed only | never |
 | Kept past the window, no feedback | observe | never |
+
+The statement row is the seed's: no tool records one, so the `derive`
+there is written by the boot replay, and a statement the seed does not
+carry does not exist. See "Where the general statement comes from".
 
 Seeded means marked. Every seeded row carries the mark, and the ledger
 shows it beside the row and in the seeded notice. The `shopper_01`

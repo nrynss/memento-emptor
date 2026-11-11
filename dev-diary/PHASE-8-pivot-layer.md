@@ -562,11 +562,19 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/contract/, internal/api/server/, testdata/api/, docs/interface.md
-status:     claimed:t85h-statement
+status:     in-review
 ```
 The precedence order's fourth rung is a general statement, and the served layer serves statements when they exist, but no tool records one: statements reach the store only through the seed. A builder reading `docs/interface.md` would look for a way to record the shopper's usual size and find none, so rung 4 cannot be exercised live. Decide: add a `record_statement` tool (contract change with its fixtures and docs), or state the limitation plainly in `docs/interface.md` and name the seed as the only source.
 
 **Done when:** either the tool exists, is served, and its fixture set validates, or the documentation states the limitation and the seed as the only source; the gate passes.
+
+**Notes (in-review).** Took the documentation option. A `record_statement` tool is not small here: `TestToolsFrozen` pins the surface at eleven names, and the tool list is materialised in `internal/auth`'s `toolAccess` table (outside this task's `owns`) as well as in the agent frontends, the ledger and the merchant app, so the tool would drag every one of those into the commit — and what it would buy is the single Claimed label the seed already supplies, since the layer never promotes a statement. Docs changed:
+
+- `docs/interface.md` gains "Where the general statement comes from", between the precedence order and the new-shopper example: no tool records a statement, the boot replay's derived notes are their only source, the reason is that a statement is a Claimed label and never evidence (so no code path may turn it into a belief), what adding a tool would actually take, and how recall serves one when it is there (step 4, Claimed, standing None, overridden by own evidence and the pool, and the usual-size fallback).
+- The rung-4 table row, the turn-pattern step for recording what the shopper says, the "How a signal is written" row and the new-shopper example's lead sentence all say the same thing, so a builder meets the limit where they look for the tool.
+- One fixture corrected for honesty: `recall_for_purchase.response.example-pool.json`'s statement belief carried `seeded: false`, which no path can produce — only the seed writes a statement, and the seed's own statement rows carry the seeded mark — so it now carries that mark, and the document's block is byte-identical to it. `ledger_beliefs.response.example.json` already marked the same value `seeded: true`, so the recall example was the outlier against its sibling fixture, not a deliberate shape. Rule 7 holds at the one row the doc used to contradict itself on.
+
+A follow-on `record_statement` tool would be a new contract task for the orchestrator to open; the tool name, the two schemas, the route, the table test and `internal/auth`'s access table all belong in that one commit. Gate green, `npm ci` in `web/` and `merchant/` first; `go test ./internal/api/...` green; spend $0.00, no live call.
 
 ---
 
