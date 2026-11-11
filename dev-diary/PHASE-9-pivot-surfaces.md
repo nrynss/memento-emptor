@@ -707,6 +707,20 @@ T9.9 gave both agents' tool bindings offline coverage, but `tools/check.sh` does
 
 ---
 
+### T9.20: The demo's step 2 runs live
+```yaml
+requires:   [T9.17]
+fixture-ok: no
+size:       XS · mid
+owns:       demo/
+status:     not-started
+```
+T9.17 gave the reference agent a catalog search, but no live turn has used it and `demo/run.py` does not call it, so product.md's step 2 still has no live path. After the agent is redeployed with `CHANNEL3_API_KEY`, add the catalog call to the demo driver, take one live turn that names the matched candidate (line, size, SKU) before its recommendation, and record the step-2 evidence and the one Channel3 credit it costs.
+
+**Done when:** a live reference-agent turn searches the catalog and names the matched candidate before its recommendation; the demo driver records it; the credit and any spend are recorded; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
