@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 12 / 13 | In progress (T8.5c) |
+| P8 | 13 / 15 | In progress (T8.5d, T8.5e) |
 | P9 | 8 / 10 | In progress (T9.6, T9.7) |
 | P10 | 3 / 6 | In progress |
 
@@ -323,6 +323,12 @@ PASS T8.3b live pool: seeded pool read warm and cold; index deleted
 **What surprised.** The index's per-direction shopper counts cover fit *returns* only, so feedback-only direction evidence never meets the eight-shopper floor: 10 shoppers with only `too_small` feedback read Building where the rule says Earned. That is T8.3c (new): union the counts or narrow the rule — the latter is a contract change and the orchestrator's call. The T0.12 recording predates the `fit_shoppers` filter, so the fixture test derives 63/55/8 from the recorded counts. The index predates `settled_at`-window reads; the recent window is a separate top-level aggregation.
 
 **The next agent should not have to work out.** T8.5 builds the reader in the layer, calls `Warm` at boot (a nil return is not "the pool is configured" — a wrong key shows up on the first `Fit`), maps `ErrUnavailable` to `contract.PoolUnavailable`, and maps `Counts.Reasons` to the contract views. T8.3b does the live read. T8.3c resolves the union question before the pool is served.
+
+### T8.5c: Re-link declared views (done, edge cases owned by T8.5d)
+
+**What exists.** `internal/api/server/` re-links declared corrections by content match on restore and serves the consulted-empty pool shape. Review FINDINGS: one High (same-words/two-subjects cross-link on divergent rebuild — recall hard-fails), one Medium (silent views with no rewritten belief), one Low (same-subject two-belief collapse) — all owned by T8.5d, plus the server-comparison update for the tightened fixtures. The live tripwire flip is T8.5e's.
+
+**The next agent should not have to work out.** T8.5d persists the view↔entry pairing and updates the comparison; T8.5e flips the live tripwires.
 
 ### T8.5b: Layer end to end, live (done)
 

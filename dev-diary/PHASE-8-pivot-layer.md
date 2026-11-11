@@ -377,7 +377,7 @@ requires:   [T8.5, T8.5b]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     in-review
+status:     done
 ```
 T8.5b pinned two defects live, both needing `internal/api/server/`: a restored declared view matches no precedence class after restart (beliefs get fresh ids, the stale `ContradictsBeliefID` matches nothing), so the correction loses all force and the pool decides; and a wired pool consulted on an empty line returns Claimed with a `(nil, consulted)` lookup the assembler rejects. Re-link declared views by content match on restore, and decide the consulted-empty guard (serve it or refuse it loudly). Tripwires for both live in `tests/live/precedence/`.
 
@@ -386,9 +386,39 @@ T8.5b pinned two defects live, both needing `internal/api/server/`: a restored d
 **Notes (in-review).** Both fixes are in `internal/api/server/`, fixture only, no contract or store change.
 
 - Consulted-empty: serve it. The frozen `example-none` shape is already pool-absent with lookup `consulted`, and the contract suite pins `consulted with an empty pool` — the assembler's rejection contradicted the contract. `assembleRecall` now accepts a nil pool with a `consulted` lookup (unwired/skipped still ride none, unreachable still rides unavailable; a present pool still requires consulted). `TestRecallConsultedEmptyPoolServes` pins it: a wired pool answering Claimed on a full line serves no pool object, lookup consulted, guidance none.
-- Re-link: `persistStanding` now journals every entry with its against cleared, plus a synthesized cover entry (words, live belief's subject, size, time) for each declared view with no same-words/same-subject journal entry — direct-against-belief corrections never journalled, so without the cover they could never re-link. `restoreStanding` re-records them as standings, so the rewritten belief re-declares them by subject match. `backfillDeclaration` re-links a restored view by content match on the correction's words when its citation is stale: unknown id, or an id the restart reused for an unrelated belief, detected by asking whether any same-words journal entry names the cited belief's subject. A citation explained that way is left alone, so the same words declared against two subjects never cross-link.
+- Re-link: `persistStanding` now journals every entry with its against cleared, plus a synthesized cover entry (words, live belief's subject, size, time) for each declared view with no same-words/same-subject journal entry — direct-against-belief corrections never journalled, so without the cover they could never re-link. `restoreStanding` re-records them as standings, so the rewritten belief re-declares them by subject match. `backfillDeclaration` re-links a restored view by content match on the correction's words when its citation is stale: unknown id, or an id the restart reused for an unrelated belief, detected by asking whether any same-words journal entry names the cited belief's subject. A citation explained that way is left alone, so the same words declared against one subject never cross-link to another subject's belief through the journal check. (Correction on review: across subjects on a divergent rebuild, both views can still collapse onto the first-rebuilt belief — the journal check is per subject, not per view. That cross-subject collapse plus the silent-view and two-belief cases are T8.5d's work, not this task's.)
 - `TestDeclaredCorrectionRelinksAfterRestart` (direct path) and `TestStandingDeclaredRelinksAfterRestart` (standing-then-declared path) prove it with a divergent mint order: the restarted layer ingests a dispute first, so the rewritten fit belief cannot reuse its old id, and the correction still decides citing the new id. Both fail on the old code with the defect's exact shape (correction silent, own evidence decides). The gate passes.
 - The live tripwires in `tests/live/precedence/` still pin the defects and are outside this task's `owns`, so they are untouched: the next live run will surface both as stale pins (the consulted-empty probe succeeds where it pinned a failure; the dangling view still overrides after restart where it pinned loss of force). Flipping those assertions to pin the fix needs a driver update with live Elastic and the hub binary, which this task cannot run offline.
+
+Review FINDINGS (all owned, none blocking the landed mechanism): (1, High) same words declared against two subjects + divergent rebuild collapses both views onto the first-rebuilt belief while the second recall hard-fails `ErrOverrideMissing`. Needs persisted view↔entry pairing. (2, Medium) a declared view with no rewritten belief goes fully silent in the restart-before-redelivery window. (3, Low) same-subject two-belief collapse. All three plus the server-comparison update for T7.4's tightened fixtures ride in T8.5d; the live tripwire flip rides in T8.5e.
+
+---
+
+### T8.5d: Harden re-linking and serve the tightened shape
+```yaml
+requires:   [T8.5c, T7.4]
+fixture-ok: yes
+size:       M · mid
+owns:       internal/api/server/, internal/standing/
+status:     not-started
+```
+T8.5c's re-link works for the direct and standing paths, but the review proved three edge defects live in `internal/api/server/`: same-words/two-subjects cross-link on divergent rebuild (recall hard-fails `ErrOverrideMissing` — the refusal this layer exists to eliminate); silent declared views with no rewritten belief; same-subject two-belief collapse. Persist the view↔entry pairing (or equivalent) so a rebuild re-links exactly. In the same task, update the served-side comparison against T7.4's tightened fixtures (the two failing subtests the T7.4 review pinned).
+
+**Done when:** the three edge cases are tested (including the throwaway reproduction: same words, fit belief + seller belief, divergent rebuild — both views stay attached to their own beliefs and no recall hard-fails); the server comparison passes against the tightened fixtures; the gate passes.
+
+---
+
+### T8.5e: Flip the re-link tripwires live
+```yaml
+requires:   [T8.5d]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/precedence/
+status:     not-started
+```
+The T8.5b driver pins the defect shapes (loss of force after restart; `pool absent with lookup` rejection). After T8.5d lands, flip both tripwires to pin the fix, live against the hub. Budget: under $0.20 of embedding spend.
+
+**Done when:** both tripwires assert the fixed behaviour live; test indices and sessions erased; spend recorded.
 
 ---
 
