@@ -442,6 +442,20 @@ status:     claimed:t25b-housekeeping
 
 ---
 
+### T2.2d: Move the live reasons driver to the thirteen-phrase set
+```yaml
+requires:   [T2.2c]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/reasons/
+status:     not-started
+```
+T2.2c took the labelled Jev set to thirteen recordings, but `tests/live/reasons/` still pins eleven: `main.go`'s `len(want) != 11` guard, `run.sh`, the README and the total-cost line. A live rerun would refuse the set before making a call. Move the driver, its script and its README to the thirteen-phrase set; no live call is needed to make the change.
+
+**Done when:** the driver accepts the thirteen-recording set and would run against it; the pinned total matches the recorded costs; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] PayPal events become evidence, idempotently (T2.1, T2.1b).
