@@ -496,11 +496,17 @@ requires:   [T9.12]
 fixture-ok: yes
 size:       XS · mid
 owns:       .github/workflows/ci.yml
-status:     claimed:t913-ci-bun
+status:     in-review
 ```
 T9.12 wired the frontend guard into the gate, but the full-package typecheck needs `bun` and the package's modules, which the CI runner does not have: CI takes the reduced fallback that checks only `server/relay.ts`. Add `setup-bun` and a frozen `bun install` for `agent/frontend/` to the workflow so CI runs the same full typecheck as a workstation.
 
 **Done when:** CI installs bun and the package's frozen dependencies and the gate's frontend step runs the full typecheck there; a run shows it green; no other gate step changes.
+
+**Notes (worker).** `.github/workflows/ci.yml` gains three steps before the gate and nothing else moves: `oven-sh/setup-bun@v2` with `bun-version: '1.3.14'` (the version this task proved the gate on, quoted like the existing `go-version` and `node-version` pins and tag-pinned like the other actions), `actions/cache@v4` over `~/.bun/install/cache` keyed `${{ runner.os }}-bun-${{ hashFiles('agent/frontend/bun.lock') }}`, and `bun install --frozen-lockfile` with `working-directory: agent/frontend`. setup-bun caches its downloaded executable by default (`no-cache` defaults to false); the explicit cache covers the package downloads the install fetches, and its key moves with the lockfile. `tools/check.sh` is unchanged: the frontend step still runs `bun run typecheck` where bun and `agent/frontend/node_modules` exist and otherwise prints its limit and checks `server/relay.ts` alone, so a machine without bun behaves exactly as before. The workflow parses as YAML with all nine steps reading back in order, and `go run ./tools/pincheck` still agrees across 9 declarations, because that check reads only `go-version:` and `node-version:`.
+
+Proof on the workstation: `bun --version` is 1.3.14; `bun install --frozen-lockfile` in `agent/frontend/` installs 282 packages and leaves `bun.lock` untouched; `bun run typecheck` (the package's `tsc --noEmit` over `server/`) exits 0; `./tools/check.sh` is green and its frontend step prints `-- agent/frontend typecheck (bun run typecheck)` then `$ tsc --noEmit`, the full-package branch. `npm ci` in `web/` and `merchant/` supplied the gate's other dependencies.
+
+**Limit, stated.** GitHub Actions cannot run in this worktree, so no CI run backs this change; what is proved is the exact command sequence the job now runs, locally. The "a run shows it green" clause stays unproven until the workflow runs on a push. Finding (Low), owner: a future task the orchestrator numbers, extending `tools/pincheck` to bun, because bun's pin is hand-kept and nothing compares it to a second source; `package.json` sets no `packageManager` or `engines.bun`, so leaving `bun-version` off would float to `latest` rather than pin anything. T9.14 can now run its mapping test under the bun CI installs.
 
 ---
 
