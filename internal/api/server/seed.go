@@ -323,8 +323,7 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 		if err := memory.RecordCorrection(ctx, s.graph, corr.view.Text, belief.content, corr.at); err != nil {
 			return fmt.Errorf("server: load seed: record correction: %w", err)
 		}
-		st.corrections[corr.view.CorrectionID] = &correctionRecord{view: corr.view, at: corr.at}
-		st.corrOrder = append(st.corrOrder, corr.view.CorrectionID)
+		st.takeCorrection(corr.view.CorrectionID, &correctionRecord{view: corr.view, at: corr.at})
 	}
 
 	for id, timeline := range seed.Timelines {

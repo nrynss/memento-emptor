@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -397,10 +398,46 @@ func (s *Service) state(ctx context.Context, shopper string) (*shopperState, err
 }
 
 // mint returns the next wire id under one prefix, deterministic in call
-// order so tests replay exactly.
+// order so tests replay exactly. A reserved id holds its number: a
+// correction id taken from the journal or the seed makes the next mint
+// of that prefix start past it.
 func (st *shopperState) mint(prefix string) string {
 	st.seq[prefix]++
 	return fmt.Sprintf("%s_%06d", prefix, st.seq[prefix])
+}
+
+// reserveID holds one id's number against the mint sequence under its
+// prefix, so mint never returns an id the store already holds. An id in
+// another shape — a fixture's opaque correction id — names no number and
+// reserves nothing. The caller holds the lock.
+func (st *shopperState) reserveID(id string) {
+	prefix, digits, ok := strings.Cut(id, "_")
+	if !ok || prefix == "" || digits == "" {
+		return
+	}
+	n, err := strconv.Atoi(digits)
+	if err != nil || n < 1 {
+		return
+	}
+	if n > st.seq[prefix] {
+		st.seq[prefix] = n
+	}
+}
+
+// takeCorrection records one correction under its id, in arrival order,
+// the first time the id is seen. A correction id identifies one
+// correction for the life of the store: a restored id and the seed that
+// replays it are one correction, so a later sighting keeps the first
+// view in its first place instead of appending a second row. The id's
+// number is reserved against the mint sequence, so a later mint cannot
+// reuse it. The caller holds the lock.
+func (st *shopperState) takeCorrection(id string, rec *correctionRecord) {
+	if _, taken := st.corrections[id]; taken {
+		return
+	}
+	st.reserveID(id)
+	st.corrections[id] = rec
+	st.corrOrder = append(st.corrOrder, id)
 }
 
 // log records one interface call. The caller holds the service lock.

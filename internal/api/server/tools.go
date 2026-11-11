@@ -444,8 +444,7 @@ func (s *Service) RecordCorrection(ctx context.Context, req contract.RecordCorre
 		},
 		at: now,
 	}
-	st.corrections[id] = rec
-	st.corrOrder = append(st.corrOrder, id)
+	st.takeCorrection(id, rec)
 	belief.touch(now)
 	st.timeline(belief.id, contract.TimelineEvent{
 		At:      now.Format(time.RFC3339),
@@ -488,8 +487,7 @@ func (s *Service) recordStanding(ctx context.Context, st *shopperState, req cont
 		},
 		at: now,
 	}
-	st.corrections[id] = rec
-	st.corrOrder = append(st.corrOrder, id)
+	st.takeCorrection(id, rec)
 	if namesSubject(subject) {
 		entry := standingCorrection(req.Text, subject, size, now)
 		if err := st.journal.Record(ctx, s.graph, entry); err != nil {
@@ -1095,22 +1093,36 @@ func (s *Service) ExplainBelief(ctx context.Context, req contract.ExplainBeliefR
 	if err != nil {
 		return contract.ExplainBeliefResponse{}, fmt.Errorf("server: explain belief: %w", err)
 	}
-	corrections := []contract.CorrectionView{}
-	for i := len(st.corrOrder) - 1; i >= 0; i-- {
-		corr := st.corrections[st.corrOrder[i]]
-		if corr != nil && corr.view.ContradictsBeliefID == rec.id {
-			corrections = append(corrections, corr.view)
-		}
-	}
-	if corrections == nil {
-		corrections = []contract.CorrectionView{}
-	}
+	corrections := correctionsFor(st, rec.id)
 	timeline := append([]contract.TimelineEvent(nil), st.timelines[rec.id]...)
 	sort.SliceStable(timeline, func(i, j int) bool { return timeline[i].At < timeline[j].At })
 	if timeline == nil {
 		timeline = []contract.TimelineEvent{}
 	}
 	return contract.ExplainBeliefResponse{Belief: view, Corrections: corrections, Timeline: timeline}, nil
+}
+
+// correctionsFor lists one belief's corrections newest first, each
+// correction id once. The arrival order may name an id twice — a journal
+// written before the order de-duplicated, or a replayed seed beside its
+// restored view — and one correction stays one row however often the
+// order names it. The caller holds the lock.
+func correctionsFor(st *shopperState, beliefID string) []contract.CorrectionView {
+	out := []contract.CorrectionView{}
+	seen := map[string]bool{}
+	for i := len(st.corrOrder) - 1; i >= 0; i-- {
+		id := st.corrOrder[i]
+		if seen[id] {
+			continue
+		}
+		seen[id] = true
+		corr := st.corrections[id]
+		if corr == nil || corr.view.ContradictsBeliefID != beliefID {
+			continue
+		}
+		out = append(out, corr.view)
+	}
+	return out
 }
 
 // beliefRank orders ledger rows: contradicted first, then Earned,
@@ -1202,16 +1214,7 @@ func (s *Service) LedgerBelief(ctx context.Context, req contract.LedgerBeliefReq
 	if err != nil {
 		return contract.LedgerBeliefResponse{}, fmt.Errorf("server: ledger belief: %w", err)
 	}
-	corrections := []contract.CorrectionView{}
-	for i := len(st.corrOrder) - 1; i >= 0; i-- {
-		corr := st.corrections[st.corrOrder[i]]
-		if corr != nil && corr.view.ContradictsBeliefID == rec.id {
-			corrections = append(corrections, corr.view)
-		}
-	}
-	if corrections == nil {
-		corrections = []contract.CorrectionView{}
-	}
+	corrections := correctionsFor(st, rec.id)
 	var notice *string
 	if text, ok := st.notices[rec.id]; ok {
 		notice = &text

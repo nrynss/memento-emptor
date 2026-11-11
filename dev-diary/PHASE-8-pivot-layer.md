@@ -698,11 +698,19 @@ requires:   [T8.5d]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, internal/standing/
-status:     claimed:t85m-corr-ids
+status:     in-review
 ```
 The T9.7 live run found `restoreStanding` restores the journal's correction ids but not the mint sequence, so after a restart the next `record_correction` minted `corr_000001` over a restored one. A correction id must identify one correction for the life of the store.
 
 **Done when:** the mint sequence resumes past every restored id (or ids are minted from a source that cannot collide); a restart test proves the next correction gets a fresh id and the restored one still resolves; `explain_belief` lists each correction once after a restore (the T9.7 review saw seven rows for five ids, because `restoreStanding` and `LoadSeed` both append the seeded entry and a reused id is appended again); the gate passes.
+
+**Notes (in-review).** One insertion point now owns a correction id. `shopperState.takeCorrection` records a correction the first time its id is seen and does nothing on a second sighting, so the restored view and the seed that replays it stay one correction in one place in the arrival order; `reserveID` reads the number out of a minted shape (`corr_000001`) and holds the prefix's sequence past it, so the next mint starts where the store left off. An opaque fixture id (`corr_3b7e52`) names no number and reserves nothing, which is why the seeded demo still mints from one. `restoreStanding`, `LoadSeed` and both record paths insert through it, and `mint`'s comment now says what holds the sequence.
+
+The read has its own guard because a journal written before this fix can already name one id twice: `correctionsFor` walks the order newest first, keeps the first row per id and serves the same list to `explain_belief` and `ledger_belief`. RULE 4 is unchanged: a restored correction still declares against its rewritten belief by its journal entry, still wins recall, and the belief still stays on the ledger.
+
+`TestRestoredCorrectionIDIsNeverMintedAgain` records a declared correction, restarts over the same standing directory, proves the restored id is the one that decides, then records a second correction: it gets `corr_000002`, the restored view still reads its own words against its own belief, and the order holds two ids. `TestRestartAndReseedListEachCorrectionOnce` seeds, records a live correction, restarts, replays the seed and asserts `explain_belief` and `ledger_belief` list the seeded and the live correction once each, with the count equal to the store's distinct corrections. `TestExplainBeliefListsARepeatedOrderOnce` pushes a duplicate id straight into the order and asserts the listing still shows one row. All three fail on the code before this task; the correction and precedence tests pass unchanged.
+
+Two things the next agent should not have to rediscover: the reuse is created by the restore, not by the seed, because `LoadSeed` after a restart passes `ErrAlreadySeeded` only when beliefs exist and beliefs are not restored, so every boot appends the seeded corrections again; and the arrival order is still the newest-first sort key for both listings, so a duplicate is a wrong row rather than a wrong sequence.
 
 ---
 

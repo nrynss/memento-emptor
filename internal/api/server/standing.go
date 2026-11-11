@@ -19,6 +19,8 @@ import (
 // entries are re-recorded as standings, so the graph holds their notes
 // again; declared views keep their stale belief ids until a rewritten
 // belief re-declares the paired entry and re-links them by entry match.
+// Each restored correction holds its id and its number against the mint
+// sequence, so a correction recorded after the restart gets a fresh id.
 // A shopper with no snapshot starts from the defaults: pooling on, no
 // corrections, an empty journal, no pairing.
 func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper string) error {
@@ -35,10 +37,7 @@ func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper
 		if err != nil {
 			return fmt.Errorf("server: restore standing for %q: bad correction time: %w", shopper, err)
 		}
-		if _, ok := st.corrections[view.CorrectionID]; !ok {
-			st.corrOrder = append(st.corrOrder, view.CorrectionID)
-		}
-		st.corrections[view.CorrectionID] = &correctionRecord{view: view, at: at}
+		st.takeCorrection(view.CorrectionID, &correctionRecord{view: view, at: at})
 	}
 	for _, link := range snap.Links {
 		st.pairing[link.CorrectionID] = link
