@@ -963,7 +963,7 @@ Gap (external, owner: Astropods; the user files it). In two turns of the same ho
 requires:   [T9.7]
 fixture-ok: yes
 size:       S · mid
-owns:       internal/api/server/, agent/runtime/, agent/second/, product.md, demo/README.md, demo/evidence/run-6/
+owns:       internal/api/server/, agent/runtime/, agent/second/, product.md, demo/README.md, demo/RUN-6.md, demo/evidence/run-6/
 status:     in-review
 ```
 The P9 review found product.md's step 5 has no live agent path: `recallBeliefs` serves fit beliefs only, so the seller belief from the not-arrived dispute (`blf_1a5e09`) never reaches recall, and agent keys are refused on ledger reads by design. No live turn can mention the dispute the step requires; the demo record substitutes free reads. Decide: serve seller beliefs alongside fit ones for the asked brand (with their subject and step), or add an agent-admitted read for the shopper's seller evidence, or record the step as a read-only demonstration.
@@ -974,7 +974,7 @@ The P9 review found product.md's step 5 has no live agent path: `recallBeliefs` 
 
 Why no agent change. `explain_belief` is already agent-admitted and shopper-scoped, so the layer can explain the seller belief to an agent. But recall is the only surface that would hand an agent the belief's id, and it does not serve that belief; the ledger reads that would name the id are shopper-only by design. Reaching the dispute from a turn therefore needs a second admission decision — an agent-admitted read of the shopper's seller evidence, or seller beliefs in recall — and this task takes neither, as decided. `agent/runtime/` and `agent/second/` are untouched.
 
-What changed. `product.md`'s step 5 states the read-only path and its reason. `demo/README.md`'s step-5 row and gap 4 say the same, its open-gap list drops gap 4, and `demo/RUN-6.md`'s step-5 row and gap 4 follow. The run-6 evidence is untouched: `05-dispute-leaves-sizing-alone.json` already reads the seller belief, its one row (`not_arrived`, counts `seller_reliability`) and the unchanged sizing rows live, so the record now names what it shows rather than implying an agent turn that never existed. Gap 4 was a design question, not a defect, and the decision closes it.
+What changed. `product.md`'s step 5 states the read-only path and its reason. `demo/README.md`'s step-5 row and gap 4 say the same, its open-gap list drops gap 4, and `demo/RUN-6.md`'s step-5 row and gap 4 follow. Editing the run record's step-5 row was sanctioned by the dispatch, which names it; `demo/RUN-6.md` now sits in `owns` beside `demo/README.md`. The run-6 evidence is untouched: `05-dispute-leaves-sizing-alone.json` already reads the seller belief, its one row (`not_arrived`, counts `seller_reliability`) and the unchanged sizing rows live, so the record now names what it shows rather than implying an agent turn that never existed. Gap 4 was a design question, not a defect, and the decision closes it.
 
 The test. `TestDisputeReachesLedgerAndExplainNeverRecall` in the new file `internal/api/server/dispute_read_only_test.go` uses `pivotHarness` with the pool wired: it earns the runs-small belief from three fit returns, ingests the not-arrived dispute (`WH-2EV-04`), and proves the reads. `ledger_beliefs` lists the seller belief Claimed with one evidence row beside the sizing belief's three. `ledger_belief` and `explain_belief` carry the dispute row: outcome dispute, reason `not_arrived`, counts `seller_reliability`, item not the shirt. `ledger_evidence` filtered to the seller belief holds that one row, linked to no other belief. `recall_for_purchase` for brand-x-001 serves the fit belief with its three rows, own-evidence guidance toward size L and the consulted pool, and the seller belief is absent. A second, brandless recall pins the kind guard rather than the brand filter: it serves every fit belief and still no seller belief. Mutation-checked by deleting `recallBeliefs`'s `view.Kind != domain.BeliefKindFit` check: the test fails on the brandless recall ("serves 2 beliefs, want only the fit belief"), and the check was restored byte for byte.
 
@@ -1128,10 +1128,12 @@ reference agent's offline check.
   the not-arrived dispute) never reaches recall, and T9.9 keeps agent keys off the ledger
   reads on purpose. No live agent turn can therefore mention the dispute that step 5 says the
   agent mentions without treating it as settled; the record substitutes free reads. Gap 4 of
-  T9.7's list names T9.9, which is done and declined to widen the surface, so the gap is now
-  unowned. **Owner: T9.22 (proposed; `internal/api/server/` for a recall that carries the
-  seller belief, and the agents' surface for mentioning it).** Whether step 5 can instead be
-  satisfied by the reads is the orchestrator's call.
+  T9.7's list names T9.9, which is done and declined to widen the surface, so the gap was then
+  unowned. Whether step 5 can instead be satisfied by the reads was the orchestrator's call.
+  **Fixed by T9.24 — recorded as a read-only demonstration.** No new task id was needed: the
+  decision is recorded, and the step is shown by the layer's own belief and ledger reads, not
+  by an agent turn. A future agent-visible seller read would be its own decision, not an
+  outstanding fix.
 - (Low) **The demo record's gap owners are stale after later lands.** README gaps 3, 4, 5, 7
   and 8, and `RUN-6.md`'s whole gap list, name owners that are now done or no task:
   T4.8 (gap 3), T9.9 (gaps 4 and 7), T8.5l (gap 5), T4.6 (gap 8's page half), and "the
@@ -1142,7 +1144,7 @@ reference agent's offline check.
   removed the duplicate standing sentence). Gap 3's stale lines are already owned by T9.20
   through T4.8's note; the rest are not. **Owner: T9.20 (owns `demo/`, in review)** for the
   README and `RUN-6.md` correction, once its own step-2 work lands; gap 4's substance is
-  T9.22's above.
+  T9.24's above.
 
 **Limits.** No paid turn was made, so the reference deployment's live tool list is unverified;
 its build id postdates T9.9's record and T9.20 is redeploying it. The record's sixteen-trace
