@@ -16,7 +16,8 @@ import (
 // every spelling of a cause into the domain's own field. The recorded
 // population spells damage "damaged" and not-as-described
 // "not_as_described"; the second counts as damage, because the goods
-// arrived and were wrong, and never as non-arrival.
+// arrived and were wrong, and never as non-arrival. The categories that
+// count toward nothing (unclear, none) and an unknown label are dropped.
 func TestReasonCountsViewGivesEachCauseOneField(t *testing.T) {
 	got := reasonCountsView(map[domain.Category]int{
 		domain.CategoryFitTooSmall:        2,
@@ -26,7 +27,9 @@ func TestReasonCountsViewGivesEachCauseOneField(t *testing.T) {
 		"not_as_described":                11,
 		domain.CategoryNotArrived:         13,
 		domain.CategoryChangedMind:        17,
-		"too_expensive":                   19,
+		domain.CategoryUnclear:            23,
+		domain.CategoryNone:               29,
+		"too_expensive":                   31,
 	})
 	want := contract.ReasonCountsView{
 		FitTooSmall:        2,
@@ -46,8 +49,9 @@ func TestReasonCountsViewGivesEachCauseOneField(t *testing.T) {
 // dispute writes no row at all, so no served path can put "damaged" or
 // "not_as_described" into the index. The view keeps them as a read-side
 // alias for an index that already holds the recorded population's
-// spelling. A task that widens the vocabulary or writes a row around the
-// writer fails here.
+// spelling. A task that widens the writer's accepted set, or makes Record
+// write a dispute row, fails here; a producer that bypasses the writer is
+// outside this test.
 func TestServedFitWriterRefusesTheLegacyPoolLabels(t *testing.T) {
 	ctx := context.Background()
 	keyer, err := identity.NewKeyer(identity.SeedSaltHex)
