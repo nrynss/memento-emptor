@@ -177,6 +177,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
 
+### T9.17: The reference agent searches the catalog (in review until T9.20)
+
+**What exists.** `agent/runtime/agent/catalog.ts` adds `search_catalog`: a port of the Go matcher's rule (brand + category + equal fit set, never line name alone, excluding returned SKUs) over Channel3's `/search`, returning the recorded records unchanged. It is agent-local, not an edge tool; the eight layer tools still equal the access table, and the check asserts the split. The offline check replays `testdata/channel3` and pins field parity, the negative controls, the refusals and the HTTP shape (179 checks); `tsc` clean; gate green. Review found and fixed an untested refusal and corrected the recorded size list (7.5, 9, 9.5, 10, 10.5 — gapped).
+
+**What surprised.** The deployed agent is Bun and the matcher is Go, so the rule is a port held to the same recordings. The layer's line identity differs from Channel3's (`brand-x-001`/`shirts`/`regular` vs `SMwk`/`dress-shirts`/`top-fit: Regular`), and the mapping lives in the agent instructions.
+
+**The next agent should not have to work out.** T9.20 must create the `CHANNEL3_API_KEY` vault secret, redeploy with both `--var`s, run the live step-2 turn and close T9.17. `product.md`'s size-chart sentence was corrected: no size chart exists, the size comes from recall.
+
 ### T8.5i: Recall serves thin evidence (done)
 
 **What exists.** `recallBeliefs` no longer gates on standing: every fit belief for the requested brand is served, so a lone return arrives as `Claimed`/`None` with its one evidence row, its `own_evidence` precedence step, and the pool beside it marked overridden. The correction rule is untouched. The seed already carried the case (`blf_2b9d60`, a one-row fits-well belief), and `assertRecallPivot` now pins it; `baseRecallBeliefs` is the single filter both fixture comparisons use. The now-reachable one-return guidance sentence was ungrammatical and is fixed; two- and three-return texts are byte-identical.
