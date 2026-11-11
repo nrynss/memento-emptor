@@ -27,7 +27,8 @@ export function confirmationLineFor(correctionText: string): string {
  * Applies the layer's correction answer to its row. The status, standing
  * and warning come from the response; the evidence and the row itself are
  * carried over untouched, so the belief stays on record beside the edit.
- */function applyCorrectionResponse(
+ */
+function applyCorrectionResponse(
 	row: LedgerBeliefRow,
 	response: RecordCorrectionResponse
 ): LedgerBeliefRow {
