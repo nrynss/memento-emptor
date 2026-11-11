@@ -163,7 +163,7 @@ requires:   [T7.6]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/runs/cmd/, bench/README.md, dev-diary/PHASE-5-comparison.md, dev-diary/PHASE-2-layer.md
-status:     not-started
+status:     claimed:t77-bench-wire
 ```
 `bench/runs/cmd/t55`, `t58` and `t59` marshal contract values directly (`json.Marshal`), bypassing the service's encode path, so their committed recordings under `bench/runs/t59/` show the subject as `Kind`/`ID`/`Name`. T7.6's tags make a re-run emit `kind`/`id`/`name`, so a future re-run would differ from the frozen recordings. Nothing in the gate compares them and the freeze check is green. Decide: leave round 1 as frozen history and state that its recordings predate the tags wherever the commands are documented, or make the commands emit the tagged shape and record that a re-run now differs.
 
