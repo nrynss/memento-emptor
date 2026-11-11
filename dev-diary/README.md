@@ -82,7 +82,7 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 | **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
 | **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
 | **F: Pivot surfaces** | P9 | 30 / 32 | In progress (T9.15, T9.24) |
-| **G: Round 2** | P10 | 7 / 8 | In progress (T10.5) |
+| **G: Round 2** | P10 | 8 / 8 | Done |
 
 If capacity is short, run A first and then B: the demo needs both, and the ledger can follow on fixtures.
 
@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 7 / 7 | Done |
 | P8 | 36 / 37 | In progress (T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
-| P10 | 7 / 8 | In progress (T10.5) |
+| P10 | 8 / 8 | Done |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T10.5: The round-2 results are published (done)
+
+**What exists.** `bench/round2/README.md` holds the round-2 record: limits first (we wrote the shoppers, answers, population, prompts and grader, so this is the mechanism on constructed cases), the extraction artifact, the run's structure, then per-case and per-arm counts for right size, wrong cause, the next-turn/next-session/other-agent corrections, the deciding precedence step, citations and tokens, then the 28-of-56 recall difference and four headline candidates with none chosen. Every count re-derives from `r2-scores.json` and the 112 run files, and the Reproduce snippet prints the committed tables.
+
+**What surprised.** The frozen `rung` field reads the unprojected live response, so arm 3's case-1 turns record `pool` although that arm's prompt carries no pool, and it is empty on all 24 post-correction turns because the correction overrides every step. Arm 2's 4/16 is two held turns and two tie-breaks, and its 2/4 later turns repeat M rather than carry the correction. The citation rule reads only PayPal ids, so arms 3 and 4 cite 0 by construction. The review corrected nine figures and claims, including an overclaim that arms 3 and 4 match on every case but one (by the committed scores they differ in all four; by hand they agree on three).
+
+**The next agent should not have to work out.** The user still picks the headline; the document is complete with the candidates unchosen. The six artifact run ids and both counts are named in the README. `ProjectRecall` drops arm 3's pool but leaves the belief precedence pointing at it — a prompt change would need its own task and a re-freeze. T10.4's two layer gaps (statement `against` resolution, the capture-keyed fit row) still need layer owners.
 
 ### T10.4: All four arms ran (done)
 

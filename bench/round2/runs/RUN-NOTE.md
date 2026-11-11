@@ -70,7 +70,7 @@ $0.036723, arm 3 $0.008199, arm 4 $0.011136. The projection at 112 turns
 from that cell was **$1.6002** at the per-arm mean and **$4.1130** at the
 priciest measured turn, both inside the $5.00 cap, so the batch ran. The
 actual total was lower because `r2-crowd-rival`'s arm-2 extraction is the
-largest in the set (2228 words).
+largest in the set (2152 words of extraction in a 2228-word prompt).
 
 ## Counts (frozen grader)
 
