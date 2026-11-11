@@ -67,6 +67,20 @@ Four things the next agent should not have to rediscover:
 
 ---
 
+### T9.2b: Ledger reads the tightened contract
+```yaml
+requires:   [T7.4]
+fixture-ok: yes
+size:       S · mid
+owns:       web/src/lib/ledger/, web/src/lib/api/, web/src/routes/belief/, web/src/lib/contest/
+status:     claimed:t92b-tighten-web
+```
+T7.4 requires the pivot pool and precedence fields, so the ledger decoders and fixture tests that expected them absent now fail (6 tests: api snapshots, pool precedence, pre-pool belief). Update the decoders to the required shape and the tests to the tightened fixtures. No behaviour change beyond the contract.
+
+**Done when:** the 6 failing tests pass against the tightened fixtures; the gate passes.
+
+---
+
 ### T9.3: The merchant app ★
 ```yaml
 requires:   [T8.3, T8.6]
