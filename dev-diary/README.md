@@ -160,7 +160,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 12 / 12 | Done |
-| P1 | 7 / 8 | In progress (T1.1d) |
+| P1 | 8 / 8 | Done |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 8 / 10 | In progress (T4.9, T4.10) |
@@ -176,6 +176,12 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T1.1d: One unknown-code rule (done, P1 closed)
+
+**What exists.** `domain.StoredCategoryForDispute` is the only place an unknown dispute code's disposition is written (unknown → `none` with no error; anything else propagates), and both served ingest and the live driver call it; neither keeps a private copy. `CategoryForDispute` still refuses unknown codes, so the domain's strictness is unchanged and every pre-existing test stands. The task first landed `blocked` because its `owns` omitted `internal/ingest/` while its Done-when needed it; the orchestrator widened the line rather than cut the rule in half. Review ran three mutations (error on unknown; lenient domain; wrong category) and all bit.
+
+**The next agent should not have to work out.** `internal/ingest`'s dispute tests still state expected categories independently of the frozen table on purpose: a new code fails there until its row is added.
 
 ### T9.21: The agent packages are type-checked (done)
 

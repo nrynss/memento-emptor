@@ -191,7 +191,7 @@ requires:   [T1.1b]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/domain/, internal/ingest/, tests/live/ingest/
-status:     in-review
+status:     done
 ```
 The T1.1c review found the unknown-dispute-code disposition now exists in two places: `internal/ingest.handleDispute` and the live driver's `disputeCategory`. A rule change would drift (loudly, via an assertion mismatch, but drift). Export the disposition from `internal/domain` (or a shared helper) and have both call it.
 
