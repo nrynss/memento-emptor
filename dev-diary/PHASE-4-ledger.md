@@ -103,7 +103,7 @@ requires:   [T4.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       web/src/lib/why/
-status:     in-review
+status:     done
 notes:      The why cards in web/src/lib/why/ now lead with the shopper's words and name the reason category in plain language (`reasonWord`: too small, too large, damaged, not arrived, changed mind, unclear, from the merchant grid's reason columns and the domain's category comments); the raw category code no longer renders. A dispute's reason text is the payment source's code rather than the shopper's words, so `reasonReading` leads it with the plain word and never quotes the code. The layer's `none` is the zero value, no classified reason rather than a fit verdict, so it names no word: a card can never call an unauthorised-charge dispute "fits well". The reason column comes first in both the counted and the not-counted card. The trace note now says this is a fixture replay whose links are on-page placeholders, with the live transport still to come (T4.8); the traces.ts header no longer promises a live mode. Tests: every classified category maps to a lowercase word with no underscore, `none` maps to null, the demo's counted rows read "too small", the dispute reads "not arrived" unquoted, `reasonReading` is tested to quote the shopper's words and never a dispute code, and a source guard fails if the template prints a raw category or prints the category before the quote. Branch task/t47; review fixes on task/t47-review.
 ```
 The P4 review found the why cards print the raw reason category (`fit_too_small`) above the shopper's words, and the trace note promises a "live mode" the fixture-only ledger does not have.
@@ -117,7 +117,7 @@ The P4 review found the why cards print the raw reason category (`fit_too_small`
 requires:   [T4.1, T9.6]
 fixture-ok: yes
 size:       M · mid
-owns:       web/src/lib/api/, web/src/routes/ledger/
+owns:       web/src/lib/api/, web/src/routes/ledger/, web/src/lib/why/, web/src/routes/belief/
 status:     not-started
 ```
 The T9.7 run found the deployed ledger page is a fixture replay: its live numbers exist only as API reads, and the screen is labelled as a replay. Add an HTTP transport behind `LedgerClient` (same-origin or the edge, with the shopper link token), keep the fixture transport for tests, and fall back loudly rather than silently showing a replay as live.

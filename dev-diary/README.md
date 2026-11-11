@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 6 / 7 | In progress (T1.1c) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
-| P4 | 5 / 8 | In progress (T4.6, T4.7, T4.8) |
+| P4 | 6 / 8 | In progress (T4.6, T4.8) |
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T4.7: Plain language in the why cards (done)
+
+**What exists.** The cards lead with the shopper's words, the category reaches the screen only through `reasonWord`, and the trace note says it is a fixture replay with a live transport still to come. Review fixed two dishonest mappings: `none` was being called "fits well" (the contract's `none` is "no classified reason", and an `UNAUTHORIZED_TRANSACTION` dispute would have printed as a fit verdict) — it now names no category and lets the recorded text stand — and a dispute's text was quoted as the shopper's words when it is PayPal's code; it now leads with "not arrived" and records the code second. A source guard forbids raw category interpolation and enforces the quote-first order.
+
+**What surprised.** The web type's gloss ("none for a fits-well verdict") is wrong and caused the first defect; T4.8 now owns `web/src/lib/api/` and fixes it. The trace transport is a separate piece of work T4.8's original `owns` could not reach, so its line now covers `web/src/lib/why/` and `web/src/routes/belief/`.
+
+**The next agent should not have to work out.** `none` is not a fit verdict; a dispute's reason text is a code, not the shopper's words.
 
 ### P7 E2E review: FINDINGS, one Medium opened
 
