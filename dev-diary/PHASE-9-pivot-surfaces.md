@@ -906,6 +906,20 @@ T9.22 changed the reference agent's instruction so recall answers before `search
 
 ---
 
+### T9.24: A live path for the dispute in demo step 5
+```yaml
+requires:   [T9.7]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/, agent/runtime/, agent/second/
+status:     not-started
+```
+The P9 review found product.md's step 5 has no live agent path: `recallBeliefs` serves fit beliefs only, so the seller belief from the not-arrived dispute (`blf_1a5e09`) never reaches recall, and agent keys are refused on ledger reads by design. No live turn can mention the dispute the step requires; the demo record substitutes free reads. Decide: serve seller beliefs alongside fit ones for the asked brand (with their subject and step), or add an agent-admitted read for the shopper's seller evidence, or record the step as a read-only demonstration.
+
+**Done when:** a live agent turn can mention the shopper's dispute from the layer (or the step is recorded as read-only with its reason); the chosen path is tested; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
