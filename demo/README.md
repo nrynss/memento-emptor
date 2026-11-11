@@ -42,8 +42,9 @@ a live sandbox REST transport.
    state, not the live session), cites the belief/returns, asks the
    pending question and asks for an explicit yes. Its trace shows
    `recall_for_purchase` before the recommendation generation.
-4. **Approval, then a sandbox purchase of the M.** Agent turn 2 answers
-   "yes". The demo then executes the approved purchase through the
+4. **Approval, then a sandbox purchase of the M.** Agent turn 2 is the
+   buy intent and turn 3 answers "yes" with the honest not-wired
+   statement. The demo then executes the approved purchase through the
    frozen orders machine: propose → capture-before-approval refused
    (`ErrNoApproval`, transport never called) → scripted shopper click on
    the real approval URL → `ApproveAfterYes("yes")` with the
@@ -88,7 +89,7 @@ ids). Real ids stay in `demo/out/` (git-ignored, mode 0600).
 | `ORD-T36-R<n>` / `CAP-T36-R<n>` / `CUSTOM-T36-R<n>` / `EVT-T36-R<n>-PURCHASE` | the run's new purchase order/capture/custom/event ids |
 | `APPROVAL-URL-REDACTED` | the payer-action approval URL (carries an order token) |
 | `CONV-T36-R<n>` | the agent conversation id |
-| `TRACE-T36-R<n>[-T1,-T2]` (8 hex chars in prose) | agent/platform trace ids (kept short; costs kept) |
+| `TRACE-T36-R<n>[-T1,-T2,-T3]` (8 hex chars in prose) | agent/platform trace ids (kept short; costs kept) |
 | `BLF-T36-R<n>[-SELLER]` | the run's belief ids |
 
 Trace ids and costs are kept (short ids in prose, full only in `out/`).
@@ -105,7 +106,7 @@ value outside that config survives into `demo/` outside `out/`.
 | PayPal reads, capture, Channel3 details | sandbox free, details free | none needed |
 | Jev (4 classifications/run) | ~$0.00002 each | pinned build, 10x per-call, stop |
 | Lambo + Elastic native inference | no billable resources | session erased |
-| Astropods turns (2/run) | ~$0.03-0.04 each | $0.10 per turn, billing before/after every turn |
+| Astropods turns (3/run) | ~$0.03-0.04 each | $0.10 per turn, billing before/after every turn |
 | Evaluator re-run (if any) | server-side judge | billing delta watched, $0.10 cap |
 
 Cap: stop and report if total new spend exceeds $1.00 or any single

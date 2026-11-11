@@ -28,6 +28,19 @@ tools are fake-backed until the layer is served; no purchase tool (T3.3).
 
 **Done when:** the deployed agent answers a shopping request against the layer's fakes, and the trace shows the recall first.
 
+**Notes (review, P3 E2E).** The Done-when was met when it was written
+(handoff log records trace `b51715f4…`: generation → `recall_for_purchase`
+187 ms → generation → `pending_questions` → generation, $0.0367), but its
+environment no longer exists: T9.8 deleted `agent/runtime/agent/memory.ts`
+and pointed the tools at the served layer's edge
+(`agent/runtime/agent/layer.ts`), so "against the layer's fakes" cannot be
+re-run from this tree. The offline check is no longer 19 checks; it is 58,
+and they now inject a fake transport and assert the HTTP request the
+deployment sends (`bun agent/runtime/agent/offline-check.ts`, green on
+this branch). The live turn this task claimed is prose in the handoff log
+with a trace id, not a committed transcript; the nearest recorded turn is
+T9.8's, which is a live-layer turn, not a fake-backed one.
+
 ---
 
 ### T3.2: Catalog through Channel3
@@ -37,6 +50,7 @@ fixture-ok: yes
 size:       S · mid
 owns:       agent/catalog/
 status:     done
+```
 
 **Notes (worker).** `agent/catalog/` parses Channel3 products, matches on
 brand id + category slug + equal fit-handle values with the shared signals
@@ -46,7 +60,6 @@ simulated. Tests replay `testdata/channel3/` offline. Live re-verify: one
 `GET /v1/products/tbnrl46` (detail calls are free, 0 credits spent) agrees
 with the fixture on id, title, brand `SMwk`, category `dress-shirts`,
 `top-fit: Regular`, InStock USD 195 at `us.sunspel.com`, variants null.
-```
 Candidate products and variants from real retailers, as a real part of the agent, behind an interface a builder could replace. Real-retailer fulfilment is labelled as simulated.
 
 **Done when:** tests replay `testdata/channel3/`; one live call is in the handoff log, with credits used.
@@ -95,7 +108,7 @@ builder (`AskOne`), strict explicit-yes gate (`IsApprovalYes`),
 `ApproveAfterYes` (Service.Approve then transport mirror, non-yes
 refused with `ErrNotApproved`, nothing mirrored), correction-wins
 recommendation helper, and transaction-tied `Feedback` with `Validate`.
-9 tests: approval gating over `FakeCheckout` (capture fails closed
+7 tests: approval gating over `FakeCheckout` (capture fails closed
 pre-approval, vague reply mirrors nothing, yes approves + mirrors +
 captures), plus a replay pinning all four loops to
 `testdata/replay/p3-turns.json`. Deployed agent needed no redeploy:
@@ -120,6 +133,24 @@ orders tests), not on a live order.
 
 **Done when:** each loop runs on the deployed agent, and each answer reaches the layer tied to the right transaction.
 
+**Notes (review, P3 E2E).** Two corrections to the worker note above.
+The suite is **7 tests**, not 9 (`go test ./agent/loops/ -v` lists seven
+`=== RUN` lines); the count is fixed above. More important: the six live
+turns ran against the deployment's fake-backed tools, not the layer. The
+T3.1 build (`agent/runtime/agent/memory.ts` at commit `5889280`) answered
+`recall_for_purchase`, `pending_questions`, `record_reason`,
+`record_correction` and `record_feedback` from a standing fixture, and
+this task's own note says the image was unchanged; so `corr_live01`,
+`blf_8f2c41` and the accepted writes were minted by the fake. The second
+Done-when clause ("each answer reaches the layer tied to the right
+transaction") was therefore **not shown live** when this task closed,
+and T3.6 discloses the same fake-backed state for its own agent turns.
+It is shown now, after T9.8 pointed both deployments at the served
+layer: T9.8's reference turn records `record_correction` against the live
+edge and mints `corr_000001` (trace `ed617f32…`), and T3.6's demo writes
+the reasons, correction and feedback on the live layer from the driver.
+The standing gap in the worker note (no purchase tool) still holds.
+
 ---
 
 ### T3.5: Evals
@@ -129,6 +160,7 @@ fixture-ok: no
 size:       S · mid
 owns:       agent/evals/
 status:     done
+```
 
 **Notes (worker).** New package `agent/evals/`: `EVALUATION.yaml` (3
 boolean LLM judges: recall_first, correction_honoured,
@@ -161,7 +193,6 @@ prompt edits, no live turns); the Go test pins each fixture's prompt to
 the frozen YAML, so a prompt edit invalidates the verdicts. Previously
 recorded server verdicts unchanged and still valid. Status stays
 `in-review`.
-```
 
 **Notes (reviewer).** Consequence check: `ast eval push` replaces the
 server preset set (`exposed_pii`, `leaked_credentials`,
@@ -178,6 +209,20 @@ this landing.
 Astropods evaluators over real traces. Did the agent recall before recommending? Did a correction change the very next recommendation? Did any purchase skip approval?
 
 **Done when:** each evaluator passes on a good run and fails on a deliberately broken one; both are recorded.
+
+**Notes (review, P3 E2E).** "Both are recorded" holds for
+`correction_honoured` and `approval_before_purchase`: each has a committed
+pass/fail pair whose prompt text the Go test pins to `EVALUATION.yaml`
+(mutating either prompt fails `TestCounterfactualPairs`). It holds less
+well for `recall_first`: its fail side is one prose line (trace
+`29335c48`), with no committed transcript and no pair, so its prompt is
+unpinned — a wording edit that keeps "belief", "evidence" and "seeded"
+leaves the suite green (checked on this branch). Supersession is also
+worth stating here: `agent/runtime/EVALUATION.yaml` is the deployed
+eight-judge set and two of the three T3.5 prompts have since grown
+evidence-free clauses, so re-pushing from `agent/evals/` would revert
+five judges; the T9.4 handoff entry records that divergence. Owner for
+both: T10.3, which the handoff log already names for the judge work.
 
 ---
 
@@ -232,6 +277,22 @@ session delta ($0.67 → $1.24) leaves ~$0.415 across the four failed
 attempts, consistent with the per-turn costs — plausible, under the
 $1.00 cap, no turn over $0.10. Gate passes. Reviewer spend $0.
 
+**Notes (review, P3 E2E).** The run records and the driver agree on
+three deployed-agent turns per run (`turn1Trace`, `turn2Trace`,
+`turn3Trace`; turn costs $0.0688 and $0.0859), so the drift was in the
+documentation around them: `demo/README.md`'s spend table said "2/run",
+its placeholder table listed only `-T1,-T2`, its step 4 called the yes
+"agent turn 2" (it is turn 3), and `demo/run.sh`'s leg list said "Two
+deployed-agent turns". All four are corrected on this branch, wording
+only, no driver or run-record change. Re-derived here: per-turn costs sum
+to the recorded $0.0688/$0.0859, Jev's four calls sum to $0.000085596,
+and the T3.2 fixture (InStock USD 195 at `us.sunspel.com`, variants
+null) matches what both runs say step 2 fetched. A viewer note for T9.7
+and T6.4's narration: step 4's approval is the driver's scripted
+`"yes"` plus a scripted shopper click on the real approval URL, not a
+typed human yes, and the agent's turn 3 says the purchase is not wired
+immediately before the driver buys — the run records say both, but a
+video must not present that as the agent completing the purchase.
 
 ---
 
@@ -275,7 +336,6 @@ via the messaging proxy: trace at $0.0057, 17 observations, successful
 `[tool] lookupReturn` between generations. Verification spend $0.01
 (billing $0.65 → $0.66); task total ≈ $0.07 of $0.25. No-login serving is
 proven; the public-shopper-page task is unblocked.
-Prove whether an Astropods agent can be reached with no login, on `probe-gw` only (never `memento-agent`). Deploy a minimal page with one chat endpoint on port 80 declaring `agent.interfaces: {frontend: true, messaging: true}` (both: `messaging` defaults to false once `interfaces` is declared; production filesystem is read-only). Report the exact Configure screen and Public setting for the user to switch. With no cookies, confirm 200 from our container with no login redirect. Send one short model turn through the page; confirm gateway, trace and tool spans. Budget $0.25 with billing re-checks. Record with evidence in `research/astropods.md`.
 
 **Done when:** the no-login reachability question is answered with evidence in `research/astropods.md`; if reachable, a follow-up dev-diary task for the public shopper page exists (orchestrator decides when).
 
@@ -334,6 +394,22 @@ Surprise: the CLI login token lives in the platform secret store under
 `service astro-cli` (reused the T3.7 driver pattern with the token held
 in process memory, never printed); the drive script stays outside the
 repo like its predecessor.
+
+**Notes (review, P3 E2E).** The live result above cannot be re-derived
+offline: this task's own `owns` holds no transcript (its drive script
+stays outside the repo), unlike T3.7, whose probe is committed at
+`testdata/astropods/15-public-probe.txt`. What the tree does carry is the
+proof turn id and cost baked into the public page
+(`agent/frontend/public/index.html`: `a89f4f49`, $0.0174) and the
+deployment spec that makes the page reachable (`frontend: true`,
+`messaging: true`). `bun run typecheck` in `agent/frontend/` is green on
+this branch. Gap: nothing tests the relay's input validation or the
+30-turn cap (`agent/frontend/server/index.ts`), and no gate step
+type-checks `agent/frontend/`, so a future edit there is unguarded.
+Owner: T9.7 for the recorded evidence (it owns `demo/` and records the
+pivoted run), and the cap/validation tests are proposed for the same
+task's brief; the typecheck step needs a gate owner (T9.3i owns
+`tools/check.sh`).
 
 ---
 

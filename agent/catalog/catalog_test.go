@@ -61,7 +61,7 @@ func sunspelWant() Want {
 // share brand, category and equal top-fit, so all three are candidates,
 // and each carries the shared signals as its evidence.
 func TestMatchSunspelLine(t *testing.T) {
-	got := Match(sunspleWantFix(t), sunspelLine(t))
+	got := Match(sunspelWant(), sunspelLine(t))
 	if len(got) != 3 {
 		t.Fatalf("match returned %d candidates, want 3", len(got))
 	}
@@ -80,12 +80,6 @@ func TestMatchSunspelLine(t *testing.T) {
 			t.Errorf("candidate %s brand name is %q, want Sunspel", c.Product.ID, c.Product.BrandName)
 		}
 	}
-}
-
-// sunspleWantFix keeps the test above readable: the belief's cut.
-func sunspleWantFix(t *testing.T) Want {
-	t.Helper()
-	return sunspelWant()
 }
 
 // TestMatchRejectsLineNameAlone proves the negative control: the two
@@ -153,7 +147,7 @@ func TestApparelMarksSizesOutOfBand(t *testing.T) {
 	if p.Variants != nil {
 		t.Fatalf("sunspel variants is modelled, want nil: sizes live at the retailer")
 	}
-	got := Match(sunspleWantFix(t), []Product{p})
+	got := Match(sunspelWant(), []Product{p})
 	if len(got) != 1 {
 		t.Fatalf("match returned %d candidates, want 1", len(got))
 	}

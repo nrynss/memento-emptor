@@ -94,7 +94,8 @@ func (c *Client) roundTrip(ctx context.Context, method, path string, body []byte
 }
 
 // searchReply is the wire shape of a search answer: the products plus the
-// paging token for the next page.
+// paging token for the next page. Source has no paging seam, so a search
+// reads its first page and the token is not carried further.
 type searchReply struct {
 	Products      []json.RawMessage `json:"products"`
 	NextPageToken string            `json:"next_page_token"`

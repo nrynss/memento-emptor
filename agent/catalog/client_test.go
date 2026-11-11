@@ -32,16 +32,22 @@ func (s *stubTransport) roundTrip(req *http.Request) (*http.Response, error) {
 	}, nil
 }
 
+// mustReadFixture returns one recorded response body beside this package.
+func mustReadFixture(t *testing.T, name string) string {
+	t.Helper()
+	raw, err := os.ReadFile(filepath.Join(fixtureDir(t), name))
+	if err != nil {
+		t.Fatalf("read %s: %v", name, err)
+	}
+	return string(raw)
+}
+
 // stubClient wires the client to the recorded search and detail
 // responses.
 func stubClient(t *testing.T) (*stubTransport, *Client) {
 	t.Helper()
 	read := func(name string) string {
-		raw, err := os.ReadFile(filepath.Join(fixtureDir(t), name))
-		if err != nil {
-			t.Fatalf("read %s: %v", name, err)
-		}
-		return string(raw)
+		return mustReadFixture(t, name)
 	}
 	stub := &stubTransport{t: t, bodies: map[string]string{
 		"POST /v1/search":          read("search-oxford-shirts.json"),
@@ -68,6 +74,41 @@ func TestClientSearchReplaysFixture(t *testing.T) {
 	}
 	if h := stub.last.Header.Get("x-api-key"); h == "" {
 		t.Error("search sent no x-api-key header")
+	}
+}
+
+// TestClientSearchPumaReplaysFixture replays the second recorded search,
+// which no other test read: the running-shoe page carries ten products
+// and the Puma Darter Pro 2 with its category-specific footwear handle.
+func TestClientSearchPumaReplaysFixture(t *testing.T) {
+	stub := &stubTransport{t: t, bodies: map[string]string{
+		"POST /v1/search": mustReadFixture(t, "search-puma-running-shoes.json"),
+	}}
+	client := NewClient("fixture-key", "", stub.roundTrip)
+	got, err := client.Search(context.Background(), "puma running shoes", 10)
+	if err != nil {
+		t.Fatalf("search: %v", err)
+	}
+	if len(got) != 10 {
+		t.Fatalf("search returned %d products, want 10", len(got))
+	}
+	var puma *Product
+	for i := range got {
+		if got[i].ID == "VWvTIPF" {
+			puma = &got[i]
+		}
+	}
+	if puma == nil {
+		t.Fatalf("search holds no VWvTIPF: %v", got)
+	}
+	if puma.BrandID != "T0QO" || puma.Category != "athletic-shoes" {
+		t.Errorf("puma is brand %q category %q", puma.BrandID, puma.Category)
+	}
+	if cut := puma.Fit["footwear-cut"]; len(cut) != 1 || cut[0] != "Low cut" {
+		t.Errorf("footwear-cut is %v, want [Low cut]: the fit handle is per category", cut)
+	}
+	if puma.Variants == nil {
+		t.Error("puma variants is nil, want the recorded Size option")
 	}
 }
 

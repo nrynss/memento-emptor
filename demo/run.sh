@@ -11,7 +11,7 @@
 #      shapes T2.1b proved identical to the sandbox reads.
 #   3. Channel3 live detail + frozen match (free; detail calls cost no
 #      credits, no searches are used).
-#   4. Two deployed-agent turns via the messaging proxy (~$0.03-0.04
+#   4. Three deployed-agent turns via the messaging proxy (~$0.03-0.04
 #      each, $0.10 per-turn guard, billing re-checked around each turn).
 #   5. One new sandbox purchase through agent/orders (sandbox only, free)
 #      with a real explicit-yes plus the scripted shopper approval, then

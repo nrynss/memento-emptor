@@ -180,12 +180,12 @@ type Config struct {
 type Service struct {
 	transport CheckoutTransport
 
-	mu       sync.Mutex
-	orders   map[string]*Order
-	byNeed   map[string]string
-	byRequst map[string]string
-	seen     map[string]string
-	seq      int
+	mu        sync.Mutex
+	orders    map[string]*Order
+	byNeed    map[string]string
+	byRequest map[string]string
+	seen      map[string]string
+	seq       int
 }
 
 // NewService builds a Service over the transport. It refuses a
@@ -201,7 +201,7 @@ func NewService(transport CheckoutTransport, cfg Config) (*Service, error) {
 		transport: transport,
 		orders:    make(map[string]*Order),
 		byNeed:    make(map[string]string),
-		byRequst:  make(map[string]string),
+		byRequest: make(map[string]string),
 		seen:      make(map[string]string),
 	}, nil
 }
@@ -236,7 +236,7 @@ func (s *Service) Propose(ctx context.Context, shopper, need string, item domain
 	// concurrent proposes with distinct request ids can still reach the
 	// payment source twice and leave a stray proposed order there, but
 	// the loser never approves or captures it, so no money moves.
-	if id, ok := s.byRequst[requestID]; ok {
+	if id, ok := s.byRequest[requestID]; ok {
 		stored := *s.orders[id]
 		s.mu.Unlock()
 		return &stored, true, nil
@@ -270,7 +270,7 @@ func (s *Service) create(ctx context.Context, params CreateParams) (*Order, bool
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if id, ok := s.byRequst[params.RequestID]; ok {
+	if id, ok := s.byRequest[params.RequestID]; ok {
 		stored := *s.orders[id]
 		return &stored, true, nil
 	}
@@ -290,7 +290,7 @@ func (s *Service) create(ctx context.Context, params CreateParams) (*Order, bool
 		CreateRequestID: params.RequestID,
 	}
 	s.orders[result.OrderID] = order
-	s.byRequst[params.RequestID] = result.OrderID
+	s.byRequest[params.RequestID] = result.OrderID
 	s.byNeed[needKey(params.ShopperID, params.Need)] = result.OrderID
 	stored := *order
 	return &stored, false, nil
