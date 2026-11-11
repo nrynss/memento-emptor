@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 19 / 22 | In progress (T8.5i, T8.5j, T8.5k) |
+| P8 | 20 / 28 | In progress (T8.5i, T8.5j, T8.5k, T8.5m, T8.5n, T8.5o, T8.5p, T8.7b) |
 | P9 | 18 / 24 | In progress (T9.9, T9.11, T9.14, T9.15, T9.16, T9.17) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.5l: Feedback is idempotent per purchase (done)
+
+**What exists.** A delivery for a purchase that already carries a recorded feedback takes the repeat path: no new `fb_` id, no evidence append, no graph write, no status move, and the answer is the feedback on record (id, verdict, belief, counts). Seeded feedback rows are marked by `LoadSeed`, and `SeedFromExamples` fills the seeded feedback's id from the frozen request/response pair (`fb_51c2d8`), so the documented history is not double-counted: `blf_2b9d60` stays Claimed with one `ev_51c2d8`. The repeat still settles the purchase-keyed fit row, so the demo's pool counts (22 → 23) are unchanged; the review added a test pinning that. Review also fixed a schema break (a hand-built seed answering `feedback_id: ""`) and made the repeat check precede the verdict computation.
+
+**What surprised.** A repeat with different words is answered with the recorded verdict and silently drops the new words; an `unclear` first delivery marks no row, so every resend mints a fresh id. Both are now owned: **T8.5o**.
+
+**The next agent should not have to work out.** Do not add a duplicate field to `RecordFeedbackResponse` without the orchestrator: it is a frozen shared type and its example already answers `accepted: true` for a seeded repeat. `tests/live/layer`'s feedback step is ungated (T8.5i owns it). T8.5p owns the `seeded: false` live-origin ledger rows.
 
 ### P5 E2E review: APPROVE, one Medium re-run opened
 
