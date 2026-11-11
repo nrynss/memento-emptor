@@ -425,7 +425,7 @@ requires:   [T9.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/runtime/, agent/second/
-status:     in-review
+status:     done
 ```
 The T9.8 review found three low defects in the live agent surface. Both agents expose `ledger_beliefs`, `ledger_belief` and `ledger_evidence`, which the edge admits for `CallerShopper` only, so an agent key gets a 403 on each. `tools.ts` has no offline coverage: the checks inject the transport below it, so tool ids, schemas and execute bindings are exercised only by a live build. And the reference prompt tells the agent to retry any failed tool call once, so a `record_correction` that landed and then timed out could be written twice; retries must be for reads only, or a write must recall before retrying.
 
@@ -435,7 +435,7 @@ The T9.8 review found three low defects in the live agent surface. Both agents e
 
 Both `tools.ts` files are now a factory — `createTools(layer)` and `createTools(landing)` — with the deployed `tools` export as that factory over the transport built from the environment. The deployed path is otherwise untouched: same ids, same descriptions, same schemas, same HTTP request. The factory is what makes the bindings testable offline.
 
-The checks now exercise the bindings themselves rather than only the transport below them (130 checks for the reference agent, 123 for the second). Each reads the edge's access table from `internal/auth/surface.go` and the frozen names from `internal/api/contract/tools.go` and compares the offered tool set with the set admitted to `CallerAgent`; for every tool it reads `<tool>.request.schema.json` from `testdata/api`, compares required fields, field names and field types against the zod schema, then calls that tool's `execute` through the factory and compares the body the transport received with `<tool>.request.example.json`. A changed id, a renamed or retyped field, or an extra or missing tool on either side fails the check: `id: "record_feedback"` renamed to `record_feedbackx` and `pooling` retyped to a string were both tried, both failed, and both were reverted.
+The checks now exercise the bindings themselves rather than only the transport below them (130 checks for the reference agent, 125 for the second). Each reads the edge's access table from `internal/auth/surface.go` and the frozen names from `internal/api/contract/tools.go` and compares the offered tool set with the set admitted to `CallerAgent`; for every tool it reads `<tool>.request.schema.json` from `testdata/api`, compares required fields, field names and field types against the zod schema, then calls that tool's `execute` through the factory and compares the body the transport received with `<tool>.request.example.json`. A changed id, a renamed or retyped field, or an extra or missing tool on either side fails the check: `id: "record_feedback"` renamed to `record_feedbackx` and `pooling` retyped to a string were both tried, both failed, and both were reverted.
 
 The retry rule is its own step in each agent's instructions, and step 1 now points at it instead of carrying "retry it once". A failing read may be called once more. `record_correction`, `record_reason` and `record_feedback` each append a row, so a write that errored or timed out is read back first — `recall_for_purchase` for a correction, `pending_questions` for a reason, `explain_belief` for feedback — reported if it landed, and resent only when the read shows it did not; when the read cannot show it, the agent asks the shopper. `set_pooling` states a choice instead of appending a row, so it is named safe to repeat. The checks pin that wording. Neither transport retries on its own — a stub-server check counts exactly one request per call — so a duplicated write could only come from the model, and the instructions are where it is prevented.
 
@@ -674,10 +674,10 @@ The T9.16 review found the row that task adds would be a pin nothing compares: `
 requires:   [T9.9, T9.13]
 fixture-ok: yes
 size:       XS · mid
-owns:       tools/check.sh
+owns:       tools/check.sh, .github/workflows/ci.yml
 status:     not-started
 ```
-T9.9 gave both agents' tool bindings offline coverage, but `tools/check.sh` does not invoke it: `bun agent/offline-check.ts` and `bun agent/check.ts` run only when someone runs them by hand, so a tool-surface drift passes the gate. Add both checks to the gate behind the same bun guard the frontend step uses.
+T9.9 gave both agents' tool bindings offline coverage, but `tools/check.sh` does not invoke it: `bun agent/offline-check.ts` and `bun agent/check.ts` run only when someone runs them by hand, so a tool-surface drift passes the gate. Add both checks to the gate behind the same bun guard the frontend step uses, and install the two agent packages' frozen dependencies in CI, or the runner lacks `agent/runtime/node_modules` and `agent/second/node_modules` and both checks fall through.
 
 **Done when:** the gate runs both agent checks where bun is present and states the fallback where it is not; a broken tool id fails the gate; the gate passes.
 

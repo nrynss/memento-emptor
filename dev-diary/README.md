@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 22 / 31 | In progress (T8.5i, T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5s, T8.7b) |
-| P9 | 18 / 24 | In progress (T9.9, T9.11, T9.14, T9.15, T9.16, T9.17) |
+| P9 | 19 / 26 | In progress (T9.11, T9.14, T9.15, T9.17, T9.18, T9.19, T9.9) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.9: Agent tool surface and retry discipline (done)
+
+**What exists.** Both agents offer exactly the eight calls the edge admits to an agent key; the three shopper-only ledger reads are unbound rather than refused, and the access table was deliberately not widened (the ledger is the shopper's own view). `tools.ts` is a factory over the transport, so the offline checks exercise ids, input schemas and `execute` bindings against the frozen contract and the Go access table itself. The retry rule is a numbered step: reads may retry once, writes must be read back before a resend, `set_pooling` is the only write safe to repeat. Checks: 130 (reference) and 125 (second). Review strengthened three pins (read-back pairing, the retryable list, the write list) and corrected the note's count.
+
+**What surprised.** The gate does not run either check, so the coverage was invisible to CI; **T9.19** now owns it and must also install the two agent packages, or the runner falls through the guard. The deployed builds do not match this commit until both agents are redeployed.
+
+**The next agent should not have to work out.** The redeploy commands are in the T9.9 note; `--var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY` needs the input declared in `astropods.yml`, or the platform silently drops it.
 
 ### T4.6: One shopper at a time on the belief page (done)
 
