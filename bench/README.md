@@ -71,14 +71,14 @@ what was actually served in round 1.
 recordings): a Candidate belief never reached the response. Two later commits
 moved that gate — `2917e98` opened Candidate and evidenceless Claimed, and
 `13373a8` removed standing as a gate, so every fit belief comes back with its
-label. A re-run on current `main` therefore differs from these records in two
-ways: which beliefs recall serves, and the prompt's memory block, which now
+label. A re-run on current `main` can therefore differ from these records in
+two ways: which beliefs recall serves, and the prompt's memory block, which now
 carries keys the older contract did not have (`precedence` on a served belief,
 `pool` and `pool_lookup` on the response). That makes a re-run a different
 measurement, not a correction: it needs a fresh freeze decision before any of
-its numbers replace or join the round-1 counts. Nothing in this document
-changes; the T5.8b re-run of the two multi-brand cells is in `bench/runs/t58b/`
-and records what the current layer serves.
+its numbers replace or join the round-1 counts. No round-1 number changes; the
+T5.8b re-run of the two multi-brand cells is in `bench/runs/t58b/` and records
+what the current layer serves.
 
 ## Setup
 

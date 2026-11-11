@@ -1388,24 +1388,30 @@ func parseInts(raw string) ([]int, error) {
 }
 
 // committedSpend sums the trace costs of the run files already committed
-// (or staged): the T5.8 and T5.8b turns in the out dir plus the frozen
-// T5.5 turns in the parent runs dir, so the cumulative cap holds across
-// driver invocations and batches against the whole comparison spend.
+// (or staged): the T5.5, T5.8 and T5.8b turns under the runs dir, so the
+// cumulative cap holds across driver invocations, not just the current
+// batch. A batch that writes to its own dir still counts the earlier
+// batches beside it.
 func committedSpend(outDir string) (float64, error) {
-	paths, err := filepath.Glob(filepath.Join(outDir, "t58-*.json"))
-	if err != nil {
-		return 0, err
+	runsDir := filepath.Dir(outDir)
+	dirs := []string{outDir, runsDir, filepath.Join(runsDir, "t58"), filepath.Join(runsDir, "t58b")}
+	seen := make(map[string]bool)
+	var paths []string
+	for _, dir := range dirs {
+		for _, prefix := range []string{"t55-", "t58-", "t58b-"} {
+			matched, err := filepath.Glob(filepath.Join(dir, prefix+"*.json"))
+			if err != nil {
+				return 0, err
+			}
+			for _, path := range matched {
+				if seen[path] {
+					continue
+				}
+				seen[path] = true
+				paths = append(paths, path)
+			}
+		}
 	}
-	rerun, err := filepath.Glob(filepath.Join(outDir, "t58b-*.json"))
-	if err != nil {
-		return 0, err
-	}
-	paths = append(paths, rerun...)
-	prior, err := filepath.Glob(filepath.Join(filepath.Dir(outDir), "t55-*.json"))
-	if err != nil {
-		return 0, err
-	}
-	paths = append(paths, prior...)
 	total := 0.0
 	for _, path := range paths {
 		if strings.HasSuffix(path, "scores.json") {
