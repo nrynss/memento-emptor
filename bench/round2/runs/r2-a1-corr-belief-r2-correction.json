@@ -1,0 +1,42 @@
+{
+  "run_id": "r2-a1-corr-belief-r2-correction",
+  "shopper_id": "r2-corr-belief",
+  "case_id": "correction-then-another-agent",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "repeat": 2,
+  "turn": "correction",
+  "agent": "A",
+  "model": "claude-sonnet-4-6",
+  "prompt": "Shopper: r2-corr-belief\nCandidate: a new Otter Oxford Shirt from Brand Otter (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.\n\nYour recommendation in reply to the above was:\nI cannot make a size recommendation because no sizing information, body measurements, or prior purchase history was provided.\n\nShopper correction: Actually I have lost a size since then, use M now.\nGiven that correction, what size do you recommend for the candidate? Cite only what you were given.",
+  "memory_tool": "none",
+  "memory_response": "",
+  "reply": "**M**\nThe shopper stated they have lost a size and now wear M.",
+  "prompt_words": 121,
+  "reply_words": 13,
+  "trace_cost_usd": 0.001224,
+  "contaminated": false,
+  "capped": false,
+  "extraction": {
+    "size": "M",
+    "size_rule": "standalone-token",
+    "size_quote": "",
+    "id_refs": null
+  },
+  "score": {
+    "shopper_id": "r2-corr-belief",
+    "case_id": "correction-then-another-agent",
+    "arm": 1,
+    "turn": "correction",
+    "expected_size": "M",
+    "right_size": true,
+    "wrong_cause": 0,
+    "correction_honoured": true,
+    "supported_cites": 0,
+    "cited": 0,
+    "rung": "",
+    "tokens": 134,
+    "token_basis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "over_cap": false
+  }
+}

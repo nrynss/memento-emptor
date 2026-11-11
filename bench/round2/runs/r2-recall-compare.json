@@ -1,0 +1,621 @@
+{
+  "note": "Live recall against bench/round2/recall.go's expectation, per shopper and phase. Ids, the absolute event times and the guidance prose are excluded; every other field compares. The expectation dates its rows from the freeze's fixed anchor, while the live layer is seeded with the same relative spans in real past event time (a future event time never ages, so promotion would never happen); only the order of the times is part of the freeze. A difference is reported, not repaired.",
+  "runs": [
+    {
+      "run_id": "r2-a3-corr-belief-r1-correction",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-belief-r1-first",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-corr-belief-r1-next-session",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-belief-r1-other-agent",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-belief-r2-correction",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-belief-r2-first",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-corr-belief-r2-next-session",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-belief-r2-other-agent",
+      "shopper_id": "r2-corr-belief",
+      "arm": 3,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r1-correction",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r1-first",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r1-next-session",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r1-other-agent",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r2-correction",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r2-first",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r2-next-session",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-corr-standing-r2-other-agent",
+      "shopper_id": "r2-corr-standing",
+      "arm": 3,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-crowd-plain-r1-first",
+      "shopper_id": "r2-crowd-plain",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-crowd-plain-r2-first",
+      "shopper_id": "r2-crowd-plain",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-crowd-rival-r1-first",
+      "shopper_id": "r2-crowd-rival",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction",
+      "differences": [
+        "beliefs[0].evidence: 5 in the expectation, 3 live",
+        "beliefs[0].evidence[0].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-007-0f77\", live \"CAP-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.custom_id: expected \"seed-41-r2-crowd-rival-007\", live \"seed-41-r2-crowd-rival-010\"",
+        "beliefs[0].evidence[0].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-007-0f77\", live \"EVT-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-007-0f77\", live \"ORD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-007-0f77\", live \"RFD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].reason.text: expected \"too loose across the chest\", live \"sleeves too long in M\"",
+        "beliefs[0].evidence[1].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-009-448f\", live \"CAP-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.custom_id: expected \"seed-41-r2-crowd-rival-009\", live \"seed-41-r2-crowd-rival-013\"",
+        "beliefs[0].evidence[1].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-009-448f\", live \"EVT-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-009-448f\", live \"ORD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-009-448f\", live \"RFD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].reason.text: expected \"swims on the shopper\", live \"too loose in the body\"",
+        "beliefs[0].evidence[2].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-010-3abd\", live \"CAP-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.custom_id: expected \"seed-41-r2-crowd-rival-010\", live \"seed-41-r2-crowd-rival-014\"",
+        "beliefs[0].evidence[2].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-010-3abd\", live \"EVT-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-010-3abd\", live \"ORD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-010-3abd\", live \"RFD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].reason.text: expected \"sleeves too long in M\", live \"sleeves too long again\"",
+        "beliefs[1].standing: expected \"Candidate\", live \"None\"",
+        "beliefs[1].status: expected \"Building\", live \"Claimed\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-crowd-rival-r2-first",
+      "shopper_id": "r2-crowd-rival",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction",
+      "differences": [
+        "beliefs[0].evidence: 5 in the expectation, 3 live",
+        "beliefs[0].evidence[0].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-007-0f77\", live \"CAP-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.custom_id: expected \"seed-41-r2-crowd-rival-007\", live \"seed-41-r2-crowd-rival-010\"",
+        "beliefs[0].evidence[0].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-007-0f77\", live \"EVT-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-007-0f77\", live \"ORD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-007-0f77\", live \"RFD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].reason.text: expected \"too loose across the chest\", live \"sleeves too long in M\"",
+        "beliefs[0].evidence[1].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-009-448f\", live \"CAP-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.custom_id: expected \"seed-41-r2-crowd-rival-009\", live \"seed-41-r2-crowd-rival-013\"",
+        "beliefs[0].evidence[1].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-009-448f\", live \"EVT-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-009-448f\", live \"ORD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-009-448f\", live \"RFD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].reason.text: expected \"swims on the shopper\", live \"too loose in the body\"",
+        "beliefs[0].evidence[2].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-010-3abd\", live \"CAP-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.custom_id: expected \"seed-41-r2-crowd-rival-010\", live \"seed-41-r2-crowd-rival-014\"",
+        "beliefs[0].evidence[2].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-010-3abd\", live \"EVT-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-010-3abd\", live \"ORD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-010-3abd\", live \"RFD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].reason.text: expected \"sleeves too long in M\", live \"sleeves too long again\"",
+        "beliefs[1].standing: expected \"Candidate\", live \"None\"",
+        "beliefs[1].status: expected \"Building\", live \"Claimed\""
+      ]
+    },
+    {
+      "run_id": "r2-a3-new-otherbrand-r1-first",
+      "shopper_id": "r2-new-otherbrand",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-new-otherbrand-r2-first",
+      "shopper_id": "r2-new-otherbrand",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-new-plain-r1-first",
+      "shopper_id": "r2-new-plain",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-new-plain-r2-first",
+      "shopper_id": "r2-new-plain",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-noisy-down-r1-first",
+      "shopper_id": "r2-noisy-down",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-noisy-down-r2-first",
+      "shopper_id": "r2-noisy-down",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-noisy-up-r1-first",
+      "shopper_id": "r2-noisy-up",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a3-noisy-up-r2-first",
+      "shopper_id": "r2-noisy-up",
+      "arm": 3,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r1-correction",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r1-first",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r1-next-session",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r1-other-agent",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r2-correction",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r2-first",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r2-next-session",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-belief-r2-other-agent",
+      "shopper_id": "r2-corr-belief",
+      "arm": 4,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].status: expected \"Earned\", live \"Out of true\"",
+        "beliefs[1].contradicted: expected true, live false",
+        "beliefs[1].contradicted_by: type map[string]interface {} in the expectation, \u003cnil\u003e live"
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r1-correction",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r1-first",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r1-next-session",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r1-other-agent",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r2-correction",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "correction",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r2-first",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r2-next-session",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "next-session",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-corr-standing-r2-other-agent",
+      "shopper_id": "r2-corr-standing",
+      "arm": 4,
+      "turn": "other-agent",
+      "phase": "after-correction",
+      "differences": [
+        "beliefs[0].contradicted_by.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\"",
+        "beliefs[0].status: expected \"Claimed\", live \"Out of true\"",
+        "guidance.belief_present: expected false, live true",
+        "overriding_correction.contradicts_belief_id: unexpected live value \"\\u003cid\\u003e\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-crowd-plain-r1-first",
+      "shopper_id": "r2-crowd-plain",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-crowd-plain-r2-first",
+      "shopper_id": "r2-crowd-plain",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-crowd-rival-r1-first",
+      "shopper_id": "r2-crowd-rival",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction",
+      "differences": [
+        "beliefs[0].evidence: 5 in the expectation, 3 live",
+        "beliefs[0].evidence[0].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-007-0f77\", live \"CAP-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.custom_id: expected \"seed-41-r2-crowd-rival-007\", live \"seed-41-r2-crowd-rival-010\"",
+        "beliefs[0].evidence[0].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-007-0f77\", live \"EVT-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-007-0f77\", live \"ORD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-007-0f77\", live \"RFD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].reason.text: expected \"too loose across the chest\", live \"sleeves too long in M\"",
+        "beliefs[0].evidence[1].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-009-448f\", live \"CAP-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.custom_id: expected \"seed-41-r2-crowd-rival-009\", live \"seed-41-r2-crowd-rival-013\"",
+        "beliefs[0].evidence[1].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-009-448f\", live \"EVT-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-009-448f\", live \"ORD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-009-448f\", live \"RFD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].reason.text: expected \"swims on the shopper\", live \"too loose in the body\"",
+        "beliefs[0].evidence[2].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-010-3abd\", live \"CAP-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.custom_id: expected \"seed-41-r2-crowd-rival-010\", live \"seed-41-r2-crowd-rival-014\"",
+        "beliefs[0].evidence[2].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-010-3abd\", live \"EVT-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-010-3abd\", live \"ORD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-010-3abd\", live \"RFD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].reason.text: expected \"sleeves too long in M\", live \"sleeves too long again\"",
+        "beliefs[1].standing: expected \"Candidate\", live \"None\"",
+        "beliefs[1].status: expected \"Building\", live \"Claimed\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-crowd-rival-r2-first",
+      "shopper_id": "r2-crowd-rival",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction",
+      "differences": [
+        "beliefs[0].evidence: 5 in the expectation, 3 live",
+        "beliefs[0].evidence[0].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-007-0f77\", live \"CAP-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.custom_id: expected \"seed-41-r2-crowd-rival-007\", live \"seed-41-r2-crowd-rival-010\"",
+        "beliefs[0].evidence[0].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-007-0f77\", live \"EVT-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-007-0f77\", live \"ORD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-007-0f77\", live \"RFD-seed-41-r2-crowd-rival-010-3abd\"",
+        "beliefs[0].evidence[0].reason.text: expected \"too loose across the chest\", live \"sleeves too long in M\"",
+        "beliefs[0].evidence[1].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-009-448f\", live \"CAP-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.custom_id: expected \"seed-41-r2-crowd-rival-009\", live \"seed-41-r2-crowd-rival-013\"",
+        "beliefs[0].evidence[1].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-009-448f\", live \"EVT-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-009-448f\", live \"ORD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-009-448f\", live \"RFD-seed-41-r2-crowd-rival-013-3523\"",
+        "beliefs[0].evidence[1].reason.text: expected \"swims on the shopper\", live \"too loose in the body\"",
+        "beliefs[0].evidence[2].link.capture_id: expected \"CAP-seed-41-r2-crowd-rival-010-3abd\", live \"CAP-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.custom_id: expected \"seed-41-r2-crowd-rival-010\", live \"seed-41-r2-crowd-rival-014\"",
+        "beliefs[0].evidence[2].link.event_id: expected \"EVT-seed-41-r2-crowd-rival-010-3abd\", live \"EVT-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.order_id: expected \"ORD-seed-41-r2-crowd-rival-010-3abd\", live \"ORD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].link.refund_id: expected \"RFD-seed-41-r2-crowd-rival-010-3abd\", live \"RFD-seed-41-r2-crowd-rival-014-89eb\"",
+        "beliefs[0].evidence[2].reason.text: expected \"sleeves too long in M\", live \"sleeves too long again\"",
+        "beliefs[1].standing: expected \"Candidate\", live \"None\"",
+        "beliefs[1].status: expected \"Building\", live \"Claimed\""
+      ]
+    },
+    {
+      "run_id": "r2-a4-new-otherbrand-r1-first",
+      "shopper_id": "r2-new-otherbrand",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-new-otherbrand-r2-first",
+      "shopper_id": "r2-new-otherbrand",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-new-plain-r1-first",
+      "shopper_id": "r2-new-plain",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-new-plain-r2-first",
+      "shopper_id": "r2-new-plain",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-noisy-down-r1-first",
+      "shopper_id": "r2-noisy-down",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-noisy-down-r2-first",
+      "shopper_id": "r2-noisy-down",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-noisy-up-r1-first",
+      "shopper_id": "r2-noisy-up",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    },
+    {
+      "run_id": "r2-a4-noisy-up-r2-first",
+      "shopper_id": "r2-noisy-up",
+      "arm": 4,
+      "turn": "first",
+      "phase": "before-correction"
+    }
+  ]
+}

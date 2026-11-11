@@ -1,0 +1,42 @@
+{
+  "run_id": "r2-a3-corr-standing-r1-first",
+  "shopper_id": "r2-corr-standing",
+  "case_id": "correction-then-another-agent",
+  "arm": 3,
+  "arm_name": "memento-shopper-only",
+  "repeat": 1,
+  "turn": "first",
+  "agent": "A",
+  "model": "claude-sonnet-4-6",
+  "prompt": "Shopper: r2-corr-standing\nCandidate: a new Sable Oxford Shirt from Brand Sable (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: Memento layer, shopper only. The shopper's own beliefs, evidence, labels and corrections, with no pooled product fit in this condition:\n{\n  \"beliefs\": [\n    {\n      \"belief_id\": \"blf_000001\",\n      \"contradicted\": false,\n      \"contradicted_by\": null,\n      \"evidence\": [],\n      \"kind\": \"fit\",\n      \"precedence\": {\n        \"overridden\": false,\n        \"overridden_by\": null,\n        \"step\": \"statement\"\n      },\n      \"seeded\": true,\n      \"standing\": \"None\",\n      \"status\": \"Claimed\",\n      \"subject\": {\n        \"id\": \"brand-s-013\",\n        \"kind\": \"brand\",\n        \"name\": \"Brand Sable\"\n      },\n      \"updated_at\": \"2026-11-04T18:49:06Z\",\n      \"value\": \"shopper says they are usually size M\"\n    }\n  ],\n  \"overriding_correction\": null,\n  \"pending_count\": 0,\n  \"pool\": null,\n  \"pool_lookup\": \"consulted\",\n  \"shopper_id\": \"r2-corr-standing\",\n  \"trace_id\": null\n}",
+  "memory_tool": "recall_for_purchase",
+  "memory_response": "{\"shopper_id\":\"r2-corr-standing\",\"beliefs\":[{\"belief_id\":\"blf_000001\",\"kind\":\"fit\",\"subject\":{\"kind\":\"brand\",\"id\":\"brand-s-013\",\"name\":\"Brand Sable\"},\"value\":\"shopper says they are usually size M\",\"status\":\"Claimed\",\"standing\":\"None\",\"contradicted\":false,\"contradicted_by\":null,\"evidence\":[],\"precedence\":{\"step\":\"statement\",\"overridden\":false,\"overridden_by\":null},\"seeded\":true,\"updated_at\":\"2026-11-04T18:49:06Z\"}],\"pool\":null,\"pool_lookup\":\"consulted\",\"overriding_correction\":null,\"guidance\":{\"text\":\"Take size M for Brand Sable: the shopper's usual size.\",\"basis\":\"statement\",\"correction_id\":null,\"belief_id\":\"blf_000001\"},\"pending_count\":0,\"trace_id\":null}",
+  "reply": "**M**\nThe shopper states they are usually size M in Brand Sable.",
+  "prompt_words": 135,
+  "reply_words": 12,
+  "trace_cost_usd": 0.001869,
+  "contaminated": false,
+  "capped": false,
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "",
+    "id_refs": null
+  },
+  "score": {
+    "shopper_id": "r2-corr-standing",
+    "case_id": "correction-then-another-agent",
+    "arm": 3,
+    "turn": "first",
+    "expected_size": "M",
+    "right_size": true,
+    "wrong_cause": 0,
+    "correction_honoured": null,
+    "supported_cites": 0,
+    "cited": 0,
+    "rung": "statement",
+    "tokens": 147,
+    "token_basis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "over_cap": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "run_id": "r2-a2-new-plain-r2-first",
+  "shopper_id": "r2-new-plain",
+  "case_id": "new-to-brand",
+  "arm": 2,
+  "arm_name": "paypal-history",
+  "repeat": 2,
+  "turn": "first",
+  "agent": "A",
+  "model": "claude-sonnet-4-6",
+  "prompt": "Shopper: r2-new-plain\nCandidate: a new Vale Oxford Shirt from Brand Vale (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: PayPal history. Exactly what the shopper's PayPal account returns — transactions, orders with line items, refunds and disputes — and nothing the memory layer produced:\n[\n  {\n    \"transaction_info\": {\n      \"custom_field\": \"r2-r2-new-plain\",\n      \"fee_amount\": {\n        \"currency_code\": \"USD\",\n        \"value\": \"-26.00\"\n      },\n      \"instrument_sub_type\": \"PayPal Wallet\",\n      \"instrument_type\": \"PayPal\",\n      \"protection_eligibility\": \"01\",\n      \"transaction_amount\": {\n        \"currency_code\": \"USD\",\n        \"value\": \"26.00\"\n      },\n      \"transaction_event_code\": \"T0006\",\n      \"transaction_id\": \"CAP-seed-41-r2-new-plain-001-6058\",\n      \"transaction_initiation_date\": \"2026-11-13T12:00:00Z\",\n      \"transaction_status\": \"S\",\n      \"transaction_subject\": \"Store purchase, 1 item\",\n      \"transaction_updated_date\": \"2026-11-13T12:00:00Z\"\n    }\n  },\n  {\n    \"create_time\": \"2026-11-13T12:00:00Z\",\n    \"id\": \"ORD-seed-41-r2-new-plain-001-6058\",\n    \"intent\": \"CAPTURE\",\n    \"purchase_units\": [\n      {\n        \"amount\": {\n          \"currency_code\": \"USD\",\n          \"value\": \"26.00\"\n        },\n        \"custom_id\": \"r2-r2-new-plain\",\n        \"description\": \"Loom Loom Tee\",\n        \"items\": [\n          {\n            \"category\": \"PHYSICAL_GOODS\",\n            \"description\": \"Size M\",\n            \"name\": \"Loom Loom Tee\",\n            \"quantity\": \"1\",\n            \"sku\": \"LOM-TEE-M\",\n            \"unit_amount\": {\n              \"currency_code\": \"USD\",\n              \"value\": \"26.00\"\n            }\n          }\n        ],\n        \"reference_id\": \"r2-LOM-TEE-M\"\n      }\n    ],\n    \"status\": \"COMPLETED\"\n  }\n]",
+  "memory_tool": "paypal_history",
+  "memory_response": "[\n  {\n    \"transaction_info\": {\n      \"custom_field\": \"r2-r2-new-plain\",\n      \"fee_amount\": {\n        \"currency_code\": \"USD\",\n        \"value\": \"-26.00\"\n      },\n      \"instrument_sub_type\": \"PayPal Wallet\",\n      \"instrument_type\": \"PayPal\",\n      \"protection_eligibility\": \"01\",\n      \"transaction_amount\": {\n        \"currency_code\": \"USD\",\n        \"value\": \"26.00\"\n      },\n      \"transaction_event_code\": \"T0006\",\n      \"transaction_id\": \"CAP-seed-41-r2-new-plain-001-6058\",\n      \"transaction_initiation_date\": \"2026-11-13T12:00:00Z\",\n      \"transaction_status\": \"S\",\n      \"transaction_subject\": \"Store purchase, 1 item\",\n      \"transaction_updated_date\": \"2026-11-13T12:00:00Z\"\n    }\n  },\n  {\n    \"create_time\": \"2026-11-13T12:00:00Z\",\n    \"id\": \"ORD-seed-41-r2-new-plain-001-6058\",\n    \"intent\": \"CAPTURE\",\n    \"purchase_units\": [\n      {\n        \"amount\": {\n          \"currency_code\": \"USD\",\n          \"value\": \"26.00\"\n        },\n        \"custom_id\": \"r2-r2-new-plain\",\n        \"description\": \"Loom Loom Tee\",\n        \"items\": [\n          {\n            \"category\": \"PHYSICAL_GOODS\",\n            \"description\": \"Size M\",\n            \"name\": \"Loom Loom Tee\",\n            \"quantity\": \"1\",\n            \"sku\": \"LOM-TEE-M\",\n            \"unit_amount\": {\n              \"currency_code\": \"USD\",\n              \"value\": \"26.00\"\n            }\n          }\n        ],\n        \"reference_id\": \"r2-LOM-TEE-M\"\n      }\n    ],\n    \"status\": \"COMPLETED\"\n  }\n]",
+  "reply": "**M** — The shopper's only PayPal order on record is a Loom Loom Tee in Size M, so M is the one size confirmed in their purchase history.",
+  "prompt_words": 176,
+  "reply_words": 28,
+  "trace_cost_usd": 0.003006,
+  "contaminated": false,
+  "capped": false,
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "",
+    "id_refs": null
+  },
+  "score": {
+    "shopper_id": "r2-new-plain",
+    "case_id": "new-to-brand",
+    "arm": 2,
+    "turn": "first",
+    "expected_size": "L",
+    "right_size": false,
+    "wrong_cause": 0,
+    "correction_honoured": null,
+    "supported_cites": 0,
+    "cited": 0,
+    "rung": "",
+    "tokens": 204,
+    "token_basis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "over_cap": false
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "run_id": "r2-a1-crowd-rival-r1-first",
+  "shopper_id": "r2-crowd-rival",
+  "case_id": "unlike-the-crowd",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "repeat": 1,
+  "turn": "first",
+  "agent": "A",
+  "model": "claude-sonnet-4-6",
+  "prompt": "Shopper: r2-crowd-rival\nCandidate: a new Wren Oxford Shirt from Brand Wren (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+  "memory_tool": "none",
+  "memory_response": "",
+  "reply": "I cannot make a size recommendation — no sizing information, body measurements, or past purchase history was provided in your message.",
+  "prompt_words": 65,
+  "reply_words": 21,
+  "trace_cost_usd": 0.001092,
+  "contaminated": false,
+  "capped": false,
+  "extraction": {
+    "size": "",
+    "size_rule": "none",
+    "size_quote": "",
+    "id_refs": null
+  },
+  "score": {
+    "shopper_id": "r2-crowd-rival",
+    "case_id": "unlike-the-crowd",
+    "arm": 1,
+    "turn": "first",
+    "expected_size": "S",
+    "right_size": false,
+    "wrong_cause": 0,
+    "correction_honoured": null,
+    "supported_cites": 0,
+    "cited": 0,
+    "rung": "",
+    "tokens": 86,
+    "token_basis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "over_cap": false
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "freeze_commit": "b137c9fd0602da9a5806ebcdd11b5d3e37415928",
+  "frozen_manifest_sha256": "74a2ad9d092054d2c38e6914e83567d0ed6242d92f8a679d8967203a3f5e67d9",
+  "note": "T10.4: the round-2 comparison runs (t104 driver)"
+}

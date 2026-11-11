@@ -1,0 +1,42 @@
+{
+  "run_id": "r2-a1-new-otherbrand-r2-first",
+  "shopper_id": "r2-new-otherbrand",
+  "case_id": "new-to-brand",
+  "arm": 1,
+  "arm_name": "no-memory",
+  "repeat": 2,
+  "turn": "first",
+  "agent": "A",
+  "model": "claude-sonnet-4-6",
+  "prompt": "Shopper: r2-new-otherbrand\nCandidate: a new Vale Oxford Shirt from Brand Vale (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: none. No past purchases were given for this recommendation. Recommend from the candidate alone.",
+  "memory_tool": "none",
+  "memory_response": "",
+  "reply": "I cannot make a size recommendation because no sizing information, body measurements, or past purchase history was provided.",
+  "prompt_words": 65,
+  "reply_words": 18,
+  "trace_cost_usd": 0.001041,
+  "contaminated": false,
+  "capped": false,
+  "extraction": {
+    "size": "",
+    "size_rule": "none",
+    "size_quote": "",
+    "id_refs": null
+  },
+  "score": {
+    "shopper_id": "r2-new-otherbrand",
+    "case_id": "new-to-brand",
+    "arm": 1,
+    "turn": "first",
+    "expected_size": "L",
+    "right_size": false,
+    "wrong_cause": 0,
+    "correction_honoured": null,
+    "supported_cites": 0,
+    "cited": 0,
+    "rung": "",
+    "tokens": 83,
+    "token_basis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "over_cap": false
+  }
+}

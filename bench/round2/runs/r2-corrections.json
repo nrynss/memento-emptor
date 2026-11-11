@@ -1,0 +1,61 @@
+{
+  "corrections": [
+    {
+      "shopper_id": "r2-corr-belief",
+      "contradicts_belief_id": "blf_000002",
+      "request": {
+        "contradicts_belief_id": "blf_000002",
+        "shopper_id": "r2-corr-belief",
+        "text": "Actually I have lost a size since then, use M now."
+      },
+      "response": {
+        "correction": {
+          "correction_id": "corr_000001",
+          "text": "Actually I have lost a size since then, use M now.",
+          "contradicts_belief_id": "blf_000002",
+          "recorded_at": "2026-11-11T19:26:09Z",
+          "takes_precedence": true
+        },
+        "belief_id": "blf_000002",
+        "status": "Out of true",
+        "standing": "Venerable",
+        "contradicted": true,
+        "guidance": {
+          "text": "Take size M for Brand Otter",
+          "basis": "correction",
+          "correction_id": "corr_000001",
+          "belief_id": "blf_000002"
+        },
+        "trace_id": null
+      }
+    },
+    {
+      "shopper_id": "r2-corr-standing",
+      "request": {
+        "shopper_id": "r2-corr-standing",
+        "text": "I was measured last week, take S now."
+      },
+      "response": {
+        "correction": {
+          "correction_id": "corr_000001",
+          "text": "I was measured last week, take S now.",
+          "contradicts_belief_id": "blf_000001",
+          "recorded_at": "2026-11-11T19:26:10Z",
+          "takes_precedence": true
+        },
+        "belief_id": "blf_000001",
+        "status": "Out of true",
+        "standing": "None",
+        "contradicted": true,
+        "guidance": {
+          "text": "Take size S for Brand Sable",
+          "basis": "correction",
+          "correction_id": "corr_000001",
+          "belief_id": "blf_000001"
+        },
+        "trace_id": null
+      }
+    }
+  ],
+  "note": "The shopper's correction, recorded through the layer's record_correction once per case-4 shopper, after every first turn and before every later turn."
+}
