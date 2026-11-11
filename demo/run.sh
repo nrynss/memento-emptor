@@ -16,6 +16,8 @@
 # MEMENTO_SECOND_DEPLOYMENT must be set to the second agent's deployment id;
 # the id never lives in this repository.
 set -euo pipefail
+# Raw answers carry full trace ids; keep demo/out private (mode 0600).
+umask 077
 
 cd "$(dirname "$0")/.."
 

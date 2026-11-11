@@ -121,8 +121,12 @@ def http(url, body=None, bearer=None, method="POST", timeout=120):
 
 def save(name, value):
     os.makedirs(RAWDIR, exist_ok=True)
-    with open(os.path.join(RAWDIR, name), "w") as f:
+    path = os.path.join(RAWDIR, name)
+    with open(path, "w") as f:
         json.dump(value, f, indent=2, sort_keys=True)
+    # The README says demo/out is 0600: raw answers stay private even when
+    # the driver is run without run.sh's umask.
+    os.chmod(path, 0o600)
 
 
 def redact(value):
@@ -494,6 +498,9 @@ def step3(ref_conv):
                                "contradicted": b.get("contradicted"),
                                "evidence_count": len(b.get("evidence", []))}
                               for b in post.get("beliefs", []) if b["belief_id"] == "blf_8f2c41"), None),
+        "belief_before": next(({"belief_id": b["belief_id"], "status": b.get("status"),
+                                "guidance": pre.get("guidance")}
+                               for b in pre.get("beliefs", []) if b["belief_id"] == "blf_8f2c41"), None),
         "turns": [first, second, third],
     }
     evidence("03-correction-through-the-agent.json", state)
@@ -825,11 +832,10 @@ def main():
         "merchant": MERCHANT,
         "pool": pooled,
         "seeded_returns": seeded,
-        "belief_before_correction": {
-            "belief_id": "blf_8f2c41",
-            "status": (recall_before.get("beliefs") or [{}])[0].get("status"),
-            "guidance": recall_before.get("guidance"),
-        },
+        # Recorded by step3 before the correction turn. A --resume or
+        # --summary-only run has no pre-correction read to rebuild it from, so
+        # it stays null rather than borrowing another belief's status.
+        "belief_before_correction": corrected.get("belief_before"),
         "correction": corrected,
         "purchase_and_feedback": feedback,
         "dispute": dispute,

@@ -6,7 +6,9 @@
 #   1. records the spend baseline and opens a fresh run directory;
 #   2. reads the demo line's pool and, when an earlier run left a live settled
 #      row, opts the demo shopper out of pooling (which removes their own live
-#      fit rows) and back in;
+#      fit rows); it then opts back in whatever the count was, because an
+#      interrupted reset would otherwise leave the shopper out and the run's
+#      feedback would write no pool row;
 #   3. asserts the starting evidence: the pool is Earned small with the seeded
 #      counts, the shopper's sizing belief carries the three seeded returns,
 #      and the latest sandbox capture and dispute are in their memory.
@@ -14,13 +16,16 @@
 # What it cannot do: delete a correction. Corrections are append-only and live
 # in the layer's standing journal, so a run records a new correction and the
 # newest one wins. The reset records which correction is in force at the start
-# so the run's own correction can be told apart from it.
+# so the run's own correction can be told apart from it. Nor can it take back
+# feedback already written: opting out removes the pool row, but the fit
+# belief keeps every copy the feedback appended.
 #
 # Keys come from the system keyring, are read in this process, and are never
 # printed or written. Live reads are free; the agent turns are the run's spend.
 #
 # Usage: bash demo/reset.sh <run-number>
 set -euo pipefail
+umask 077
 
 RUN="${1:?usage: bash demo/reset.sh <run-number>}"
 cd "$(dirname "$0")/.."
@@ -68,15 +73,18 @@ printf '%s' "$fit" >"$OUT/pool-before.json"
 
 live_settled="$(printf '%s' "$fit" | python3 -c 'import json,sys; d=json.load(sys.stdin); d=d.get("pool",d); print(((d.get("live") or {}).get("settled") or 0))')"
 if [ "$live_settled" -gt 0 ]; then
-	say "an earlier run left $live_settled live settled row(s); opting the demo shopper out and back in"
+	say "an earlier run left $live_settled live settled row(s); opting the demo shopper out of pooling"
 	off="$(call set_pooling "$AGENT_TOKEN" '{"shopper_id":"shopper_01","pooling":false}')"
 	printf '%s' "$off" >"$OUT/pooling-off.json"
-	on="$(call set_pooling "$AGENT_TOKEN" '{"shopper_id":"shopper_01","pooling":true}')"
-	printf '%s' "$on" >"$OUT/pooling-on.json"
 	say "rows removed: $(printf '%s' "$off" | python3 -c 'import json,sys; print(json.load(sys.stdin).get("rows_removed"))')"
-	fit="$(call product_fit "$AGENT_TOKEN" "$LINE")"
-	printf '%s' "$fit" >"$OUT/pool-after.json"
 fi
+# Opt back in whatever the count was: a reset that died between the two calls
+# would leave the shopper out, and the run's feedback writes no pool row for a
+# shopper who is out.
+on="$(call set_pooling "$AGENT_TOKEN" '{"shopper_id":"shopper_01","pooling":true}')"
+printf '%s' "$on" >"$OUT/pooling-on.json"
+fit="$(call product_fit "$AGENT_TOKEN" "$LINE")"
+printf '%s' "$fit" >"$OUT/pool-after.json"
 
 python3 - "$OUT" <<'PY'
 import json, sys
@@ -111,6 +119,23 @@ if belief is None or len(belief.get("evidence", [])) != 3:
 correction = recall.get("overriding_correction") or {}
 print(f"[reset] three seeded returns present; belief {belief['belief_id']} "
       f"{belief.get('status')}; correction in force: {correction.get('correction_id') or 'none'}")
+PY
+
+# The purchase and the dispute step 4 and step 5 read are not reachable
+# through recall (the seller belief never reaches it), so they are checked
+# on the ledger read the run itself makes.
+ledger="$(call ledger_evidence "$SHOPPER_TOKEN" '{"shopper_id":"shopper_01"}')"
+printf '%s' "$ledger" >"$OUT/ledger-baseline.json"
+python3 - "$OUT" <<'PY'
+import json, sys
+out = sys.argv[1]
+rows = json.load(open(out + "/ledger-baseline.json")).get("evidence", [])
+kinds = [row["evidence"]["outcome"]["kind"] for row in rows]
+missing = [kind for kind in ("capture", "dispute") if kind not in kinds]
+if missing:
+    print(f"[reset] the shopper's memory has no {' or '.join(missing)} row; refusing to start", file=sys.stderr)
+    sys.exit(5)
+print(f"[reset] capture and dispute present; {len(rows)} evidence rows in memory")
 PY
 
 export PATH="$HOME/.ast/bin:$PATH"
