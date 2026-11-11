@@ -964,8 +964,8 @@ The contract's `PoolConsulted` comment stays as it was: "the pool has something 
 requires:   [T8.5m]
 fixture-ok: no
 size:       XS · mid
-owns:       tests/live/hub/
-status:     not-started
+owns:       tests/live/hub/, internal/api/server/, dev-diary/PHASE-8-pivot-layer.md
+status:     claimed:t85s-boot
 ```
 The T8.5m review found `LoadSeed` calls `memory.RecordCorrection` before `takeCorrection` decides the id is already restored, so every boot re-issues that correction's graph write even when the journal holds it. No served-state effect offline; prove it against the live hub and either make the boot skip the write for a restored id or record that the repeat is harmless and why.
 
