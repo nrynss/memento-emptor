@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 6 / 7 | In progress (T1.1c) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
-| P4 | 4 / 7 | In progress (T4.5, T4.6, T4.7) |
+| P4 | 5 / 8 | In progress (T4.6, T4.7, T4.8) |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T4.5: The contest route (done)
+
+**What exists.** `/ledger` appends the why and contest columns; clicking Contest opens `ContestEditor` for that belief with `formId=contest-<belief id>`, submits through `record_correction` only, and copies the layer's answer back into the grid, so the row becomes Out of true with the correction beside it while its value, evidence count and seeded mark stay. Every row links to `/belief?belief=<id>`, and `/belief` resolves the link, keeping its back link. Review mutation-checked the click, the citation and the answer-apply path; it also found the deep-link wiring had no test (vitest resolves `$app/environment` to the server build, so the whole path could be deleted green) and added one that mounts the real page with a browser URL. P4's fourth exit box now ticks.
+
+**What surprised.** The correction fixture answers only `blf_8f2c41`; contesting another row fails honestly rather than widening a fixture. Under vitest, any `page.url` read must sit behind `browser`.
+
+**The next agent should not have to work out.** The Why href is a literal `/belief` (base path unset); if the app gains a base path, the renderer needs `resolve` too.
 
 ### T10.3: Round-2 freeze (done)
 

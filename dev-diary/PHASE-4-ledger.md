@@ -72,7 +72,7 @@ requires:   [T4.4, T9.2]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/ledger/, web/src/lib/ledger/, web/src/lib/contest/
-status:     in-review
+status:     done
 notes:      The ledger page appends `explainColumnDefs()` and `contestEditColumnDefs()` after the read-only columns; the Contest button opens `ContestEditor` for that row with form id `contest-<belief id>`, submits through the existing `ContestState`, and reads the state's rows back so the row moves to Out of true with the correction beside it and the evidence count unchanged. Each row links to `/belief?belief=<id>`; `/belief` reads the link through `linkedBeliefId`/`pickBeliefId` and keeps its `/ledger` back link. Deep-link helpers in `web/src/lib/ledger/deeplink.ts`; the route flow is covered in `contest-route.test.ts` (step 4 fixture, real grid click, editor submit, kept belief, both links). The correction fixture answers only `blf_8f2c41`, so Contest on another row fails honestly instead of widening it. The why page's own link resolution is covered in `belief-deeplink.test.ts`, which supplies the browser guard and the request URL because vitest reports `$app/environment` as the server. T9.2's task line corrected. Branch task/t45.
 ```
 The P4 review found the contest path has no route: `/ledger` is read-only, `/belief` renders only the standing editor, and no route passes a belief id to the declared contest editor. `contestEditColumnDefs` is never used and the built ledger has no "Contest" string. A shopper cannot contest a belief in the app, so T4.4's exit criterion is unmet. Add the contest column to the ledger, open the editor per row with a unique form id, let the existing state apply the layer's answer, and link `/ledger` to `/belief` (which should honour a belief query parameter). Correct T9.2's task line that says the ledger shows precedence/pool/opt-out when only `/belief` does.
@@ -128,7 +128,7 @@ The T9.7 run found the deployed ledger page is a fixture replay: its live number
 - [x] The ledger reads through a typed client (T4.1).
 - [x] The four statuses render, seeded rows marked (T4.2).
 - [x] Every belief can be explained, including what wasn't counted (T4.3).
-- [ ] A shopper can contest a belief (T4.4).
+- [x] A shopper can contest a belief (T4.4, T4.5).
 
 ---
 
