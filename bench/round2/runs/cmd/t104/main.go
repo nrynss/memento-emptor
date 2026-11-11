@@ -202,11 +202,7 @@ func run(opts options) error {
 	if err != nil {
 		return err
 	}
-	freezeCommit, err := freezeCommit()
-	if err != nil {
-		return err
-	}
-	marker, err := round2.BeginRuns(opts.outDir, freezeCommit, "T10.4: the round-2 comparison runs (t104 driver)")
+	marker, err := openRuns(opts.outDir, "T10.4: the round-2 comparison runs (t104 driver)")
 	if err != nil {
 		return err
 	}
@@ -370,7 +366,36 @@ func selectShoppers(all []seed.Round2Shopper, wanted []string) ([]seed.Round2Sho
 	return out, nil
 }
 
-// freezeCommit finds the commit that landed bench/round2/FROZEN.md.
+// openRuns opens the run directory against the freeze in this tree, or
+// reuses the marker already there when it still names this freeze. The
+// marker binds the directory to one freeze: a resume of the same run keeps
+// the original marker, and a freeze edited mid-run fails here instead of
+// being silently re-bound by a rewritten marker. A directory with no marker
+// is opened with BeginRuns.
+func openRuns(outDir, note string) (round2.RunsMarker, error) {
+	freeze, err := freezeCommit()
+	if err != nil {
+		return round2.RunsMarker{}, err
+	}
+	path := filepath.Join(outDir, round2.RunsMarkerFile)
+	if _, statErr := os.Stat(path); statErr != nil {
+		if !os.IsNotExist(statErr) {
+			return round2.RunsMarker{}, fmt.Errorf("t104: inspect runs marker: %w", statErr)
+		}
+		return round2.BeginRuns(outDir, freeze, note)
+	}
+	marker, err := round2.ReadRunsMarker(outDir)
+	if err != nil {
+		return round2.RunsMarker{}, fmt.Errorf("t104: the run directory is already open; move it aside to start a new run: %w", err)
+	}
+	return marker, nil
+}
+
+// freezeCommit finds the commit that added bench/round2/FROZEN.md, the
+// freeze's landing commit. It uses --diff-filter=A so a later prose
+// amendment does not re-label the freeze the run directory was opened
+// against; the manifest hash in the marker is the binding that holds on
+// every clone (FROZEN.md section 8).
 func freezeCommit() (string, error) {
 	out, err := exec.Command("git", "log", "--diff-filter=A", "--format=%H", "--", "bench/round2/FROZEN.md").Output()
 	if err != nil {
@@ -737,6 +762,13 @@ func (d *driver) driveTurn(ctx context.Context, shopper seed.Round2Shopper, arm 
 		if record, ok, err := readRunFile(path); err != nil {
 			return round2.RunFile{}, 0, err
 		} else if ok {
+			// A turn committed without a reply is a recorded failure that
+			// may have been paid for, not a finished turn: reuse would
+			// silently drop it from the batch, so refuse until its trace
+			// is recovered or the file is removed.
+			if !record.Capped && strings.TrimSpace(record.Reply) == "" {
+				return round2.RunFile{}, 0, fmt.Errorf("t104: %s is committed with no reply (a failed turn); recover its trace with -mode recover or delete the file before re-running", runID)
+			}
 			fmt.Printf("turn %s: already committed, reused\n", runID)
 			return record, 0, nil
 		}
@@ -999,7 +1031,7 @@ func (d *driver) writeCorrections() error {
 		return nil
 	}
 	return writeJSON(filepath.Join(d.opts.outDir, "r2-corrections.json"), map[string]any{
-		"note":        "The shopper's correction, recorded through the layer's record_correction once per case-4 shopper, after every first turn and before every later turn.",
+		"note":        "The shopper's correction, recorded through the layer's record_correction after every first turn and before any later turn. This file holds the final driver invocation's calls: the layer is reseeded per invocation, so a correction turn committed earlier keeps that instance's recorded_at in its own memory_response.",
 		"corrections": corrections,
 	})
 }

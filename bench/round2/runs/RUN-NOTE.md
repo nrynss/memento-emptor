@@ -3,9 +3,13 @@
 ## What ran
 
 - **Freeze.** `bench/round2/FROZEN.md` as landed by commit
-  `b137c9fd0602da9a5806ebcdd11b5d3e37415928`; the run directory was opened
-  with `round2.BeginRuns` and `bench/round2/freeze_check.sh --allow-runs`
-  ran green before the first turn and again after the last.
+  `b137c9fd0602da9a5806ebcdd11b5d3e37415928`, the commit that added it
+  (`git log --diff-filter=A`). The file was amended after that commit, and
+  the marker's `frozen_manifest_sha256` (`74a2ad9d0920…`) pins the amended
+  file in this tree, which is the binding FROZEN section 8 describes. The
+  run directory was opened with `round2.BeginRuns`; the driver runs
+  `bench/round2/freeze_check.sh --allow-runs` at the start of every
+  invocation, and the check is green on the committed tree.
 - **Cells.** Eight frozen shoppers x four arms x two repeats = 64 first
   turns. Case 4 adds the correction, next-session and other-agent turns
   (2 shoppers x 4 arms x 2 repeats x 3 = 48). **112 turns in all.**
@@ -14,13 +18,24 @@
   billing read, message, trace poll and id scrubbing as in
   `bench/pilot/cmd/drive` and `bench/runs/cmd/t55`. The prompt carries the
   arm's memory itself; no agent tool spans are involved.
-- **The layer.** One Lambo 0.10.1 hub (native `.jina-embeddings-v3` over
-  the live Elastic deployment), one `server.Service` per shopper over its
-  own hub session, the live fit index `t104-fit-rows` (scratch, deleted at
-  the end) and a temporary standing journal. The layer ran continuously
-  from the population seed to the last turn; nothing restarted it
-  mid-run. Recall was served over the layer's own HTTP handler
+- **The layer.** One Lambo 0.10.1 hub per invocation (native
+  `.jina-embeddings-v3` over the live Elastic deployment), one
+  `server.Service` per shopper over its own hub session, the live fit
+  index `t104-fit-rows` (scratch, deleted at the end) and a temporary
+  standing journal. Recall was served over the layer's own HTTP handler
   (`POST /tools/recall_for_purchase`), not read from a stub.
+- **A restart reseeds; the batch ran in four invocations.** Each driver
+  invocation boots a fresh hub, regenerates the 121-row population at that
+  moment (see Population below) and replays the frozen histories through
+  `LoadSeed`; the one-cell check was an earlier, fifth invocation. Three of
+  the four batch invocations stopped early — the missing trace, then the
+  two 502s below — so a turn recorded in a later invocation was served by a
+  fresh seed of the same frozen inputs, not by a layer that had kept
+  running. Every restart reused the turns already committed rather than
+  sending them again: the two 502 turns were the only turns sent twice, and
+  the trace-missing turn was recovered, not re-sent. The seed moment moves
+  the absolute event times and the pool's recent window, and it moved no
+  pool count: no pool difference appears in `r2-recall-compare.json`.
 - **Population.** `seed.GenerateRound2Population(time.Now().UTC())`, 121
   rows, written through `fitindex.Writer`'s per-shopper transitions
   (`Captured`, `Refunded`, `Classified`, `Feedback`, `Kept`) and verified
@@ -67,8 +82,9 @@ largest in the set (2228 words).
 | Arm 4 right size | 12/16 | 4/4 | 4/4 | 4/4 |
 
 Wrong-cause errors: 0 in every arm. Over-cap turns: 0. Contaminated
-turns: 7 (the round-1 string rule flags a reply that quotes its own live
-belief id — `blf_`; the memory is the arm's own, not another shopper's).
+turns: 7 (the round-1 string rule flags demo-shopper tokens; every hit is
+this arm's own live layer id — six `corr_` and one `blf_` — not another
+shopper's memory).
 Every run file carries its own `score` (the frozen `round2.Score`), and
 `r2-scores.json` collects the same 112 rows.
 
@@ -77,7 +93,7 @@ Every run file carries its own `score` (the frozen `round2.Score`), and
 `r2-recall-compare.json` compares every Memento turn with
 `bench/round2/recall.go`'s expectation for its phase. Ids, the absolute
 event times and the guidance prose are excluded; every other field
-compares. **28 of 56 turns differ, in three groups; the other 28 match
+compares. **28 of 56 turns differ, in two groups; the other 28 match
 field for field** — including all of `r2-new-plain`,
 `r2-new-otherbrand`, `r2-crowd-plain`, `r2-noisy-up`, `r2-noisy-down` and
 `r2-corr-belief`'s first turn.
@@ -154,18 +170,61 @@ the correction/next-session/other-agent turns):
   `r2-a4-new-plain-r1-first` (L read as M), `r2-a4-corr-belief-r2-first`
   (L read as M). No human override was applied, so the committed scores
   are the frozen rule's. Re-read by hand, arm 3's first-turn count would
-  be 12/16 and arm 4's 16/16; T10.5 should decide whether to report the
+  be 12/16 and arm 4's 16/16. How to present that is T10.5's call: it owns
+  `bench/round2/README.md`, and this note does not choose between the
   deterministic counts, the hand re-read, or both.
 - **Transport failures.** Two message POSTs answered 502 and were not
   recorded (no message id, no reply): `r2-a3-corr-standing-r1-first` and
-  `r2-a2-corr-standing-r1-other-agent`. The batch stopped each time and
-  the turn was sent again after a fresh seed; both retries succeeded. The
-  billing reads across those gaps rose by at most $0.02, platform
-  overhead included; any orphaned turn cost is below one arm-2 turn and
-  is not in the scores.
+  `r2-a2-corr-standing-r1-other-agent`. Each stopped its invocation; the
+  turn was sent again in the next invocation after a fresh seed, and both
+  retries succeeded. The billing reads across those gaps rose by at most
+  $0.02, platform overhead included; any orphaned turn cost is below one
+  arm-2 turn and is not in the scores.
+- **The correction is recorded again in each invocation, and the
+  corrections file holds the last call.** A fresh hub holds no correction,
+  so every invocation that reaches a case-4 shopper records it again
+  (`recordCorrection`) before that invocation's later turns.
+  `r2-corrections.json` is the final invocation's call for each shopper,
+  and its `recorded_at` is later than the correction memory the committed
+  correction and next-session turns were served (each run file's
+  `memory_response` is what that turn saw). The text and the ids agree
+  across instances, and `recorded_at` is excluded from the recall
+  comparison.
 - **One turn's trace arrived late.** `r2-a1-noisy-up-r2-first` was sent
   and paid for, but its trace was not listed within the deadline. The
-  failure was recorded, not retried; the trace appeared afterwards
-  (short id `c39c1881`, $0.001080) and was recovered from the platform and
-  recorded with a note. This turn's recovery is why the scores carry 112
-  rows.
+  failure was recorded, not retried, and the batch stopped there — the
+  first of the three early stops above. The trace appeared afterwards
+  (short id `c39c1881`, $0.001080) and was recovered from the platform in
+  recover mode and recorded with a note. This turn's recovery is why the
+  scores carry 112 rows.
+
+## Review (fresh eyes)
+
+Re-verified from the committed files, no live call, $0. The 112 run files
+are the exact 8 shoppers x 4 arms x 2 repeats cross product plus case 4's
+later turns, with no missing or duplicated id. Every score recomputes with
+`round2.GradeRunFile` from the frozen shopper and hidden answer, and
+`r2-scores.json`, `r2-summary.json` and `r2-recall-compare.json` recompute
+from the run files. Every prompt is `BaseSection` plus `MemorySection` over
+the memory the file records (plus the conversation on a correction turn),
+and arm 2's memory is `ArmTwoInput` byte for byte. Spend re-sums to
+$0.789309; the one-cell figure and both projections re-derive. The frozen
+inputs are untouched: `freeze_check.sh --allow-runs` is green at 116 rows
+and the run directory is the only addition.
+
+Review fixes, in this file and the driver; no frozen input and no run
+file's measured content changed. (1) The earlier text said the layer ran
+continuously with no restart; the artifacts say otherwise — the correction
+`recorded_at` in `r2-corrections.json` (19:26) is later than the one the
+correction and next-session turns carry (18:14 and 18:58), and the seeded
+event times and the correction times group into four batch instances.
+"What ran" now records the four invocations, the three early stops and
+what a restart means. (2) The contaminated count named only `blf_`; six of
+the seven replies quote `corr_`. (3) "Three groups" was two, and the
+corrections file's note now says it holds the final invocation's calls.
+(4) The driver now reuses an existing marker only when it still names this
+freeze (it used to rewrite `FREEZE.json` at the start of every invocation,
+which would have silently re-bound a directory to an amended freeze), and
+it refuses to reuse a committed turn that carries no reply (the
+trace-missing failure used to be skipped as "already committed" on
+resume).

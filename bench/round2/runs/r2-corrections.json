@@ -57,5 +57,5 @@
       }
     }
   ],
-  "note": "The shopper's correction, recorded through the layer's record_correction once per case-4 shopper, after every first turn and before every later turn."
+  "note": "The shopper's correction, recorded through the layer's record_correction after every first turn and before any later turn. This file holds the final driver invocation's calls: the layer is reseeded per invocation, so a correction turn committed earlier keeps that instance's recorded_at in its own memory_response."
 }
