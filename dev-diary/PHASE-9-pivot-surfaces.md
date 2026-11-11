@@ -336,9 +336,23 @@ The image toolchain pins live in Dockerfiles and in a README table; no check com
 
 ---
 
+### T9.8: Agents read the served layer
+```yaml
+requires:   [T9.4, T9.5, T9.6]
+fixture-ok: no
+size:       M · frontier
+owns:       agent/runtime/, agent/second/
+status:     claimed:t98-live-agents
+```
+Both deployed agents are fake-backed: `agent/runtime/agent/memory.ts` and `agent/second/agent/store.ts` serve a standing copy of the pivot shapes, so a demo turn never reaches the live layer. T9.7's central claim — a correction made through the reference agent is honoured by the second agent from the shared layer — cannot be shown while the tools are stand-ins. Replace the fake tools with HTTP calls to the layer's edge (`/tools/{tool}`) carrying an agent key in `Authorization: Bearer` and the shopper id in the body, wire the key through the deployment's secret store (never a file, never printed), redeploy both agents, and prove one live turn per agent: recall first, correction recorded, the other agent honouring it. Budget: under $2.00 of agent spend; run one turn first and check its cost. If a live turn cannot be made to work, record precisely what fails and hand the decision back to the orchestrator rather than faking it.
+
+**Done when:** both agents' tools call the served layer through its edge with an agent key supplied by the deployment's secret store; a live reference-agent turn records a correction and a live second-agent turn honours it from the same layer, with both traces recorded; no token appears in any file or log; the gate passes.
+
+---
+
 ### T9.7: The demo, after the pivot ★
 ```yaml
-requires:   [T9.2, T9.3d, T9.5, T9.6]
+requires:   [T9.2, T9.3d, T9.5, T9.6, T9.8]
 fixture-ok: no
 size:       M · frontier
 owns:       demo/
