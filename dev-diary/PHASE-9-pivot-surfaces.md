@@ -820,7 +820,7 @@ requires:   [T9.17]
 fixture-ok: no
 size:       XS · mid
 owns:       demo/
-status:     not-started
+status:     claimed:t920-live-catalog
 ```
 T9.17 gave the reference agent a catalog search, but no live turn has used it and `demo/run.py` does not call it, so product.md's step 2 still has no live path. After the agent is redeployed with `CHANNEL3_API_KEY`, add the catalog call to the demo driver, take one live turn that names the matched candidate (line, size, SKU) before its recommendation, and record the step-2 evidence and the one Channel3 credit it costs.
 
