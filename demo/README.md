@@ -29,7 +29,7 @@ trace ids.
 | **2. The belief they earn** | live read; no Channel3 call | The belief's value is "runs small, take size L" and the pool agrees (also L). In this run no live Channel3 candidate call exists in the reference agent, so the candidate SKU (`PSW8GeK`) appears only in the captured purchase in step 4 (see **gaps**). Two later live catalog turns are recorded below. | same as step 1 |
 | **3. The correction, through the reference agent** | live (three agent turns) | Two turns in one conversation. Trace `ded28ebc` (ask) recalls first; trace `c94448ee` recalls then calls `record_correction` and the layer mints `corr_000004`; trace `82d6512f` recalls and recommends M under it. The belief stays, **Out of true**, with its three rows. | [`03-correction-through-the-agent.json`](evidence/run-6/03-correction-through-the-agent.json) |
 | **4. The purchase and feedback** | existing capture + live turn | The purchase is the capture `ev_51c2d8`, custom id `memento-shopper01-06`, SKU `PSW8GeK`, size M, recorded in an earlier sandbox cycle; a new purchase cannot be ingested (see **gaps**). Trace `11d83a4f` calls `record_feedback`; the fit row settles live and the pool moves 22 → 23 settled, 0 → 1 live, fits-well 4 → 5. | [`04-purchase-and-feedback.json`](evidence/run-6/04-purchase-and-feedback.json) |
-| **5. The dispute that leaves sizing alone** | live read of an existing row | Live reads: seller belief `blf_1a5e09` is **Claimed** with exactly one row, the not-arrived dispute `PP-D-51713` recorded in an earlier sandbox cycle; the sizing belief still holds exactly its three fit rows and no dispute row, and recall still decides on the correction, not on the dispute. | [`05-dispute-leaves-sizing-alone.json`](evidence/run-6/05-dispute-leaves-sizing-alone.json) |
+| **5. The dispute that leaves sizing alone** | read-only demonstration (live layer reads; no agent turn) | Live reads of the layer's own rows: seller belief `blf_1a5e09` is **Claimed** with exactly one row, the not-arrived dispute `PP-D-51713` recorded in an earlier sandbox cycle; the sizing belief still holds exactly its three fit rows and no dispute row, and recall still decides on the correction, not on the dispute. The step is shown by these reads, not by an agent turn: recall is the recommendation surface and serves the fit belief and the pool, while seller evidence is not a recommendation, so it stays out of the agent's recommendation path. | [`05-dispute-leaves-sizing-alone.json`](evidence/run-6/05-dispute-leaves-sizing-alone.json) |
 | **6. The ledger** | live API reads + fixture-replay page | Live `ledger_beliefs`, `ledger_evidence` and recall: the decision is the correction, the pool is overridden by it (`pool.precedence`), the belief rows carry statuses, seeded marks and counts. The screens in this run are the **fixture replay** (60 settled / 48 seeded, not the live 23 / 22 / 1). T4.8 has since added the live transport — with a shopper link token (`/ledger?t=…&s=…`) the page reads and labels the layer's own rows — but the run was recorded before it, so the screens stay labelled as the replay and are never counted as the live read. | [`06-ledger.json`](evidence/run-6/06-ledger.json), `06-ledger-belief.png`, `06-ledger-table.png` |
 | **7. The second agent and the merchant** | live (one agent turn; live merchant read) | Trace `9d4893e7` (fresh conversation, no correction in its prompt) recalls first and recommends M citing `corr_000004`, quotes its words, and shows the overridden pool and beliefs with the live/seeded split. The merchant app reads **Earned small, 23 settled (22 seeded, 1 live)** through its proxy; its "why" panel names the counts and the rule. | [`07-second-agent-and-merchant.json`](evidence/run-6/07-second-agent-and-merchant.json), `07-merchant.png` |
 
@@ -185,7 +185,8 @@ subscription facts are in
 record was written. None is filled in from a fixture. Fixed since this run:
 gaps 3, 5, 6, 8 and 9 are closed in the tree (gap 8 also on the served page
 after its next deploy); gap 7 is covered by T9.22's sequencing rule, proved by
-T9.23's re-record. Gaps 1, 2, 4 and 10 remain open with the owners below.
+T9.23's re-record; gap 4 is decided by T9.24 as a read-only demonstration. Gaps
+1, 2 and 10 remain open with the owners below.
 
 1. **Step 0's empty shopper** is refused by the edge: the agent key binds
    `shopper_01` only. Until an operator adds the day-one shopper to the key's
@@ -209,8 +210,11 @@ T9.23's re-record. Gaps 1, 2, 4 and 10 remain open with the owners below.
    the demo story still replays, labelled. The run-6 screens are that replay
    and stay labelled as such. Closed by T4.8.
 4. **The seller belief never reaches recall**, and the agent key is refused
-   on ledger reads, so no live agent turn can mention the dispute; the live
-   reads prove sizing is untouched. Owner: T9.24 (a live path for the dispute).
+   on ledger reads, so no agent turn can mention the dispute; the live
+   reads prove sizing is untouched. **Decided by T9.24**: that is the
+   design, so the step is a read-only demonstration rather than an agent
+   turn — recall is the recommendation surface and serves the fit belief and
+   the pool, while seller evidence is not a recommendation.
 5. **`record_feedback` is not idempotent per purchase** in the shopper's
    belief: a second feedback for the same purchase appends the same evidence
    again. The seeded arc's one copy plus this run's two feedback calls left

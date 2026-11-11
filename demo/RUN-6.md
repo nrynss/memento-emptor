@@ -19,7 +19,7 @@ below. Spend is in the last section.
 | 2 | live read; no Channel3 call | The pool independently reads small and also points L. The belief is **Out of true** because a correction is in force (it was already in force at the start; see the reset note). The reference agent has no Channel3 search, so no live candidate call exists; the candidate SKU `PSW8GeK` is visible in the step-4 purchase only. | `01-…`, `02-…` |
 | 3 | live (three agent turns) | Trace `ded28ebc` (ask): `recall_for_purchase` → M under the pre-run correction `corr_000003`. Trace `c94448ee` (correct): `recall_for_purchase` → `record_correction`; the layer mints **`corr_000004`** with the shopper's words. Trace `82d6512f` (next): `recall_for_purchase` → M under `corr_000004`. Belief `blf_8f2c41` stays with its three rows, **Out of true**. | `03-correction-through-the-agent.json` |
 | 4 | existing capture + live turn | Purchase: the capture `ev_51c2d8`, custom id `memento-shopper01-06`, SKU `PSW8GeK`, size M, recorded in an earlier sandbox cycle. Trace `11d83a4f`: `record_feedback` ("fits well across the shoulders and in the sleeves") → verdict `fits_well`, belief `blf_2b9d60`. Fit row settles live: pool 22 → **23 settled**, 0 → **1 live**, fits-well 4 → 5. A new purchase cannot be ingested: the app's one webhook subscription does not point at the layer, and the served layer reads verified events from the recording demo source; the unsigned-delivery probe answers 400 at the gate. | `04-purchase-and-feedback.json`, `04-purchase-blockers.json` |
-| 5 | live read of an existing row | Seller belief `blf_1a5e09` **Claimed**, one row: dispute `PP-D-51713` (`ev_9d4c22`, recorded in an earlier cycle), `not_arrived`, counts `seller_reliability`. Sizing belief still exactly `ev_6d1a09/10/11`; no dispute row; recall still decides on the correction, not the dispute. | `05-dispute-leaves-sizing-alone.json` |
+| 5 | read-only demonstration (live layer reads; no agent turn) | Seller belief `blf_1a5e09` **Claimed**, one row: dispute `PP-D-51713` (`ev_9d4c22`, recorded in an earlier cycle), `not_arrived`, counts `seller_reliability`. Sizing belief still exactly `ev_6d1a09/10/11`; no dispute row; recall still decides on the correction, not the dispute. The step is shown by these reads, not by an agent turn: recall is the recommendation surface and serves the fit belief and the pool, while seller evidence is not a recommendation, so it stays out of the agent's recommendation path. | `05-dispute-leaves-sizing-alone.json` |
 | 6 | live API reads + fixture-replay page | Live ledger reads: `blf_8f2c41` Out of true (3), `blf_2b9d60` Building (3, with the same purchase repeated — see gaps), `blf_1a5e09` Claimed (1), `blf_77c310` Claimed (0). Recall: basis `correction` over `corr_000004`, pool precedence `{step: pool, overridden_by: correction}`. The deployed page is a fixture replay (`06-ledger-belief.png`, `06-ledger-table.png`; 60 settled / 48 seeded in the screenshot); the live numbers are the JSON. | `06-ledger.json`, two screens |
 | 7 | live (one agent turn; live merchant read) | Second agent, fresh conversation, trace `9d4893e7`: `recall_for_purchase` first, then **M** citing `corr_000004`, quoting the correction's words, and showing the overridden pool and beliefs (23 settled: 22 seeded, 1 live). The merchant proxy reads **Earned small, 23 settled (22 seeded, 1 live)**; the why panel names the counts and the rule. | `07-second-agent-and-merchant.json`, `07-merchant.png` |
 
@@ -68,7 +68,8 @@ state in the evidence is the reset's answer, not a remembered one.
 Fixed since this run: 3, 5, 6, 8 and 9 are closed in the tree (8 also on the
 served page after its next deploy); 7 is covered by T9.22's sequencing rule,
 proved by T9.23's re-record; 10's catalog tool is live (T9.20) and its
-candidate gap is T9.22/T9.23. Open: 1, 2 and 4.
+candidate gap is T9.22/T9.23. 4 is decided by T9.24 as a read-only
+demonstration. Open: 1 and 2.
 
 1. **Day-one shopper recall refused** (401, `shopper_02`). Owner: **T9.15**
    (second shopper key); the demo cannot change a Render secret.
@@ -80,8 +81,10 @@ candidate gap is T9.22/T9.23. Open: 1, 2 and 4.
    `/ledger?t=` reads live and labels the source; without a token the demo
    story replays, labelled.
 4. **Seller belief never reaches recall**, and agent keys are refused on
-   ledger reads, so no agent turn can mention the dispute. Owner: **T9.24**
-   (a live path for the dispute).
+   ledger reads, so no agent turn can mention the dispute. **Decided by
+   T9.24**: that is the design, so step 5 is a read-only demonstration
+   rather than an agent turn — recall serves the fit belief and the pool, and
+   seller evidence is not a recommendation.
 5. **`record_feedback` duplicated a purchase in the belief.** **Closed by
    T8.5l**: a repeat answers the feedback on record without minting, appending
    or moving the status.

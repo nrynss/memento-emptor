@@ -964,11 +964,21 @@ requires:   [T9.7]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, agent/runtime/, agent/second/, product.md, demo/README.md, demo/evidence/run-6/
-status:     claimed:t924-dispute
+status:     in-review
 ```
 The P9 review found product.md's step 5 has no live agent path: `recallBeliefs` serves fit beliefs only, so the seller belief from the not-arrived dispute (`blf_1a5e09`) never reaches recall, and agent keys are refused on ledger reads by design. No live turn can mention the dispute the step requires; the demo record substitutes free reads. Decide: serve seller beliefs alongside fit ones for the asked brand (with their subject and step), or add an agent-admitted read for the shopper's seller evidence, or record the step as a read-only demonstration.
 
 **Done when:** a live agent turn can mention the shopper's dispute from the layer (or the step is recorded as read-only with its reason); the chosen path is tested; the gate passes.
+
+**Notes (in-review).** Decided: the step is a read-only demonstration, not an agent turn. Recall is the recommendation surface: it serves the fit belief and the pool, and every item it serves takes one of the five precedence steps, which are sizing rungs. A seller belief is not a recommendation, so serving it there would put a non-fit belief in the agent's recommendation path. The dispute is shown by the layer's own belief and ledger reads instead: the seller belief, its one row, and the sizing belief unchanged.
+
+Why no agent change. `explain_belief` is already agent-admitted and shopper-scoped, so the layer can explain the seller belief to an agent. But recall is the only surface that would hand an agent the belief's id, and it does not serve that belief; the ledger reads that would name the id are shopper-only by design. Reaching the dispute from a turn therefore needs a second admission decision — an agent-admitted read of the shopper's seller evidence, or seller beliefs in recall — and this task takes neither, as decided. `agent/runtime/` and `agent/second/` are untouched.
+
+What changed. `product.md`'s step 5 states the read-only path and its reason. `demo/README.md`'s step-5 row and gap 4 say the same, its open-gap list drops gap 4, and `demo/RUN-6.md`'s step-5 row and gap 4 follow. The run-6 evidence is untouched: `05-dispute-leaves-sizing-alone.json` already reads the seller belief, its one row (`not_arrived`, counts `seller_reliability`) and the unchanged sizing rows live, so the record now names what it shows rather than implying an agent turn that never existed. Gap 4 was a design question, not a defect, and the decision closes it.
+
+The test. `TestDisputeReachesLedgerAndExplainNeverRecall` in the new file `internal/api/server/dispute_read_only_test.go` uses `pivotHarness` with the pool wired: it earns the runs-small belief from three fit returns, ingests the not-arrived dispute (`WH-2EV-04`), and proves the reads. `ledger_beliefs` lists the seller belief Claimed with one evidence row beside the sizing belief's three. `ledger_belief` and `explain_belief` carry the dispute row: outcome dispute, reason `not_arrived`, counts `seller_reliability`, item not the shirt. `ledger_evidence` filtered to the seller belief holds that one row, linked to no other belief. `recall_for_purchase` for brand-x-001 serves the fit belief with its three rows, own-evidence guidance toward size L and the consulted pool, and the seller belief is absent. A second, brandless recall pins the kind guard rather than the brand filter: it serves every fit belief and still no seller belief. Mutation-checked by deleting `recallBeliefs`'s `view.Kind != domain.BeliefKindFit` check: the test fails on the brandless recall ("serves 2 beliefs, want only the fit belief"), and the check was restored byte for byte.
+
+Not done here, on purpose. No live call and no spend: the recorded live reads are the run's, and this task's test is offline. No evidence file is rewritten, so the run record stays as recorded. The remaining open gaps named in `demo/README.md` are 1, 2 and 10.
 
 ---
 
