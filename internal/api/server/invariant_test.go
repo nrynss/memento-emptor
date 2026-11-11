@@ -82,6 +82,53 @@ func TestRecallWithoutOverrideIsUnrepresentable(t *testing.T) {
 	}
 }
 
+// TestRecallWithTwoCorrectionsNeedsEachInline pins the assembler's shape
+// for the case two beliefs for one brand are each corrected: the response
+// carries one top-level override and each contradicted belief carries its
+// own inline, so recall serves both instead of refusing. The override must
+// still be one of those inline corrections — a foreign one fails closed,
+// and a contradicted belief with no inline fails closed — so a second
+// correction is never a way to smuggle a belief past its own warning.
+func TestRecallWithTwoCorrectionsNeedsEachInline(t *testing.T) {
+	first := contradictedView()
+	second := contradictedView()
+	second.BeliefID = "blf_2"
+	second.Value = "runs large, take size S"
+	secondCorrection := *second.ContradictedBy
+	secondCorrection.CorrectionID = "corr_2"
+	secondCorrection.Text = "M fits me now"
+	secondCorrection.ContradictsBeliefID = "blf_2"
+	second.ContradictedBy = &secondCorrection
+
+	firstInline := *first.ContradictedBy
+	guidance := contract.GuidanceView{
+		Text:         "Take size M for Brand X",
+		Basis:        contract.GuidanceCorrection,
+		CorrectionID: &firstInline.CorrectionID,
+		BeliefID:     &first.BeliefID,
+	}
+
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{first, second}, nil, "", &firstInline, guidance, 0, nil); err != nil {
+		t.Fatalf("two contradicted beliefs with their own inline corrections fail: %v", err)
+	}
+
+	foreign := firstInline
+	foreign.CorrectionID = "corr_other"
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{first, second}, nil, "", &foreign, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
+		t.Errorf("a top-level override of neither served belief assembles: %v", err)
+	}
+
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{first, second}, nil, "", nil, contract.GuidanceView{Basis: contract.GuidanceBelief}, 0, nil); !errors.Is(err, ErrOverrideMissing) {
+		t.Errorf("two contradicted beliefs with no override assemble: %v", err)
+	}
+
+	bare := second
+	bare.ContradictedBy = nil
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{first, bare}, nil, "", &firstInline, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
+		t.Errorf("a contradicted belief with no inline correction assembles: %v", err)
+	}
+}
+
 // TestRecallFailsClosedOnLostCorrection proves the service never serves
 // a contradicted belief whose correction is gone: even with a corrupt
 // state, recall errors instead of returning the belief alone.

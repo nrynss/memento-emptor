@@ -874,11 +874,19 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/api/server/, internal/api/contract/
-status:     claimed:t85w-two-corrections
+status:     in-review
 ```
 The P8 review proved a High: `recallBeliefs` serves every fit belief, but `assembleRecall` allows one override. Rival birth (three opposite answers) plus `record_correction` against each belief makes every recall for that brand hard-fail with `server: contradicted belief has no overriding correction`. The ledger's contest path can trigger it, and it does not heal. Decide the repair (one override per belief in the response, or refusing the second correction at write time) — a response change is contract-shaped and the orchestrator's call — and pin it with a test that fails on today's behaviour.
 
 **Done when:** two corrected beliefs for one brand cannot make recall refuse; the chosen shape is tested and documented; the gate passes.
+
+**Notes (in-review).** Chose the third shape: no response change and no write refusal. `BeliefView.ContradictedBy` already carried one correction per belief, so the response could represent two contradictions; only `assembleRecall` refused, because it required *every* contradicted belief's inline correction to equal the single top-level one. The assembler now requires each contradicted served belief to carry its own inline correction, and the top-level override to be one of those corrections; it no longer requires them all to be the same one. The top level keeps its meaning — the correction to honour first, which `overridingCorrection` already picked as the newer of the two, most specific first — and the older correction rides inline on the belief it contradicts. Both beliefs are served, both stay contradicted and on the ledger, and neither is dropped: rule 4 holds for each of them.
+
+Why not the other two. Adding a list (or a per-belief correction field) to `RecallResponse` is a JSON shape change, the orchestrator's call under rule 1, and it buys nothing the inline field does not already carry: the fixture would move for a field nothing needs. Refusing the second correction at write time would leave the newborn rival uncorrectable, so a shopper sold two opposite fits could correct only one and the other would keep deciding; the ledger's contest path would answer a legitimate shopper action with an error, and "the correction wins at once" would hold for one belief only.
+
+What stays enforced. A contradicted belief with no inline correction still fails closed, and a top-level override matching none of the served beliefs still fails closed, so a second correction is never a way past a warning. `beliefView` still fails when a contradicted belief's correction is gone. A shopper whose two corrections name different sizes gets both, the newer at the top level: the response is honest about the shopper's own contradiction instead of refusing to answer.
+
+Two things the next agent should not have to rediscover. The JSON shape, the schemas and every fixture are unchanged, so nothing here needed the orchestrator's call: only doc comments in `internal/api/contract/types.go` moved, to say that the top-level correction is the newer when two apply and that each belief keeps its own inline. And the reproduction is a service-level test, not an assembler one: `internal/api/server/two_corrections_test.go` drives rival birth (one small answer, three large) then one correction per belief, and it failed on the unfixed tree with `server: contradicted belief has no overriding correction: belief "blf_000001"`; `internal/api/server/invariant_test.go` now pins the assembler's boundary — two inline corrections assemble, a foreign top-level override fails, an inline-less contradicted belief fails.
 
 ---
 

@@ -258,8 +258,10 @@ type BeliefView struct {
 	Standing domain.GraphState `json:"standing"`
 	// Contradicted is true while a correction applies to this belief.
 	Contradicted bool `json:"contradicted"`
-	// ContradictedBy carries the applying correction, or null when the
-	// belief is not contradicted.
+	// ContradictedBy carries the correction that applies to this belief,
+	// or null when the belief is not contradicted. Two beliefs for one
+	// brand may each carry a different correction here, so a second
+	// correction is never hidden behind the first.
 	ContradictedBy *CorrectionView `json:"contradicted_by"`
 	// Evidence is every piece of evidence that counts toward this belief.
 	Evidence []EvidenceView `json:"evidence"`
@@ -376,9 +378,12 @@ type RecallRequest struct {
 // product fit when the pool has something to say; Guidance names the step
 // that decided. Every item carries its status label, and when steps
 // disagree both are returned with the lower marked overridden. When
-// OverridingCorrection is present the agent recommends from it first: the
-// correction ships both at the top level and inside each contradicted
-// belief, so it cannot be read past.
+// OverridingCorrection is present the agent recommends from it first: it
+// ships both at the top level and inside the belief it contradicts, so it
+// cannot be read past. One brand can hold two beliefs, one each way, and
+// the shopper can correct both: the top level then carries the newer
+// correction and each belief carries its own inline, so every
+// contradiction stays overridable and neither belief is dropped.
 type RecallResponse struct {
 	// ShopperID identifies the shopper.
 	ShopperID string `json:"shopper_id"`
@@ -397,7 +402,9 @@ type RecallResponse struct {
 	// never pretends an empty one.
 	PoolLookup PoolLookup `json:"pool_lookup"`
 	// OverridingCorrection is the correction the agent must honour
-	// first, or null when none applies.
+	// first, or null when none applies. When more than one applies it
+	// is the newer of them, and each contradicted belief carries its
+	// own inline beside it.
 	OverridingCorrection *CorrectionView `json:"overriding_correction"`
 	// Guidance states what to recommend now, by precedence step.
 	Guidance GuidanceView `json:"guidance"`
