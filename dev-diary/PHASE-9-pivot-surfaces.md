@@ -340,7 +340,7 @@ requires:   [T9.3g, T9.3h]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/check.sh, .github/workflows/ci.yml
-status:     not-started
+status:     claimed:t93i-pin-check
 ```
 The image toolchain pins live in Dockerfiles and in a README table; no check compares them with `ci.yml`'s `setup-node` and `setup-go`, so the Node 22 drift could recur silently. Add a gate step that reads every Dockerfile's build stages and the CI versions and fails when a frontend build stage's Node major or a Go build stage's Go version disagrees with its pin.
 
