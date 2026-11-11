@@ -556,6 +556,20 @@ Gate green in the review worktree (`npm ci` in `web/` and `merchant/` first; bot
 
 ---
 
+### T8.5h: Record a general statement, or state the limitation
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/contract/, internal/api/server/, testdata/api/, docs/interface.md
+status:     not-started
+```
+The precedence order's fourth rung is a general statement, and the served layer serves statements when they exist, but no tool records one: statements reach the store only through the seed. A builder reading `docs/interface.md` would look for a way to record the shopper's usual size and find none, so rung 4 cannot be exercised live. Decide: add a `record_statement` tool (contract change with its fixtures and docs), or state the limitation plainly in `docs/interface.md` and name the seed as the only source.
+
+**Done when:** either the tool exists, is served, and its fixture set validates, or the documentation states the limitation and the seed as the only source; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).

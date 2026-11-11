@@ -135,10 +135,26 @@ Notes (T1.4, in-review): `internal/fakes/` holds the seam (four interfaces the r
 
 ---
 
+### T1.1b: Not-as-described disputes, and unknown codes that must not fail ingest
+```yaml
+requires:   [T1.1, T2.1]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/domain/, internal/ingest/, product.md, testdata/api/
+status:     not-started
+```
+The P1 review found `product.md` claims seller reliability is earned from "Non-arrival **and not-as-described** disputes, by PayPal reason code", but the frozen table has no not-as-described code: `CategoryForDispute` refuses `MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED`, and `internal/ingest` fails the whole dispute delivery on that error, so a real not-as-described dispute is rejected rather than stored. T1.1's Done-when never observed the code, which is why this survived phase validation.
+
+Decide: add the code (with its own category, since `not_arrived` would mislabel it in the merchant counts) or amend `product.md` to non-arrival only. Either way, an unknown dispute code must store the dispute with no classified reason and must not fail the delivery's idempotent retry; a reason is not a cause when the code is unknown.
+
+**Done when:** a table test pins the chosen disposition of a not-as-described code; an unknown dispute code stores the dispute, writes no belief, and does not return an error that drops the delivery; the product doc and the table agree; the gate passes.
+
+---
+
 ## Exit Criteria
 
-- [ ] Domain model, write rule and architecture in place (T1.1).
-- [ ] Interface frozen, documented for builders (T1.2).
-- [ ] Demo and comparison shoppers generated, with hidden answers kept apart (T1.3).
-- [ ] The demo shopper exists in the sandbox (T1.3b).
-- [ ] The whole story replays offline (T1.4).
+- [x] Domain model, write rule and architecture in place (T1.1).
+- [x] Interface frozen, documented for builders (T1.2).
+- [x] Demo and comparison shoppers generated, with hidden answers kept apart (T1.3).
+- [x] The demo shopper exists in the sandbox (T1.3b).
+- [x] The whole story replays offline (T1.4).

@@ -130,6 +130,20 @@ T7.4 requires the pivot's pool and precedence fields, but the replay builds cont
 
 ---
 
+### T7.6: Subject JSON tags
+```yaml
+requires:   [T7.1]
+fixture-ok: yes
+size:       XS · mid
+owns:       internal/domain/, internal/api/server/, internal/fakes/
+status:     not-started
+```
+`domain.Subject` has no JSON tags, so marshaling any contract type emits `Kind`/`ID`/`Name`, which every belief schema rejects under `additionalProperties: false`. The wire shape is correct today only because the server and the fakes' comparison each carry a rename workaround. Put the tags on the domain type (`json:"kind"`, `json:"id"`, `json:"name"`), delete both workarounds, and make `TestExamplesMarshalBackToSchema` stop forgiving the three frozen keys.
+
+**Done when:** the three keys serialize as the schema expects with no rename workaround anywhere; the round-trip test forbids them; the wire shape of every fixture is unchanged; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [ ] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).

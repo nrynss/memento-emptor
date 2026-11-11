@@ -160,14 +160,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 12 / 12 | Done |
-| P1 | 5 / 5 | Done |
+| P1 | 5 / 6 | In progress (T1.1b) |
 | P2 | 12 / 13 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
-| P7 | 5 / 5 | Done |
-| P8 | 18 / 18 | Done |
+| P7 | 5 / 6 | In progress (T7.6) |
+| P8 | 18 / 19 | In progress (T8.5h) |
 | P9 | 13 / 16 | In progress (T9.3i, T9.7, T9.8) |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P1 E2E review: FINDINGS, fixes landed
+
+**What exists.** The P1 review verified all five tasks against the tree and landed eight fixes on `cc5625b`: four builder-doc contradictions in `docs/interface.md` (a table row saying a correction promotes — it never does; a claim that reads take no trace id; a missing `set_pooling` section; a wrong standing-correction description) and one in `docs/architecture.md`; three gate gaps (no serialize-direction contract check, no per-tool example check, the seed golden test bypassed `Write`'s file layout); a scoped `KeyVariables` comment; and T1.2's notes moved after its Done-when with a supersession line. The reviewer also re-derived the pivot pool fixtures from the population (Claimed 2 settled 1/1, Building 8 with recent 5, Earned 63.2% share — all exact) and mutation-checked the write table, pool thresholds, doc pin, fixture drift, key pattern and seeding. All five P1 exit boxes now tick.
+
+**What surprised.** Two spec gaps: `product.md` names not-as-described disputes while the frozen table refuses that code and ingest fails the whole delivery on it (owner **T1.1b**); and `domain.Subject` has no JSON tags, so marshaling emits `Kind`/`ID`/`Name` that every schema rejects, with the wire shape kept correct by two rename workarounds (owner **T7.6**). A third: no tool records a general statement, so precedence rung 4 is unreachable for builders (owner **T8.5h**). None blocks the demo.
+
+**The next agent should not have to work out.** The new serialize-direction test (`TestExamplesMarshalBackToSchema`) is the guard that would have caught the Subject tags; keep it. The replay's final ledger is a literal mirroring the frozen snapshots, not a story-derived state — its coherence is by construction, so it cannot catch a story/ledger inconsistency beyond the pinned waypoints.
 
 ### T8.1d: Retire the recall-tier claim (done, P8 closed)
 
