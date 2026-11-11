@@ -262,19 +262,22 @@ carries on without a pool and never pretends an empty one.
 Rung 4 needs a general statement, and no tool on this surface records
 one. Statements reach a shopper's memory only through the seed: replaying
 it derives each seeded belief that carries no evidence as a note, and
-those notes are the statements recall serves. The statement in the
-example below is one of them, and it carries the seeded mark like every
-other seeded row.
+those notes are the statements recall serves. The layer replays one seed,
+for the shopper it is started for, so a shopper outside that seed has no
+statement and rung 4 stays empty. The statement in the example below has
+that shape, and it carries the seeded mark like every other seeded row.
 
 The reason is the rule rung 4 rests on. A statement is a Claimed label,
 never evidence: it is the shopper's word about themselves, not something
 a payment outcome or a purchase-tied answer established, so no code path
 may turn one into a belief. Recording it through a tool would mean a new
-frozen tool name with its request and response schemas, a route that
-derives the note and never writes a structural edge, and every fixture
-and tool list in the build updated in the same commit. That is a
-contract change, and this surface does not have it. A builder who needs
-the shopper's usual size recorded seeds it with the shopper's history.
+frozen tool name with its request and response schemas, a handler on the
+existing `/tools/{tool}` route that derives the note and never writes a
+structural edge, and every fixture and tool list in the build updated in
+the same commit. That is a contract change, and this surface does not
+have it. A builder who needs a shopper's usual size recorded has no call
+to make: it belongs in that shopper's seed, which is the layer's own
+history, so putting one in place is a change to the seed.
 
 When a statement is there, recall serves it at step 4 as Claimed with
 standing None and no evidence: own evidence and the pool both override
