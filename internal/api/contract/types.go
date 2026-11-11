@@ -2,10 +2,10 @@ package contract
 
 import "github.com/nrynss/memento-emptor/internal/domain"
 
-// FeedbackVerdict is the layer's reading of explicit fit feedback tied to
-// a specific purchase. It is interface-local: the domain's reason
-// categories describe why an outcome happened, while a verdict describes
-// how the purchased size worked out, including the fits-well case the
+// FeedbackVerdict is the layer's reading of explicit feedback tied to a
+// specific purchase. It is interface-local: the domain's reason categories
+// describe why an outcome happened, while a verdict describes what the
+// shopper said about the purchase, including the fits-well case the
 // categories have no word for.
 type FeedbackVerdict string
 
@@ -50,13 +50,13 @@ type TimelineKind string
 
 // The timeline row kinds.
 const (
-	// TimelineEvidence is a structural write: a classified return,
-	// dispute or fit feedback linked to its transaction.
+	// TimelineEvidence is a structural write: a classified return or
+	// dispute linked to its transaction.
 	TimelineEvidence TimelineKind = "evidence"
 	// TimelineCorrection is the shopper's explicit correction, declared
 	// against the belief it contradicts.
 	TimelineCorrection TimelineKind = "correction"
-	// TimelineFeedback is fit feedback tied to a specific purchase.
+	// TimelineFeedback is feedback tied to a specific purchase.
 	TimelineFeedback TimelineKind = "feedback"
 	// TimelineStatus is a status change on the belief itself.
 	TimelineStatus TimelineKind = "status"
@@ -515,7 +515,7 @@ type RecordReasonResponse struct {
 	TraceID *string `json:"trace_id"`
 }
 
-// RecordFeedbackRequest records explicit fit feedback tied to a specific
+// RecordFeedbackRequest records explicit feedback tied to a specific
 // purchase, joined on the custom ID that propagates across the order,
 // capture, refund and dispute records.
 type RecordFeedbackRequest struct {
@@ -537,10 +537,11 @@ type RecordFeedbackRequest struct {
 // too small or too large — counts toward fit as supporting evidence for
 // the worn size; a seller verdict — damaged or defective, or not arrived
 // — counts toward seller reliability; unclear and changed-mind verdicts
-// count toward nothing and the agent asks again. A repeat delivery of the
-// recorded verdict answers with that verdict and the id it was recorded
-// under; words that read as a different verdict for a purchase already
-// holding one are refused with the feedback conflict error.
+// count toward nothing. Only an unclear answer leaves the agent to ask
+// again. A repeat delivery of the recorded verdict answers with that
+// verdict and the id it was recorded under; words that read as a
+// different verdict for a purchase already holding one are refused with
+// the feedback conflict error.
 type RecordFeedbackResponse struct {
 	// FeedbackID identifies the recorded feedback.
 	FeedbackID string `json:"feedback_id"`

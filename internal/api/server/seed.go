@@ -91,13 +91,13 @@ type Seed struct {
 	// Notices carries each seeded belief's notice in words.
 	Notices map[string]string
 	// FeedbackVerdicts carries the verdict behind each feedback row, by
-	// evidence id. Feedback has no reason category; the verdict decides
-	// what it counts toward.
+	// evidence id. A seeded fit feedback row has no reason category; its
+	// verdict decides what it counts toward.
 	FeedbackVerdicts map[string]contract.FeedbackVerdict
 	// FeedbackIDs carries the id the history recorded each feedback row
 	// under, by evidence id. A seeded feedback row whose history names no
-	// id has none, and a repeat delivery for its purchase then answers
-	// with no id rather than one the layer invented.
+	// id has none, and a repeat delivery for its purchase mints one id and
+	// answers it thereafter.
 	FeedbackIDs map[string]string
 }
 

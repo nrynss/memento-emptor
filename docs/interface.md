@@ -1078,15 +1078,16 @@ Response when the answer is vague. It counted toward nothing,
 
 ## record_feedback
 
-After delivery, ask how the purchased size worked out and send the
-verbatim answer tied to the purchase. The join key is the `custom_id`
-that propagates across the order, capture, refund and dispute records.
-A fit verdict — `fits_well`, `too_small` or `too_large` — counts toward
-fit as supporting evidence for the worn size. A seller verdict —
-`damaged_or_defective` or `not_arrived` — counts toward seller
-reliability and never toward fit: it names the seller belief and adds no
-fit evidence and no fit row. A verdict of `unclear` or `changed_mind`
-counts toward nothing and the agent asks again.
+After delivery, ask how the purchase worked out — the size, and whether
+the item arrived as described — and send the verbatim answer tied to the
+purchase. The join key is the `custom_id` that propagates across the
+order, capture, refund and dispute records. A fit verdict — `fits_well`,
+`too_small` or `too_large` — counts toward fit as supporting evidence for
+the worn size. A seller verdict — `damaged_or_defective` or `not_arrived`
+— counts toward seller reliability and never toward fit: it names the
+seller belief and adds no fit evidence and no fit row. A `changed_mind`
+verdict counts toward nothing; an `unclear` verdict counts toward
+nothing and the agent asks again.
 
 Request:
 
@@ -1480,10 +1481,11 @@ Evidence rows request:
 }
 ```
 
-Evidence rows response. Newest first. The feedback row carries no
+Evidence rows response. Newest first. The fit feedback row carries no
 failure reason — its reason category is none with the shopper's words —
 and `counts_toward` carries the verdict's kind, so one shape serves
-returns, disputes and feedback:
+returns, disputes and feedback; a seller feedback row instead carries
+its seller reason category:
 
 ```json validate=ledger_evidence.response.example
 {
@@ -1586,7 +1588,7 @@ How a signal is written:
 
 | Signal | Write | Promotes |
 |---|---|---|
-| Classified return or dispute, fit feedback | record_action | yes |
+| Classified return or dispute, fit or seller feedback | record_action | yes |
 | The shopper's correction | record_action, citing the belief in `against` only | never: it overrides, it adds no evidence |
 | General statement | derive, from the seed only | never |
 | Kept past the window, no feedback | observe | never |

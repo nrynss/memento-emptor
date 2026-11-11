@@ -916,7 +916,8 @@ func (s *Service) beliefForReason(ctx context.Context, st *shopperState, questio
 // worn size. A seller verdict — damaged or defective, not arrived —
 // counts toward seller reliability through the same belief record_reason
 // uses, never toward fit. An unclear or changed-mind verdict counts
-// toward nothing and the agent asks again.
+// toward nothing: an unclear answer leaves the agent to ask again, and a
+// changed-mind answer records the shopper's decision once.
 //
 // A purchase's feedback is recorded once, by the purchase's own identity:
 // the evidence row the capture carries. A repeat delivery of the recorded
@@ -994,7 +995,7 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 		return contract.RecordFeedbackResponse{}, err
 	}
 	if counts == domain.BeliefKindSeller {
-		if err := s.writeEvidenceRow(ctx, st, belief, matched, stubKey(matched.row)); err != nil {
+		if err := s.writeEvidenceRowAt(ctx, st, belief, matched, stubKey(matched.row), now); err != nil {
 			return contract.RecordFeedbackResponse{}, err
 		}
 	} else {

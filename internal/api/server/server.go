@@ -36,7 +36,7 @@ var (
 	// never saw. Feedback joins on the capture it concerns, never floats.
 	ErrUnknownPurchase = errors.New("server: unknown purchase")
 	// ErrFeedbackMismatch answers feedback whose variant does not match
-	// the purchase it names. Fit feedback is tied to a specific purchase.
+	// the purchase it names. Feedback is tied to a specific purchase.
 	ErrFeedbackMismatch = errors.New("server: feedback does not match the purchase")
 	// ErrFeedbackConflict answers a repeat delivery whose words read as a
 	// different verdict than the purchase already holds. The purchase
@@ -154,8 +154,9 @@ type CallEntry struct {
 // evidenceRecord is one stored evidence row: the domain row, its wire id,
 // how it was written, the store doc behind its graph stub, and the
 // beliefs it counts toward. A row with no belief counts toward nothing.
-// Counts is stored, not derived: feedback rows carry their verdict's
-// kind while their reason category stays none.
+// Counts is stored, not derived: feedback rows carry their verdict's kind.
+// A fit feedback row carries no reason category; a seller feedback row
+// carries the seller category its verdict names.
 type evidenceRecord struct {
 	id        string
 	row       domain.Evidence
@@ -172,9 +173,10 @@ type evidenceRecord struct {
 
 // recordedFeedback is one purchase's recorded feedback: the id it was
 // recorded under, the verdict that recorded it, and the belief it counts
-// toward. A repeat delivery answers with these rather than writing again,
-// so the purchase's evidence stays one row and its belief's status cannot
-// move. A seeded row whose history names no id carries an empty id.
+// toward, empty when it counts toward nothing. A repeat delivery answers
+// with these rather than writing again, so the purchase's evidence stays
+// one row and its belief's status cannot move. A seeded row whose history
+// names no id carries an empty id.
 type recordedFeedback struct {
 	id       string
 	verdict  contract.FeedbackVerdict
@@ -618,8 +620,17 @@ func (s *Service) indexEvidence(ctx context.Context, row domain.Evidence, fitHan
 }
 
 // writeEvidenceRow indexes one reasoned row, writes it to the graph with
-// the doc id in the stub, and links it to its belief.
+// the doc id in the stub, and links it to its belief at the row's own
+// event time.
 func (s *Service) writeEvidenceRow(ctx context.Context, st *shopperState, rec *beliefRecord, evRec *evidenceRecord, key string) error {
+	return s.writeEvidenceRowAt(ctx, st, rec, evRec, key, evRec.row.OccurredAt)
+}
+
+// writeEvidenceRowAt is writeEvidenceRow with the evidence event's time
+// given separately. A classified outcome is recorded at the outcome's
+// time; feedback is recorded when the shopper gives it, even though the
+// row it describes is the purchase's own capture.
+func (s *Service) writeEvidenceRowAt(ctx context.Context, st *shopperState, rec *beliefRecord, evRec *evidenceRecord, key string, at time.Time) error {
 	docID, err := s.indexEvidence(ctx, evRec.row, "")
 	if err != nil {
 		return err
@@ -628,7 +639,9 @@ func (s *Service) writeEvidenceRow(ctx context.Context, st *shopperState, rec *b
 	if err != nil {
 		return fmt.Errorf("server: build graph stub: %w", err)
 	}
-	written, err := memory.WriteEvidence(ctx, s.graph, rec.content, rec.kind, rec.direction, stub, evRec.row)
+	row := evRec.row
+	row.OccurredAt = at
+	written, err := memory.WriteEvidence(ctx, s.graph, rec.content, rec.kind, rec.direction, stub, row)
 	if err != nil {
 		return fmt.Errorf("server: write evidence: %w", err)
 	}
@@ -639,6 +652,6 @@ func (s *Service) writeEvidenceRow(ctx context.Context, st *shopperState, rec *b
 	evRec.writeOp = domain.WriteRecordAction
 	evRec.beliefIDs = append(evRec.beliefIDs, rec.id)
 	rec.evIDs = append(rec.evIDs, evRec.id)
-	rec.touch(evRec.row.OccurredAt)
+	rec.touch(at)
 	return nil
 }

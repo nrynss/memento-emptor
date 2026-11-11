@@ -3,6 +3,9 @@ package server
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -420,6 +423,10 @@ func TestSellerFeedbackWritesSellerEvidence(t *testing.T) {
 	if belief == nil || belief.kind != domain.BeliefKindSeller {
 		t.Fatalf("belief %q is %+v, want the seller belief", *first.BeliefID, belief)
 	}
+	if want := svc.deps.Clock(); !belief.updatedAt.Equal(want) {
+		t.Fatalf("seller belief last changed %s, want the feedback time %s",
+			belief.updatedAt.Format(time.RFC3339), want.Format(time.RFC3339))
+	}
 	if fits := fitBeliefsFor(st, "brand-x-001"); len(fits) != 0 {
 		t.Fatalf("seller feedback left %d fit beliefs, want none", len(fits))
 	}
@@ -742,6 +749,17 @@ func TestConflictingFeedbackIsRefused(t *testing.T) {
 			t.Fatalf("conflicting repeat minted %d feedback ids, want the first only", st.seq["fb"])
 		}
 	})
+}
+
+// TestFeedbackConflictIsRefusedAsAnInvalidRequest pins the sentinel's wire
+// mapping: a repeat that conflicts with the recorded verdict is the
+// caller's mistake, so it answers 400 rather than a server fault.
+func TestFeedbackConflictIsRefusedAsAnInvalidRequest(t *testing.T) {
+	rec := httptest.NewRecorder()
+	writeServiceError(rec, fmt.Errorf("server: record feedback: %w", ErrFeedbackConflict))
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("conflicting repeat status %d, want 400", rec.Code)
+	}
 }
 
 // TestNoCountFeedbackIsIdempotentOnResend proves a first delivery that
