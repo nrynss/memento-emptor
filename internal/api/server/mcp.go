@@ -56,10 +56,10 @@ func (s *Service) handleHealth(w http.ResponseWriter, _ *http.Request) {
 // handleWebhook ingests one raw payment-source delivery. The body is the
 // exact bytes the source posted, bounded like every other route: the
 // signature covers those bytes, so they are never re-encoded. The
-// delivery's custom id is the shopper join — the reference agent sets it
-// to the shopper at order creation — and a delivery without one is
-// refused. Verification runs inside HandleDelivery before the
-// idempotency check, so a forged body naming a stored event id is
+// delivery's shopper join is the resource's custom id for a capture or a
+// refund, and the disputed transaction's custom for a dispute; a delivery
+// without one is refused. Verification runs inside HandleDelivery before
+// the idempotency check, so a forged body naming a stored event id is
 // refused, never answered as a duplicate.
 func (s *Service) handleWebhook(w http.ResponseWriter, r *http.Request) {
 	raw, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
@@ -82,22 +82,45 @@ func (s *Service) handleWebhook(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, res)
 }
 
-// webhookShopper resolves the shopper one delivery belongs to from the
-// body's resource custom id. The body's shape is the payment source's:
-// unknown fields are the source's business and never fail the join.
+// webhookShopper resolves the shopper one delivery belongs to. A capture
+// or a refund carries the join at the resource's top-level custom id; a
+// dispute carries it per disputed transaction, so the top-level custom id
+// is tried first (keeping the capture and refund path unchanged) and the
+// first non-empty transaction custom after it. A dispute that carries
+// neither is refused with ErrDisputeWithoutShopper; it is never defaulted
+// to a shopper. The body's shape is the payment source's: unknown fields
+// are the source's business and never fail the join.
 func webhookShopper(raw []byte) (string, error) {
 	var body struct {
+		// EventType names the delivery's type, so a dispute is told apart
+		// from a capture or a refund.
+		EventType string `json:"event_type"`
+		// Resource carries the outcome and its transaction data.
 		Resource struct {
+			// CustomID is the capture's and refund's shopper join.
 			CustomID string `json:"custom_id"`
+			// DisputedTransactions carry a dispute's shopper join.
+			DisputedTransactions []struct {
+				// Custom is the disputed transaction's shopper join.
+				Custom string `json:"custom"`
+			} `json:"disputed_transactions"`
 		} `json:"resource"`
 	}
 	if err := json.Unmarshal(raw, &body); err != nil {
 		return "", fmt.Errorf("bad delivery: %w", err)
 	}
-	if strings.TrimSpace(body.Resource.CustomID) == "" {
-		return "", errors.New("delivery names no shopper")
+	if custom := strings.TrimSpace(body.Resource.CustomID); custom != "" {
+		return custom, nil
 	}
-	return body.Resource.CustomID, nil
+	if strings.HasPrefix(strings.TrimSpace(body.EventType), "CUSTOMER.DISPUTE.") {
+		for _, transaction := range body.Resource.DisputedTransactions {
+			if custom := strings.TrimSpace(transaction.Custom); custom != "" {
+				return custom, nil
+			}
+		}
+		return "", ErrDisputeWithoutShopper
+	}
+	return "", ErrWebhookShopper
 }
 
 // callsResponse wraps the call log for the ledger.

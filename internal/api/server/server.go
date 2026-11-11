@@ -51,6 +51,15 @@ var (
 	// ErrMissingShopper answers a call with no shopper id. Every call is
 	// scoped to one shopper, so an unscoped call answers nothing.
 	ErrMissingShopper = errors.New("server: missing shopper id")
+	// ErrWebhookShopper answers a capture or refund delivery whose
+	// resource names no shopper. The text is the wire message the route
+	// already answered, so the capture and refund behaviour is unchanged.
+	ErrWebhookShopper = errors.New("delivery names no shopper")
+	// ErrDisputeWithoutShopper answers a dispute delivery whose resource
+	// and disputed transactions name no shopper. It wraps
+	// ErrWebhookShopper, so a caller can treat every missing shopper
+	// alike, and its text says which shape was missing one.
+	ErrDisputeWithoutShopper = fmt.Errorf("%w: dispute carries no custom", ErrWebhookShopper)
 	// ErrPoolUnwired answers a pooled read or write while the pool is not
 	// wired: no index, no identity salt or no line resolver. The layered
 	// half answers nothing rather than guess a line or a hash.

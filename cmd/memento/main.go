@@ -628,8 +628,9 @@ func (d *director) handleTool(w http.ResponseWriter, r *http.Request) {
 	svc.Handler().ServeHTTP(w, r)
 }
 
-// handleWebhook routes one payment delivery on its resource custom id,
-// which is the shopper join the reference agent sets at order creation.
+// handleWebhook routes one payment delivery on its shopper join: the
+// resource's custom id for a capture or refund, or the disputed
+// transaction's custom for a dispute.
 func (d *director) handleWebhook(w http.ResponseWriter, r *http.Request) {
 	raw, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {
@@ -700,20 +701,43 @@ func bodyShopper(raw []byte) string {
 	return body.ShopperID
 }
 
-// webhookShopper returns the shopper one delivery belongs to from its
-// resource custom id, or empty when the body does not parse. The service
-// refuses a delivery without one; routing only decides which service
-// answers that refusal.
+// webhookShopper returns the shopper one delivery belongs to. A capture or
+// a refund carries the join at the resource's top-level custom id; a
+// dispute carries it per disputed transaction, so the top-level custom id
+// is tried first (keeping the capture and refund path unchanged) and the
+// first non-empty transaction custom after it. An empty answer routes to
+// the default service, which refuses the delivery; the director never
+// picks a shopper for a delivery that names none.
 func webhookShopper(raw []byte) string {
 	var body struct {
+		// EventType names the delivery's type, so a dispute is told apart
+		// from a capture or a refund.
+		EventType string `json:"event_type"`
+		// Resource carries the outcome and its transaction data.
 		Resource struct {
+			// CustomID is the capture's and refund's shopper join.
 			CustomID string `json:"custom_id"`
+			// DisputedTransactions carry a dispute's shopper join.
+			DisputedTransactions []struct {
+				// Custom is the disputed transaction's shopper join.
+				Custom string `json:"custom"`
+			} `json:"disputed_transactions"`
 		} `json:"resource"`
 	}
 	if err := json.Unmarshal(raw, &body); err != nil {
 		return ""
 	}
-	return body.Resource.CustomID
+	if custom := strings.TrimSpace(body.Resource.CustomID); custom != "" {
+		return custom
+	}
+	if strings.HasPrefix(strings.TrimSpace(body.EventType), "CUSTOMER.DISPUTE.") {
+		for _, transaction := range body.Resource.DisputedTransactions {
+			if custom := strings.TrimSpace(transaction.Custom); custom != "" {
+				return custom
+			}
+		}
+	}
+	return ""
 }
 
 // lineKey names one product line the static catalog knows: the brand and
