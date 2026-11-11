@@ -883,7 +883,9 @@ func beliefContents(s server.Seed) []string {
 //
 // The marshal below is the raw contract value, not the service's encode
 // path, so it writes whatever the domain type says. domain.Subject gained
-// its json tags in T7.6, which makes the subject read kind/id/name. The two
+// its json tags in T7.6, which makes the subject read kind/id/name; the
+// arm-3 block writes that same contract type structurally in pre_recall and
+// post_recall, so the subject's keys change there too on a re-run. The two
 // committed T5.9 recordings that carry a belief,
 // t59-a3-noisy-large.json and t59-a3-noisy-small.json, predate the tags and
 // show Kind/ID/Name; they stay as recorded, and T7.7's record of that
