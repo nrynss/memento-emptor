@@ -162,12 +162,14 @@ func guidanceForOwnEvidence(view contract.BeliefView, poolDisagrees bool) contra
 }
 
 // ownEvidenceClause states the shopper's own rows behind a recommendation,
-// with the verb agreeing with the count: one return says, several say.
+// with the verb agreeing with the count: one return says, several say. The
+// count itself comes from evidenceCount, so the phrasing has one home.
 func ownEvidenceClause(n int) string {
+	verb := "say"
 	if n == 1 {
-		return "your own one return says it"
+		verb = "says"
 	}
-	return fmt.Sprintf("your own %s say it", evidenceCount(n))
+	return fmt.Sprintf("your own %s %s it", evidenceCount(n), verb)
 }
 
 // evidenceCount states how many evidence rows back a recommendation, in
