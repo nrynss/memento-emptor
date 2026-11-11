@@ -10,8 +10,9 @@
 	// A link carrying the shopper's token (?t=<token>) reads all of it from
 	// the live layer through the edge; a page without one replays the demo
 	// story from fixtures and says so. A failed live read is labelled as a
-	// failure and leaves no earlier answer on screen, so nothing here can be
-	// mistaken for live data.
+	// failure of that read and leaves no earlier answer on screen; the live
+	// source label appears only once a live read has answered, so nothing
+	// here can be mistaken for live data.
 
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
@@ -101,6 +102,12 @@
 	let recall = $state<RecallResponse | null>(null);
 	let recallError = $state<string | null>(null);
 	let recallLoading = $state(true);
+
+	// The belief read and the recommendation read are independent, so one can
+	// fail while the other answers. The page claims a live source only once one
+	// of them did: a page that answered nothing says so in its alerts instead
+	// of wearing a "Live" badge over an empty screen.
+	const liveAnswered = $derived(detail !== null || recall !== null);
 
 	// The shopper the pivot's surfaces act for. A live link names one
 	// shopper; a replay names the shopper its case replays.
@@ -283,7 +290,7 @@
 		Fixture replay: the demo story, not a live ledger. Open this page with a shopper
 		link to read the live layer.
 	</p>
-{:else}
+{:else if liveAnswered}
 	<p class="why-live" data-why-source="live">
 		Live: the layer's own answer for shopper {liveLink.shopperId}.
 	</p>
@@ -309,7 +316,7 @@
 {#if loadError !== null}
 	<p role="alert" class="why-error">
 		{#if liveLink !== null}
-			The live why view read failed: {loadError}. Nothing on this page is live data.
+			The live why view read failed: {loadError}. No belief is shown from the live layer.
 		{:else}
 			The why view failed to load: {loadError}
 		{/if}

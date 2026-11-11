@@ -156,8 +156,36 @@ describe('the why page reads live from a shopper link', () => {
 			'the belief failure label'
 		);
 
-		expect(host.textContent ?? '').toContain('Nothing on this page is live data');
+		// The recommendation read is independent and did answer here, so the
+		// alert names what failed rather than claiming the page is all fixture.
+		expect(host.textContent ?? '').toContain('No belief is shown from the live layer');
 		expect(host.querySelector('.why-value')).toBeNull();
+		expect(host.textContent ?? '').not.toContain(token);
+	});
+
+	it('claims no live source when nothing live answered', async () => {
+		const send = (() =>
+			Promise.resolve({
+				ok: false,
+				status: 401,
+				text: () => Promise.resolve('{"error":{"code":"unauthenticated","message":"unauthorized"}}')
+			} as unknown as Response)) as typeof globalThis.fetch;
+		vi.stubGlobal('fetch', send);
+
+		const host = render(`http://localhost/belief?t=${token}&s=shopper_09`);
+		await waitFor(
+			() => (host.textContent ?? '').includes('live recommendation read failed'),
+			'the recommendation failure label'
+		);
+		await waitFor(
+			() => (host.textContent ?? '').includes('live why view read failed'),
+			'the belief failure label'
+		);
+
+		expect(host.querySelector('[data-why-source="live"]')).toBeNull();
+		expect(host.querySelector('[data-why-source="replay"]')).toBeNull();
+		expect(host.querySelector('.why-value')).toBeNull();
+		expect(host.textContent ?? '').toContain('No recommendation is shown');
 		expect(host.textContent ?? '').not.toContain(token);
 	});
 });
