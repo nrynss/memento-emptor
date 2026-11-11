@@ -747,11 +747,28 @@ requires:   [T9.9, T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/check.sh, .github/workflows/ci.yml
-status:     claimed:t919-gate-agents
+status:     in-review
 ```
 T9.9 gave both agents' tool bindings offline coverage, but `tools/check.sh` does not invoke it: `bun agent/offline-check.ts` and `bun agent/check.ts` run only when someone runs them by hand, so a tool-surface drift passes the gate. Add both checks to the gate behind the same bun guard the frontend step uses, and install the two agent packages' frozen dependencies in CI, or the runner lacks `agent/runtime/node_modules` and `agent/second/node_modules` and both checks fall through.
 
 **Done when:** the gate runs both agent checks where bun is present and states the fallback where it is not; a broken tool id fails the gate; the gate passes.
+
+**Notes (in-review).** Both agents' offline checks now run in the gate, behind the frontend step's bun guard, and CI installs both packages' frozen dependencies. `tools/check.sh` gains `check_agent`, called once for `agent/runtime agent/runtime/agent/offline-check.ts` and once for `agent/second agent/second/agent/check.ts`. With `bun` on PATH and that package's `node_modules` present it prints `-- <name> (bun <script>)` and runs the check through the captured-output helper the frontend steps already use, so a failing check prints its own `FAIL:` lines and fails the gate. Without bun it prints `skipped: bun is not on PATH; it cannot be run on node`; without the package's modules, `skipped: <dir>/node_modules is absent; run bun install --frozen-lockfile in <dir>`. Both checks are Bun programs (`Bun.file`, `import.meta.dir`) that resolve their dependencies from the package's own tree, so node cannot stand in for bun the way it does for `server/relay.ts`.
+
+`.github/workflows/ci.yml` gains two steps after the shopper-page install, `bun install --frozen-lockfile` with `working-directory: agent/runtime` and `agent/second`, so the runner does not fall through the guard. The `actions/cache@v4` key now moves with all three `bun.lock` files, and the setup-bun comment names all three checks. The workflow parses as YAML and reads back as eleven steps.
+
+Proof on the workstation, no key, $0:
+
+- `./tools/check.sh` is green and prints `-- agent/runtime offline check (bun agent/runtime/agent/offline-check.ts)` then `-- agent/second offline check (bun agent/second/agent/check.ts)`; run by hand from the repository root, the two scripts pass 130 and 125 checks apiece.
+- With bun off `PATH` and both agent packages installed, the same gate is green and prints both `skipped: bun is not on PATH; it cannot be run on node` lines. With bun present and `agent/runtime/node_modules` moved aside, it is green and prints that check's `node_modules is absent` text while the second check still runs. The modules-absent text names the install command, so the line says how to get the check back.
+- A broken id fails the gate: `id: "record_feedback"` changed to `record_feedbackx` in `agent/second/agent/tools.ts` makes the gate exit 1 with `FAIL: the record_feedback binding carries its frozen id (id record_feedbackx)` and `FAIL [agent/second offline check]`, after the second agent's other 124 checks pass. Reverted, `git status` clean.
+- On the tree the two amendments below assume -- T9.14's `server/status.ts` and T9.18's Bun row applied and reverted -- the gate is green with bun hidden: the fallback runs `tsc ... server/relay.ts server/status.ts`, both agent checks print their skipped lines, and `tools/pincheck` prints `go 1.27, node 26 and bun 1 agree across 18 declarations`.
+
+Two amendments rode in the same commit. The pin comment now names each toolchain's sources -- including the `deploy/README.md` table row as Bun's third source beside every Dockerfile's `oven/bun:` stage and CI's setup-bun -- and states 18 declarations in all. The fallback typecheck now covers `server/status.ts` beside `server/relay.ts`, since T9.14 makes the status mapping import-free like the relay and the fallback was otherwise leaving it unchecked where bun or the modules are absent.
+
+**Limit, stated.** This branch is cut at 329918d, which carries neither T9.14's `server/status.ts` nor T9.18's README Bun row (`task/t914` at c1620e6, `task/t918` at 2047be0). On that base `tools/pincheck` reads 17 declarations, not 18, and the no-bun fallback exits 2 with `TS6053: File 'server/status.ts' not found`. With bun and `agent/frontend/node_modules` installed -- the state CI runs in -- the gate is green on the base and prints `-- agent/frontend typecheck (bun run typecheck)` plus both agent checks. Both halves of this task are proved on the tree those two tasks produce, so the orchestrator must land them before or with this branch. No GitHub Actions run exists in a worktree, so the runner is unproven, as it was for T9.13.
+
+**Surprise.** Both checks run unchanged from the repository root (`bun agent/<pkg>/agent/<script>.ts`), because they resolve the contract examples and the Go access table from `import.meta.dir`, not the working directory. That is why the gate need not `cd` into the package, and why the guard tests for the package's `node_modules` rather than the root's.
 
 ---
 
