@@ -945,7 +945,7 @@ requires:   [T8.5i]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/
-status:     in-review
+status:     done
 ```
 The T8.5i review found `guidanceForOwnEvidence` defaults the direction clause to "runs small" unless the belief's value reads large, and `poolDisagrees` means "a pool is present and own evidence overrode it", not "the pool recommends a different size". A lone fits-well return is served (T8.5i) with the sentence "Take size M for Brand X: your own one return says it runs small, ahead of the pool." — the size is right but the sentence misstates the evidence and self-contradicts, and the "ahead of the pool" clause fires when the pool merely agrees. Make the clause derive from the belief's own value (fits-well, too small, too large) and say whether the pool agrees, is overridden, or is absent.
 

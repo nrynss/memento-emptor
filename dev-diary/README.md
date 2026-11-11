@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 29 / 35 | In progress (T8.5k, T8.5o, T8.5q, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
+| P8 | 30 / 35 | In progress (T8.5k, T8.5o, T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5v: The own-evidence sentence tells the truth (done)
+
+**What exists.** `guidanceForOwnEvidence` reads its direction clause from the belief's own value — fits well / runs small / runs large with the row count, and "say so" when the value names none — and its pool clause from the pool's own recommendation: "and the pool agrees" when both name the same size, "ahead of the pool" only when they differ, no clause when no pool rides. The fits-well sentence names the evidence a **purchase**, not a return. `poolDisagrees` is gone. The six-row table `TestOwnEvidenceSentenceTellsTheTruth` drives the real service per shape; on the parent it fails the fits-well row with "runs small" and the three agreeing rows with "ahead of the pool".
+
+**What surprised.** The old `poolDisagrees` was effectively "a pool is present" whenever own evidence won, so every present pool was called ahead of the crowd, agreeing or not. The step expression (`neighbourSize` one rung the way the direction points) now lives in both `poolAgrees` and `guidanceForPool`; a change to one must move the other. Landing it after T8.5r needed one hand resolution: own evidence now receives the pool step's view, or nil when the pool named no direction, so a directionless pool adds no clause.
+
+**The next agent should not have to work out.** Agreement is size-based, not label-based. Precedence still marks a present pool overridden even when it agrees — only the prose distinguishes the cases.
 
 ### T8.5n: Unattached ingest rows carry an operation (done)
 

@@ -339,7 +339,8 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 	case contract.GuidanceOwnEvidence:
 		var ownPool *contract.PoolView
 		if pooled != nil {
-			ownPool = pooled.view
+			view := pooled.view
+			ownPool = &view
 		}
 		guidance = guidanceForOwnEvidence(strongestOwn(served), ownPool)
 	case contract.GuidancePool:
