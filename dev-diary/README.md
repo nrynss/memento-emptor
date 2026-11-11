@@ -160,7 +160,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 12 / 12 | Done |
-| P1 | 5 / 7 | In progress (T1.1b, T1.1c) |
+| P1 | 6 / 7 | In progress (T1.1c) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 7 | In progress (T4.5, T4.6, T4.7) |
@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 19 / 22 | In progress (T8.5i, T8.5j, T8.5k) |
-| P9 | 16 / 21 | In progress (T9.7, T9.9, T9.11, T9.13, T9.14) |
+| P9 | 18 / 23 | In progress (T9.7, T9.9, T9.11, T9.14, T9.16) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T1.1b: Not-as-described disputes (done)
+
+**What exists.** `MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED` files under `damaged_or_defective` (the goods arrived and were wrong; a new category would have moved the frozen reason-counts shape, mirrored in both frontends). Served ingest keeps `CategoryForDispute` strict but catches its sentinel: an unknown code stores the dispute with category `none` and the raw code as text, writes no belief, and a redelivery answers Duplicate. A code-less dispute stores with a nil reason, which the frozen schema requires. Both table tests fail if the frozen table grows past them. Review: F1, an unknown-code dispute reaches `ledger_evidence` with an empty `write_op` (schema-forbidden) → **T8.5n**; F2, the fitindex comment's not-arrival-only rationale → **T8.5k** (widened); F3, a code-less dispute is audit-only → **T8.5n**; the live driver still aborts on unknown codes → **T1.1c**.
+
+### T9.13: Bun in CI (done)
+
+**What exists.** CI now runs `setup-bun` pinned to 1.3.14, caches bun's package downloads keyed on `agent/frontend/bun.lock`, and runs `bun install --frozen-lockfile` before the gate, so the shopper-page typecheck is the full package there; a workstation without bun still takes the gate's fallback. Proved locally both ways; the Actions run itself is unprovable here and lands with the push. Review found the bun pin has no second source (pincheck ignores it; the `oven/bun:1` images float) → **T9.16**, and the gate's comment still says CI installs neither bun nor the modules → **T9.16**.
 
 ### T7.7: The round-1 wire shape (done, P7 closed)
 

@@ -141,7 +141,7 @@ requires:   [T1.1, T2.1]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/domain/, internal/ingest/, product.md, testdata/api/
-status:     in-review
+status:     done
 ```
 The P1 review found `product.md` claims seller reliability is earned from "Non-arrival **and not-as-described** disputes, by PayPal reason code", but the frozen table has no not-as-described code: `CategoryForDispute` refuses `MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED`, and `internal/ingest` fails the whole dispute delivery on that error, so a real not-as-described dispute is rejected rather than stored. T1.1's Done-when never observed the code, which is why this survived phase validation.
 
