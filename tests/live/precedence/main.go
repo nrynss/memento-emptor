@@ -846,6 +846,9 @@ func poolLine() domain.ProductLine {
 // settled small returns (eight distinct shoppers: the 8-shopper floor),
 // one large return and one fits-well feedback. Eight of ten fit outcomes
 // point small (the 60% floor) at eight times the opposite (the 2x rule).
+// Every row is marked seeded, and the pool step asserts the seeded/live
+// split, so an unmarked row fails the driver rather than passing as live
+// history.
 func (d *driver) seedPool() error {
 	type entry struct {
 		payer  string
@@ -896,7 +899,10 @@ func (d *driver) seedPool() error {
 // statementSeed is one shopper's loading history holding nothing but a
 // general statement: no evidence, no questions. The statement derives as
 // a note through the live graph, so the serving rule is what the
-// statement step reads live.
+// statement step reads live. The row is generated history, so it carries
+// the seeded mark: LoadSeed copies a row's mark, it does not invent one,
+// and the statement step asserts the mark came through to the served
+// belief.
 func statementSeed(shopper string) server.Seed {
 	return server.Seed{
 		ShopperID: shopper,
@@ -905,7 +911,7 @@ func statementSeed(shopper string) server.Seed {
 			Kind:      domain.BeliefKindFit,
 			Subject:   domain.Subject{Kind: domain.SubjectBrand, ID: "brand-s-001", Name: "Brand S"},
 			Value:     "shopper says they are usually size M",
-			Seeded:    false,
+			Seeded:    true,
 			UpdatedAt: time.Date(2026, 10, 1, 10, 0, 0, 0, time.UTC).Format(time.RFC3339),
 		}},
 		Links:            map[string][]string{},
@@ -1155,6 +1161,9 @@ func run(ctx context.Context) (err error) {
 		pooled.Pool.Precedence.Overridden {
 		return &fail{fmt.Sprintf("pool precedence %+v, want the deciding pool step", pooled.Pool.Precedence)}
 	}
+	// The split is also the seeded mark's assertion: the ten rows the
+	// driver seeded count as seeded, and only the shopper's own writes
+	// could ever count as live.
 	if pooled.Pool.Seeded.Settled != 10 || pooled.Pool.Live.Settled != 0 {
 		return &fail{fmt.Sprintf("pool split seeded %d live %d, want the 10 seeded rows alone",
 			pooled.Pool.Seeded.Settled, pooled.Pool.Live.Settled)}
@@ -1225,7 +1234,17 @@ func run(ctx context.Context) (err error) {
 	if stated.Guidance.Text != "Take size M for Brand S: the shopper's usual size." {
 		return &fail{fmt.Sprintf("statement guidance %q, want the usual-size text", stated.Guidance.Text)}
 	}
-	d.printf("-- statement decides: guidance %q", stated.Guidance.Text)
+	if len(stated.Beliefs) != 1 || stated.Beliefs[0].BeliefID != "seed_stmt_001" {
+		return &fail{fmt.Sprintf("statement recall serves %d beliefs, want the one seeded statement seed_stmt_001", len(stated.Beliefs))}
+	}
+	// Rule 7: a seeded row carries its mark. The step seeds the row, so
+	// the served belief must say so; an unmarked statement here means
+	// LoadSeed stopped copying the mark through.
+	if !stated.Beliefs[0].Seeded {
+		return &fail{"the recall serves the seeded statement unmarked, want seeded true"}
+	}
+	d.printf("-- statement decides: guidance %q, belief %s seeded=%t",
+		stated.Guidance.Text, stated.Beliefs[0].BeliefID, stated.Beliefs[0].Seeded)
 
 	d.printf("\n== 7. nothing decides, and recall still answers")
 	nothingSvc, _, err := d.openShopper("t85b-nothing")

@@ -612,11 +612,19 @@ requires:   [T8.5e]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/precedence/
-status:     claimed:t85j-mark
+status:     in-review
 ```
 The T8.5h review found `tests/live/precedence/main.go` builds its statement belief with `Seeded: false` and `LoadSeed` copies the mark through, so rule 7 ("seeded means marked") does not hold at that row. No product path is built that way, but the harness's own fixture should be honest. Mark every seeded row the harness builds and assert the mark where it checks the served statement.
 
 **Done when:** the harness's seeded statement carries the mark, its assertions check it, and a live run still passes; the gate passes.
+
+**Notes (in-review).** `statementSeed` now builds its row with `Seeded: true`, and the statement step asserts the mark where it already checked the guidance: the recall must serve exactly one belief, `seed_stmt_001`, with `Seeded` true, so an unmarked row fails the driver instead of passing as lived history. Its transcript line prints the belief id and the mark. The pool seed already carried `Seeded: true` on all ten rows; the pool step's seeded/live split (10 seeded, 0 live) is that mark's assertion, and both the `seedPool` doc comment and the split check now say so, so no row the harness builds is left unmarked.
+
+Proof without a live call: a temporary in-package check, deleted before the commit, built the harness's own `statementSeed` through the real `LoadSeed` over the graph fake and read `Recall` back — guidance basis statement, text "Take size M for Brand S: the shopper's usual size.", belief `seed_stmt_001` with `seeded=true`. The same check flipped the copy's mark to false and got `seeded=false` back, so the new assertion bites. The mark path it exercises is the shipped one: `LoadSeed` copies `view.Seeded` into the belief record and `beliefView` serves `rec.seeded`.
+
+The live leg is left to the next run of the T8.5b driver: it needs the hub binary, the deployment URL and its key, and any live run is spend-facing, so this task made no live call (spend $0.00). The assertion is what that run will exercise — a live pass also needs the seeded statement to reach the served recall, which no offline check can prove.
+
+Gate green, `npm ci` in `web/` and `merchant/` first. Against `main` the commit touches only `tests/live/precedence/main.go` and this task's lines.
 
 ---
 
