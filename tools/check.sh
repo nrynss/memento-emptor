@@ -131,7 +131,7 @@ else
 		fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server/relay.ts or server/status.ts"
 fi
 
-# --- agents: the two deployments' offline checks (T9.9, T9.19) ---
+# --- agents: the two deployments' offline checks and type-checks (T9.9, T9.19, T9.21) ---
 # Each package's check runs its own tool bindings against the frozen contract
 # examples: the ids the model is offered, their input schemas, the request each
 # `execute` sends, the edge's access table, and the memory contract. No model,
@@ -146,6 +146,14 @@ fi
 # with `bun install --frozen-lockfile`; a workstation without bun, or without a
 # package's modules, prints which check it skipped and why rather than passing
 # silently.
+#
+# After each offline check, the package is type-checked with its own TypeScript
+# (`tsc --noEmit -p tsconfig.json`, run from the package so it reads that
+# tsconfig): bun transpiles without checking types, so a type error its
+# runtime passes over -- an optional string passed where the tool schema
+# requires one, say -- would otherwise reach the gate green. It sits inside
+# the same guard as the check above, so it is skipped, and said so, only where
+# bun or that package's modules are absent.
 check_agent() {
 	local dir=$1
 	local script=$2
@@ -162,6 +170,12 @@ check_agent() {
 
 	echo "-- $name (bun $script)"
 	run_frontend "$name" bun "$script"
+
+	echo "-- $dir typecheck (tsc --noEmit)"
+	(
+		cd "$dir"
+		run_frontend "$dir typecheck" ./node_modules/.bin/tsc --noEmit -p tsconfig.json
+	)
 }
 
 check_agent agent/runtime agent/runtime/agent/offline-check.ts "agent/runtime offline check"
