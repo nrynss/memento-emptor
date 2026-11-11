@@ -242,6 +242,20 @@ func TestCheckTable(t *testing.T) {
 			want: []string{"agent/runtime/Dockerfile's bun build stage (line 1)", `"latest" is not a numeric version`},
 		},
 		{
+			name: "a dockerfile's bun image loses its tag",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "agent/frontend/Dockerfile", "FROM oven/bun:1", "FROM oven/bun")
+			},
+			want: []string{"agent/frontend/Dockerfile line 1", "oven/bun states no tag"},
+		},
+		{
+			name: "a dockerfile's bun image is pinned by digest only",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "agent/frontend/Dockerfile", "FROM oven/bun:1", "FROM oven/bun@sha256:6b1d4a2f9c0d")
+			},
+			want: []string{"agent/frontend/Dockerfile line 1", "states no tag"},
+		},
+		{
 			name: "the tree states no bun image",
 			edit: func(t *testing.T, files map[string]string) {
 				delete(files, "agent/frontend/Dockerfile")

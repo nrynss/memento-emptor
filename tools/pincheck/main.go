@@ -150,12 +150,15 @@ func bunPins(root string) ([]pin, error) {
 // bunDockerPins reads the bun base image of every `FROM` line in one
 // Dockerfile. Both stages count: the image that installs modules and the slim
 // one that runs them are built on the same bun, so a file that drifts one of
-// them is named at its line.
+// them is named at its line. A reference that names the image but no tag, bare
+// or by digest, is a failure: it is a source that states no version, and
+// passing over it would let the file drop its pin without a word.
 func bunDockerPins(root, rel string) ([]pin, error) {
 	body, err := os.ReadFile(filepath.Join(root, rel))
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", rel, err)
 	}
+	repo := imageName(kindBun)
 	var pins []pin
 	for i, line := range strings.Split(string(body), "\n") {
 		fields := strings.Fields(line)
@@ -163,7 +166,10 @@ func bunDockerPins(root, rel string) ([]pin, error) {
 			continue
 		}
 		for _, field := range fields[1:] {
-			ref, ok := imageTag(field, imageName(kindBun))
+			if field == repo || strings.HasPrefix(field, repo+"@") {
+				return nil, fmt.Errorf("%s line %d: %s states no tag, so it names no version to compare", rel, i+1, field)
+			}
+			ref, ok := imageTag(field, repo)
 			if !ok {
 				continue
 			}
