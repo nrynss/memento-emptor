@@ -287,8 +287,8 @@ Two things the next agent should not have to rediscover:
 requires:   [T9.3d]
 fixture-ok: no
 size:       XS · mid
-owns:       deploy/Dockerfile
-status:     not-started
+owns:       deploy/Dockerfile, deploy/README.md
+status:     claimed:t93g-node-pin
 ```
 The demo image builds `web/` on Node 22 while T0.2's contract and CI pin Node 26. The deployed build works, but the pin has drifted, so a future frontend build could pass locally and CI and fail in the image (or the reverse). Align the image's build stage with the pinned Node version, prove the image builds and serves the app, and record the pin so it is checked with the rest of the toolchain.
 

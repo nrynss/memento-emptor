@@ -450,7 +450,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       cmd/memento/
-status:     not-started
+status:     claimed:t85f-hub-retry
 ```
 P0's review found two gaps in `cmd/memento/`. First, the hub client does not honour T0.11's attach-bound refusal: `postLocked` turns any non-200 into an error, and `call`'s single retry re-initialises, which cannot relieve a hub whose `max_attached` places are all full — so a burst of more than fifteen concurrent shoppers surfaces errors where the documented behaviour is 503 plus `Retry-After` and a retry after that delay. Second, the MCP reply shapes the client depends on (receipts, admission checks, warnings, blast radius) have no offline test: no test reads `testdata/lambo/`, so shape drift is caught only live.
 
@@ -463,8 +463,8 @@ P0's review found two gaps in `cmd/memento/`. First, the hub client does not hon
 requires:   [T8.1]
 fixture-ok: no
 size:       XS · mid
-owns:       deploy/start.sh, deploy/README.md
-status:     not-started
+owns:       deploy/start.sh, deploy/README.md, dev-diary/research/elastic.md
+status:     claimed:t81c-recall-tier
 ```
 `deploy/start.sh` never writes a `[recall]` section, so the deployed hub runs store-only, while T0.11's check 4 and `research/elastic.md` describe the deployment as Lambo's Elastic recall tier. Decide one of two: configure `[recall]` with the Elastic backend (and record what it costs per write and what changes in recall), or record store-only as the deliberate deployment decision and correct the two documents that claim otherwise. If configuring needs embedding spend or a new secret beyond the standing budget, stop and ask the user first.
 
