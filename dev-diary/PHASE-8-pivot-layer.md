@@ -1023,7 +1023,7 @@ requires:   [T8.5i]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/layer/
-status:     not-started
+status:     claimed:t85u-layer
 ```
 T8.5i flipped `tests/live/layer`'s one-return tripwire but did not run it; only a live run proves the served thin belief and its guidance end to end. Run it once with the keys loaded, record the redacted transcript and the spend (the fixture embedder spends $0), and erase the test indices.
 
