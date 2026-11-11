@@ -1,0 +1,30 @@
+{
+  "create_time": "2026-11-21T12:00:00Z",
+  "id": "ORD-seed-41-r2-crowd-rival-010-3abd",
+  "intent": "CAPTURE",
+  "purchase_units": [
+    {
+      "amount": {
+        "currency_code": "USD",
+        "value": "46.00"
+      },
+      "custom_id": "r2-r2-crowd-rival",
+      "description": "Brand Wren Wren Oxford Shirt",
+      "items": [
+        {
+          "category": "PHYSICAL_GOODS",
+          "description": "Size M",
+          "name": "Brand Wren Wren Oxford Shirt",
+          "quantity": "1",
+          "sku": "WRN-OXF-M",
+          "unit_amount": {
+            "currency_code": "USD",
+            "value": "46.00"
+          }
+        }
+      ],
+      "reference_id": "r2-WRN-OXF-M"
+    }
+  ],
+  "status": "COMPLETED"
+}

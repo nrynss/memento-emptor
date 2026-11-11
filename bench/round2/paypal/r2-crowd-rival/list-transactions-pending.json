@@ -1,0 +1,29 @@
+{
+  "end_date": "2026-11-29T12:00:00Z",
+  "last_refreshed_datetime": "2026-11-29T12:00:00Z",
+  "page": 1,
+  "start_date": "2026-11-11T12:00:00Z",
+  "total_items": 1,
+  "total_pages": 1,
+  "transaction_details": [
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-rival",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-crowd-rival-011-8085",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "transaction_event_code": "T1110",
+        "transaction_id": "HOLD-DSP-seed-41-r2-crowd-rival-011-8085",
+        "transaction_initiation_date": "2026-11-23T16:48:00Z",
+        "transaction_status": "P",
+        "transaction_updated_date": "2026-11-23T16:48:00Z"
+      }
+    }
+  ]
+}

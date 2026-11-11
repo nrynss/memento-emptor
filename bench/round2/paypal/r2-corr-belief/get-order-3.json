@@ -1,0 +1,30 @@
+{
+  "create_time": "2026-11-17T12:00:00Z",
+  "id": "ORD-seed-41-r2-corr-belief-045-6270",
+  "intent": "CAPTURE",
+  "purchase_units": [
+    {
+      "amount": {
+        "currency_code": "USD",
+        "value": "47.00"
+      },
+      "custom_id": "r2-r2-corr-belief",
+      "description": "Brand Otter Otter Oxford Shirt",
+      "items": [
+        {
+          "category": "PHYSICAL_GOODS",
+          "description": "Size M",
+          "name": "Brand Otter Otter Oxford Shirt",
+          "quantity": "1",
+          "sku": "OTT-OXF-M",
+          "unit_amount": {
+            "currency_code": "USD",
+            "value": "47.00"
+          }
+        }
+      ],
+      "reference_id": "r2-OTT-OXF-M"
+    }
+  ],
+  "status": "COMPLETED"
+}

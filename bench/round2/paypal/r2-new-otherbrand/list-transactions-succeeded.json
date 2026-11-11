@@ -1,0 +1,118 @@
+{
+  "end_date": "2026-11-20T12:00:00Z",
+  "last_refreshed_datetime": "2026-11-20T12:00:00Z",
+  "page": 1,
+  "start_date": "2026-11-11T12:00:00Z",
+  "total_items": 5,
+  "total_pages": 1,
+  "transaction_details": [
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-new-otherbrand",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-44.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "44.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-new-otherbrand-002-dc5f",
+        "transaction_initiation_date": "2026-11-14T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-14T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-new-otherbrand",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-new-otherbrand-002-dc5f",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-44.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-new-otherbrand-002-dc5f",
+        "transaction_initiation_date": "2026-11-14T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-14T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-new-otherbrand",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-44.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "44.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-new-otherbrand-003-d3e3",
+        "transaction_initiation_date": "2026-11-17T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-17T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-new-otherbrand",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-new-otherbrand-003-d3e3",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-44.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-new-otherbrand-003-d3e3",
+        "transaction_initiation_date": "2026-11-17T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-17T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-new-otherbrand",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-26.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "26.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-new-otherbrand-004-6fb9",
+        "transaction_initiation_date": "2026-11-19T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-19T12:00:00Z"
+      }
+    }
+  ]
+}

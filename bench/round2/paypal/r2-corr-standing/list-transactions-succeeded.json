@@ -1,0 +1,54 @@
+{
+  "end_date": "2026-11-17T12:00:00Z",
+  "last_refreshed_datetime": "2026-11-17T12:00:00Z",
+  "page": 1,
+  "start_date": "2026-11-11T12:00:00Z",
+  "total_items": 2,
+  "total_pages": 1,
+  "transaction_details": [
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-standing",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-43.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "43.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-corr-standing-048-65ea",
+        "transaction_initiation_date": "2026-11-13T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-13T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-standing",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-43.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "43.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-corr-standing-049-266f",
+        "transaction_initiation_date": "2026-11-15T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-15T12:00:00Z"
+      }
+    }
+  ]
+}

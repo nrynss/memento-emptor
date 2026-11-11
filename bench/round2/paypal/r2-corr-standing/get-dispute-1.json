@@ -1,0 +1,38 @@
+{
+  "create_time": "2026-11-15T12:00:00Z",
+  "dispute_amount": {
+    "currency_code": "USD",
+    "value": "43.00"
+  },
+  "dispute_channel": "INTERNAL",
+  "dispute_id": "DSP-seed-41-r2-corr-standing-049-266f",
+  "dispute_life_cycle_stage": "INQUIRY",
+  "dispute_state": "REQUIRED_ACTION",
+  "disputed_transactions": [
+    {
+      "buyer_transaction_id": "BUYER-CAP-seed-41-r2-corr-standing-049-266f",
+      "create_time": "2026-11-15T12:00:00Z",
+      "custom": "r2-r2-corr-standing",
+      "gross_amount": {
+        "currency_code": "USD",
+        "value": "43.00"
+      },
+      "items": [
+        {
+          "item_id": "SAB-OXF-M",
+          "item_name": "Brand Sable Sable Oxford Shirt",
+          "item_quantity": "1",
+          "item_type": "PRODUCT",
+          "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED"
+        }
+      ],
+      "seller_protection_eligible": true,
+      "seller_transaction_id": "CAP-seed-41-r2-corr-standing-049-266f",
+      "transaction_status": "HELD"
+    }
+  ],
+  "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+  "seller_response_due_date": "2026-12-05T12:00:00Z",
+  "status": "WAITING_FOR_SELLER_RESPONSE",
+  "update_time": "2026-11-15T14:24:00Z"
+}

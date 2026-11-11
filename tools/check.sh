@@ -18,6 +18,7 @@ for tool in go node npm; do
 done
 
 bench/freeze_check.sh || fail "freeze" "frozen comparison inputs mismatch (bench/FROZEN.md section 1)"
+bench/round2/freeze_check.sh || fail "freeze round 2" "frozen round 2 inputs mismatch (bench/round2/FROZEN.md section 1)"
 
 # The Go and Node pins live in six places: both images' FROM lines, CI's
 # setup-go and setup-node, go.mod, and deploy/README.md's table. An image

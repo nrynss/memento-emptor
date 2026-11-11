@@ -1,0 +1,38 @@
+{
+  "create_time": "2026-11-17T12:00:00Z",
+  "dispute_amount": {
+    "currency_code": "USD",
+    "value": "50.00"
+  },
+  "dispute_channel": "INTERNAL",
+  "dispute_id": "DSP-seed-41-r2-noisy-up-027-4539",
+  "dispute_life_cycle_stage": "INQUIRY",
+  "dispute_state": "REQUIRED_ACTION",
+  "disputed_transactions": [
+    {
+      "buyer_transaction_id": "BUYER-CAP-seed-41-r2-noisy-up-027-4539",
+      "create_time": "2026-11-17T12:00:00Z",
+      "custom": "r2-r2-noisy-up",
+      "gross_amount": {
+        "currency_code": "USD",
+        "value": "50.00"
+      },
+      "items": [
+        {
+          "item_id": "UMB-OXF-M",
+          "item_name": "Brand Umber Umber Oxford Shirt",
+          "item_quantity": "1",
+          "item_type": "PRODUCT",
+          "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED"
+        }
+      ],
+      "seller_protection_eligible": true,
+      "seller_transaction_id": "CAP-seed-41-r2-noisy-up-027-4539",
+      "transaction_status": "HELD"
+    }
+  ],
+  "reason": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+  "seller_response_due_date": "2026-12-07T12:00:00Z",
+  "status": "WAITING_FOR_SELLER_RESPONSE",
+  "update_time": "2026-11-17T14:24:00Z"
+}

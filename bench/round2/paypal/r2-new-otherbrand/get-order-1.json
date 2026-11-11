@@ -1,0 +1,30 @@
+{
+  "create_time": "2026-11-14T12:00:00Z",
+  "id": "ORD-seed-41-r2-new-otherbrand-002-dc5f",
+  "intent": "CAPTURE",
+  "purchase_units": [
+    {
+      "amount": {
+        "currency_code": "USD",
+        "value": "44.00"
+      },
+      "custom_id": "r2-r2-new-otherbrand",
+      "description": "Brand Tern Tern Oxford Shirt",
+      "items": [
+        {
+          "category": "PHYSICAL_GOODS",
+          "description": "Size M",
+          "name": "Brand Tern Tern Oxford Shirt",
+          "quantity": "1",
+          "sku": "TRN-OXF-M",
+          "unit_amount": {
+            "currency_code": "USD",
+            "value": "44.00"
+          }
+        }
+      ],
+      "reference_id": "r2-TRN-OXF-M"
+    }
+  ],
+  "status": "COMPLETED"
+}

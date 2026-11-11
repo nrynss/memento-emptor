@@ -1,0 +1,30 @@
+{
+  "create_time": "2026-11-14T12:00:00Z",
+  "id": "ORD-seed-41-r2-noisy-down-034-a225",
+  "intent": "CAPTURE",
+  "purchase_units": [
+    {
+      "amount": {
+        "currency_code": "USD",
+        "value": "28.00"
+      },
+      "custom_id": "r2-r2-noisy-down",
+      "description": "Loom Loom Beanie",
+      "items": [
+        {
+          "category": "DIGITAL_GOODS",
+          "description": "Size OS",
+          "name": "Loom Loom Beanie",
+          "quantity": "1",
+          "sku": "LOM-BEA-OS",
+          "unit_amount": {
+            "currency_code": "USD",
+            "value": "28.00"
+          }
+        }
+      ],
+      "reference_id": "r2-LOM-BEA-OS"
+    }
+  ],
+  "status": "COMPLETED"
+}

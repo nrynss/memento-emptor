@@ -1,0 +1,269 @@
+{
+  "end_date": "2026-11-24T12:00:00Z",
+  "last_refreshed_datetime": "2026-11-24T12:00:00Z",
+  "page": 1,
+  "start_date": "2026-11-11T12:00:00Z",
+  "total_items": 12,
+  "total_pages": 1,
+  "transaction_details": [
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "46.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-crowd-plain-016-28d9",
+        "transaction_initiation_date": "2026-11-13T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-13T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-crowd-plain-016-28d9",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-crowd-plain-016-28d9",
+        "transaction_initiation_date": "2026-11-13T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-13T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "46.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-crowd-plain-017-eed9",
+        "transaction_initiation_date": "2026-11-15T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-15T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-crowd-plain-017-eed9",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-crowd-plain-017-eed9",
+        "transaction_initiation_date": "2026-11-15T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-15T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "46.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-crowd-plain-018-b4a4",
+        "transaction_initiation_date": "2026-11-17T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-17T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-crowd-plain-018-b4a4",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-crowd-plain-018-b4a4",
+        "transaction_initiation_date": "2026-11-17T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-17T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "46.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-crowd-plain-019-e1d2",
+        "transaction_initiation_date": "2026-11-19T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-19T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-crowd-plain-019-e1d2",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-crowd-plain-019-e1d2",
+        "transaction_initiation_date": "2026-11-19T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-19T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "46.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-crowd-plain-020-b81d",
+        "transaction_initiation_date": "2026-11-21T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-21T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-crowd-plain-020-b81d",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-crowd-plain-020-b81d",
+        "transaction_initiation_date": "2026-11-21T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-21T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "46.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-crowd-plain-021-8ad9",
+        "transaction_initiation_date": "2026-11-22T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-22T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-crowd-plain",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-46.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "46.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-crowd-plain-022-e4cd",
+        "transaction_initiation_date": "2026-11-24T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-24T12:00:00Z"
+      }
+    }
+  ]
+}

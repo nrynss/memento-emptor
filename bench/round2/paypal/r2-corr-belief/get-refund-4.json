@@ -1,0 +1,42 @@
+{
+  "amount": {
+    "currency_code": "USD",
+    "value": "47.00"
+  },
+  "create_time": "2026-11-18T18:00:00Z",
+  "custom_id": "r2-r2-corr-belief",
+  "id": "RFD-seed-41-r2-corr-belief-046-dd57",
+  "links": [
+    {
+      "href": "https://api.sandbox.paypal.com/v2/payments/refunds/RFD-seed-41-r2-corr-belief-046-dd57",
+      "method": "GET",
+      "rel": "self"
+    },
+    {
+      "href": "https://api.sandbox.paypal.com/v2/payments/captures/CAP-seed-41-r2-corr-belief-046-dd57",
+      "method": "GET",
+      "rel": "up"
+    }
+  ],
+  "note_to_payer": "Refund for the returned item",
+  "seller_payable_breakdown": {
+    "gross_amount": {
+      "currency_code": "USD",
+      "value": "47.00"
+    },
+    "net_amount": {
+      "currency_code": "USD",
+      "value": "47.00"
+    },
+    "paypal_fee": {
+      "currency_code": "USD",
+      "value": "0.00"
+    },
+    "total_refunded_amount": {
+      "currency_code": "USD",
+      "value": "47.00"
+    }
+  },
+  "status": "COMPLETED",
+  "update_time": "2026-11-18T18:00:00Z"
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "shopper_id": "r2-new-plain",
+    "case_id": "new-to-brand",
+    "right_size": "L",
+    "why": "The shopper has no history with the candidate brand, so their own evidence says nothing about it. The pool is Earned small at size M, so the pooled step adjusts one rung up from the usual M to L.",
+    "right_size_after_correction": ""
+  },
+  {
+    "shopper_id": "r2-new-otherbrand",
+    "case_id": "new-to-brand",
+    "right_size": "L",
+    "why": "Another brand's large cut is that brand's, never the candidate's: cross-brand size mapping is out, so the own-evidence step has nothing to say about the candidate. The pool is Earned small at size M, so the right size is one rung up from the usual M, L. S is the temptation and it is wrong.",
+    "right_size_after_correction": ""
+  },
+  {
+    "shopper_id": "r2-crowd-rival",
+    "case_id": "unlike-the-crowd",
+    "right_size": "S",
+    "why": "One early too-small return in M starts a runs-small belief. Three consecutive too-large returns then reach the rival-birth threshold, so the layer births the opposite-direction belief, and two more too-large returns back it; the newer, better-supported belief is the shopper's own and beats the pool's small direction. One rung down from M is S. Without the threshold the repeated opposites stay unattached, own evidence still says L, and the case would grade the mirror instead of the layer.",
+    "right_size_after_correction": ""
+  },
+  {
+    "shopper_id": "r2-crowd-plain",
+    "case_id": "unlike-the-crowd",
+    "right_size": "S",
+    "why": "The first too-large return in M births a runs-large belief and two more back it, and the fits-well verdict at S is fit evidence for S. Own evidence beats the pool's small direction, so the right size is S. L is what naive pooling says, and it is wrong.",
+    "right_size_after_correction": ""
+  },
+  {
+    "shopper_id": "r2-noisy-up",
+    "case_id": "noisy-refunds",
+    "right_size": "L",
+    "why": "Three fit-classified too-small returns in M accumulate to size up to L. The damaged return and the lost parcel count toward the seller, the changed-mind and vague answers count toward nothing, the refund with no reason yet is a pending question, and the kept rows are weak inference; none of them moves the size.",
+    "right_size_after_correction": ""
+  },
+  {
+    "shopper_id": "r2-noisy-down",
+    "case_id": "noisy-refunds",
+    "right_size": "S",
+    "why": "Three fit-classified too-large returns in M accumulate to size down to S. The damaged and lost-parcel rows count toward the seller, the changed-mind and vague answers count toward nothing, the refund with no reason yet is pending, and the kept rows are weak inference; none of them moves the size.",
+    "right_size_after_correction": ""
+  },
+  {
+    "shopper_id": "r2-corr-belief",
+    "case_id": "correction-then-another-agent",
+    "right_size": "L",
+    "why": "Two fit-classified too-small returns in M earn the shopper's own runs-small belief, so the first recommendation is one rung up from M, L. The shopper's correction then takes precedence immediately: the size after it is M, while the belief stands declared against it, not deleted.",
+    "right_size_after_correction": "M"
+  },
+  {
+    "shopper_id": "r2-corr-standing",
+    "case_id": "correction-then-another-agent",
+    "right_size": "M",
+    "why": "The only fit trace is a kept M, which is weak inference, so the first recommendation rests on the shopper's stated usual size, M, labelled Claimed. The correction stands on its own with no belief to contradict, and the size after it is S.",
+    "right_size_after_correction": "S"
+  }
+]

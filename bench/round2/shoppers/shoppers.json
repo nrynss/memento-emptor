@@ -1,0 +1,1974 @@
+[
+  {
+    "shopper_id": "r2-new-plain",
+    "case_id": "new-to-brand",
+    "candidate": {
+      "brand_id": "brand-v-010",
+      "brand_name": "Brand Vale",
+      "line_name": "Vale Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": null,
+    "history": {
+      "ShopperID": "r2-new-plain",
+      "SessionDays": 5,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Tee",
+            "SKU": "LOM-TEE-M",
+            "Size": "M",
+            "Category": "t-shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 2,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Tee",
+            "SKU": "LOM-TEE-M",
+            "Size": "M",
+            "Category": "t-shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-new-plain-001-6058",
+            "CaptureID": "CAP-seed-41-r2-new-plain-001-6058",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-new-plain-001",
+            "EventID": "EVT-seed-41-r2-new-plain-001-6058"
+          },
+          "Note": "Kept past the window: Loom tee size M, no feedback",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  },
+  {
+    "shopper_id": "r2-new-otherbrand",
+    "case_id": "new-to-brand",
+    "candidate": {
+      "brand_id": "brand-v-010",
+      "brand_name": "Brand Vale",
+      "line_name": "Vale Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": null,
+    "history": {
+      "ShopperID": "r2-new-otherbrand",
+      "SessionDays": 9,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-t-021",
+            "BrandName": "Brand Tern",
+            "LineName": "Tern Oxford Shirt",
+            "SKU": "TRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 3,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4400,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-t-021",
+            "BrandName": "Brand Tern",
+            "LineName": "Tern Oxford Shirt",
+            "SKU": "TRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "swims on the shopper",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-new-otherbrand-002-dc5f",
+            "CaptureID": "CAP-seed-41-r2-new-otherbrand-002-dc5f",
+            "RefundID": "RFD-seed-41-r2-new-otherbrand-002-dc5f",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-new-otherbrand-002",
+            "EventID": "EVT-seed-41-r2-new-otherbrand-002-dc5f"
+          },
+          "Note": "Fit return 1: Brand Tern oxford size M refunded; swims on the shopper",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 6,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4400,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-t-021",
+            "BrandName": "Brand Tern",
+            "LineName": "Tern Oxford Shirt",
+            "SKU": "TRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "sleeves too long in M",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-new-otherbrand-003-d3e3",
+            "CaptureID": "CAP-seed-41-r2-new-otherbrand-003-d3e3",
+            "RefundID": "RFD-seed-41-r2-new-otherbrand-003-d3e3",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-new-otherbrand-003",
+            "EventID": "EVT-seed-41-r2-new-otherbrand-003-d3e3"
+          },
+          "Note": "Fit return 2: Brand Tern oxford size M refunded; sleeves too long in M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 8,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Tee",
+            "SKU": "LOM-TEE-M",
+            "Size": "M",
+            "Category": "t-shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-new-otherbrand-004-6fb9",
+            "CaptureID": "CAP-seed-41-r2-new-otherbrand-004-6fb9",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-new-otherbrand-004",
+            "EventID": "EVT-seed-41-r2-new-otherbrand-004-6fb9"
+          },
+          "Note": "Kept past the window: Loom tee size M, no feedback",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  },
+  {
+    "shopper_id": "r2-crowd-rival",
+    "case_id": "unlike-the-crowd",
+    "candidate": {
+      "brand_id": "brand-w-011",
+      "brand_name": "Brand Wren",
+      "line_name": "Wren Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": null,
+    "history": {
+      "ShopperID": "r2-crowd-rival",
+      "SessionDays": 18,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 2,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_small",
+            "Text": "too tight in the shoulders",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-005-ec6b",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-005-ec6b",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-005-ec6b",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-005",
+            "EventID": "EVT-seed-41-r2-crowd-rival-005-ec6b"
+          },
+          "Note": "Fit return 1: Brand Wren oxford size M refunded; too tight in the shoulders",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 4,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "changed_mind",
+            "Text": "changed my mind about the colour",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-006-0d20",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-006-0d20",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-006-0d20",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-006",
+            "EventID": "EVT-seed-41-r2-crowd-rival-006-0d20"
+          },
+          "Note": "Refund: Brand Wren oxford size M; shopper changed their mind about the colour",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 5,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "too loose across the chest",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-007-0f77",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-007-0f77",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-007-0f77",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-007",
+            "EventID": "EVT-seed-41-r2-crowd-rival-007-0f77"
+          },
+          "Note": "Fit return 1: Brand Wren oxford size M refunded; too loose across the chest",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 7,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "damaged_or_defective",
+            "Text": "arrived with a torn seam",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-008-0360",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-008-0360",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-008-0360",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-008",
+            "EventID": "EVT-seed-41-r2-crowd-rival-008-0360"
+          },
+          "Note": "Refund: Brand Wren oxford size M; arrived with a torn seam",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 8,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "swims on the shopper",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-009-448f",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-009-448f",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-009-448f",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-009",
+            "EventID": "EVT-seed-41-r2-crowd-rival-009-448f"
+          },
+          "Note": "Fit return 2: Brand Wren oxford size M refunded; swims on the shopper",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 10,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "sleeves too long in M",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-010-3abd",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-010-3abd",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-010-3abd",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-010",
+            "EventID": "EVT-seed-41-r2-crowd-rival-010-3abd"
+          },
+          "Note": "Fit return 3: Brand Wren oxford size M refunded; sleeves too long in M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 12,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "dispute",
+            "Status": "OPEN",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "not_arrived",
+            "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-011-8085",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-011-8085",
+            "RefundID": "",
+            "DisputeID": "DSP-seed-41-r2-crowd-rival-011-8085",
+            "CustomID": "seed-41-r2-crowd-rival-011",
+            "EventID": "EVT-seed-41-r2-crowd-rival-011-8085"
+          },
+          "Note": "Dispute opened: Brand Wren parcel never arrived; carrier lost it",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 13,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "damaged_or_defective",
+            "Text": "buttons arrived cracked",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-012-b9c7",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-012-b9c7",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-012-b9c7",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-012",
+            "EventID": "EVT-seed-41-r2-crowd-rival-012-b9c7"
+          },
+          "Note": "Refund: Brand Wren oxford size M; buttons arrived cracked",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 14,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "too loose in the body",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-013-3523",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-013-3523",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-013-3523",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-013",
+            "EventID": "EVT-seed-41-r2-crowd-rival-013-3523"
+          },
+          "Note": "Fit return 4: Brand Wren oxford size M refunded; too loose in the body",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 16,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "sleeves too long again",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-014-89eb",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-014-89eb",
+            "RefundID": "RFD-seed-41-r2-crowd-rival-014-89eb",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-014",
+            "EventID": "EVT-seed-41-r2-crowd-rival-014-89eb"
+          },
+          "Note": "Fit return 5: Brand Wren oxford size M refunded; sleeves too long again",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 18,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Tee",
+            "SKU": "LOM-TEE-M",
+            "Size": "M",
+            "Category": "t-shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-rival-015-d722",
+            "CaptureID": "CAP-seed-41-r2-crowd-rival-015-d722",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-rival-015",
+            "EventID": "EVT-seed-41-r2-crowd-rival-015-d722"
+          },
+          "Note": "Kept past the window: Loom tee size M, no feedback",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  },
+  {
+    "shopper_id": "r2-crowd-plain",
+    "case_id": "unlike-the-crowd",
+    "candidate": {
+      "brand_id": "brand-w-011",
+      "brand_name": "Brand Wren",
+      "line_name": "Wren Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": null,
+    "history": {
+      "ShopperID": "r2-crowd-plain",
+      "SessionDays": 13,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 2,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "too loose across the chest",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-plain-016-28d9",
+            "CaptureID": "CAP-seed-41-r2-crowd-plain-016-28d9",
+            "RefundID": "RFD-seed-41-r2-crowd-plain-016-28d9",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-plain-016",
+            "EventID": "EVT-seed-41-r2-crowd-plain-016-28d9"
+          },
+          "Note": "Fit return 1: Brand Wren oxford size M refunded; too loose across the chest",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 4,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "changed_mind",
+            "Text": "changed my mind about the colour",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-plain-017-eed9",
+            "CaptureID": "CAP-seed-41-r2-crowd-plain-017-eed9",
+            "RefundID": "RFD-seed-41-r2-crowd-plain-017-eed9",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-plain-017",
+            "EventID": "EVT-seed-41-r2-crowd-plain-017-eed9"
+          },
+          "Note": "Refund: Brand Wren oxford size M; shopper changed their mind about the colour",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 6,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "swims on the shopper",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-plain-018-b4a4",
+            "CaptureID": "CAP-seed-41-r2-crowd-plain-018-b4a4",
+            "RefundID": "RFD-seed-41-r2-crowd-plain-018-b4a4",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-plain-018",
+            "EventID": "EVT-seed-41-r2-crowd-plain-018-b4a4"
+          },
+          "Note": "Fit return 2: Brand Wren oxford size M refunded; swims on the shopper",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 8,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "damaged_or_defective",
+            "Text": "buttons arrived cracked",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-plain-019-e1d2",
+            "CaptureID": "CAP-seed-41-r2-crowd-plain-019-e1d2",
+            "RefundID": "RFD-seed-41-r2-crowd-plain-019-e1d2",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-plain-019",
+            "EventID": "EVT-seed-41-r2-crowd-plain-019-e1d2"
+          },
+          "Note": "Refund: Brand Wren oxford size M; buttons arrived cracked",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 10,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "sleeves too long in M",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-plain-020-b81d",
+            "CaptureID": "CAP-seed-41-r2-crowd-plain-020-b81d",
+            "RefundID": "RFD-seed-41-r2-crowd-plain-020-b81d",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-plain-020",
+            "EventID": "EVT-seed-41-r2-crowd-plain-020-b81d"
+          },
+          "Note": "Fit return 3: Brand Wren oxford size M refunded; sleeves too long in M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 11,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-plain-021-8ad9",
+            "CaptureID": "CAP-seed-41-r2-crowd-plain-021-8ad9",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-plain-021",
+            "EventID": "EVT-seed-41-r2-crowd-plain-021-8ad9"
+          },
+          "Note": "Kept past the window: Brand Wren oxford size M, no feedback",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 13,
+          "Signal": "fit_feedback",
+          "Source": "shopper",
+          "Outcome": {
+            "Kind": "capture",
+            "Status": "COMPLETED",
+            "AmountMinor": 4600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-w-011",
+            "BrandName": "Brand Wren",
+            "LineName": "Wren Oxford Shirt",
+            "SKU": "WRN-OXF-S",
+            "Size": "S",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-crowd-plain-022-e4cd",
+            "CaptureID": "CAP-seed-41-r2-crowd-plain-022-e4cd",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-crowd-plain-022",
+            "EventID": "EVT-seed-41-r2-crowd-plain-022-e4cd"
+          },
+          "Note": "Fit feedback: Brand Wren oxford size S fits well, tied to this purchase",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  },
+  {
+    "shopper_id": "r2-noisy-up",
+    "case_id": "noisy-refunds",
+    "candidate": {
+      "brand_id": "brand-u-012",
+      "brand_name": "Brand Umber",
+      "line_name": "Umber Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": null,
+    "history": {
+      "ShopperID": "r2-noisy-up",
+      "SessionDays": 18,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 1,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Tee",
+            "SKU": "LOM-TEE-M",
+            "Size": "M",
+            "Category": "t-shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-023-cd30",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-023-cd30",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-023",
+            "EventID": "EVT-seed-41-r2-noisy-up-023-cd30"
+          },
+          "Note": "Kept past the window: Loom tee size M, no feedback",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 2,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_small",
+            "Text": "too tight in the shoulders",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-024-f65a",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-024-f65a",
+            "RefundID": "RFD-seed-41-r2-noisy-up-024-f65a",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-024",
+            "EventID": "EVT-seed-41-r2-noisy-up-024-f65a"
+          },
+          "Note": "Fit return 1: Brand Umber oxford size M refunded; too tight in the shoulders",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 3,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2800,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Beanie",
+            "SKU": "LOM-BEA-OS",
+            "Size": "OS",
+            "Category": "hats"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-025-0c4a",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-025-0c4a",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-025",
+            "EventID": "EVT-seed-41-r2-noisy-up-025-0c4a"
+          },
+          "Note": "Kept past the window: Loom beanie, no feedback",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 4,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "damaged_or_defective",
+            "Text": "arrived with a torn seam",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-026-88b0",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-026-88b0",
+            "RefundID": "RFD-seed-41-r2-noisy-up-026-88b0",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-026",
+            "EventID": "EVT-seed-41-r2-noisy-up-026-88b0"
+          },
+          "Note": "Refund: Brand Umber oxford size M; arrived with a torn seam",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 6,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "dispute",
+            "Status": "OPEN",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "not_arrived",
+            "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-027-4539",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-027-4539",
+            "RefundID": "",
+            "DisputeID": "DSP-seed-41-r2-noisy-up-027-4539",
+            "CustomID": "seed-41-r2-noisy-up-027",
+            "EventID": "EVT-seed-41-r2-noisy-up-027-4539"
+          },
+          "Note": "Dispute opened: Brand Umber parcel never arrived; tracking stuck for weeks",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 7,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "changed_mind",
+            "Text": "changed my mind about the colour",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-028-cedd",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-028-cedd",
+            "RefundID": "RFD-seed-41-r2-noisy-up-028-cedd",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-028",
+            "EventID": "EVT-seed-41-r2-noisy-up-028-cedd"
+          },
+          "Note": "Refund: Brand Umber oxford size M; shopper changed their mind about the colour",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 9,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_small",
+            "Text": "too tight across the chest",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-029-f41b",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-029-f41b",
+            "RefundID": "RFD-seed-41-r2-noisy-up-029-f41b",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-029",
+            "EventID": "EVT-seed-41-r2-noisy-up-029-f41b"
+          },
+          "Note": "Fit return 2: Brand Umber oxford size M refunded; too tight across the chest",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 11,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "unclear",
+            "Text": "not great",
+            "Confidence": 0.94
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-030-06f8",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-030-06f8",
+            "RefundID": "RFD-seed-41-r2-noisy-up-030-06f8",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-030",
+            "EventID": "EVT-seed-41-r2-noisy-up-030-06f8"
+          },
+          "Note": "Refund: Brand Umber oxford size M; shopper answer too vague to classify, ask again",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 13,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-031-5a8f",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-031-5a8f",
+            "RefundID": "RFD-seed-41-r2-noisy-up-031-5a8f",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-031",
+            "EventID": "EVT-seed-41-r2-noisy-up-031-5a8f"
+          },
+          "Note": "Refund: Brand Umber oxford size M; no reason yet, the agent has not asked",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 15,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5000,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-u-012",
+            "BrandName": "Brand Umber",
+            "LineName": "Umber Oxford Shirt",
+            "SKU": "UMB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_small",
+            "Text": "sleeves too short in M",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-up-032-3c39",
+            "CaptureID": "CAP-seed-41-r2-noisy-up-032-3c39",
+            "RefundID": "RFD-seed-41-r2-noisy-up-032-3c39",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-up-032",
+            "EventID": "EVT-seed-41-r2-noisy-up-032-3c39"
+          },
+          "Note": "Fit return 3: Brand Umber oxford size M refunded; sleeves too short in M",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  },
+  {
+    "shopper_id": "r2-noisy-down",
+    "case_id": "noisy-refunds",
+    "candidate": {
+      "brand_id": "brand-n-015",
+      "brand_name": "Brand North",
+      "line_name": "Northwind Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": null,
+    "history": {
+      "ShopperID": "r2-noisy-down",
+      "SessionDays": 19,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 1,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2500,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Tee",
+            "SKU": "LOM-TEE-M",
+            "Size": "M",
+            "Category": "t-shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-033-a1c4",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-033-a1c4",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-033",
+            "EventID": "EVT-seed-41-r2-noisy-down-033-a1c4"
+          },
+          "Note": "Kept past the window: Loom tee size M, no feedback",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 3,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2800,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Beanie",
+            "SKU": "LOM-BEA-OS",
+            "Size": "OS",
+            "Category": "hats"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-034-a225",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-034-a225",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-034",
+            "EventID": "EVT-seed-41-r2-noisy-down-034-a225"
+          },
+          "Note": "Kept past the window: Loom beanie, no feedback",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 4,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "swims on the shopper",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-035-a336",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-035-a336",
+            "RefundID": "RFD-seed-41-r2-noisy-down-035-a336",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-035",
+            "EventID": "EVT-seed-41-r2-noisy-down-035-a336"
+          },
+          "Note": "Fit return 1: Brand North oxford size M refunded; swims on the shopper",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 6,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "damaged_or_defective",
+            "Text": "arrived with a loose hem",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-036-4326",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-036-4326",
+            "RefundID": "RFD-seed-41-r2-noisy-down-036-4326",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-036",
+            "EventID": "EVT-seed-41-r2-noisy-down-036-4326"
+          },
+          "Note": "Refund: Brand North oxford size M; arrived with a loose hem",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 8,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "dispute",
+            "Status": "OPEN",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "not_arrived",
+            "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-037-f763",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-037-f763",
+            "RefundID": "",
+            "DisputeID": "DSP-seed-41-r2-noisy-down-037-f763",
+            "CustomID": "seed-41-r2-noisy-down-037",
+            "EventID": "EVT-seed-41-r2-noisy-down-037-f763"
+          },
+          "Note": "Dispute opened: Brand North parcel never arrived; carrier lost it",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 10,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "too loose across the chest",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-038-27e5",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-038-27e5",
+            "RefundID": "RFD-seed-41-r2-noisy-down-038-27e5",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-038",
+            "EventID": "EVT-seed-41-r2-noisy-down-038-27e5"
+          },
+          "Note": "Fit return 2: Brand North oxford size M refunded; too loose across the chest",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 12,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "changed_mind",
+            "Text": "ordered two colours, kept the other",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-039-29a2",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-039-29a2",
+            "RefundID": "RFD-seed-41-r2-noisy-down-039-29a2",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-039",
+            "EventID": "EVT-seed-41-r2-noisy-down-039-29a2"
+          },
+          "Note": "Refund: Brand North oxford size M; ordered two colours, kept the other",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 14,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "unclear",
+            "Text": "did not love it",
+            "Confidence": 0.94
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-040-3133",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-040-3133",
+            "RefundID": "RFD-seed-41-r2-noisy-down-040-3133",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-040",
+            "EventID": "EVT-seed-41-r2-noisy-down-040-3133"
+          },
+          "Note": "Refund: Brand North oxford size M; shopper answer too vague to classify, ask again",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 16,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-041-9566",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-041-9566",
+            "RefundID": "RFD-seed-41-r2-noisy-down-041-9566",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-041",
+            "EventID": "EVT-seed-41-r2-noisy-down-041-9566"
+          },
+          "Note": "Refund: Brand North oxford size M; no reason yet, the agent has not asked",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 17,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 5200,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-n-015",
+            "BrandName": "Brand North",
+            "LineName": "Northwind Oxford Shirt",
+            "SKU": "NOR-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_large",
+            "Text": "sleeves too long in M",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-noisy-down-042-2b96",
+            "CaptureID": "CAP-seed-41-r2-noisy-down-042-2b96",
+            "RefundID": "RFD-seed-41-r2-noisy-down-042-2b96",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-noisy-down-042",
+            "EventID": "EVT-seed-41-r2-noisy-down-042-2b96"
+          },
+          "Note": "Fit return 3: Brand North oxford size M refunded; sleeves too long in M",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  },
+  {
+    "shopper_id": "r2-corr-belief",
+    "case_id": "correction-then-another-agent",
+    "candidate": {
+      "brand_id": "brand-o-014",
+      "brand_name": "Brand Otter",
+      "line_name": "Otter Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": {
+      "text": "Actually I have lost a size since then, use M now.",
+      "want_size": "M"
+    },
+    "history": {
+      "ShopperID": "r2-corr-belief",
+      "SessionDays": 8,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-o-014",
+            "BrandName": "Brand Otter",
+            "LineName": "Otter Oxford Shirt",
+            "SKU": "OTT-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 2,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4700,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-o-014",
+            "BrandName": "Brand Otter",
+            "LineName": "Otter Oxford Shirt",
+            "SKU": "OTT-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_small",
+            "Text": "too tight in the shoulders",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-corr-belief-043-85a6",
+            "CaptureID": "CAP-seed-41-r2-corr-belief-043-85a6",
+            "RefundID": "RFD-seed-41-r2-corr-belief-043-85a6",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-corr-belief-043",
+            "EventID": "EVT-seed-41-r2-corr-belief-043-85a6"
+          },
+          "Note": "Fit return 1: Brand Otter oxford size M refunded; too tight in the shoulders",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 5,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4700,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-o-014",
+            "BrandName": "Brand Otter",
+            "LineName": "Otter Oxford Shirt",
+            "SKU": "OTT-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_small",
+            "Text": "sleeves too short in M",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-corr-belief-044-79ee",
+            "CaptureID": "CAP-seed-41-r2-corr-belief-044-79ee",
+            "RefundID": "RFD-seed-41-r2-corr-belief-044-79ee",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-corr-belief-044",
+            "EventID": "EVT-seed-41-r2-corr-belief-044-79ee"
+          },
+          "Note": "Fit return 2: Brand Otter oxford size M refunded; sleeves too short in M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 6,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4700,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-o-014",
+            "BrandName": "Brand Otter",
+            "LineName": "Otter Oxford Shirt",
+            "SKU": "OTT-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "damaged_or_defective",
+            "Text": "arrived with a torn seam",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-corr-belief-045-6270",
+            "CaptureID": "CAP-seed-41-r2-corr-belief-045-6270",
+            "RefundID": "RFD-seed-41-r2-corr-belief-045-6270",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-corr-belief-045",
+            "EventID": "EVT-seed-41-r2-corr-belief-045-6270"
+          },
+          "Note": "Refund: Brand Otter oxford size M; arrived with a torn seam",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 7,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "refund",
+            "Status": "COMPLETED",
+            "AmountMinor": 4700,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-o-014",
+            "BrandName": "Brand Otter",
+            "LineName": "Otter Oxford Shirt",
+            "SKU": "OTT-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "fit_too_small",
+            "Text": "too tight across the chest",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-corr-belief-046-dd57",
+            "CaptureID": "CAP-seed-41-r2-corr-belief-046-dd57",
+            "RefundID": "RFD-seed-41-r2-corr-belief-046-dd57",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-corr-belief-046",
+            "EventID": "EVT-seed-41-r2-corr-belief-046-dd57"
+          },
+          "Note": "Fit return 3: Brand Otter oxford size M refunded; too tight across the chest",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 8,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 2600,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-l-020",
+            "BrandName": "Loom",
+            "LineName": "Loom Tee",
+            "SKU": "LOM-TEE-M",
+            "Size": "M",
+            "Category": "t-shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-corr-belief-047-18f1",
+            "CaptureID": "CAP-seed-41-r2-corr-belief-047-18f1",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-corr-belief-047",
+            "EventID": "EVT-seed-41-r2-corr-belief-047-18f1"
+          },
+          "Note": "Kept past the window: Loom tee size M, no feedback",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  },
+  {
+    "shopper_id": "r2-corr-standing",
+    "case_id": "correction-then-another-agent",
+    "candidate": {
+      "brand_id": "brand-s-013",
+      "brand_name": "Brand Sable",
+      "line_name": "Sable Oxford Shirt",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "usual_size": "M"
+    },
+    "correction": {
+      "text": "I was measured last week, take S now.",
+      "want_size": "S"
+    },
+    "history": {
+      "ShopperID": "r2-corr-standing",
+      "SessionDays": 6,
+      "Rows": [
+        {
+          "Day": 0,
+          "Signal": "general_statement",
+          "Source": "shopper",
+          "Outcome": null,
+          "Item": {
+            "BrandID": "brand-s-013",
+            "BrandName": "Brand Sable",
+            "LineName": "Sable Oxford Shirt",
+            "SKU": "SAB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "",
+            "CaptureID": "",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "",
+            "EventID": ""
+          },
+          "Note": "Shopper says they are usually size M",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 2,
+          "Signal": "kept_past_window",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "kept",
+            "Status": "PAST_WINDOW",
+            "AmountMinor": 4300,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-s-013",
+            "BrandName": "Brand Sable",
+            "LineName": "Sable Oxford Shirt",
+            "SKU": "SAB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": null,
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-corr-standing-048-65ea",
+            "CaptureID": "CAP-seed-41-r2-corr-standing-048-65ea",
+            "RefundID": "",
+            "DisputeID": "",
+            "CustomID": "seed-41-r2-corr-standing-048",
+            "EventID": "EVT-seed-41-r2-corr-standing-048-65ea"
+          },
+          "Note": "Kept past the window: Brand Sable oxford size M, no feedback",
+          "SeedMark": "seeded"
+        },
+        {
+          "Day": 4,
+          "Signal": "classified_outcome",
+          "Source": "payment",
+          "Outcome": {
+            "Kind": "dispute",
+            "Status": "OPEN",
+            "AmountMinor": 4300,
+            "Currency": "USD"
+          },
+          "Item": {
+            "BrandID": "brand-s-013",
+            "BrandName": "Brand Sable",
+            "LineName": "Sable Oxford Shirt",
+            "SKU": "SAB-OXF-M",
+            "Size": "M",
+            "Category": "shirts"
+          },
+          "Reason": {
+            "Category": "not_arrived",
+            "Text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED",
+            "Confidence": 1
+          },
+          "Link": {
+            "OrderID": "ORD-seed-41-r2-corr-standing-049-266f",
+            "CaptureID": "CAP-seed-41-r2-corr-standing-049-266f",
+            "RefundID": "",
+            "DisputeID": "DSP-seed-41-r2-corr-standing-049-266f",
+            "CustomID": "seed-41-r2-corr-standing-049",
+            "EventID": "EVT-seed-41-r2-corr-standing-049-266f"
+          },
+          "Note": "Dispute opened: Brand Sable parcel never arrived; tracking stuck for weeks",
+          "SeedMark": "seeded"
+        }
+      ]
+    }
+  }
+]

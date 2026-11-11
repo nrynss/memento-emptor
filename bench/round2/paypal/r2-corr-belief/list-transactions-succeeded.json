@@ -1,0 +1,204 @@
+{
+  "end_date": "2026-11-19T12:00:00Z",
+  "last_refreshed_datetime": "2026-11-19T12:00:00Z",
+  "page": 1,
+  "start_date": "2026-11-11T12:00:00Z",
+  "total_items": 9,
+  "total_pages": 1,
+  "transaction_details": [
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "47.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-corr-belief-043-85a6",
+        "transaction_initiation_date": "2026-11-13T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-13T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-corr-belief-043-85a6",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-corr-belief-043-85a6",
+        "transaction_initiation_date": "2026-11-13T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-13T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "47.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-corr-belief-044-79ee",
+        "transaction_initiation_date": "2026-11-16T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-16T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-corr-belief-044-79ee",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-corr-belief-044-79ee",
+        "transaction_initiation_date": "2026-11-16T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-16T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "47.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-corr-belief-045-6270",
+        "transaction_initiation_date": "2026-11-17T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-17T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-corr-belief-045-6270",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-corr-belief-045-6270",
+        "transaction_initiation_date": "2026-11-17T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-17T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "47.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-corr-belief-046-dd57",
+        "transaction_initiation_date": "2026-11-18T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-18T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-corr-belief-046-dd57",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-47.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-corr-belief-046-dd57",
+        "transaction_initiation_date": "2026-11-18T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-18T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-corr-belief",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-26.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "26.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-corr-belief-047-18f1",
+        "transaction_initiation_date": "2026-11-19T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-19T12:00:00Z"
+      }
+    }
+  ]
+}

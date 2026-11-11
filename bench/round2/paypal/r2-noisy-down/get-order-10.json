@@ -1,0 +1,30 @@
+{
+  "create_time": "2026-11-28T12:00:00Z",
+  "id": "ORD-seed-41-r2-noisy-down-042-2b96",
+  "intent": "CAPTURE",
+  "purchase_units": [
+    {
+      "amount": {
+        "currency_code": "USD",
+        "value": "52.00"
+      },
+      "custom_id": "r2-r2-noisy-down",
+      "description": "Brand North Northwind Oxford Shirt",
+      "items": [
+        {
+          "category": "PHYSICAL_GOODS",
+          "description": "Size M",
+          "name": "Brand North Northwind Oxford Shirt",
+          "quantity": "1",
+          "sku": "NOR-OXF-M",
+          "unit_amount": {
+            "currency_code": "USD",
+            "value": "52.00"
+          }
+        }
+      ],
+      "reference_id": "r2-NOR-OXF-M"
+    }
+  ],
+  "status": "COMPLETED"
+}

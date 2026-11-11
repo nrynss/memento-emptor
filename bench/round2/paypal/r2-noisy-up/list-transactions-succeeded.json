@@ -1,0 +1,377 @@
+{
+  "end_date": "2026-11-29T12:00:00Z",
+  "last_refreshed_datetime": "2026-11-29T12:00:00Z",
+  "page": 1,
+  "start_date": "2026-11-11T12:00:00Z",
+  "total_items": 17,
+  "total_pages": 1,
+  "transaction_details": [
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-26.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "26.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-023-cd30",
+        "transaction_initiation_date": "2026-11-12T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-12T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-024-f65a",
+        "transaction_initiation_date": "2026-11-13T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-13T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-noisy-up-024-f65a",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-noisy-up-024-f65a",
+        "transaction_initiation_date": "2026-11-13T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-13T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-28.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "28.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-025-0c4a",
+        "transaction_initiation_date": "2026-11-14T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-14T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-026-88b0",
+        "transaction_initiation_date": "2026-11-15T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-15T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-noisy-up-026-88b0",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-noisy-up-026-88b0",
+        "transaction_initiation_date": "2026-11-15T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-15T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-027-4539",
+        "transaction_initiation_date": "2026-11-17T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-17T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-028-cedd",
+        "transaction_initiation_date": "2026-11-18T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-18T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-noisy-up-028-cedd",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-noisy-up-028-cedd",
+        "transaction_initiation_date": "2026-11-18T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-18T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-029-f41b",
+        "transaction_initiation_date": "2026-11-20T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-20T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-noisy-up-029-f41b",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-noisy-up-029-f41b",
+        "transaction_initiation_date": "2026-11-20T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-20T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-030-06f8",
+        "transaction_initiation_date": "2026-11-22T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-22T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-noisy-up-030-06f8",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-noisy-up-030-06f8",
+        "transaction_initiation_date": "2026-11-22T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-22T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-031-5a8f",
+        "transaction_initiation_date": "2026-11-24T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-24T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-noisy-up-031-5a8f",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-noisy-up-031-5a8f",
+        "transaction_initiation_date": "2026-11-24T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-24T18:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "fee_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "protection_eligibility": "01",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "50.00"
+        },
+        "transaction_event_code": "T0006",
+        "transaction_id": "CAP-seed-41-r2-noisy-up-032-3c39",
+        "transaction_initiation_date": "2026-11-26T12:00:00Z",
+        "transaction_status": "S",
+        "transaction_subject": "Store purchase, 1 item",
+        "transaction_updated_date": "2026-11-26T12:00:00Z"
+      }
+    },
+    {
+      "transaction_info": {
+        "custom_field": "r2-r2-noisy-up",
+        "instrument_sub_type": "PayPal Wallet",
+        "instrument_type": "PayPal",
+        "paypal_reference_id": "CAP-seed-41-r2-noisy-up-032-3c39",
+        "paypal_reference_id_type": "TXN",
+        "protection_eligibility": "02",
+        "transaction_amount": {
+          "currency_code": "USD",
+          "value": "-50.00"
+        },
+        "transaction_event_code": "T1107",
+        "transaction_id": "RFD-seed-41-r2-noisy-up-032-3c39",
+        "transaction_initiation_date": "2026-11-26T18:00:00Z",
+        "transaction_note": "Refund for the returned item",
+        "transaction_status": "S",
+        "transaction_subject": "Refund for the returned item",
+        "transaction_updated_date": "2026-11-26T18:00:00Z"
+      }
+    }
+  ]
+}
