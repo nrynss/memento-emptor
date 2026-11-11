@@ -220,10 +220,10 @@ func TestRefundBeforeCapture(t *testing.T) {
 }
 
 // TestDisputeForEachMappedCode files a dispute for every code in the
-// frozen table. The two arrival codes map to the not-arrived category
-// and count toward the seller; the account-takeover code maps to no
-// category and counts toward nothing. A code outside the table fails
-// with the frozen unknown-code error and stores nothing.
+// frozen table. The arrival codes map to the not-arrived category, the
+// not-as-described code maps to damage, and all three count toward the
+// seller; the account-takeover code maps to no category and counts toward
+// nothing.
 func TestDisputeForEachMappedCode(t *testing.T) {
 	item := shirtItem("chino-khaki-32")
 	disputeFor := func(eventID, disputeID string, code domain.DisputeCode) (fakes.WebhookEvent, fakes.DisputeRecord, fakes.OrderRecord) {
@@ -248,6 +248,7 @@ func TestDisputeForEachMappedCode(t *testing.T) {
 	}{
 		{domain.DisputeMerchandiseNotReceived, domain.CategoryNotArrived, domain.BeliefKindSeller},
 		{domain.DisputeItemNotReceived, domain.CategoryNotArrived, domain.BeliefKindSeller},
+		{domain.DisputeMerchandiseNotAsDescribed, domain.CategoryDamagedOrDefective, domain.BeliefKindSeller},
 		{domain.DisputeUnauthorizedTransaction, domain.CategoryNone, domain.BeliefKindNone},
 	}
 	// The table is hand-copied so the expected category and belief kind
@@ -276,14 +277,6 @@ func TestDisputeForEachMappedCode(t *testing.T) {
 		source.disputes[dispute.DisputeID] = dispute
 		source.orders[order.OrderID] = order
 	}
-	badLink := domain.TransactionLink{OrderID: "ORD-D-BAD", DisputeID: "PP-D-BAD", CustomID: "shopper-d", EventID: "WH-D-BAD"}
-	source.events["WH-D-BAD"] = fakes.WebhookEvent{
-		EventID: "WH-D-BAD", EventType: "CUSTOMER.DISPUTE.CREATED", Verified: true,
-		Outcome: domain.Outcome{Kind: domain.OutcomeDispute, Status: "OPEN", AmountMinor: 100, Currency: "USD"},
-		Link:    badLink, DisputeCode: "NOT_A_CODE",
-	}
-	source.disputes["PP-D-BAD"] = fakes.DisputeRecord{DisputeID: "PP-D-BAD", Code: "NOT_A_CODE", Item: item, Link: badLink}
-	source.orders["ORD-D-BAD"] = fakes.OrderRecord{OrderID: "ORD-D-BAD", Items: []domain.Item{item}, Link: badLink}
 
 	service := NewService(source, WithClock(fixedClock()))
 	ctx := context.Background()
@@ -310,11 +303,79 @@ func TestDisputeForEachMappedCode(t *testing.T) {
 			t.Errorf("dispute %s files a pending question; only refunds ask the shopper", tc.code)
 		}
 	}
-	if _, err := service.Handle(ctx, "WH-D-BAD"); !errors.Is(err, domain.ErrUnknownDisputeCode) {
-		t.Fatalf("unknown dispute code error = %v, want ErrUnknownDisputeCode", err)
+}
+
+// TestDisputeUnknownCodeStoresWithoutBelief stages a dispute whose code
+// the frozen table does not name. The outcome is stored with the code it
+// carried and no category, so it counts toward nothing, and the payment
+// source's retry is answered as a duplicate rather than dropped. A code
+// with no text at all stores the row with no reason.
+func TestDisputeUnknownCodeStoresWithoutBelief(t *testing.T) {
+	item := shirtItem("chino-khaki-32")
+	stage := func(source *stubSource, eventID, disputeID string, code domain.DisputeCode) {
+		link := domain.TransactionLink{OrderID: "ORD-" + disputeID, CaptureID: "CAP-" + disputeID, DisputeID: disputeID, CustomID: "shopper-d", EventID: eventID}
+		source.events[eventID] = fakes.WebhookEvent{
+			EventID: eventID, EventType: "CUSTOMER.DISPUTE.CREATED", Verified: true,
+			Outcome: domain.Outcome{Kind: domain.OutcomeDispute, Status: "OPEN", AmountMinor: 100, Currency: "USD"},
+			Link:    link, DisputeCode: code,
+		}
+		source.disputes[disputeID] = fakes.DisputeRecord{DisputeID: disputeID, Code: code, Item: item, Link: link}
+		source.orders["ORD-"+disputeID] = fakes.OrderRecord{OrderID: "ORD-" + disputeID, Items: []domain.Item{item}, Link: link}
 	}
-	if len(service.Rows()) != len(cases) {
-		t.Errorf("store holds %d rows, want %d: the unknown code stores nothing", len(service.Rows()), len(cases))
+	source := &stubSource{
+		events:   map[string]fakes.WebhookEvent{},
+		orders:   map[string]fakes.OrderRecord{},
+		disputes: map[string]fakes.DisputeRecord{},
+	}
+	stage(source, "WH-D-UNKNOWN", "PP-D-UNKNOWN", "NOT_A_CODE")
+	stage(source, "WH-D-NOCODE", "PP-D-NOCODE", "")
+	service := NewService(source, WithClock(fixedClock()))
+	ctx := context.Background()
+
+	unknown, err := service.Handle(ctx, "WH-D-UNKNOWN")
+	if err != nil {
+		t.Fatalf("unknown dispute code dropped the delivery: %v", err)
+	}
+	if len(unknown.Rows) != 1 {
+		t.Fatalf("unknown dispute code stores %d rows, want 1", len(unknown.Rows))
+	}
+	row := unknown.Rows[0]
+	if row.Reason == nil || row.Reason.Category != domain.CategoryNone {
+		t.Fatalf("unknown dispute code reason = %v, want no category", row.Reason)
+	}
+	if row.Reason.Text != "NOT_A_CODE" {
+		t.Errorf("unknown dispute code keeps text %q, want the code", row.Reason.Text)
+	}
+	if row.CountsToward() != domain.BeliefKindNone {
+		t.Errorf("unknown dispute code counts toward %v, want nothing: a reason is not a cause when the code is unknown", row.CountsToward())
+	}
+
+	retried, err := service.Handle(ctx, "WH-D-UNKNOWN")
+	if err != nil {
+		t.Fatalf("unknown dispute code fails the retry: %v", err)
+	}
+	if !retried.Duplicate {
+		t.Error("the retry of an unknown dispute code is not answered as a duplicate")
+	}
+	if len(retried.Rows) != 1 || retried.Rows[0].Reason == nil {
+		t.Errorf("the retry returns %d rows, want the stored one", len(retried.Rows))
+	}
+
+	nocode, err := service.Handle(ctx, "WH-D-NOCODE")
+	if err != nil {
+		t.Fatalf("a dispute with no code dropped the delivery: %v", err)
+	}
+	if len(nocode.Rows) != 1 {
+		t.Fatalf("a dispute with no code stores %d rows, want 1", len(nocode.Rows))
+	}
+	if nocode.Rows[0].Reason != nil {
+		t.Errorf("a dispute with no code carries reason %v, want none", nocode.Rows[0].Reason)
+	}
+	if nocode.Rows[0].CountsToward() != domain.BeliefKindNone {
+		t.Errorf("a dispute with no code counts toward %v, want nothing", nocode.Rows[0].CountsToward())
+	}
+	if len(service.Rows()) != 2 {
+		t.Errorf("store holds %d rows, want 2: the unknown code and the code-less dispute", len(service.Rows()))
 	}
 }
 

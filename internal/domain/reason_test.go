@@ -46,6 +46,10 @@ func TestCategoryForDispute(t *testing.T) {
 	}{
 		{DisputeMerchandiseNotReceived, CategoryNotArrived, BeliefKindSeller},
 		{DisputeItemNotReceived, CategoryNotArrived, BeliefKindSeller},
+		// The not-as-described code files under damage: the goods arrived
+		// and were wrong, so non-arrival would state a false fact about
+		// the delivery.
+		{DisputeMerchandiseNotAsDescribed, CategoryDamagedOrDefective, BeliefKindSeller},
 		{DisputeUnauthorizedTransaction, CategoryNone, BeliefKindNone},
 	}
 	for _, tc := range cases {
@@ -60,6 +64,22 @@ func TestCategoryForDispute(t *testing.T) {
 		if kind := got.CountsToward(); kind != tc.kind {
 			t.Errorf("CategoryForDispute(%q) counts toward %q, want %q", tc.code, kind, tc.kind)
 		}
+	}
+}
+
+// TestNotAsDescribedCountsAgainstTheSeller pins the disposition product.md
+// promises: a not-as-described dispute is a seller-reliability signal, so
+// it must never count toward sizing and must never read as non-arrival.
+func TestNotAsDescribedCountsAgainstTheSeller(t *testing.T) {
+	got, err := CategoryForDispute(DisputeMerchandiseNotAsDescribed)
+	if err != nil {
+		t.Fatalf("CategoryForDispute(%q) returned error: %v", DisputeMerchandiseNotAsDescribed, err)
+	}
+	if got == CategoryNotArrived {
+		t.Errorf("not-as-described maps to %q; the parcel arrived, so that states the wrong fact", got)
+	}
+	if kind := got.CountsToward(); kind != BeliefKindSeller {
+		t.Errorf("not-as-described counts toward %q, want seller reliability", kind)
 	}
 }
 

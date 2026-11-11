@@ -18,8 +18,9 @@ const (
 	// CategoryFitTooLarge means too big or too loose: swims on the
 	// shopper, runs large. It counts toward fit.
 	CategoryFitTooLarge Category = "fit_too_large"
-	// CategoryDamagedOrDefective means the item arrived broken or did not
-	// work. It counts toward seller reliability, never toward sizing.
+	// CategoryDamagedOrDefective means the goods were wrong when they
+	// arrived: broken, not working, or materially unlike the description.
+	// It counts toward seller reliability, never toward sizing.
 	CategoryDamagedOrDefective Category = "damaged_or_defective"
 	// CategoryNotArrived means the item never arrived or delivery failed.
 	// It counts toward seller reliability, never toward sizing.
@@ -71,6 +72,11 @@ const (
 	// DisputeMerchandiseNotReceived is the dispute reason carried
 	// top-level and per item on a live non-arrival dispute.
 	DisputeMerchandiseNotReceived DisputeCode = "MERCHANDISE_OR_SERVICE_NOT_RECEIVED"
+	// DisputeMerchandiseNotAsDescribed is the dispute reason for goods that
+	// arrived but were materially unlike the description: the wrong item,
+	// the wrong variant, or a different specification. It counts against
+	// the seller, in the same class as damage, and never toward sizing.
+	DisputeMerchandiseNotAsDescribed DisputeCode = "MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED"
 	// DisputeItemNotReceived is the seller-protection dispute category
 	// carried on capture records.
 	DisputeItemNotReceived DisputeCode = "ITEM_NOT_RECEIVED"
@@ -84,6 +90,7 @@ const (
 // DisputeCodes lists every dispute code in the fixed table.
 var DisputeCodes = []DisputeCode{
 	DisputeMerchandiseNotReceived,
+	DisputeMerchandiseNotAsDescribed,
 	DisputeItemNotReceived,
 	DisputeUnauthorizedTransaction,
 }
@@ -93,11 +100,20 @@ var ErrUnknownDisputeCode = errors.New("domain: unknown dispute code")
 
 // CategoryForDispute maps a dispute code to its reason category. Codes
 // outside the table are an error and count toward nothing: no code path
-// may turn a dispute into a belief without a matching reason.
+// may turn a dispute into a belief without a matching reason. A caller
+// that must keep the outcome stores it with no classified reason instead
+// of dropping it.
+//
+// The not-as-described code files under the damage category: the goods
+// arrived and were wrong, which is the seller signal damage already
+// carries, and the reason-counts shape the ledger and merchant app share
+// has no field of its own for it.
 func CategoryForDispute(code DisputeCode) (Category, error) {
 	switch code {
 	case DisputeMerchandiseNotReceived, DisputeItemNotReceived:
 		return CategoryNotArrived, nil
+	case DisputeMerchandiseNotAsDescribed:
+		return CategoryDamagedOrDefective, nil
 	case DisputeUnauthorizedTransaction:
 		return CategoryNone, nil
 	default:

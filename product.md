@@ -66,7 +66,7 @@ Surface (the pivot's shapes are settled in T7.1):
 | **Item and variant** | The order's line items; Channel3 variant data | Brand X oxford shirt, size M |
 | **Reason** | Disputes: PayPal's reason code. Refunds: the shopper's answer when the agent asks, classified | "too tight in the shoulders" → *fit: too small* |
 
-Only evidence whose **reason** matches a belief counts toward it. A fit-related return counts toward "Brand X runs small". A dispute over an item that never arrived counts against the *seller*, never toward sizing.
+Only evidence whose **reason** matches a belief counts toward it. A fit-related return counts toward "Brand X runs small". A dispute over an item that never arrived, or arrived not as described, counts against the *seller*, never toward sizing.
 
 **Not returning something is not satisfaction.**
 
@@ -83,7 +83,7 @@ Only evidence whose **reason** matches a belief counts toward it. A fit-related 
 |---|---|---|
 | **Shopper fit** | How a brand's sizing fits *this* shopper | This shopper's fit-classified returns and fit feedback |
 | **Product fit** | How a product or brand runs *for everyone* ("runs small in the shoulders") | Fit-classified returns and feedback pooled across shoppers, one interaction per shopper's purchase |
-| **Seller reliability** | Whether a seller delivers | Non-arrival and not-as-described disputes, by PayPal reason code |
+| **Seller reliability** | Whether a seller delivers what was ordered | Non-arrival and not-as-described disputes, by PayPal reason code. A not-as-described code counts in the damage category: the parcel arrived and the goods were wrong, so it is a seller fault of the same class, not a missing delivery |
 
 The evidence path is the same for all three; the reason category decides which belief a piece of evidence counts toward. Cross-brand size mapping, repeat buys as a preference signal, and quality or style preferences are still out.
 

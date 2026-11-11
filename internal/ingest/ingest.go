@@ -2,6 +2,7 @@ package ingest
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"sync"
@@ -117,7 +118,8 @@ func NewService(source fakes.PaymentSource, opts ...Option) *Service {
 // Handle verifies one delivery and stores its evidence rows, idempotent
 // on the payment source's event id. Redelivery returns the stored rows
 // with Duplicate set. A refund also files a pending question; a dispute
-// arrives with its reason classified through the frozen dispute table.
+// arrives with its reason classified through the frozen dispute table, or
+// with no category when the table does not name its code.
 func (s *Service) Handle(ctx context.Context, eventID string) (Result, error) {
 	if err := ctx.Err(); err != nil {
 		return Result{}, fmt.Errorf("ingest: handle event %q: %w", eventID, err)
@@ -226,6 +228,11 @@ func (s *Service) handleRefund(ctx context.Context, event fakes.WebhookEvent) (R
 // dispute table maps the source's code to. The items come from the order
 // read; the dispute record's item is the fallback when the order read
 // carries none.
+//
+// A code the table does not name stores the row with no category: the
+// outcome exists, the code it carried stays on the row, and nothing is
+// classified, so the delivery is stored instead of dropped and no belief
+// is earned from it.
 func (s *Service) handleDispute(ctx context.Context, event fakes.WebhookEvent) (Result, error) {
 	if event.Link.DisputeID == "" {
 		return Result{}, fmt.Errorf("ingest: dispute event %q: %w", event.EventID, ErrMalformedEvent)
@@ -235,8 +242,11 @@ func (s *Service) handleDispute(ctx context.Context, event fakes.WebhookEvent) (
 		return Result{}, fmt.Errorf("ingest: read dispute %q: %w", event.Link.DisputeID, err)
 	}
 	category, err := domain.CategoryForDispute(dispute.Code)
-	if err != nil {
+	if err != nil && !errors.Is(err, domain.ErrUnknownDisputeCode) {
 		return Result{}, fmt.Errorf("ingest: dispute event %q: %w", event.EventID, err)
+	}
+	if err != nil {
+		category = domain.CategoryNone
 	}
 	items := []domain.Item{}
 	if event.Link.OrderID != "" {
@@ -255,10 +265,13 @@ func (s *Service) handleDispute(ctx context.Context, event fakes.WebhookEvent) (
 	occurred := s.stamp(event.EventID)
 	link := dispute.Link
 	link.EventID = event.EventID
-	reason := &domain.Reason{
-		Category:   category,
-		Text:       string(dispute.Code),
-		Confidence: 1.0,
+	var reason *domain.Reason
+	if code := string(dispute.Code); code != "" {
+		reason = &domain.Reason{
+			Category:   category,
+			Text:       code,
+			Confidence: 1.0,
+		}
 	}
 	rows := make([]domain.Evidence, len(items))
 	for i, item := range items {
@@ -271,8 +284,9 @@ func (s *Service) handleDispute(ctx context.Context, event fakes.WebhookEvent) (
 			OccurredAt: occurred,
 		}
 	}
-	// A dispute writes no fit row: it says the purchase did not arrive,
-	// which is about the seller, not how the product fits.
+	// A dispute writes no fit row: it says the purchase did not arrive or
+	// was not as described, which is about the seller, not how the
+	// product fits.
 	return Result{Rows: rows}, nil
 }
 
