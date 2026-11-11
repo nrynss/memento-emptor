@@ -28,10 +28,12 @@ pass in one place and fail in another:
 | Node | 26 | `Dockerfile`'s `web-build` and `merchant/Dockerfile`'s `web-build`: `node:26-bookworm` | `ci.yml`'s `setup-node` 26 |
 | Lambo | 0.10.1 | `Dockerfile`: the release download, sha256-pinned | the image build's own `sha256sum -c`; no CI step pins it |
 
-One asymmetry and one limit, both intended: the Go tag floats the
-latest 1.27 patch where CI and `go.mod` fix 1.27.1, and no CI step reads
-these tags, so the table is the record and the named checks are the
-guard.
+One asymmetry, intended: the Go tag floats the latest 1.27 patch where
+CI and `go.mod` fix 1.27.1. The table is no longer the record alone: the
+gate runs `tools/pincheck`, which reads both images' `FROM` lines, CI's
+`go-version` and `node-version`, `go.mod` and these rows, and fails
+naming the file and version that drift. It also fails when a source
+stops stating its pin, so it cannot pass by reading less.
 
 The Node major is the whole frontend pin: neither `web/package.json` nor
 `merchant/package.json` declares an `engines` field, so nothing but the

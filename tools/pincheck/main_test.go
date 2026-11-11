@@ -81,7 +81,8 @@ func writeTree(t *testing.T, files map[string]string) string {
 }
 
 // TestCheckTable proves both failure modes and the pass: a Node pin that
-// drifts from the rest, a Go pin that does, and the current pins agreeing.
+// drifts from the rest, a Go pin that does, a lost source, and the current pins
+// agreeing.
 func TestCheckTable(t *testing.T) {
 	cases := []struct {
 		name string
@@ -142,6 +143,27 @@ func TestCheckTable(t *testing.T) {
 				replace(t, files, "deploy/README.md", "| Go | 1.27 |", "| Go | 1.26 |")
 			},
 			want: []string{"go: deploy/README.md", "says 1.26"},
+		},
+		{
+			name: "go.mod loses its go directive",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "go.mod", "\ngo 1.27.1\n", "\n")
+			},
+			want: []string{"go.mod: no go directive"},
+		},
+		{
+			name: "the two images agree with each other and disagree with ci and the table",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "deploy/Dockerfile", "node:26-bookworm", "node:22-bookworm")
+				replace(t, files, "deploy/merchant/Dockerfile", "node:26-bookworm", "node:22-bookworm")
+			},
+			want: []string{
+				"node: no single pin is in the majority",
+				"deploy/Dockerfile's node build stage",
+				"deploy/merchant/Dockerfile's node build stage",
+				"setup-node",
+				"toolchain table node row",
+			},
 		},
 		{
 			name: "the demo image loses its web stage",
