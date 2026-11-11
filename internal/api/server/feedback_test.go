@@ -9,6 +9,8 @@ import (
 	"github.com/nrynss/memento-emptor/internal/domain"
 	"github.com/nrynss/memento-emptor/internal/evidence"
 	"github.com/nrynss/memento-emptor/internal/fakes"
+	"github.com/nrynss/memento-emptor/internal/fitindex"
+	"github.com/nrynss/memento-emptor/internal/identity"
 )
 
 // feedbackSends is one purchase's feedback delivered three times: the
@@ -166,9 +168,6 @@ func TestSeededFeedbackIsNotDoubleCounted(t *testing.T) {
 	if reason := explained.Belief.Evidence[0].Reason; reason == nil || reason.Text != priorReason {
 		t.Fatalf("the seeded row's reason is %v, want its own words %q", reason, priorReason)
 	}
-	if reason := explained.Belief.Evidence[0].Reason; reason == nil || reason.Text != priorReason {
-		t.Fatalf("the seeded row's reason is %v, want its own words %q", reason, priorReason)
-	}
 	spy.mu.Lock()
 	after := len(spy.actions)
 	spy.mu.Unlock()
@@ -189,14 +188,101 @@ func evidenceIDs(view contract.BeliefView) []string {
 	return out
 }
 
+// TestRepeatFeedbackSettlesTheSeededPurchasesRowOnce proves the purchase
+// still counts once in the pool: the history's own copy is a delivery for
+// a purchase whose feedback is on record, and it settles the purchase's
+// fit row from the verdict on record. Three sends leave one row, settled
+// by fits-well feedback, so the pool's counts cannot move on a retry.
+func TestRepeatFeedbackSettlesTheSeededPurchasesRowOnce(t *testing.T) {
+	ctx := context.Background()
+	shopper := "shopper_01"
+	fitIdx := &fakeFitIndex{}
+	svc, _ := seededFeedbackService(t, fitIdx, nil)
+
+	for _, send := range feedbackSends {
+		if _, err := svc.RecordFeedback(ctx, contract.RecordFeedbackRequest{
+			ShopperID:    shopper,
+			CustomID:     "memento-shopper01-06",
+			SKU:          "PSW8GeK",
+			Size:         "M",
+			FeedbackText: send.text,
+		}); err != nil {
+			t.Fatalf("%s send: %v", send.name, err)
+		}
+		if got := fitIdx.rowCount(); got != 1 {
+			t.Fatalf("%s send left %d fit rows, want the purchase's one", send.name, got)
+		}
+	}
+
+	fitIdx.mu.Lock()
+	defer fitIdx.mu.Unlock()
+	for id, row := range fitIdx.rows {
+		if !row.Settled || row.SettledKind != domain.FitSettledByFeedback || row.Verdict != domain.FitVerdictFitsWell {
+			t.Fatalf("purchase %q reads settled %v by %q with verdict %q, want it settled by its fits-well feedback",
+				id, row.Settled, row.SettledKind, row.Verdict)
+		}
+	}
+}
+
+// TestRepeatFeedbackAnswersAnIdTheHistoryDidNotName proves a seed that
+// names no feedback id still answers with one. The frozen response schema
+// forbids an empty feedback_id, so the layer mints the id it holds the
+// row under, once, and every later repeat answers that same id.
+func TestRepeatFeedbackAnswersAnIdTheHistoryDidNotName(t *testing.T) {
+	ctx := context.Background()
+	shopper := "shopper_01"
+	svc, _ := seededFeedbackService(t, nil, func(seed *Seed) { seed.FeedbackIDs = map[string]string{} })
+	req := contract.RecordFeedbackRequest{
+		ShopperID:    shopper,
+		CustomID:     "memento-shopper01-06",
+		SKU:          "PSW8GeK",
+		Size:         "M",
+		FeedbackText: "The M fits well across the shoulders.",
+	}
+
+	first, err := svc.RecordFeedback(ctx, req)
+	if err != nil {
+		t.Fatalf("first send: %v", err)
+	}
+	if first.FeedbackID == "" {
+		t.Fatal("the repeat answered with no feedback id, which the frozen response schema forbids")
+	}
+	second, err := svc.RecordFeedback(ctx, req)
+	if err != nil {
+		t.Fatalf("retry send: %v", err)
+	}
+	if second.FeedbackID != first.FeedbackID {
+		t.Fatalf("retry answered %q, want the id it answered first %q", second.FeedbackID, first.FeedbackID)
+	}
+	st, err := svc.state(ctx, shopper)
+	if err != nil {
+		t.Fatalf("partition: %v", err)
+	}
+	if st.seq["fb"] != 1 {
+		t.Fatalf("two sends minted %d feedback ids, want the one the row is held under", st.seq["fb"])
+	}
+}
+
 // seededSpyService builds the seeded service with a spy over the graph,
 // so a repeat delivery can be proved to write nothing.
 func seededSpyService(t *testing.T) (*Service, *spyGraph) {
+	t.Helper()
+	return seededFeedbackService(t, nil, nil)
+}
+
+// seededFeedbackService builds the service the layer boots from, with a
+// spy over the graph and, when fitIdx is not nil, the fit writer wired so a
+// test can read the pool's rows. change edits the seed before it loads, for
+// the seeds a hand-built history carries.
+func seededFeedbackService(t *testing.T, fitIdx fitindex.Index, change func(*Seed)) (*Service, *spyGraph) {
 	t.Helper()
 	dir := apiDir(t)
 	seed, err := SeedFromExamples(dir)
 	if err != nil {
 		t.Fatalf("build seed: %v", err)
+	}
+	if change != nil {
+		change(&seed)
 	}
 	store, err := evidence.NewStore(testContract{kind: "server-feedback"})
 	if err != nil {
@@ -209,12 +295,15 @@ func seededSpyService(t *testing.T) (*Service, *spyGraph) {
 	spy := &spyGraph{inner: fakes.NewRecordingEvidenceGraph(SeedGraphContents(seed), fakes.StoryRecalls())}
 	fixed := time.Date(2026, 11, 8, 18, 40, 0, 0, time.UTC)
 	svc, err := NewService(Deps{
-		Payments:   fakes.NewRecordingPaymentSource(fakes.DemoStoryInputs()),
-		Classifier: classifier,
-		Store:      store,
-		Graph:      spy,
-		SchemaDir:  dir,
-		Clock:      func() time.Time { return fixed },
+		Payments:     fakes.NewRecordingPaymentSource(fakes.DemoStoryInputs()),
+		Classifier:   classifier,
+		Store:        store,
+		Graph:        spy,
+		SchemaDir:    dir,
+		Clock:        func() time.Time { return fixed },
+		FitRows:      fitIdx,
+		Lines:        fitindex.LinesFunc(staticLines),
+		IdentitySalt: identity.SeedSaltHex,
 	})
 	if err != nil {
 		t.Fatalf("new service: %v", err)

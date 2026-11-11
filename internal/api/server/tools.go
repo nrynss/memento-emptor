@@ -922,13 +922,13 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 		}
 		return contract.RecordFeedbackResponse{}, fmt.Errorf("server: record feedback: %w", ErrFeedbackMismatch)
 	}
+	if prior := matched.feedback; prior != nil {
+		return s.repeatFeedback(ctx, st, matched, req, prior)
+	}
 	verdict := verdictForFeedback(req.FeedbackText)
 	counts, err := memory.VerdictCountsToward(verdict)
 	if err != nil {
 		return contract.RecordFeedbackResponse{}, fmt.Errorf("server: record feedback: %w", err)
-	}
-	if prior := matched.feedback; prior != nil {
-		return s.repeatFeedback(ctx, st, matched, req, prior)
 	}
 	id := st.mint("fb")
 	if counts == domain.BeliefKindNone {
@@ -1008,6 +1008,14 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 // pool. The answer is the first feedback's answer, so the caller reads
 // what the layer holds rather than what the repeat would have written.
 func (s *Service) repeatFeedback(ctx context.Context, st *shopperState, matched *evidenceRecord, req contract.RecordFeedbackRequest, prior *recordedFeedback) (contract.RecordFeedbackResponse, error) {
+	if prior.id == "" {
+		// A seed the layer was handed may name no id for this feedback.
+		// The feedback is on record all the same, and the frozen
+		// response schema forbids an empty feedback_id, so the layer
+		// mints the id the row is held under, once, as a first
+		// delivery would; later repeats answer the same id.
+		prior.id = st.mint("fb")
+	}
 	now := s.deps.Clock()
 	if err := s.feedbackFitRow(ctx, st, matched, prior.verdict, now); err != nil {
 		return contract.RecordFeedbackResponse{}, err
