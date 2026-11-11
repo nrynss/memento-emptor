@@ -407,7 +407,7 @@ requires:   [T9.2, T9.3d, T9.5, T9.6, T9.8]
 fixture-ok: no
 size:       M · frontier
 owns:       demo/
-status:     not-started
+status:     claimed:t97-demo
 ```
 product.md's demo from step 0 to step 7, live, on the hosted service: the new shopper sized from the pool on day one; the three returns; the correction; the purchase and feedback; the dispute that leaves sizing alone; the ledger; the second agent honouring the correction; the merchant app's "why". The words about pooling follow the consent decision (T7.3). Budget: under $1.00. Rehearse step 0 first and check its cost.
 
