@@ -562,7 +562,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/contract/, internal/api/server/, testdata/api/, docs/interface.md
-status:     in-review
+status:     done
 ```
 The precedence order's fourth rung is a general statement, and the served layer serves statements when they exist, but no tool records one: statements reach the store only through the seed. A builder reading `docs/interface.md` would look for a way to record the shopper's usual size and find none, so rung 4 cannot be exercised live. Decide: add a `record_statement` tool (contract change with its fixtures and docs), or state the limitation plainly in `docs/interface.md` and name the seed as the only source.
 
@@ -603,6 +603,20 @@ status:     not-started
 The P2 review found `internal/api/server/recall.go` serves Venerable/Candidate fit beliefs and evidenceless statements but drops a fit belief with one return (`GraphNone`, one evidence), with a comment saying "recall never withholds, but one return is a question, not an answer" — which is withholding. `product.md` says it never refuses, thin evidence comes back labelled thin, status is a label never a gate, and own evidence counts at any status. The T8.5 handoff recorded this and assigned it to T7.4, which could not reach this package and never mentioned it, so the finding is now owned here. Round 2's arm 4 relies on thin evidence being served.
 
 **Done when:** a one-return fit belief is served, labelled with its status and precedence, with the pool beside it exactly as thin evidence is served elsewhere; the live layer tripwire that pinned the withholding is flipped; the gate passes.
+
+---
+
+### T8.5j: Mark the live precedence harness's seeded statement
+```yaml
+requires:   [T8.5e]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/precedence/
+status:     not-started
+```
+The T8.5h review found `tests/live/precedence/main.go` builds its statement belief with `Seeded: false` and `LoadSeed` copies the mark through, so rule 7 ("seeded means marked") does not hold at that row. No product path is built that way, but the harness's own fixture should be honest. Mark every seeded row the harness builds and assert the mark where it checks the served statement.
+
+**Done when:** the harness's seeded statement carries the mark, its assertions check it, and a live run still passes; the gate passes.
 
 ---
 

@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 5 / 6 | In progress (T7.6) |
-| P8 | 18 / 20 | In progress (T8.5h, T8.5i) |
+| P8 | 19 / 21 | In progress (T8.5i, T8.5j) |
 | P9 | 14 / 17 | In progress (T9.3i, T9.7, T9.9) |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.5h: The statement rung (done)
+
+**What exists.** `docs/interface.md` now says rung 4 is fed only by the seed, gives the reason (a statement is a Claimed label, never evidence, so nothing may promote it), and says what a `record_statement` tool would really cost: a frozen tool name, its two schemas, a handler on the existing `/tools/{tool}` route, and the auth `toolAccess` table plus both agent frontends — which is why the option was not taken. The limit appears at the rung-4 row, the turn pattern, the write-signal table and the new-shopper example. One fixture corrected: the recall example's statement belief now carries `seeded: true`, matching the ledger example and the seed path; the doc block stays byte-identical.
+
+**What surprised.** The seed marks are copied, not forced, so a hand-built seed can yield an unmarked seeded row; the live precedence harness does exactly that. Review also found the doc implied a builder could seed a statement on demand, when seeding is a boot-time fixture change for one shopper.
+
+**The next agent should not have to work out.** T8.5j owns the harness's unmarked row. Adding the tool remains a contract change spanning `internal/api/contract`, `internal/api/server`, `testdata/api`, `internal/auth` and both agent frontends.
 
 ### P2 E2E review: FINDINGS, fixes landed
 
