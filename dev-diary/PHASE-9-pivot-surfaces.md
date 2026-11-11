@@ -180,7 +180,7 @@ requires:   [T8.5b, T9.1, T7.3]
 fixture-ok: no
 size:       S · mid
 owns:       deploy/render.yaml, deploy/seed/, deploy/guard.sh, deploy/provision.sh, .env.example, tools/env.sh
-status:     in-review
+status:     done
 ```
 The hosted service runs the T8.1 hub, the fit index (its live name, not a test prefix) and the seeded population, seeded once as T6.1 does. Measure `--max-sessions 128` and `--rate-limit-rps 200` on the 0.5 CPU starter; the T8.1b numbers are from a 12-CPU machine and do not stand for the starter. The Elastic key and the shopper salt reach the service as Render secrets, never in a file. Add the three auth key variables (`MEMENTO_AGENT_KEYS`, `MEMENTO_SHOPPER_TOKENS`, `MEMENTO_MERCHANT_KEYS`) to `deploy/render.yaml` as `sync: false`, name them in `.env.example`, and read them in `tools/env.sh` from the keyring; mint the keys with T8.5's command, never invent them. If seeding through the writer, call `Refunded` then `Classified` so a reason-bearing seed refund settles, and measure the forced-refresh cost at population scale. The fixture embedder cannot converge the frozen arc; keep `LAMBO_SEED=0` for the local loop. Raise `deploy/guard.sh`'s ceiling to the combined two-service shape ($14.25/mo run-rate); until then it trips exit 2 while `deploy/merchant/guard.sh` stays green for the pair. Append the merchant key entry to the layer's `MEMENTO_MERCHANT_KEYS` (digest from the T9.3d notes — secret stays in Render, never in a file). Any change to the monthly cost is recorded in the handoff log; the user has pre-approved the pivot's new services.
 
@@ -198,6 +198,10 @@ Two things the next agent should not have to rediscover:
 
 - The public-URL Done-when is blocked outside this task's `owns`: the deployed image still runs the pre-pivot layer (`product_fit` answers unknown tool; recall has no pool or precedence fields), because wiring the pivoted layer into the image needs `cmd/memento` (pool reader, fit writer, identity salt, line resolver, standing dir, hub graph client), `deploy/start.sh` (boot order and env) and `deploy/Dockerfile` (population fixture) — none of which this task owns. The follow-up wiring task owns that; this task's seeder, keys, vars and guard are staged for it. The pool half is proved: the same live Elastic deployment returned the exact verdicts for the seeded population under the `t96-` prefix before the index was deleted.
 - Keep the old Lambo arc seed until the pivoted image lands: removing it now would darken the current demo with no replacement, and its session is the same name the hub will serve the new layer on, so the wiring task should decide whether the arc retires with the replay.
+
+**Public-URL proof (after the push that landed the stack, `ff9c922`, both services redeployed `live`).** Through the edge with the demo agent key: `POST /mcp tools/call recall_for_purchase` for `shopper_01` on the demo line reads `pool_lookup: consulted`, pool **Earned small** (22 settled, 22 seeded, 0 live, precedence `pool` overridden by `correction`), overriding correction `corr_3b7e52` ("I've lost weight, use M"), guidance basis `correction`, and the two beliefs it contradicts — the frozen story end to end. `POST /tools/product_fit` for brand-x-001/shirts/regular/M reads **Earned small**, 22 settled / 22 seeded / 0 live, precedence null. Merchant proxy (no caller credential) answers the same Earned shape, so the deployed page's live vintage is real. `bash deploy/guard.sh --check`: 2 services, 1 GB disk, $14.25/mo against the $16.00 ceiling, green. Spend $0.00 of model (no model call).
+
+**Merchant key gap found and fixed live.** The merchant service held a key whose digest was absent from the layer's `MEMENTO_MERCHANT_KEYS` (T9.3d minted `merchant-app`; T9.6's entry was `merchant-app-01` from a different mint), so the proxy answered 401 `unauthenticated` after the first pivoted deploy. Fixed as an operator step: the merchant service's key digest was appended to the layer's `MEMENTO_MERCHANT_KEYS` (`merchant-app-live|…|seller-acme-01|-|-`), the layer redeployed, and the proxy read above is the proof. Values never entered the repo; the Render env-vars echo was held in a private temp file and deleted. Next agent: when minting a merchant key, register its digest on the layer's secret in the same step, and verify the proxy read — a keyless 401 is this exact gap, not a code defect.
 
 ---
 
@@ -247,6 +251,8 @@ Wire the merchant page from the fixture transport to same-origin `/tools/product
 
 **Live proof (local edge + served layer, not the public layer).** Seeded the T9.1 population into scratch index `t93e-proof` (`deploy/seed -fit-only`, all six verdicts verified back), served it with the unmodified pivoted layer on its loopback port (pool and fit wired; hub address dummy — `product_fit` serves from the default service and never dials it), and pointed the unmodified merchant edge at it with a locally minted merchant key. Through the proxy with no caller credential, all six lines read Earned/Building/Building/Building/Claimed/Out-of-true with seeded-only counts (demo oxford Earned small, settled 22, seeded 22, live 0 — the live shape, distinct from the bundled 60/48 snapshot); any other `/tools/` path 404s at the edge untouched. With the layer stopped the proxy answers 502 `layer-unreachable` and the page falls back to the snapshot (unit-proved). Index deleted afterwards (`t93e-proof*` listing `[]`); production `fit-rows` untouched. Spend $0.00 (no model call; Elastic test-prefix churn only).
 
+**Live vintage verified (after the T9.6 push).** The deployed merchant service now reads the layer: `POST https://memento-merchant.onrender.com/tools/product_fit` with no caller credential returns Earned small, 22 settled / 22 seeded / 0 live for the demo oxford — the live shape, not the bundled 60/48 snapshot. The merchant key gap behind the earlier 401 is recorded under T9.6.
+
 Three things the next agent should not have to rediscover:
 
 - The same-origin transport sends no key by construction, so the no-elastic proof test's env-var pin (`MEMENTO_LAYER_URL`, `MEMENTO_MERCHANT_KEY`) is untouched: those names now belong to the direct-layer transport and the deploy, not the page.
@@ -294,7 +300,7 @@ product.md's demo from step 0 to step 7, live, on the hosted service: the new sh
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
 - [x] The ledger shows the deciding step and the pool, with no other shopper's rows (T9.2).
-- [ ] The merchant app is built and deployed, reading only `product_fit` (T9.3, T9.3d).
+- [x] The merchant app is built and deployed, reading only `product_fit` (T9.3, T9.3d).
 - [x] The reference agent never refuses on evidence and records standalone corrections (T9.4).
 - [x] A second agent honours a correction it never saw (T9.5).
 - [ ] The pivoted layer is live, and the demo runs end to end (T9.6, T9.7).

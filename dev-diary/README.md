@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 5 | Done |
 | P8 | 14 / 15 | In progress (T8.5e) |
-| P9 | 8 / 10 | In progress (T9.6, T9.7) |
+| P9 | 9 / 10 | In progress (T9.7) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.6: The pivoted layer live on Render (done)
+
+**What exists.** `main` is pushed (`ff9c922`) and both Render services redeployed `live` from it. The public layer now serves the pivot end to end: `recall_for_purchase` for `shopper_01` reads `pool_lookup: consulted`, pool Earned small (22 settled, 22 seeded, 0 live) overridden by correction `corr_3b7e52`, guidance basis `correction`; `product_fit` for the demo oxford reads Earned small; the merchant proxy answers the same shape with no caller credential. `deploy/guard.sh --check` green at 2 services / 1 GB disk / $14.25/mo against $16.00. Spend $0.00 of model.
+
+**What surprised.** The merchant proxy 401'd after the first pivoted deploy: T9.3d's service key was minted as `merchant-app` while the layer's `MEMENTO_MERCHANT_KEYS` held `merchant-app-01` from a different mint, so the two never met. Fixed as an operator step — the service key's digest appended to the layer secret, layer redeployed, proxy read green. A keyless 401 on the proxy is that gap, not a code defect.
+
+**The next agent should not have to work out.** Minting a merchant key and registering its digest on the layer's secret are one step, and the proxy read is the check. The old Lambo arc seed stays until the demo says otherwise; its session is orphaned by the live-salt session, not colliding. T9.7 is the last P9 task.
 
 ### Stack landing: T7.4, T7.5, T8.5d, T9.2b, T9.3f (done)
 
