@@ -150,8 +150,8 @@ in-band cost fields, console billing still a user step.
 requires:   [T2.3, T8.5]
 fixture-ok: yes
 size:       M · mid
-owns:       internal/evidence/, cmd/memento/, product.md, docs/architecture.md
-status:     not-started
+owns:       internal/evidence/, internal/api/server/, internal/memory/, cmd/memento/, product.md, docs/architecture.md, dev-diary/PHASE-2-layer.md
+status:     claimed:t23c-persist
 ```
 The served layer builds `internal/evidence.NewStore`, which holds documents in process (`docs []Document`), so a restart loses every shopper's raw evidence while the hub keeps beliefs and the pool keeps rows. `product.md` and `docs/architecture.md` describe Elastic as storing and searching raw evidence, but no code path writes evidence documents to Elastic: the live Elastic path is the `fit-rows` pool. Decide and record: persist raw evidence (an Elastic evidence index with its mapping and contract, or a disk-backed store) so a restart keeps the ledger and recall citations, or record the loss in the docs and make the ledger show it plainly instead of an empty panel.
 
