@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 32 / 37 | In progress (T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
+| P8 | 33 / 37 | In progress (T8.5q, T8.5s, T8.5u, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5x: Kept and contested are recorded as limitations (done)
+
+**What exists.** `product.md` "How a fit row is written" states both transitions and why the served layer does not write them, with what exists instead; the evidence-model table points there. `docs/interface.md` says the kept signal is `observe, from the seed only` and labels the `product_fit` example's counts illustrative (the block stays byte-identical); `docs/architecture.md` says the kept write has no served producer and names feedback as the only served rank-4 write. Two tests pin the limits: `internal/ingest/kept_test.go` proves `Handle` refuses a kept delivery before the fit recorder, and `internal/api/server/pool_transitions_test.go` proves a closed question cannot be re-answered. Comments in `pool.go`, `server.go` and `internal/ingest` no longer name a served kept or contested call. T7.1's note is annotated in place.
+
+**What surprised.** The review found the contested claim needed a caveat rather than the builder's reason: after a restart the delivered-event guard is gone (T2.3c journals evidence and questions, not event ids), so a redelivered refund re-files its question, a new classified answer is accepted, and the row's reason can change. `TestRestartRedeliveryReopensTheRefundQuestion` pins that as a limitation, not wanted behaviour. `ErrQuestionClosed` is declared and mapped to the wire but no path returns it; a second answer answers `ErrUnknownQuestion`.
+
+**The next agent should not have to work out.** The rank-4 unmergeable limit is about the kept and contested writes; feedback is a served rank-4 write. Do not "fix" the missing kept producer without a return window; the dedupe of delivered events belongs with a task that persists event ids.
 
 ### T2.3c: Evidence survives a restart (done)
 
