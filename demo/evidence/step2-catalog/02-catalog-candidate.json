@@ -1,0 +1,48 @@
+{
+  "candidate": {
+    "line": "Men's Button Down Oxford Shirt",
+    "line_named": true,
+    "named_before_size": true,
+    "note": "the named SKU is the one the seeded returns carry; it matches the cut, but it is not a new candidate",
+    "returned_sku": true,
+    "size": "M",
+    "size_source": "recall: the catalog carries no size for this line (variants is null)",
+    "sku": "tbnrl46"
+  },
+  "catalog": {
+    "answer_generation_start": "2026-11-11T13:48:24.131Z",
+    "search_end": "2026-11-11T13:48:24.106Z",
+    "search_start": "2026-11-11T13:48:22.640Z",
+    "searched": true,
+    "searched_before_answer": true,
+    "tool": "search_catalog"
+  },
+  "channel3": {
+    "credits": 1,
+    "note": "one search costs one credit; product detail calls are free",
+    "searches": 1
+  },
+  "turn": {
+    "cost": 0.055296,
+    "deployment": "MEMENTO-REF",
+    "input": "I need a Brand X oxford shirt in the regular fit. Which one would you recommend?",
+    "label": "catalog",
+    "latency_ms": 12798,
+    "reply": "I'll check your purchase history and search the catalog at the same time!Here's my recommendation:\n\n---\n\n**Men's Button Down Oxford Shirt \u2014 SKU tbnrl46** ($195)\n\ud83d\udc49 [Shop at us.sunspel.com](https://buy.trychannel3.com/tbnrl46-m1d3-8aUHo5)\n\nSame brand (Brand X / SMwk), same category (dress shirts), same fit label (Regular).\n\n**Size: M** \u2014 here's what's driving that, fully transparent:\n\n**Basis: Correction (corr_000004) \u2014 step: correction, overrides belief blf_8f2c41**\n\nYour explicit correction recorded 2026-11-11 reads: *\"Use M for me on Brand X oxfords from now on - I've gone down a size since October.\"* This takes precedence over everything else.\n\n**What it overrides (shown alongside, not hidden):**\n- **Belief blf_8f2c41 (Out of true / Venerable):** 3 returns of size M as too small (too tight shoulders, too tight chest, sleeves too short) in October 2026 \u2014 evidence was pointing to size L.\n- **Pool (Earned):** 23 settled shoppers, seeded split 22 seeded + 1 live. Returns: 12 too small, 3 too large, 5 \"fits well\" feedback. Pool direction: runs small. The pool is overridden by your correction.\n\n**Also noted:** A more recent Building belief (blf_2b9d60) from Nov 8 notes the M fits well across the shoulders now \u2014 consistent with your correction.\n\n---\n\nShall I go ahead? Reply **yes** to confirm.",
+    "step": "02",
+    "timestamp": "2026-11-11T13:48:27.000Z",
+    "tools": [
+      {
+        "end": "2026-11-11T13:48:22.995Z",
+        "name": "recall_for_purchase",
+        "start": "2026-11-11T13:48:22.637Z"
+      },
+      {
+        "end": "2026-11-11T13:48:24.106Z",
+        "name": "search_catalog",
+        "start": "2026-11-11T13:48:22.640Z"
+      }
+    ],
+    "trace_id_short": "c2a3bf4d"
+  }
+}

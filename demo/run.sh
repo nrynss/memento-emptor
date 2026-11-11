@@ -10,8 +10,9 @@
 # (git-ignored), and writes the redacted evidence the run record cites to
 # demo/evidence/run-<n>/.
 #
-# Agent turns are the only spend: the driver checks the spend baseline the
-# reset wrote and records the delta. A layer read costs nothing.
+# Agent turns are the only agent spend: the driver checks the spend baseline
+# the reset wrote and records the delta. A layer read costs nothing. Step 2's
+# catalog search costs one Channel3 credit per product turn.
 #
 # MEMENTO_SECOND_DEPLOYMENT must be set to the second agent's deployment id;
 # the id never lives in this repository.

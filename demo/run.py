@@ -25,6 +25,11 @@ Environment:
 Usage:
   bash demo/reset.sh <run-number>
   bash demo/run.sh
+  python3 demo/run.py --step2-trace <trace-id>
+
+--step2-trace records step 2 from a turn sent through demo/drive.py, reading
+the platform's trace: it makes no live call of its own and writes the same
+evidence a full run's step 2 writes.
 """
 
 import calendar
@@ -50,9 +55,22 @@ SHOPPER = "shopper_01"
 DEMO_LINE = {"brand_id": "brand-x-001", "category": "shirts", "fit_handle": "regular", "size": "M"}
 TOOL_NAMES = (
     "recall_for_purchase", "record_correction", "pending_questions", "record_reason",
-    "record_feedback", "explain_belief", "product_fit", "set_pooling",
+    "record_feedback", "explain_belief", "product_fit", "set_pooling", "search_catalog",
     "ledger_beliefs", "ledger_belief", "ledger_evidence",
 )
+
+# Step 2 asks for a product, not a size, so the turn goes to the catalog
+# without a correction in the prompt.
+STEP2_ASK = ("I need a Brand X oxford shirt in the regular fit. "
+             "Which one would you recommend?")
+# The catalog recording the agent's tool replays. The demo cut is the oxford
+# line, so this is the answer a step-2 search works from.
+CATALOG_RECORDING = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 "..", "testdata", "channel3", "search-oxford-shirts.json")
+# The SKUs the shopper's memory already carries for the demo line: the three
+# seeded returns (tbnrl46) and the captured purchase (PSW8GeK). A candidate
+# is a different SKU; a turn that names one of these named the returned item.
+RETURNED_SKUS = frozenset({"tbnrl46", "PSW8GeK"})
 
 RUN = None
 RAWDIR = None
@@ -97,8 +115,8 @@ GAP_OWNERS = (
 )
 
 
-def normalise_gaps():
-    """Give every gap its owner, drop the step-7 label, and add step 2's missing tool."""
+def normalise_gaps(catalog):
+    """Give every gap its owner, and add step 2's missing-tool gap to an old run."""
     out = []
     for entry in GAPS:
         if "merchant page reads live pool counts" in entry["text"]:
@@ -110,7 +128,11 @@ def normalise_gaps():
                     text = text.rstrip() + " Owner: " + owner + "."
                     break
         out.append({"step": entry["step"], "text": text})
-    if not any("product-search tool" in entry["text"] for entry in out):
+    # A run recorded before the agent had a catalog search has no step-2
+    # catalog evidence; its summary keeps the gap that run carried. A run
+    # with that evidence has either searched (nothing to add) or failed
+    # loudly before it reached here.
+    if catalog is None and not any("product-search tool" in entry["text"] for entry in out):
         out.append({
             "step": "2",
             "text": ("the reference agent exposes no product-search tool, so no live turn names "
@@ -170,11 +192,19 @@ def save(name, value):
 
 
 def redact(value):
-    """Drop full host trace ids from committed evidence (short ids stay)."""
+    """Drop full host trace ids from committed evidence (short ids stay).
+
+    Query strings are stripped from URLs as well: a catalog offer link can
+    carry an affiliate id, which is account detail and never enters the
+    committed evidence.
+    """
     if isinstance(value, dict):
         return {k: redact(v) for k, v in value.items() if k != "trace_id"}
     if isinstance(value, list):
         return [redact(v) for v in value]
+    if isinstance(value, str):
+        return re.sub(r"https?://[^\s)\]\"']+",
+                      lambda m: m.group(0).split("?", 1)[0], value)
     return value
 
 
@@ -327,6 +357,101 @@ def reply_text(detail):
     if isinstance(out, dict):
         return out.get("text") or out.get("content") or json.dumps(out)
     return out if isinstance(out, str) else json.dumps(out)
+
+
+def catalog_products():
+    """The demo cut's products, from the recording the agent's catalog tool replays."""
+    with open(CATALOG_RECORDING) as f:
+        recorded = json.load(f)
+    return {product["id"]: product for product in recorded.get("products", [])
+            if isinstance(product, dict) and isinstance(product.get("id"), str)}
+
+
+def answer_generation(detail):
+    """When the answer's model generation starts: the last chat generation."""
+    starts = [obs.get("start_time") for obs in detail.get("observations", [])
+              if obs.get("type") == "generation"
+              and (obs.get("name") or "").startswith("chat ")
+              and obs.get("start_time")]
+    return max(starts) if starts else None
+
+
+SIZE_WORDS = "XXS|XS|S|M|L|XL|XXL"
+
+
+def recommended_size(reply):
+    """The size the reply recommends and where it names it, from the reply alone."""
+    for pattern in (rf"\bsize:\s*\**({SIZE_WORDS})\b",
+                    rf"\b(?:recommend|recommended|take|go with)\b[^.\n]{{0,40}}\b({SIZE_WORDS})\b"):
+        found = re.search(pattern, reply, re.IGNORECASE)
+        if found:
+            return found.group(1).upper(), found.start(1)
+    return None, None
+
+
+def catalog_use(detail, record):
+    """Step 2's catalog evidence: the search, its order, and the named candidate.
+
+    The trace carries tool span names and times, not their arguments or
+    answers, so the named line and SKU are read from the reply and checked
+    against the recording the tool replays. The size comes from recall: the
+    catalog carries no size for the oxford line (variants is null).
+    """
+    catalog = next((s for s in record["tools"] if s["name"] == "search_catalog"), None)
+    if catalog is None:
+        raise RuntimeError("step 2: the turn did not search the catalog")
+    answer_at = answer_generation(detail)
+    if not catalog.get("end") or not answer_at or catalog["end"] > answer_at:
+        raise RuntimeError("step 2: the catalog search did not finish before the answer")
+    named = []
+    for sku, product in catalog_products().items():
+        at = re.search(r"\b" + re.escape(sku) + r"\b", record["reply"])
+        if not at:
+            continue
+        title = product.get("title") or ""
+        line = re.search(re.escape(title), record["reply"], re.IGNORECASE) if title else None
+        named.append({
+            "sku": sku,
+            "line": title,
+            "sku_at": at.start(),
+            "line_at": line.start() if line else None,
+            "line_named": line is not None,
+            "returned_sku": sku in RETURNED_SKUS,
+        })
+    if not named:
+        raise RuntimeError("step 2: the reply names no catalog SKU")
+    candidate = min(named, key=lambda n: min([p for p in (n["line_at"], n["sku_at"])
+                                              if p is not None]))
+    if not candidate["line_named"]:
+        raise RuntimeError(f"step 2: the reply names SKU {candidate['sku']} but not its line")
+    size, size_at = recommended_size(record["reply"])
+    if size is None:
+        raise RuntimeError("step 2: the reply names no recommended size")
+    candidate_at = min(p for p in (candidate["line_at"], candidate["sku_at"]) if p is not None)
+    return {
+        "catalog": {
+            "searched": True,
+            "tool": "search_catalog",
+            "search_start": catalog.get("start"),
+            "search_end": catalog.get("end"),
+            "answer_generation_start": answer_at,
+            "searched_before_answer": True,
+        },
+        "candidate": {
+            "line": candidate["line"],
+            "sku": candidate["sku"],
+            "size": size,
+            "size_source": ("recall: the catalog carries no size for this line "
+                            "(variants is null)"),
+            "line_named": candidate["line_named"],
+            "named_before_size": candidate_at < size_at,
+            "returned_sku": candidate["returned_sku"],
+            "note": ("the named SKU is the one the seeded returns carry; it matches the cut, "
+                     "but it is not a new candidate") if candidate["returned_sku"] else "",
+        },
+        "channel3": {"searches": 1, "credits": 1,
+                     "note": "one search costs one credit; product detail calls are free"},
+    }
 
 
 USED_TRACES = set()
@@ -507,6 +632,57 @@ def step12():
     evidence("01-three-returns-and-belief.json", state)
     evidence("02-belief-explained.json", explain)
     return state, recall
+
+
+def step2(ref_conv):
+    """Ask for a product so the turn searches the catalog before it recommends."""
+    record = turn("02", "catalog", REF_DEPLOYMENT, ref_conv, STEP2_ASK)
+    if not record["tools"] or record["tools"][0]["name"] != "recall_for_purchase":
+        raise RuntimeError("step 2: the turn did not recall first")
+    state = {"turn": record}
+    state.update(catalog_use(trace_detail(REF_DEPLOYMENT, record["trace_id"]), record))
+    evidence("02-catalog-candidate.json", state)
+    return state
+
+
+def step2_trace(trace_id):
+    """Record a step-2 turn sent through demo/drive.py, from the turn's trace."""
+    detail = trace_detail(REF_DEPLOYMENT, trace_id)
+    found = detail.get("trace", {})
+    record = {
+        "step": "02",
+        "label": "catalog",
+        "deployment": "MEMENTO-REF",
+        "trace_id": trace_id,
+        "trace_id_short": trace_id[:8],
+        "cost": found.get("total_cost"),
+        "latency_ms": found.get("latency_ms"),
+        "timestamp": found.get("timestamp"),
+        "input": found.get("input"),
+        "tools": [{"name": s["name"], "start": s["start"], "end": s["end"]}
+                  for s in tool_spans(detail)],
+        "reply": reply_text(detail),
+    }
+    if not record["tools"] or record["tools"][0]["name"] != "recall_for_purchase":
+        raise RuntimeError("step 2: the turn did not recall first")
+    state = {"turn": record}
+    state.update(catalog_use(detail, record))
+    return state
+
+
+def step2_main(trace_id):
+    """Write step 2's evidence for a trace, with no live call of its own."""
+    global RAWDIR, EVIDENCE
+    RAWDIR = os.path.join(OUT, "step2-catalog")
+    EVIDENCE = os.path.join("demo", "evidence", "step2-catalog")
+    os.makedirs(RAWDIR, exist_ok=True)
+    os.makedirs(EVIDENCE, exist_ok=True)
+    state = step2_trace(trace_id)
+    save("02-catalog-candidate.json", state)
+    evidence("02-catalog-candidate.json", state)
+    candidate = state["candidate"]
+    say("step 2: catalog evidence for trace", trace_id[:8], "-",
+        candidate["line"], candidate["sku"], "size", candidate["size"])
 
 
 def pre_belief_view(pre):
@@ -844,6 +1020,11 @@ def main():
         with open(os.path.join(EVIDENCE, name)) as f:
             return json.load(f)
 
+    def load_catalog():
+        """Step 2's evidence when this run has it; a pre-catalog run does not."""
+        path = os.path.join(EVIDENCE, "02-catalog-candidate.json")
+        return load_evidence("02-catalog-candidate.json") if os.path.isfile(path) else None
+
     def recorded_gaps(pooled, feedback):
         """The step gaps that follow from the recorded evidence itself."""
         attempt = pooled.get("new_shopper_recall", {})
@@ -873,6 +1054,7 @@ def main():
         dispute = load_evidence("05-dispute-leaves-sizing-alone.json")
         ledger = load_evidence("06-ledger.json")
         second = load_evidence("07-second-agent-and-merchant.json")
+        catalog = load_catalog()
         recorded_gaps(pooled, feedback)
         say("summary rebuilt from the recorded evidence; no live call")
     elif "--resume" in sys.argv:
@@ -886,6 +1068,7 @@ def main():
         pooled = load_evidence("00-pool-and-new-shopper.json")
         corrected = load_evidence("03-correction-through-the-agent.json")
         feedback = load_evidence("04-purchase-and-feedback.json")
+        catalog = load_catalog()
         say("resuming from the recorded steps; re-reading the free layer state and driving step 7")
         seeded, _ = step12()
         dispute = step5()
@@ -896,6 +1079,7 @@ def main():
         say("reference conversation opened")
         pooled = step0()
         seeded, _ = step12()
+        catalog = step2(ref_conv)
         corrected, _ = step3(ref_conv)
         feedback = step4()
         dispute = step5()
@@ -908,7 +1092,9 @@ def main():
     else:
         spend = None
     trace_costs = {}
-    for record in (corrected["turns"] + [feedback["turn"], second["turn"]]):
+    paid = ([catalog["turn"]] if catalog else []) + corrected["turns"] + [
+        feedback["turn"], second["turn"]]
+    for record in paid:
         trace_costs[record["trace_id_short"]] = record["cost"]
     if spend is None:
         spend = {
@@ -918,10 +1104,13 @@ def main():
             if baseline and after else None,
             "trace_costs": trace_costs,
             "trace_total": round(sum(c for c in trace_costs.values() if c), 4),
-            "note": "trace costs are the agent turns; the billing delta also carries platform compute",
+            "channel3_credits": (catalog or {}).get("channel3", {}).get("credits"),
+            "note": ("trace costs are the agent turns; the billing delta also carries platform "
+                     "compute. Channel3 searches are one credit each and are not in the billing "
+                     "figure"),
         }
 
-    normalise_gaps()
+    normalise_gaps(catalog)
     before_correction = corrected.get("belief_before_correction")
     summary = {
         "run": RUN,
@@ -940,6 +1129,7 @@ def main():
             "run's)."
         ),
         "correction": corrected,
+        "step2_catalog": catalog,
         "purchase_and_feedback": feedback,
         "dispute": dispute,
         "ledger": ledger,
@@ -958,4 +1148,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--step2-trace" in sys.argv:
+        at = sys.argv.index("--step2-trace")
+        if at + 1 >= len(sys.argv):
+            raise SystemExit("usage: demo/run.py --step2-trace <trace-id>")
+        step2_main(sys.argv[at + 1])
+    else:
+        main()

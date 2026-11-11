@@ -820,11 +820,21 @@ requires:   [T9.17]
 fixture-ok: no
 size:       XS · mid
 owns:       demo/
-status:     claimed:t920-live-catalog
+status:     in-review
 ```
 T9.17 gave the reference agent a catalog search, but no live turn has used it and `demo/run.py` does not call it, so product.md's step 2 still has no live path. After the agent is redeployed with `CHANNEL3_API_KEY`, add the catalog call to the demo driver, take one live turn that names the matched candidate (line, size, SKU) before its recommendation, and record the step-2 evidence and the one Channel3 credit it costs.
 
 **Done when:** a live reference-agent turn searches the catalog and names the matched candidate before its recommendation; the demo driver records it; the credit and any spend are recorded; the gate passes.
+
+**Notes (in-review).** The live turn is trace `c2a3bf4d` (the full id stays in `demo/out/`). It was one fresh conversation sent through `demo/drive.py`, with the prompt "I need a Brand X oxford shirt in the regular fit. Which one would you recommend?" and no correction. The deployment offers nine tools, `search_catalog` among them. The trace's order is `recall_for_purchase` (22.637–22.995), `search_catalog` (22.640–24.106), then the answer generation at 24.131, so the search finished before the model wrote the recommendation. The reply opens with "Here's my recommendation:", names the line "Men's Button Down Oxford Shirt" and SKU `tbnrl46`, then gives size M under correction `corr_000004`; the search span ended before the answer generation, so the catalog result preceded the recommendation. The size comes from recall, not the catalog: the oxford line's `variants` is null, so the catalog names the line and SKU and recall names the size, as T9.17 recorded.
+
+`demo/run.py` now carries the call. `TOOL_NAMES` includes `search_catalog`; `step2(ref_conv)` runs after step 1, sends the product request, requires recall first, and records the search span, that its end precedes the answer generation, and the named line, SKU and size from the reply checked against `testdata/channel3/search-oxford-shirts.json`. A full run includes the step-2 turn in the trace-cost total and the summary's `step2_catalog` block. `python3 demo/run.py --step2-trace <trace-id>` writes the same evidence from a turn sent through `demo/drive.py`, with no live call of its own; that is how this turn's evidence was written to `demo/evidence/step2-catalog/02-catalog-candidate.json`. The evidence redactor now also strips URL query strings, because a catalog offer link can carry an affiliate id, which is account detail.
+
+Credit and spend. One catalog search, **one Channel3 credit**; the turn made no product-detail call. Trace `c2a3bf4d` cost **$0.0553**; usage spend moved $5.86 → $5.92 and credit $4.14 → $4.08. That is under the $0.25 budget, and it is the only live call this task made. The conversation create is not a turn, and the trace reads are free.
+
+Limit, recorded rather than smoothed over: `tbnrl46` is the SKU the three seeded returns carry, so it matches the cut but is the returned item, not a new candidate. The trace carries tool span names and times, not the tool's arguments or answer, so the demo cannot tell whether the SKU came from the search answer or from recall. The agent's instruction asks for `exclude_skus` on the products behind the belief, and this reply does not show that exclusion. Finding (Low, owner T9.17): tighten the catalog tool's instruction or default so a step-2 turn excludes the returned SKUs; that file is outside this task's `owns`. The T9.17 review's note that `product.md`'s step 2 still says the size chart maps the candidate to the shopper's measurements also stands; `product.md` is outside every task's `owns`.
+
+The gate passes after `npm ci` in `web/` and `merchant/`.
 
 ---
 
