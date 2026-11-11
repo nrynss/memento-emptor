@@ -8,7 +8,7 @@ import standingRequestExample from '../../../../testdata/api/record_correction.r
 import { fixtureShopperId, LedgerApiError } from '$lib/api';
 import { CorrectionClient } from './client';
 import { decodeRecordCorrectionResponse } from './decode';
-import { createFixtureCorrectionTransport, fixtureCorrectionText } from './fixture';
+import { createFixtureCorrectionTransport } from './fixture';
 import { createFixtureContestState } from './state';
 import type { CorrectionTransport, RecordCorrectionResponse } from './types';
 
@@ -63,11 +63,10 @@ describe('standing correction shape', () => {
 
 describe('standing correction through the fixture path', () => {
 	it('replays the canonical standing correction exactly as frozen', async () => {
-		const client = new CorrectionClient(createFixtureCorrectionTransport());
-		const response = await client.recordCorrection({
-			shopper_id: fixtureShopperId,
-			text: fixtureCorrectionText
-		});
+		const client = new CorrectionClient(
+			createFixtureCorrectionTransport(standingRequestExample['shopper_id'])
+		);
+		const response = await client.recordCorrection({ ...standingRequestExample });
 		expect(response).toEqual(standingExample as unknown as RecordCorrectionResponse);
 	});
 
