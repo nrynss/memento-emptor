@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 5 | Done |
 | P8 | 17 / 18 | In progress (T8.1d) |
-| P9 | 12 / 16 | In progress (T9.3h, T9.3i, T9.7, T9.8) |
+| P9 | 13 / 16 | In progress (T9.3i, T9.7, T9.8) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.3h: Merchant image Node pin (done)
+
+**What exists.** `deploy/merchant/Dockerfile`'s `web-build` stage is `node:26-bookworm`, matching the demo image and CI; `deploy/README.md`'s toolchain table covers both images and the T9.3g "known drift" paragraph is gone. Proved local: `--no-cache --target web-build` answers `v26.13.0` inside the stage; the full image serves `/healthz` and `/` (Memento Merchant), 404s other `/tools/` paths, and answers `product_fit` 502 `layer-unreachable` with a key against a dead loopback layer (503 `key_not_configured` without a key). Gate green.
+
+**What surprised.** The review caught three false claims in the notes and one in the README: "503" where the edge answers 502 with a key set (503 is only the missing-key case), a Go patch pin where the tag floats the latest 1.27 patch, and "as the gate" for `npm ci` — the gate runs `npm ci --dry-run`, only CI installs. All corrected.
+
+**The next agent should not have to work out.** The pin now lives in two `FROM` lines; T9.3i is the task that makes a disagreement fail mechanically.
 
 ### P0 remediation: T8.5f, T8.1c, T9.3g (done)
 

@@ -301,7 +301,7 @@ Proof, local docker 29.9.3: `docker build -f deploy/Dockerfile -t memento-t93g:l
 Three things the next agent should not have to rediscover:
 
 - `MEMENTO_IDENTITY_SALT` is not optional in any run of the image or of `start.sh`: the supervisor always exports `LAMBO_MCP_URL` and `LAMBO_MCP_TOKEN`, and the layer refuses those without the salt that names its sessions, so a boot without one stops with `LAMBO_MCP_URL and LAMBO_MCP_TOKEN need MEMENTO_IDENTITY_SALT`. The documented local loop was stale on this point; fixed here by adding a per-run salt to its command, since that section is how the image is proved.
-- The merchant image is still on `node:22-bookworm` (`deploy/merchant/Dockerfile`), a second image this task's `owns` excludes. Finding (Low), owner: T9.3h (align the merchant image's Node pin); the drift is recorded in `deploy/README.md`'s toolchain section until it lands, so it is not silently forgotten.
+- The merchant image was still on `node:22-bookworm` (`deploy/merchant/Dockerfile`), a second image this task's `owns` excluded. Fixed by T9.3h: both images' `web-build` stages now use Node 26, and `deploy/README.md`'s toolchain table covers both.
 - A `web-build` cache hit after a base-image change is the failure mode to watch when re-proving this task: the pin lives in a `FROM` line, and only `--target web-build` plus `node --version` inside the stage shows the major the app was actually built on.
 
 **Review (fresh eyes).** Re-verified from the committed files on a branch cut at the task tip, no live deploy, no key. `docker build -f deploy/Dockerfile --target web-build` on docker 29.9.3 answers `v26.13.0` inside the stage and leaves `index.html`, `200.html`, `belief.html`, `ledger.html` and `_app` in `/src/web/build`; the full image serves `/healthz` with `{"ok":true}` (200), `/` with the `Memento Emptor` title and `_app` references (200), and `/belief` and `/ledger` (200, through the `200.html` fallback, which the edge reaches because `directFile` stats the bare path). Booting the same image without `MEMENTO_IDENTITY_SALT` stops with `LAMBO_MCP_URL and LAMBO_MCP_TOKEN need MEMENTO_IDENTITY_SALT`, so the README's *required, not optional* is confirmed, not inferred; `openssl rand -hex 32` is the 64 hex characters `identity.NewKeyer` accepts. The base image is the only Node pin: neither app declares `engines`, `packageManager` or an `.nvmrc`-style file. Fixes landed in this review: the pin table's third column now names what checks each pin (the Lambo pin is the image build's own `sha256sum -c`, no CI step), the Go tag's patch float is stated, the drift paragraph names T9.3h as its owner, and the local-run salt note states the no-index-wired precondition it rests on.
@@ -314,7 +314,7 @@ requires:   [T9.3d, T9.3g]
 fixture-ok: no
 size:       XS · mid
 owns:       deploy/merchant/Dockerfile, deploy/README.md
-status:     in-review
+status:     done
 ```
 T9.3g aligned the demo image's frontend build to the pinned Node 26, but `deploy/merchant/Dockerfile` still builds `merchant/` on `node:22-bookworm`. It is a separate image, so the pin drifted independently; align it the same way, prove the merchant image builds and serves `/` and `/healthz`, and record the pin beside the others.
 
