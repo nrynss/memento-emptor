@@ -584,7 +584,7 @@ requires:   [T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/pincheck/, tools/check.sh
-status:     not-started
+status:     claimed:t916-bun-pin
 ```
 T9.13 made CI's `bun-version: '1.3.14'` the repository's first toolchain pin with no second source: `tools/pincheck` compares Go and Node only, and the `oven/bun:1` image tags float past it. Extend the pin check to read the Dockerfiles' `oven/bun:` build tags and CI's `bun-version:` and compare them by major, as Node is compared. Also correct `tools/check.sh`'s comment and fallback text, which still say CI installs neither bun nor the package's modules.
 
