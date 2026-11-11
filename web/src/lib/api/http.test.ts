@@ -131,5 +131,16 @@ describe('the live transport calls the edge', () => {
 			.call('ledger_beliefs', { shopper_id: 'shopper_01', include_seeded: true })
 			.catch((error: unknown) => error);
 		expect((failure as Error).message).not.toContain(token);
+		// The unreachable path is the one that folds a foreign message into the
+		// failure, so it is what would carry the token if anything did.
+		const offline = createHttpTransport({
+			token,
+			fetch: (() => Promise.reject(new TypeError('fetch failed'))) as typeof globalThis.fetch
+		});
+		const unreachable = await offline
+			.call('ledger_beliefs', { shopper_id: 'shopper_01', include_seeded: true })
+			.catch((error: unknown) => error);
+		expect((unreachable as Error).message).toContain('fetch failed');
+		expect((unreachable as Error).message).not.toContain(token);
 	});
 });
