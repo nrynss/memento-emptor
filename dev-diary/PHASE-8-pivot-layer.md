@@ -625,7 +625,7 @@ The T8.5h review found `tests/live/precedence/main.go` builds its statement beli
 requires:   [T8.5]
 fixture-ok: yes
 size:       XS · mid
-owns:       internal/api/server/
+owns:       internal/api/server/, internal/fitindex/
 status:     not-started
 ```
 `internal/api/server/recall.go` folds a literal `"not_as_described"` reason category into `not_arrived` counts, a seam for the recorded Elastic population's labels. Since T1.1b, a not-as-described dispute counts under `damaged_or_defective`, so the same cause would read as non-arrival in one path and damage in the other if a classifier label ever reaches evidence. Disputes write no fit rows, so the pool never sees them today; decide and record whether the fold stays (with its reason) or maps to damage.
@@ -673,6 +673,20 @@ status:     not-started
 The T9.7 run found the served layer cannot ingest a live PayPal outcome: the verifier is real, but `cmd/memento` builds the ingest service with the recording demo source, and the PayPal app's only webhook subscription does not point at the layer. So a new purchase or dispute cannot be recorded live; the demo re-read the existing capture and wrote feedback through the layer instead. Build the real REST source (order, capture, refund and dispute reads) behind the existing seam, wire it in `cmd/memento`, point the sandbox app's subscription at the public webhook route, and prove one live delivery end to end. Budget: no model spend; sandbox calls only.
 
 **Done when:** a real sandbox capture and a real refund delivery reach the layer, write their evidence and fit rows, and are idempotent on redelivery; an unknown event is refused; the gate passes.
+
+---
+
+### T8.5n: Unattached ingest rows carry a write_op
+```yaml
+requires:   [T1.1b]
+fixture-ok: yes
+size:       XS · mid
+owns:       internal/api/server/
+status:     not-started
+```
+The T1.1b review found an unknown-code dispute is stored, is kept in the ledger (its reason is non-nil), and is emitted with the zero `write_op`, which the frozen schema forbids (`record_action`, `derive` or `observe`) and the web decoder rejects, so `ledger_evidence` fails to decode for that shopper. `markUnattached` already sets `observe` for a changed-mind refund; the ingest store path does not. Also decide whether a code-less dispute (stored, no reason, skipped by the ledger) should appear unattached or remain audit-only, and make the comment match.
+
+**Done when:** every unattached ingest row carries `observe`; the frozen schema and the web decoder accept it; the code-less dispute's visibility is decided and tested; the gate passes.
 
 ---
 
