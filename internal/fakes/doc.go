@@ -10,7 +10,7 @@
 //
 // Every fake replays a P0 recording, never the network. The payment fake
 // serves the ledger story's ids in the shapes proved by the PayPal
-// recordings; the classifier serves the eleven labelled Jev answers
+// recordings; the classifier serves the thirteen labelled Jev answers
 // verbatim; the store serves the hybrid search legs measured on the live
 // deployment; the graph applies the promotion bars proved on the seeded
 // session. A request that names nothing any recording or the committed

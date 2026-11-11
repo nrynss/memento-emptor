@@ -223,7 +223,7 @@ func TestFloorSeparatesLabelledSet(t *testing.T) {
 // TestNeighbourContextOmitted is the neighbour-context decision, as a test
 // rather than an opinion. The recorded requests carry the answer alone:
 // no neighbour, example, or retrieved-context field exists in any of the
-// eleven request bodies, yet the floor separates the set (see the floor
+// thirteen request bodies, yet the floor separates the set (see the floor
 // test). Nearest labelled reasons therefore add nothing measurable here,
 // and the client sends answer-only state. If a future recording needs
 // neighbour context to separate, its request shape breaks this test and
@@ -267,8 +267,8 @@ func TestNeighbourContextOmitted(t *testing.T) {
 		}
 		count++
 	}
-	if count != 11 {
-		t.Fatalf("checked %d recordings, want 11", count)
+	if count != 13 {
+		t.Fatalf("checked %d recordings, want 13", count)
 	}
 }
 
@@ -386,7 +386,7 @@ func TestClientErrors(t *testing.T) {
 		{"missing answer", serve(`{"model": "m", "answers": {}}`, 200), "a", ErrBadResponse},
 		{"confidence above one", serve(`{"model": "m", "answers": {"reason": {"type": "choice", "choice": "unclear", "confidence": 2}}}`, 200), "a", ErrBadResponse},
 		{"transport failure", func(*http.Request) (*http.Response, error) { return nil, errors.New("dial") }, "a", ErrBadResponse},
-		{"unrecorded answer", fixtureDo(t, nil), "too tight across the chest", fakes.ErrNoRecording},
+		{"unrecorded answer", fixtureDo(t, nil), "too tight around the waist", fakes.ErrNoRecording},
 		{"good reply", serve(good, 200), "a", nil},
 	}
 	for _, tc := range cases {

@@ -420,11 +420,24 @@ requires:   [T2.2]
 fixture-ok: yes
 size:       XS · mid
 owns:       testdata/jev/, internal/fakes/
-status:     claimed:t22c-recording
+status:     in-review
 ```
 The frozen story's third answer ("sleeves too short in M") has no Jev recording in `testdata/jev/`, so `TestStoryEndToEnd` reuses the "too tight in the shoulders" reply and `fakes.Run` hard-codes its category; the frozen phrase is validated only by T2.6's live leg. Record one classification for that phrase, add it to the fixture set, and let the story replay its own answer.
 
 **Done when:** the third answer has its own recording with the same shape as the other eleven; the replay uses it and the pinned phrase count moves with it; the gate passes.
+
+**Notes (in-review).** The labelled set is now thirteen recordings. `12-fit-too-small-sleeves-too-short-in-m.json` is the frozen third answer, classified at `fit_too_small`, confidence 1.00, on the pinned `typesafe/jev-1.14` resolving to `typesafe/jev-1.14-20261014` as the T0.7 build did. The second file, `13-fit-too-small-tight-across-chest.json`, closes a gap this task found rather than a gap the brief named: `fakes.Run`'s second documented return answer is "too tight across the chest", which was unrecorded too, so the replay could not drop its hard-coded category with one new file. Both files hold the exact request body the client sends and the reply as returned, in the same shape as recordings 1 to 11, with the usage and cost fields intact; the eleven existing files are byte-identical.
+
+`fakes.Run` no longer carries a category per return. It classifies each documented answer through the seam, fails unless the answer is a clear fit reason (`AskAgain` false and `CountsToward` fit), and writes the structural evidence it did before, so the log, waypoints and ledger fixtures are unchanged. `TestReplayOffline` runs the replay through a counting classifier and asserts each of the story's four answers is asked exactly once, which fails if a category is written into the replay again.
+
+The pinned counts moved with the set: `internal/reasons/resolve_test.go`'s labelled-set count and `TestNeighbourContextOmitted`'s recorded-body count read thirteen, and `internal/fakes`' playback table and package doc say thirteen. Both recorded phrases are clear 1.00 fit answers, so the floor measurement, its 0.04 margin and the exclusion of neighbour context are untouched.
+
+Spend: two calls, $0.000042756 in total ($0.000021420 for 510 input tokens and $0.000021336 for 508), well under the task's $0.10 budget; no guard tripped.
+
+Two things the next agent should not have to rediscover:
+
+- `tests/live/reasons` still pins the eleven-phrase set: its `len(want) != 11` guard, its `run.sh`, its `README.md` and its total-cost line will refuse the thirteen-file set, so a live rerun of T2.2b needs those numbers moved first. That driver is outside this task's `owns` and is left as the finding it is.
+- `internal/api/server/story_test.go`'s `TestStoryEndToEnd` still answers its third return with "too tight in the shoulders", and its comment still says T2.2 owns adding the fixture. The recording it was waiting for now exists, so that test can answer "sleeves too short in M" and lose the comment; that file is outside this task's `owns` too. `internal/reasons/doc.go`'s "eleven-phrase labelled set" describes the floor measurement, which those eleven phrases still are.
 
 ---
 

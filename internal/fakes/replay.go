@@ -166,15 +166,15 @@ func Run(ctx context.Context, deps Deps) (Result, error) {
 	step(log, 1, "2026-10-14T10:00:00Z", "Seeded past: general statement recorded as an assertion; sizing belief derived.")
 
 	// Steps 2-4: three refund webhooks. Each refund record carries no
-	// reason, so the reason comes from the documented answer; each
-	// classified return is one structural write citing the belief.
+	// reason, so the reason comes from the documented answer, classified
+	// from its own recording; each classified return is one structural
+	// write citing the belief.
 	returns := []struct {
 		event, order, refund, action, reason string
-		category                             domain.Category
 	}{
-		{"WH-2EV-01", "ORD-7XK-01", "RFD-7XK-01", ReturnOne, "too tight in the shoulders", domain.CategoryFitTooSmall},
-		{"WH-2EV-02", "ORD-7XK-02", "RFD-7XK-02", ReturnTwo, "too tight across the chest", domain.CategoryFitTooSmall},
-		{"WH-2EV-03", "ORD-7XK-03", "RFD-7XK-03", ReturnThree, "sleeves too short in M", domain.CategoryFitTooSmall},
+		{"WH-2EV-01", "ORD-7XK-01", "RFD-7XK-01", ReturnOne, "too tight in the shoulders"},
+		{"WH-2EV-02", "ORD-7XK-02", "RFD-7XK-02", ReturnTwo, "too tight across the chest"},
+		{"WH-2EV-03", "ORD-7XK-03", "RFD-7XK-03", ReturnThree, "sleeves too short in M"},
 	}
 	for i, ret := range returns {
 		event, err := deps.Payments.VerifyWebhook(ctx, ret.event)
@@ -193,6 +193,14 @@ func Run(ctx context.Context, deps Deps) (Result, error) {
 		}
 		if record.HasReason {
 			return Result{}, fmt.Errorf("fakes: replay: refund %s carries a reason; recordings carry none", ret.refund)
+		}
+		class, err := deps.Classifier.Classify(ctx, ret.reason)
+		if err != nil {
+			return Result{}, err
+		}
+		if AskAgain(class) || class.Category.CountsToward() != domain.BeliefKindFit {
+			return Result{}, fmt.Errorf("fakes: replay: return %s answer %q classifies as %q at %v, want a clear fit reason",
+				ret.refund, ret.reason, class.Category, class.Confidence)
 		}
 		if _, err := deps.Store.IndexDoc(ctx, ret.action); err != nil {
 			return Result{}, err

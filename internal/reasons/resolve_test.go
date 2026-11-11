@@ -84,7 +84,7 @@ func TestNeverExplainedCountsTowardNothing(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := len(fake.RecordedAnswers()); got != 11 {
-		t.Fatalf("labelled set covers %d answers, want 11", got)
+	if got := len(fake.RecordedAnswers()); got != 13 {
+		t.Fatalf("labelled set covers %d answers, want 13", got)
 	}
 }

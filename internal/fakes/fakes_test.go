@@ -37,7 +37,7 @@ func TestAssertKeysAbsent(t *testing.T) {
 	}
 }
 
-// TestClassifierReplaysLabelledSet proves the fake serves the eleven
+// TestClassifierReplaysLabelledSet proves the fake serves the thirteen
 // recorded Jev answers with their recorded choices and confidences. The
 // expectations below are the research table, not the loader's output.
 func TestClassifierReplaysLabelledSet(t *testing.T) {
@@ -61,6 +61,8 @@ func TestClassifierReplaysLabelledSet(t *testing.T) {
 		{"not great", domain.CategoryUnclear, 0.94},
 		{"it wasn't what I wanted", domain.CategoryChangedMind, 0.96},
 		{"meh, sending it back", domain.CategoryUnclear, 0.68},
+		{"sleeves too short in M", domain.CategoryFitTooSmall, 1},
+		{"too tight across the chest", domain.CategoryFitTooSmall, 1},
 	}
 	if got := fake.RecordedAnswers(); len(got) != len(cases) {
 		t.Fatalf("fake covers %d answers, want %d", len(got), len(cases))
@@ -100,7 +102,7 @@ func TestClassifierReplaysLabelledSet(t *testing.T) {
 			t.Errorf("answer %q should not ask again", answer)
 		}
 	}
-	if _, err := fake.Classify(ctx, "too tight across the chest"); !errors.Is(err, ErrNoRecording) {
+	if _, err := fake.Classify(ctx, "too tight around the waist"); !errors.Is(err, ErrNoRecording) {
 		t.Errorf("unrecorded answer did not fail loudly: %v", err)
 	}
 }

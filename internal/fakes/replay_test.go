@@ -57,6 +57,17 @@ func offlineDeps(t *testing.T) Deps {
 // empty, proxies broken, no network to fall back on.
 func runOffline(t *testing.T) Result {
 	t.Helper()
+	return runOfflineWith(t, nil)
+}
+
+// runOfflineWith runs the offline replay with classifier in place of the
+// recorded one, when it is not nil.
+func runOfflineWith(t *testing.T, classifier ReasonClassifier) Result {
+	t.Helper()
+	deps := offlineDeps(t)
+	if classifier != nil {
+		deps.Classifier = classifier
+	}
 	for _, name := range KeyVariables() {
 		t.Setenv(name, "")
 	}
@@ -66,20 +77,61 @@ func runOffline(t *testing.T) Result {
 	if err := AssertKeysAbsent(); err != nil {
 		t.Fatalf("offline precondition failed: %v", err)
 	}
-	result, err := Run(context.Background(), offlineDeps(t))
+	result, err := Run(context.Background(), deps)
 	if err != nil {
 		t.Fatalf("offline replay failed: %v", err)
 	}
 	return result
 }
 
+// countingClassifier records every answer the replay asks the classifier
+// about, so a category written into the replay instead of classified
+// leaves the answer uncounted.
+type countingClassifier struct {
+	inner ReasonClassifier
+	asked []string
+}
+
+// Classify asks the recorded classifier and notes the answer.
+func (c *countingClassifier) Classify(ctx context.Context, answer string) (Classification, error) {
+	c.asked = append(c.asked, answer)
+	return c.inner.Classify(ctx, answer)
+}
+
 // TestReplayOffline is the gate's proof: the whole story replays with no
 // key and no network, and the promotion arc lands where the research says
 // it must: Candidate after the second return, Earned after the third,
 // contradicted-but-kept after the correction, and sizing untouched by the
-// dispute and the lone feedback.
+// dispute and the lone feedback. Every documented answer is classified
+// from its own recording: no category is written into the replay.
 func TestReplayOffline(t *testing.T) {
-	result := runOffline(t)
+	recorded, err := NewRecordingReasonClassifier(filepath.Join(fixtureRoot(t), "jev"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	classifier := &countingClassifier{inner: recorded}
+	result := runOfflineWith(t, classifier)
+
+	// The three fit answers are the ones the story's evidence rests on,
+	// and the fourth is the vague answer that stays pending. The frozen
+	// third answer is classified from its own recording, not from the
+	// reply of a near-identical phrase.
+	for _, answer := range []string{
+		"too tight in the shoulders",
+		"too tight across the chest",
+		"sleeves too short in M",
+		"not great",
+	} {
+		asked := 0
+		for _, got := range classifier.asked {
+			if got == answer {
+				asked++
+			}
+		}
+		if asked != 1 {
+			t.Errorf("replay classified answer %q %d times, want 1: the category must come from a recording", answer, asked)
+		}
+	}
 
 	want := []Waypoint{
 		{Step: 2, Content: BeliefRunsSmall, State: domain.GraphNone, Dependents: 1, Contradicted: false, PendingCount: 0},
