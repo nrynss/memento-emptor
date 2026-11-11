@@ -762,7 +762,7 @@ requires:   [T8.5l]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     not-started
+status:     claimed:t85o-feedback
 ```
 A repeat feedback whose new words read as a different verdict (another fit verdict, `changed_mind`, or a seller verdict) is answered with the recorded one and `accepted: true`, silently dropping the new words; `record_feedback` cannot record `damaged_or_defective`/`not_arrived` at all. The same shape: an `unclear`/`changed_mind` first delivery marks no row, so every resend mints a fresh `fb_` id. Decide and implement: refuse the conflicting repeat honestly, record it as a second distinct feedback, or widen the tool — the response shape is frozen, so this is the orchestrator's call.
 
