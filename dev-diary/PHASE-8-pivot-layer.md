@@ -646,11 +646,32 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/, internal/fitindex/
-status:     claimed:t85k-fold
+status:     in-review
 ```
 `internal/api/server/recall.go` folds a literal `"not_as_described"` reason category into `not_arrived` counts, a seam for the recorded Elastic population's labels. Since T1.1b, a not-as-described dispute counts under `damaged_or_defective`, so the same cause would read as non-arrival in one path and damage in the other if a classifier label ever reaches evidence. Disputes write no fit rows, so the pool never sees them today; decide and record whether the fold stays (with its reason) or maps to damage.
 
 **Done when:** the fold's mapping matches the domain's damage category or is recorded as a deliberate label-only seam with its reason; a test pins it; the gate passes.
+
+**Notes (in-review).** The fold stays, and a not-as-described cause now counts as damage. `reasonCountsView` sends the recorded population's `not_as_described` label to `contract.ReasonCountsView.DamagedOrDefective`, the field `domain.CategoryDamagedOrDefective` feeds, and only `domain.CategoryNotArrived` reaches `NotArrived`. The `damaged` label keeps counting as damage. T1.1b filed `MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED` under `damaged_or_defective` because the goods arrived and were wrong, so the one cause no longer reads as non-arrival in the pool view while the dispute path calls it damage.
+
+The trace that decides the shape: no served path can put either legacy label into a fit row today, so the alias is a read-side spelling, not something the layer produces.
+
+- `internal/reasons/client.go` accepts a classifier choice only from the six domain categories and refuses anything else with `ErrUnknownCategory`; `record_reason` passes that category to the fit writer.
+- `internal/domain/reason.go` maps the not-as-described dispute code to `CategoryDamagedOrDefective`, and `StoredCategoryForDispute` stores an unknown code with `CategoryNone`.
+- `internal/fitindex/index.go` is the only writer of pool rows: `Record` returns before the index for a dispute, and `Classified` and `Contested` reject every category outside `domain.Categories`, so neither `damaged` nor `not_as_described` can be stored.
+- `internal/api/server/pool.go` writes fit rows from a capture, a refund, a classified answer and fit feedback only, and `internal/ingest`'s `FitRecorder` names capture, refund and kept only.
+- `internal/api/server/seed.go`'s `LoadSeed` replays beliefs, evidence, feedback and corrections into the shopper's graph and never calls the fit writer; the boot replay only calls `LoadSeed`, so seeded history writes no pool row.
+- The served population carries only domain words: `testdata/seed/population/population.json` has 37 `fit_too_small`, 13 `fit_too_large`, one `damaged_or_defective` and 18 `none`. The legacy labels live only in the recorded T0.12 population (`testdata/elastic-fit/`) and the fixtures and tests that mirror it (`internal/pool/httpindex_test.go`, `internal/api/server/pivot_test.go`).
+
+The alias stays rather than being deleted because `internal/pool` keeps each index label as it arrives in `Counts.Reasons`: an index that already holds the recorded population would lose two settled returns from the merchant's total if the view dropped the label, and mapping it to damage states the cause T1.1b decided. Dropping it would also leave the view's "unknown categories are dropped" rule swallowing a label the project itself recorded.
+
+Tests. `TestReasonCountsViewGivesEachCauseOneField` feeds every domain category, both legacy labels and an unknown one through `reasonCountsView` and pins each field: damage 23 (5 domain, 7 `damaged`, 11 `not_as_described`), non-arrival 13 (the domain constant alone), and the unknown label dropped. `TestServedFitWriterRefusesTheLegacyPoolLabels` drives the real `fitindex.Writer` the service builds: `Classified` and `Contested` refuse both labels with `ErrUnknownReason` and write no row, a not-as-described dispute carrying the damage category writes no row, and `domain.Categories` names neither label, so a task that widens the vocabulary or writes a row around the writer fails there. `TestProductFitServed` now expects damage 3 / non-arrival 0 from the fake pool's `damaged` 2 + `not_as_described` 1.
+
+Mutations, each reverted: putting `not_as_described` back under `NotArrived` fails the mapping test (`NotArrived: 24`, want 13) and `TestProductFitServed` (`NotArrived: 1`); widening `fitindex.validCategory` to accept the two labels fails the reachability test at the first refusal and at "a refused label wrote 1 fit rows".
+
+Finding, outside `owns` and for the orchestrator's landing call (rule 1): `testdata/api/product_fit.response.example.json`, and the same block repeated in `docs/interface.md`, show `damaged_or_defective: 2, not_arrived: 1` for the two recorded spellings at the example's scale, `damaged` 2 and `not_as_described` 1. The corrected view returns damage 3 / non-arrival 0 for those counts, so the example is one label behind the code. Nothing in the gate compares a served view to that example — `internal/api/contract/contract_test.go` checks its schema and its arithmetic only — so the branch is green and the frozen example needs the orchestrator's decision.
+
+Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree): `gofmt`, `go vet`, `go test -race` over every Go package, both lockfile checks, both Svelte checks, both lints, both test runs and both builds, ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 

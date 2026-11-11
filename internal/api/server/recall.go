@@ -369,9 +369,18 @@ func poolCountsView(counts pool.Counts) contract.PoolCountsView {
 	}
 }
 
-// reasonCountsView folds the settled returns by reason category. Unknown
-// categories are dropped: the merchant's "why it comes back" names only
-// the frozen set.
+// reasonCountsView folds the settled returns by reason category. The index
+// can carry the recorded population's labels beside the domain's words:
+// "damaged" spells damage, and "not_as_described" spells a cause the
+// domain files under damage too, because the goods arrived and were
+// wrong. Both count with damage and neither counts as non-arrival.
+// Unknown categories are dropped: the merchant's "why it comes back"
+// names only the frozen set.
+//
+// The two labels are a read-side spelling only. No served write path can
+// emit one: the classifier refuses a choice outside domain.Categories,
+// and the fit writer validates every category it stores against the same
+// set, so an index the layer fills carries domain words only.
 func reasonCountsView(reasons map[domain.Category]int) contract.ReasonCountsView {
 	out := contract.ReasonCountsView{}
 	for category, n := range reasons {
@@ -380,9 +389,9 @@ func reasonCountsView(reasons map[domain.Category]int) contract.ReasonCountsView
 			out.FitTooSmall += n
 		case domain.CategoryFitTooLarge:
 			out.FitTooLarge += n
-		case domain.CategoryDamagedOrDefective, "damaged":
+		case domain.CategoryDamagedOrDefective, "damaged", "not_as_described":
 			out.DamagedOrDefective += n
-		case domain.CategoryNotArrived, "not_as_described":
+		case domain.CategoryNotArrived:
 			out.NotArrived += n
 		case domain.CategoryChangedMind:
 			out.ChangedMind += n

@@ -632,8 +632,8 @@ func TestProductFitServed(t *testing.T) {
 	if view.Counts.Settled != 60 || view.Counts.Shoppers.Fit != 39 || view.Counts.Reasons.FitTooSmall != 24 {
 		t.Fatalf("pool counts %+v, want the settled denominator", view.Counts)
 	}
-	if view.Counts.Reasons.DamagedOrDefective != 2 || view.Counts.Reasons.NotArrived != 1 {
-		t.Fatalf("pool reasons %+v, want both index spellings folded", view.Counts.Reasons)
+	if view.Counts.Reasons.DamagedOrDefective != 3 || view.Counts.Reasons.NotArrived != 0 {
+		t.Fatalf("pool reasons %+v, want damaged 2 + not_as_described 1 under damage", view.Counts.Reasons)
 	}
 	if view.Seeded.Settled != 48 || view.Live.Settled != 12 || view.Recent.Settled != 44 {
 		t.Fatalf("pool splits seeded %d live %d recent %d, want 48 12 44",
