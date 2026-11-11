@@ -874,7 +874,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/api/server/, internal/api/contract/
-status:     not-started
+status:     claimed:t85w-two-corrections
 ```
 The P8 review proved a High: `recallBeliefs` serves every fit belief, but `assembleRecall` allows one override. Rival birth (three opposite answers) plus `record_correction` against each belief makes every recall for that brand hard-fail with `server: contradicted belief has no overriding correction`. The ledger's contest path can trigger it, and it does not heal. Decide the repair (one override per belief in the response, or refusing the second correction at write time) — a response change is contract-shaped and the orchestrator's call — and pin it with a test that fails on today's behaviour.
 
