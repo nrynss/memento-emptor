@@ -496,7 +496,7 @@ requires:   [T9.12]
 fixture-ok: yes
 size:       XS · mid
 owns:       .github/workflows/ci.yml
-status:     not-started
+status:     claimed:t913-ci-bun
 ```
 T9.12 wired the frontend guard into the gate, but the full-package typecheck needs `bun` and the package's modules, which the CI runner does not have: CI takes the reduced fallback that checks only `server/relay.ts`. Add `setup-bun` and a frozen `bun install` for `agent/frontend/` to the workflow so CI runs the same full typecheck as a workstation.
 
