@@ -57,8 +57,9 @@ show exactly this service.
    before any live event arrives.
 3. `lambo.toml` is written to the disk from `ELASTIC_URL` +
    `LAMBO_ES_API_KEY` (native `.jina-embeddings-v3`, the T0.6b shape
-   with the 0.10.1 timeout knobs). No embedder key means no live
-   graph: the replay still serves, loudly.
+   with the 0.10.1 timeout knobs). No `[recall]` section is written:
+   the hub is store-only by decision (see below). No embedder key means
+   no live graph: the replay still serves, loudly.
 4. `deploy/seed` probes the embedder in a scratch session, then plants
    the proven arc once per contract (marker file on the disk):
    Venerable sizing belief, seller-only dispute, declared correction.
@@ -134,6 +135,80 @@ and for the layer's graph client. It is never written to a file or
 printed. The deploy also exports `LAMBO_MCP_URL`, the hub's loopback
 URL; wiring the layer's graph client is T8.5.
 
+## The hub's recall tier: store-only, by decision
+
+`start.sh` writes `[store]`, `[embedder]`, `[daemon]` and `[serve]` into
+`lambo.toml`, and no `[recall]` section. The hub therefore runs Lambo's
+plain SQLite store with recall served from the session's own rows and
+the holder's graph. That is a decision, not an omission: T0.11's check 4
+and `research/elastic.md` measured the Elastic tier against this
+deployment, and neither describes the deployed shape.
+
+**What the hub recalls without it.** Every leg: keyword candidates, the
+recent leg, the graph legs, and the vector leg as an exact cosine scan
+over the session's own stored vectors. The SQLite store declares that
+read exact (`exact_vector_scan`), so the session holder ranks the
+vectors its in-memory graph already holds with the same scorer, and a
+holder's recall and hybrid derive never leave the process. `serve-web`
+and the `lambo recall` CLI hold no graph and run the same scan against
+SQLite. What the demo reads — a belief by id, exact-content `inspect`, a
+correction's force, dependents and blast radius — is served the same way
+with or without the tier, because those are not vector reads. Durable
+memory sits on the disk in `lambo.db` either way.
+
+**What it cannot do.** There is no engine-side kNN index: each vector
+probe scores the session's own stored vectors, so the per-query cost
+grows with the session's concept count on the hub's 0.5 CPU and memory.
+A demo shopper's session holds a few hundred vectors at most, because
+the layer writes beliefs and corrections and not catalogue data. One hub
+also cannot share a vector index between processes; it does not need to,
+because one process holds every session.
+
+**What enabling it would take, and what it would change.** The pinned
+0.10.1 binary ships `recall-elastic` (the release's `ship` feature set),
+so this is a config-only change, with no rebuild and no new secret:
+
+```toml
+[recall]
+kind = "elastic"
+url = "<ELASTIC_URL>"
+api_key = { env = "LAMBO_ES_API_KEY" }
+index_prefix = "lambo"
+timeout_ms = 20000     # cold TLS handshake is ~6.8 s; the 5 s default fails
+```
+
+It would create `lambo-meta` and `lambo-v-<contract hash>` beside the fit
+index and move the vector leg of recall to an Elastic kNN query:
+candidates come from the engine, filtered to the session by
+`session_id` there (T0.11 check 4). The index lags the flush because no
+refresh is forced, a failed mirror marks the session stale and recall
+falls back to the primary until the holder repairs it, and
+`vectordb_document` mode keeps vectors out of `_source`, so Lambo's
+exact re-scoring has nothing to re-score and the engine's HNSW score
+stands (T0.6's second finding). None of that answers anything the
+store-only hub does not already answer; the tier's value is scale, and
+the sessions do not have the scale.
+
+**What it would cost.** No extra embedding call: the tier mirrors the
+vectors the embedder already produced, it does not embed again. What it
+adds is one bulk write to the deployment per flush and one kNN query per
+vector probe, on a Vector Database project that bills on ingest volume
+and storage (T0.12 check 8). That is neither measured nor bounded here,
+so the standing budget cannot be said to cover it, and `guard.sh` audits
+the Render plan rather than Elastic ingestion. A later task that wants
+the tier should measure one write and one recall against it and state
+the numbers, instead of assuming it is free because the key is already
+in the environment.
+
+**The layer's own pool is separate and unaffected.** `fit-rows` is the
+layer's index, created and read by `internal/fitindex` and
+`internal/pool` over plain HTTP with its own mapping, a fixed name, and
+no alias, template or data stream linking it to Lambo's indices (T0.12's
+coexistence check). The layer reads it directly and never through the
+hub, so the hub's store-only setting cannot see it or change it, and a
+hub tier would write under its own `index_prefix` and still not touch
+it.
+
 ## The ledger reader's allowlist
 
 `serve-web` reads the session from the request path, so one reader
@@ -158,10 +233,21 @@ Build the image's three Go binaries and point `start.sh` at a local
 
 ```sh
 APP_DIR=/tmp/memento-local/app LAMBO_DATA_DIR=/tmp/memento-local/data \
+  MEMENTO_IDENTITY_SALT=$(openssl rand -hex 32) \
   LAMBO_EMBEDDER=fixture LAMBO_SEED=0 LAMBO_MCP_TOKEN=local-run-token \
   PORT=18081 LAMBO_MCP_PORT=17724 LAMBO_WEB_PORT=17723 \
   bash deploy/start.sh
 ```
+
+The salt is the one thing that has no default: it is a scratch 64-hex
+value here, any value will do for a local run, and it switches on the
+pivoted path, so the hub boots first and the layer replays into it
+exactly as the deployed service orders them. Without it the layer exits
+at boot (`LAMBO_MCP_URL and LAMBO_MCP_TOKEN need MEMENTO_IDENTITY_SALT`),
+because the hub session names are keyed hashes under that salt. With it
+and no `ELASTIC_URL`, the layer logs that the pool reads nothing and no
+fit row is written: `product_fit` refuses rather than report an empty
+pool.
 
 The hub comes up on `127.0.0.1:17724` in seconds, the ledger reader on
 `127.0.0.1:17723`, and two sessions at `/mcp/s/shopper-<hash>` write

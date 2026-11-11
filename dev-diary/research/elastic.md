@@ -9,6 +9,14 @@
 > T0.12 also found the deployment is an Elasticsearch **Vector Database**
 > project, not a general Serverless project; its mode and billing limits are
 > in `research/elastic-fit.md` check 8.
+>
+> **The deployed hub does not use the recall tier.** `deploy/start.sh` writes no
+> `[recall]` section, so the hub runs store-only by decision: its vector leg is
+> the store's exact scan, and Elastic holds the layer's `fit-rows` pool, not a
+> Lambo index. See `deploy/README.md`, "The hub's recall tier: store-only, by
+> decision". Everything below about the tier is what was measured against this
+> deployment, not the shape the deploy runs; the sections that once read as the
+> deployment's shape are corrected where they appear.
 
 Deployment under test: the Elastic Cloud project, engine 9.7.0 (`You Know,
 for Search`). T0.6 knew it as a Serverless deployment; T0.12 identified the
@@ -83,7 +91,16 @@ operation (`lambo re-embed`), so this choice does not lock the demo shopper
 in: it only fixes the contract every later session is refused against unless
 it matches.
 
-## Lambo recall tier: confirmed against this deployment
+## Lambo recall tier: measured against this deployment, not deployed
+
+The checks below are a capability measurement on a build that carries the tier,
+made before the deploy existed. The tier itself is available to the deploy: the
+pinned release builds with the `ship` feature set, which includes
+`recall-elastic` (T0.11's feature note), so enabling it is a `[recall]` section
+and nothing else. The deploy still leaves it out, for the reasons in
+`deploy/README.md`: the tier mirrors every flush into Elastic and moves recall's
+vector leg to a lagging kNN index, and the store's exact scan already answers
+what the demo reads. None of the results here is the deployed configuration.
 
 The installed binary (0.8.0) does not carry the tier: it refuses `[recall]`
 and names `--features recall-elastic`. A 0.9.1 binary built from the local
@@ -125,13 +142,16 @@ licence issued to Elastic Serverless with a system expiry, and
 `/_license/trial_status` answers 410 as unavailable in serverless mode
 (`deployment.json`). There is no trial to start and no extension to request.
 
-Recommendation: keep the existing Serverless project as the evidence store
-and Lambo recall tier, and do not self-host Elasticsearch beside the service.
-Self-hosting trades a working, measured index for an always-on stateful
-process the demo then owns (disk, memory, upgrades) with no evidence it buys
-anything: every tier mechanic above passes on Serverless. The user should
-confirm billing for the project in the Elastic console; nothing in this task
-predicts that bill beyond "tiny" (below).
+Recommendation as it stood at the time: keep the project as the evidence store
+and as what the tier was measured against, and do not self-host Elasticsearch
+beside the service. The deploy ended up using it for the layer's `fit-rows` pool
+and as the native embedding endpoint; the hub's recall tier is not enabled
+(`deploy/README.md`), so "recall tier" is a capability of this project rather
+than its deployed job. Self-hosting trades a working, measured index for an
+always-on stateful process the demo then owns (disk, memory, upgrades) with no
+evidence it buys anything: every tier mechanic above passes on the project. The
+user should confirm billing for the project in the Elastic console; nothing in
+this file predicts that bill beyond "tiny" (below).
 
 ## Spend
 

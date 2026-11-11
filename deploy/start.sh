@@ -3,9 +3,10 @@
 # $PORT, the memory layer replaying the frozen demo story, the Lambo hub
 # that holds one session per shopper, and one reader for the demo
 # shopper's live graph. Lambo's config is written here at boot from the
-# environment (the deployment URL lives on the disk, never in the repo);
-# the seed runs once per contract, proved by a marker file on the same
-# disk, so a restart reseeds nothing and loses nothing.
+# environment (the deployment URL lives on the disk, never in the repo)
+# and carries no `[recall]` tier: the hub is store-only by decision, see
+# deploy/README.md. The seed runs once per contract, proved by a marker
+# file on the same disk, so a restart reseeds nothing and loses nothing.
 #
 # Order matters. The seeder's short-lived stdio writer owns its session
 # alone, so it runs before the hub starts; the hub then attaches the
@@ -147,6 +148,10 @@ write_config() {
 			;;
 		esac
 		echo ""
+		# No [recall] section: the hub is store-only by decision. The tier
+		# mirrors every session's vectors into Elastic on each flush and
+		# moves recall's vector leg to a lagging kNN index, which answers
+		# nothing the store's exact scan does not. See deploy/README.md.
 		echo "# Cadence only, from the proven T0.3 toml; bars live in code."
 		echo "[daemon]"
 		echo "gc_interval = 1"
