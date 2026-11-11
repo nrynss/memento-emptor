@@ -424,7 +424,7 @@ requires:   [T8.5d]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/precedence/
-status:     in-review
+status:     done
 ```
 The T8.5b driver pins the defect shapes (loss of force after restart; `pool absent with lookup` rejection). After T8.5d lands, flip both tripwires to pin the fix, live against the hub. Budget: under $0.20 of embedding spend.
 
@@ -439,6 +439,8 @@ The T8.5b driver pins the defect shapes (loss of force after restart; `pool abse
 Spend: $0.00 of the $0.20 embedding budget (the fixture embedder computes vectors in process; no model call). The one-case-first gate printed its $0.00 line before the remaining steps. Elastic usage was test-prefixed index churn: 3 `t85b-*` indices deleted, the after listing `[]`, and the run dir removed. The hub was the existing 0.10.1 release binary earlier runs kept (it reports `lambo 0.10.1`); the release checksum could not be re-fetched because the machine was offline, so the deploy's pinned sha was not re-verified this run.
 
 **Review (fresh eyes).** Re-ran `run.sh` on this branch against the same cached hub and deployment: it passes, prints its `$0.00` line, deletes 3 `t85b-*` indices and shows the after listing `[]`, with the run dir removed. The cached hub binary's sha256 `b04eeab4…` is byte-identical to the v0.10.1 release asset's published `.sha256`, which is the file `deploy/Dockerfile` fetches and verifies, so the offline caveat above no longer stands and the driver's README now records the sha. Three mutation checks confirm the flipped pins bite: disabling the re-link fails the rebuild recall with `ErrOverrideMissing` on the rewritten belief; restoring the pre-T8.5d guidance rule (a stale belief id in the guidance while its belief is unheld) fails the restart-window assertion; restoring the old assembler guard fails the consulted-empty probe with `pool absent with lookup "consulted"`. One limit: ignoring the persisted pairing in the re-link still passes live, because this single-subject rebuild resolves by the journal entry's words and subject, so the pairing's cross-subject job stays `pivot_test.go`'s proof — the driver README claimed otherwise and is corrected here. The seven pre-existing steps keep their old assertions (this commit changes none of them) and pass. Gate green. One defect in the driver's own guards is fixed here: a refused run (non-empty prefix) still deleted every index under the prefix in its deferred cleanup — the very index the guard refused over — so cleanup now skips the names the pre-run listing found, and `run.sh` runs its listing and leak checks even when the driver fails instead of exiting before them.
+
+**Verdict: APPROVE**, with four findings fixed on the review branch, all owned here: the clean-prefix guard defect (Medium), the overclaimed words-only assertion (Low), the provenance wording (Low) and the skipped run.sh checks (Low). Landed with the task.
 
 ---
 

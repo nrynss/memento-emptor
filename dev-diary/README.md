@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 5 | Done |
-| P8 | 14 / 15 | In progress (T8.5e) |
+| P8 | 15 / 15 | Done |
 | P9 | 9 / 10 | In progress (T9.7) |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.5e: Flip the re-link tripwires live (done, P8 closed)
+
+**What exists.** The T8.5b driver's two defect pins are flipped to pin T8.5d's fixes and pass live: a consulted-but-empty line serves the frozen `example-none` shape (pool null, lookup consulted, guidance none), and a declared correction keeps force across a restart and re-links after a deliberately divergent rebuild (`blf_000001` → `blf_000002`) with no `ErrOverrideMissing`. Seven pre-existing precedence steps keep their old assertions and pass. Review APPROVE with four fixes, including a real one: a refused run (non-empty `t85b-` prefix) still deleted every index under the prefix in its deferred cleanup — the guard's promise did not hold; cleanup now skips the pre-run listing and a refusal fails loudly naming the survivor. Spend $0.00 of the $0.20 budget; indices erased, listing `[]`.
+
+**What surprised.** The cached 0.10.1 binary is byte-identical to the release asset's published checksum (the same file the Dockerfile verifies), so the offline caveat is resolved. Ignoring the persisted pairing still passes this single-subject rebuild because the journal entry resolves it; the pairing's cross-subject job remains `internal/api/server/pivot_test.go`'s proof, and the driver README no longer claims otherwise.
+
+**The next agent should not have to work out.** P8 is 15/15. The next program is the E2E review/remediation loop, one phase at a time, starting at P0.
 
 ### CI: merchant dependencies (fixed)
 
