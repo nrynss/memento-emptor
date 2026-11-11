@@ -18,7 +18,9 @@
 #   source tools/env.sh
 #   LAMBO_BIN=/path/to/lambo-0.10.1 bash tests/live/precedence/run.sh
 #
-# LAMBO_BIN must be the 0.10.1 release binary (the deploy pins its sha).
+# LAMBO_BIN must be the v0.10.1 release artifact: `deploy/Dockerfile`
+# downloads that same asset and verifies it against the release's
+# published sha256. Check the local copy against the same file first.
 # Nothing here runs in CI and nothing here gates a build: there are no
 # *_test.go files under tests/live/precedence/, so the gate builds the
 # driver but never executes it. Spend: $0.00 of embedding spend (the

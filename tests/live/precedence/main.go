@@ -1287,15 +1287,19 @@ func (d *driver) openShopper(shopper string) (*server.Service, *mcp, error) {
 
 // relinkedDeclaredView pins the declared-view re-link T8.5d landed: a
 // correction declared against a belief keeps its force across a layer
-// restart — honoured by its persisted view-to-entry pairing while the
+// restart — honoured by the subject its journal entry names while the
 // belief is not rewritten yet — and a divergent rebuild re-links it to
 // the rewritten belief, so no recall hard-fails ErrOverrideMissing.
 //
 // The rebuild is divergent on purpose: the dispute lands first and mints
 // the seller belief under the id the fit belief held before the restart,
-// so the rewritten fit belief cannot reuse it. A view matched by id
-// coincidence, or by its words alone, would cite the wrong belief; the
-// pairing is what keeps it attached to its own.
+// so the rewritten fit belief cannot reuse it and a view still on the old
+// citation cannot match by id. A view whose re-link was lost leaves the
+// served belief contradicted with no override, and the recall below
+// refuses instead of answering. The journal entry's words and subject are
+// what carry the view back here; the persisted pairing is what keeps the
+// same words about two subjects apart (pinned in pivot_test.go, not
+// here).
 //
 // The declared shopper reuses the recorded purchases 01-03, whose fit
 // rows therefore share document ids with the evidence shopper's rows and

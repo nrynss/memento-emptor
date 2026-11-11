@@ -24,7 +24,7 @@ driver is a main program, run once by hand.
 | statement (seeded general statement only) | `GuidanceStatement`, the usual-size text |
 | nothing (fresh shopper, lineless recall) | `GuidanceNone`, never a refusal |
 | probe: consulted-but-empty pool | serves the frozen `example-none` shape: null pool, consulted lookup, `GuidanceNone` |
-| declared view across a restart and a divergent rebuild | the correction decides by its paired subject after the restart, re-links to the rewritten belief after the rebuild, and no recall refuses |
+| declared view across a restart and a divergent rebuild | the correction decides by the subject its entry names after the restart, re-links to the rewritten belief after the rebuild, and no recall refuses |
 | cleanup | every `t85b-*` index deleted, the listing empty, the run dir removed |
 
 ## What is live, what is recorded
@@ -33,11 +33,14 @@ driver is a main program, run once by hand.
   mirrored into test-prefixed indices, each query filtered by
   `session_id`) and the fit/pool index `t85b-fit-rows` (seeded pool rows
   through the real writer, settled rows through the served layer's own
-  writers, reads through the pool reader). The hub is the 0.10.1 release
-  binary (the deploy's pinned sha), run locally in the same shape
-  `deploy/start.sh` boots. The graph writes (derive, record_action,
-  inspect) are the hub's own answers per shopper session; promotion to
-  Candidate/Building is the daemon's, polled, not assumed.
+  writers, reads through the pool reader). The hub is the v0.10.1
+  release artifact, sha256
+  `b04eeab4a40af9e5e698ee446d50745f488da3a551114b0e3c195c3cdf30b92d`
+  (`sha256sum` the local copy and the release's `.sha256` file match) —
+  the same asset `deploy/Dockerfile` downloads and verifies, run locally
+  in the same shape `deploy/start.sh` boots. The graph writes (derive,
+  record_action, inspect) are the hub's own answers per shopper session;
+  promotion to Candidate/Building is the daemon's, polled, not assumed.
 - **Not a model:** every shopper answer replays a labelled Jev
   recording (`testdata/jev`), so no classification call is made; the
   fixture embedder computes vectors in process, so no embedding endpoint
@@ -96,18 +99,24 @@ if the behaviour regresses, both fixed by T8.5d in
 - **Declared views re-link.** A correction declared against a belief
   cites the belief by the layer's in-memory id. After a restart the
   layer mints fresh ids, so the restored view cites a belief nothing
-  holds yet — but its persisted view-to-entry pairing names the subject,
-  so recall still honours the correction (guidance from the correction
-  alone, no stale id, the pool riding along overridden). Rebuilding the
-  belief through a re-ingest then re-links the view to the rewritten
-  belief by that pairing. The rebuild is divergent on purpose: the
-  driver ingests a dispute first, so the seller belief takes the fit
-  belief's old id and the rewritten fit belief cannot reuse it. A view
-  matched by id coincidence or by its words alone would cite the wrong
-  belief, and a lost mapping would make recall refuse instead of
-  answering; the driver asserts the correction cites the rewritten
-  belief, that belief carries its warning, and recall returns without
-  `ErrOverrideMissing`.
+  holds yet — but its journal entry (and the pairing persisted beside
+  it) names the subject, so recall still honours the correction
+  (guidance from the correction alone, no stale id, the pool riding
+  along overridden). Rebuilding the belief through a re-ingest then
+  re-links the view to the rewritten belief. The rebuild is divergent on
+  purpose: the driver ingests a dispute first, so the seller belief
+  takes the fit belief's old id and the rewritten fit belief cannot
+  reuse it, and a view still on the old citation cannot match by id. A
+  view whose re-link was lost leaves the served belief contradicted with
+  no override, and recall refuses instead of answering: disabling the
+  re-link fails the driver at that recall. The driver asserts the
+  rewritten belief took a new id, that the correction cites it, that the
+  belief carries the correction's warning, and that recall returns
+  without `ErrOverrideMissing`. The entry's own words and subject land
+  on the same belief in this single-subject case (ignoring the pairing
+  still passes); keeping the same words about two subjects apart is the
+  pairing's job, pinned by `internal/api/server/pivot_test.go`, not by
+  this driver.
 
 ## The shared-transaction caveat
 
