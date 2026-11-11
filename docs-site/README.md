@@ -20,7 +20,7 @@ request: it reads this directory and the repository's own `docs/` files.
 | `src/content/docs/interface.md` | Generated from `docs/interface.md` at build time |
 | `src/content/docs/architecture.md` | Generated from `docs/architecture.md` at build time |
 | `src/content/docs/demo-and-evidence.md` | Written here, from `demo/README.md` |
-| `src/content/docs/comparison.md` | Written here, from `bench/README.md` and `product.md` |
+| `src/content/docs/comparison.md` | Written here, from `bench/README.md`, `bench/round2/README.md` and `product.md` |
 | `src/content/docs/submission-summary.md` | A labelled placeholder, waiting for T6.3 |
 
 `scripts/sync-docs.mjs` copies the interface and architecture documents, strips
@@ -33,6 +33,7 @@ Run its build separately, as above.
 
 ## Staged state
 
-The submission summary page and the round-2 section of the comparison page are
-deliberately incomplete. They wait for T6.3, T6.4, T6.5 and the round-2 results.
-See the T6.8 note in `dev-diary/PHASE-6-ship.md` for the resume steps.
+The submission summary page is deliberately incomplete. It waits for T6.3,
+T6.4 and T6.5. The comparison page carries both rounds: round 1, and round 2
+from its own committed run. See the T6.8 note in
+`dev-diary/PHASE-6-ship.md` for the resume steps.
