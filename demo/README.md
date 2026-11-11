@@ -103,7 +103,7 @@ record was written. None is filled in from a fixture:
    `shopper_01` only. Until an operator adds the day-one shopper to the key's
    binding (a Render secret change) or a new task mints a second agent key,
    the pool read is live and the empty-shopper recall is recorded as `401`.
-   Owner: the operator (the secret) or a new task (a second key).
+   Owner: T9.15 (second shopper key).
 2. **A new purchase and a new dispute cannot be ingested.** The PayPal app's
    only webhook subscription points at an external test receiver, not at the
    layer, and the served layer's ingest reads verified events through the
@@ -112,10 +112,9 @@ record was written. None is filled in from a fixture:
    run records the existing capture and writes the fit row through
    `record_feedback`; the probe and the subscription facts are in
    [`04-purchase-blockers.json`](evidence/run-6/04-purchase-blockers.json).
-   Owner: a layer/deploy task (proposed T9.10).
+   Owner: T8.7b (live payment events).
 3. **The ledger page is a fixture replay.** It has no live transport; the
-   live reads are the API answers in step 6. Owner: a `web/` task (proposed
-   T9.11).
+   live reads are the API answers in step 6. Owner: T4.8 (live ledger).
 4. **The seller belief never reaches recall**, and the agent key is refused
    on ledger reads, so no live agent turn can mention the dispute; the live
    reads prove sizing is untouched. Owner: T9.9 (surface alignment) or a
@@ -124,13 +123,11 @@ record was written. None is filled in from a fixture:
    belief: a second feedback for the same purchase appends the same evidence
    again. The seeded arc's one copy plus this run's two feedback calls left
    `ev_51c2d8` three times on `blf_2b9d60` (which lifted it from Claimed to
-   Building). The pool row is idempotent; the belief is not. Owner: a layer
-   task (proposed T9.10).
+   Building). The pool row is idempotent; the belief is not. Owner: T8.5l (feedback idempotency).
 6. **A correction can reuse an id after a restart.** The served layer
    restores the standing journal but not the id sequence, so the next mint
    overwrote the restored `corr_000001` during an early attempt (the run's
-   own `corr_000004` is unaffected). Recorded, not worked around. Owner: the
-   same layer task (proposed T9.10).
+   own `corr_000004` is unaffected). Recorded, not worked around. Owner: T8.5m (correction id reuse).
 7. **The reference agent skipped recall** on the correction turn in one
    attempt and on the recorded feedback turn; recall-first holds on the ask
    and next-recommendation turns. The traces show it as it happened. Owner:
@@ -138,20 +135,17 @@ record was written. None is filled in from a fixture:
 8. **Both deployed apps render their own source comments** as visible text
    above the heading (the `// ...` blocks), and the belief page prints its
    standing-correction empty-state sentence twice. Presentation defects
-   outside this task's `owns`; owner a presentation task under `web/` and
-   `merchant/` (proposed T9.11).
+   outside this task's `owns`; owner T4.6 for the belief page and the deployed-app redeploy for the comments.
 9. **`explain_belief` lists a correction twice.** The live answer for
    `blf_8f2c41` carries seven corrections for five ids: `corr_000001` and
    `corr_3b7e52` each appear twice
    ([`02-belief-explained.json`](evidence/run-6/02-belief-explained.json)).
    `restoreStanding` appends the journal's ids to the correction order and
    `LoadSeed` adds the seeded one again, and a reused id is appended a second
-   time; the read does not de-duplicate. Owner: a layer task (proposed
-   T9.10).
+   time; the read does not de-duplicate. Owner: T8.5m (duplicate listing).
 10. **Step 2's Channel3 candidate is not live.** The reference agent has no
     product-search tool, so no Channel3 call exists in the run and the
-    candidate SKU appears only in step 4's captured purchase. Owner: T9.9
-    (agent tool surface) or a new task the orchestrator opens.
+    candidate SKU appears only in step 4's captured purchase. Owner: T9.17 (catalog search).
 
 ## The pre-pivot record
 

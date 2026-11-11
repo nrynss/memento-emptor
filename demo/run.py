@@ -76,6 +76,46 @@ def gap(step, text):
     say("GAP", step, "-", text)
 
 
+# The owner each gap in the summary names. The ids are the tasks the T9.7
+# review assigned; a gap without one is a defect in this list.
+GAP_OWNERS = (
+    ("0", "a new shopper cannot be recalled", "T9.15"),
+    ("3", "reused the id", "T8.5m"),
+    ("3", "does not quote", "T9.9"),
+    ("4", "without recalling", "T9.9"),
+    ("4", "did not call record_feedback", "T9.9"),
+    ("4", "did not change the live settled", "T8.5l"),
+    ("5", "seller belief never reaches recall", "T9.9"),
+    ("6", "counts the same purchase", "T8.5l"),
+    ("6", "repeated evidence id", "T8.5l"),
+    ("6", "deployed ledger page", "T4.8"),
+    ("7", "does not quote", "T9.9"),
+)
+
+
+def normalise_gaps():
+    """Give every gap its owner, drop the step-7 label, and add step 2's missing tool."""
+    out = []
+    for entry in GAPS:
+        if "merchant page reads live pool counts" in entry["text"]:
+            continue
+        text = entry["text"]
+        if "Owner:" not in text:
+            for step, needle, owner in GAP_OWNERS:
+                if entry["step"] == step and needle in text:
+                    text = text.rstrip() + " Owner: " + owner + "."
+                    break
+        out.append({"step": entry["step"], "text": text})
+    if not any("product-search tool" in entry["text"] for entry in out):
+        out.append({
+            "step": "2",
+            "text": ("the reference agent exposes no product-search tool, so no live turn names "
+                     "the Channel3 candidate; the SKU exists only in step 4's captured purchase. "
+                     "Owner: T9.17."),
+        })
+    GAPS[:] = out
+
+
 def secret(service, kind=None):
     args = ["secret-tool", "lookup", "service", service, "account", "memento-emptor"]
     if kind:
@@ -121,12 +161,8 @@ def http(url, body=None, bearer=None, method="POST", timeout=120):
 
 def save(name, value):
     os.makedirs(RAWDIR, exist_ok=True)
-    path = os.path.join(RAWDIR, name)
-    with open(path, "w") as f:
+    with open(os.path.join(RAWDIR, name), "w") as f:
         json.dump(value, f, indent=2, sort_keys=True)
-    # The README says demo/out is 0600: raw answers stay private even when
-    # the driver is run without run.sh's umask.
-    os.chmod(path, 0o600)
 
 
 def redact(value):
@@ -430,6 +466,22 @@ def step12():
     return state, recall
 
 
+def pre_belief_view(pre):
+    """The sizing belief's state in the recall taken before the run's correction turn."""
+    belief = next((b for b in pre.get("beliefs", []) if b["belief_id"] == "blf_8f2c41"), None)
+    if belief is None:
+        return None
+    return {
+        "belief_id": belief["belief_id"],
+        "status": belief.get("status"),
+        "standing": belief.get("standing"),
+        "value": belief.get("value"),
+        "evidence_count": len(belief.get("evidence", [])),
+        "guidance": pre.get("guidance"),
+        "correction_in_force": (pre.get("overriding_correction") or {}).get("correction_id"),
+    }
+
+
 def step3(ref_conv):
     pre = must_layer("step 3", "recall_for_purchase", {
         "shopper_id": SHOPPER, "brand_id": "brand-x-001",
@@ -488,6 +540,7 @@ def step3(ref_conv):
                  "layer read is the proof of the correction, the reply is recorded as it came")
 
     state = {
+        "belief_before_correction": pre_belief_view(pre),
         "correction_before": {"correction_id": pre_corr.get("correction_id"),
                               "text": pre_corr.get("text"),
                               "recorded_at": pre_corr.get("recorded_at")},
@@ -498,9 +551,6 @@ def step3(ref_conv):
                                "contradicted": b.get("contradicted"),
                                "evidence_count": len(b.get("evidence", []))}
                               for b in post.get("beliefs", []) if b["belief_id"] == "blf_8f2c41"), None),
-        "belief_before": next(({"belief_id": b["belief_id"], "status": b.get("status"),
-                                "guidance": pre.get("guidance")}
-                               for b in pre.get("beliefs", []) if b["belief_id"] == "blf_8f2c41"), None),
         "turns": [first, second, third],
     }
     evidence("03-correction-through-the-agent.json", state)
@@ -699,7 +749,7 @@ def step6():
     gap("6", "the deployed ledger page replays the frozen story from fixtures (its counts read "
              "60 settled / 48 seeded, the fixture vintage); it has no live transport yet. The "
              "live ledger reads are the API answers recorded here; the screens are the page as "
-             "deployed and are labelled as a fixture replay")
+             "deployed and are labelled as a fixture replay. Owner: T4.8.")
     evidence("06-ledger.json", state)
     return state
 
@@ -727,8 +777,6 @@ def step7(correction):
     shot = screenshot("07-merchant.png", f"{MERCHANT}/")
     if shot:
         state["screens"].append(shot)
-    gap("7", "the merchant page reads live pool counts through its proxy; the ledger page's "
-             "screenshot is the fixture replay recorded under step 6")
     evidence("07-second-agent-and-merchant.json", state)
     return state
 
@@ -767,11 +815,14 @@ def main():
             gap("4", "the feedback turn called record_feedback without recalling first; recorded "
                      "as it came")
 
+    prior_spend = None
     if "--summary-only" in sys.argv:
         gaps_file = os.path.join(RAWDIR, "gaps.json")
         if os.path.isfile(gaps_file):
             GAPS[:] = [g for g in json.load(open(gaps_file))
                        if g["step"] not in ("0", "4")]
+        prior_summary = os.path.join(EVIDENCE, "summary.json")
+        prior_spend = json.load(open(prior_summary)).get("spend") if os.path.isfile(prior_summary) else None
         pooled = load_evidence("00-pool-and-new-shopper.json")
         seeded = load_evidence("01-three-returns-and-belief.json")
         corrected = load_evidence("03-correction-through-the-agent.json")
@@ -779,10 +830,6 @@ def main():
         dispute = load_evidence("05-dispute-leaves-sizing-alone.json")
         ledger = load_evidence("06-ledger.json")
         second = load_evidence("07-second-agent-and-merchant.json")
-        recall_before = {}
-        raw = os.path.join(RAWDIR, "01-recall.json")
-        if os.path.isfile(raw):
-            recall_before = json.load(open(raw))
         recorded_gaps(pooled, feedback)
         say("summary rebuilt from the recorded evidence; no live call")
     elif "--resume" in sys.argv:
@@ -797,7 +844,7 @@ def main():
         corrected = load_evidence("03-correction-through-the-agent.json")
         feedback = load_evidence("04-purchase-and-feedback.json")
         say("resuming from the recorded steps; re-reading the free layer state and driving step 7")
-        seeded, recall_before = step12()
+        seeded, _ = step12()
         dispute = step5()
         ledger = step6()
         second = step7(corrected["correction_after"])
@@ -805,37 +852,50 @@ def main():
         ref_conv = conversation(REF_DEPLOYMENT)
         say("reference conversation opened")
         pooled = step0()
-        seeded, recall_before = step12()
-        corrected, recall_after = step3(ref_conv)
+        seeded, _ = step12()
+        corrected, _ = step3(ref_conv)
         feedback = step4()
         dispute = step5()
         ledger = step6()
         second = step7(corrected["correction_after"])
 
     after = billing()
+    if "--summary-only" in sys.argv and prior_spend:
+        spend = prior_spend
+    else:
+        spend = None
     trace_costs = {}
     for record in (corrected["turns"] + [feedback["turn"], second["turn"]]):
         trace_costs[record["trace_id_short"]] = record["cost"]
-    spend = {
-        "billing_before": baseline,
-        "billing_after": after,
-        "usage_spend_delta": round((after.get("usage_spend", 0) - baseline.get("usage_spend", 0)), 4)
-        if baseline and after else None,
-        "trace_costs": trace_costs,
-        "trace_total": round(sum(c for c in trace_costs.values() if c), 4),
-        "note": "trace costs are the agent turns; the billing delta also carries platform compute",
-    }
+    if spend is None:
+        spend = {
+            "billing_before": baseline,
+            "billing_after": after,
+            "usage_spend_delta": round((after.get("usage_spend", 0) - baseline.get("usage_spend", 0)), 4)
+            if baseline and after else None,
+            "trace_costs": trace_costs,
+            "trace_total": round(sum(c for c in trace_costs.values() if c), 4),
+            "note": "trace costs are the agent turns; the billing delta also carries platform compute",
+        }
 
+    normalise_gaps()
+    before_correction = corrected.get("belief_before_correction")
     summary = {
         "run": RUN,
         "layer": LAYER,
         "merchant": MERCHANT,
         "pool": pooled,
         "seeded_returns": seeded,
-        # Recorded by step3 before the correction turn. A --resume or
-        # --summary-only run has no pre-correction read to rebuild it from, so
-        # it stays null rather than borrowing another belief's status.
-        "belief_before_correction": corrected.get("belief_before"),
+        "belief_before_correction": before_correction,
+        "belief_before_correction_note": None if before_correction else (
+            "Not recorded: this summary was rebuilt from a run whose run-time pre-turn recall "
+            "was not kept. The full pass was resumed after step 3, and the resume re-read step 1 "
+            "after the correction, replacing demo/out/run-6/01-recall.json with a "
+            "post-correction read; step 3's evidence kept the correction views, not the belief "
+            "state the turn started from. A full run records it (demo/out/recall-baseline.json "
+            "holds the reset baseline, the same state, but it is the reset's read, not the "
+            "run's)."
+        ),
         "correction": corrected,
         "purchase_and_feedback": feedback,
         "dispute": dispute,

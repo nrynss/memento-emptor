@@ -91,7 +91,9 @@ status:     not-started
 ```
 The P4 review found the pivot's pooling and standing fixtures are built with the recall case's shopper but answer only the demo shopper: a `shopper_02` pooling call returns `shopper_01`'s answer (`{answered: 'shopper_01', removed: 3}`), a `shopper_02` standing correction throws, and `PoolingToggle` keeps its opening choice without a key, so switching cases leaves the previous shopper's result on screen. Make each fixture answer the shopper it was built for (reject a mismatch), reset the toggle when the case changes, and make the frozen standing request and fixture agree.
 
-**Done when:** every pooling and standing fixture answers only its own shopper and rejects another; switching the case remounts the toggle; the frozen example and the fixture agree; a test covers a cross-shopper rejection; the gate passes.
+Also fix the repeated standing-correction empty-state sentence the T9.7 run saw on the belief page (it prints twice).
+
+**Done when:** every pooling and standing fixture answers only its own shopper and rejects another; switching the case remounts the toggle; the frozen example and the fixture agree; a test covers a cross-shopper rejection; the empty-state sentence renders once; the gate passes.
 
 ---
 

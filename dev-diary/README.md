@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 19 / 22 | In progress (T8.5i, T8.5j, T8.5k) |
-| P9 | 18 / 23 | In progress (T9.7, T9.9, T9.11, T9.14, T9.16) |
+| P9 | 18 / 24 | In progress (T9.9, T9.11, T9.14, T9.15, T9.16, T9.17) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.7: The pivoted demo (done)
+
+**What exists.** `demo/` now runs product.md's steps 0–7 against the hosted services: `reset.sh` restores the demo line (pool 22/22/0; opt-out removes only that shopper's own live rows, corrections are append-only), `run.py` drives the layer reads/writes, both agent deployments and both apps, and `RUN-6.md` plus `evidence/run-6/` are the recorded run with per-step labels (live, live read of seeded/existing data, or fixture replay). Spend $0.69 of $1.00; the five traced turns cost $0.2377 and every trace behind the task totals $0.634.
+
+**What surprised.** The demo is only partly live, and the record says so: a new shopper is 401 (the agent key binds one shopper), a new purchase or dispute cannot ingest (the served layer builds ingest with the recording payment source and the PayPal subscription is not the layer), the ledger page is a fixture replay, and the reference agent has no product-search tool. Two real layer bugs surfaced: repeat feedback multiplies a purchase in the belief and can promote it, and a restart lets a new correction reuse a restored id (and `explain_belief` lists duplicates).
+
+**The next agent should not have to work out.** Every gap names its owner: T9.15 (second shopper key), T8.7b (live payment events), T4.8 (live ledger), T9.17 (catalog search), T8.5l (feedback idempotency), T8.5m (correction ids and duplicate listing), T9.9 (agent surface/retry), T9.11 (org id), T4.6 (belief page). Read replies from `ast agent trace --json` (`output.text`), and poll briefly after a trace appears.
 
 ### T4.5: The contest route (done)
 

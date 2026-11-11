@@ -1,14 +1,6 @@
 {
-  "belief_before_correction": {
-    "belief_id": "blf_8f2c41",
-    "guidance": {
-      "basis": "correction",
-      "belief_id": "blf_8f2c41",
-      "correction_id": "corr_000004",
-      "text": "Take size M for Brand X"
-    },
-    "status": "Building"
-  },
+  "belief_before_correction": null,
+  "belief_before_correction_note": "Not recorded: this summary was rebuilt from a run whose run-time pre-turn recall was not kept. The full pass was resumed after step 3, and the resume re-read step 1 after the correction, replacing demo/out/run-6/01-recall.json with a post-correction read; step 3's evidence kept the correction views, not the belief state the turn started from. A full run records it (demo/out/recall-baseline.json holds the reset baseline, the same state, but it is the reset's read, not the run's).",
   "correction": {
     "belief_after": {
       "belief_id": "blf_8f2c41",
@@ -131,27 +123,27 @@
   "gaps": [
     {
       "step": "5",
-      "text": "the dispute's seller belief never reaches recall (the contract serves seller beliefs through the ledger and explain reads only), and the agent key is refused on ledger reads, so a live agent turn cannot mention it; the demo shows the seller row and the untouched sizing belief by live read instead"
+      "text": "the dispute's seller belief never reaches recall (the contract serves seller beliefs through the ledger and explain reads only), and the agent key is refused on ledger reads, so a live agent turn cannot mention it; the demo shows the seller row and the untouched sizing belief by live read instead Owner: T9.9."
     },
     {
       "step": "6",
-      "text": "a belief counts the same purchase more than once: [{\"belief_id\": \"blf_2b9d60\", \"evidence_id\": [\"ev_51c2d8\"]}]. Each record_feedback for the same purchase appends that purchase's evidence to the belief again, so one kept purchase's repeated feedback can lift the belief's standing. The pool row stays one (the writer is idempotent there). A layer defect for the handoff"
+      "text": "a belief counts the same purchase more than once: [{\"belief_id\": \"blf_2b9d60\", \"evidence_id\": [\"ev_51c2d8\"]}]. Each record_feedback for the same purchase appends that purchase's evidence to the belief again, so one kept purchase's repeated feedback can lift the belief's standing. The pool row stays one (the writer is idempotent there). A layer defect for the handoff Owner: T8.5l."
     },
     {
       "step": "6",
-      "text": "the deployed ledger page replays the frozen story from fixtures (its counts read 60 settled / 48 seeded, the fixture vintage); it has no live transport yet. The live ledger reads are the API answers recorded here; the screens are the page as deployed and are labelled as a fixture replay"
-    },
-    {
-      "step": "7",
-      "text": "the merchant page reads live pool counts through its proxy; the ledger page's screenshot is the fixture replay recorded under step 6"
+      "text": "the deployed ledger page replays the frozen story from fixtures (its counts read 60 settled / 48 seeded, the fixture vintage); it has no live transport yet. The live ledger reads are the API answers recorded here; the screens are the page as deployed and are labelled as a fixture replay Owner: T4.8."
     },
     {
       "step": "0",
-      "text": "a new shopper cannot be recalled live: the agent key is bound to shopper_01 only, so shopper_02 answers 401 {\"error\": {\"code\": \"unauthenticated\", \"message\": \"unauthorized\"}}. Sizing a day-one shopper needs an operator to add the shopper to the agent key's binding (a Render secret change)."
+      "text": "a new shopper cannot be recalled live: the agent key is bound to shopper_01 only, so shopper_02 answers 401 {\"error\": {\"code\": \"unauthenticated\", \"message\": \"unauthorized\"}}. Sizing a day-one shopper needs an operator to add the shopper to the agent key's binding (a Render secret change). Owner: T9.15."
     },
     {
       "step": "4",
-      "text": "the feedback turn called record_feedback without recalling first; recorded as it came"
+      "text": "the feedback turn called record_feedback without recalling first; recorded as it came Owner: T9.9."
+    },
+    {
+      "step": "2",
+      "text": "the reference agent exposes no product-search tool, so no live turn names the Channel3 candidate; the SKU exists only in step 4's captured purchase. Owner: T9.17."
     }
   ],
   "layer": "https://memento-emptor.onrender.com",

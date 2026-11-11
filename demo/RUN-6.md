@@ -71,31 +71,30 @@ state in the evidence is the reset's answer, not a remembered one.
 2. **No live purchase or dispute ingest.** The PayPal app's only webhook
    subscription points at an external test receiver, not the layer, and the
    served layer reads verified events through `fakes.NewRecordingPaymentSource`
-   in `cmd/memento`. Owner: a layer/deploy task (proposed T9.10) wires the
+   in `cmd/memento`. Owner: a layer/deploy task (T8.7b) wires the
    real payment source and the app's subscription.
 3. **Ledger page has no live transport** (fixture-only). Owner: a `web/`
-   task, proposed T9.11.
+   task, T4.8.
 4. **Seller belief never reaches recall**, and agent keys are refused on
    ledger reads, so no agent turn can mention the dispute. Owner: T9.9's
    surface alignment, or a layer recall extension.
 5. **`record_feedback` duplicates a purchase in the belief.** The seeded
    arc's one copy plus this run's two feedback calls left `ev_51c2d8` three
-   times on `blf_2b9d60` and lifted it Claimed → Building. Owner: a layer
-   task (proposed T9.10).
+   times on `blf_2b9d60` and lifted it Claimed → Building. Owner: T8.5l (feedback idempotency).
 6. **Correction id reused after a restart.** The restored `corr_000001` was
    overwritten by the next mint because the id sequence is not restored with
-   the journal. Owner: a layer task (proposed T9.10).
+   the journal. Owner: a layer task (T8.7b).
 7. **Reference agent skipped recall** on the recorded feedback turn (and on
    one correction attempt), so recall-first is not every turn. Owner: T9.9.
 8. **Both apps render their own source comments** as visible text, and the
    belief page prints its standing-correction empty-state sentence twice.
-   Owner: a presentation task under `web/` and `merchant/`, proposed T9.11.
+   Owner: a presentation task under `web/` and `merchant/`, T4.8.
 9. **`explain_belief` lists a correction twice.** The live answer for
    `blf_8f2c41` carries seven corrections for five ids: `corr_000001` and
    `corr_3b7e52` each appear twice. `restoreStanding` and `LoadSeed` both add
    the seeded correction to the correction order, and a reused id is appended
    a second time; the read does not de-duplicate. Owner: a layer task
-   (proposed T9.10).
+   (T8.7b).
 10. **Step 2's Channel3 candidate is not live.** The reference agent has no
     product-search tool, so no Channel3 call exists and the candidate SKU
     appears only in the step-4 capture. Owner: T9.9 (agent tool surface) or a
