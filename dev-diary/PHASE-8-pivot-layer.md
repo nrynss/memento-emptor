@@ -764,6 +764,18 @@ Tests. `TestUnknownDisputeCodeRidesAsObservation` ingests a dispute whose code i
 
 No fixture moves: every frozen evidence row is attached to a belief, so none describes an unattached row. Gate green (`OK all checks passed`) after `npm ci` in `web/` and `merchant/`. Spend $0.00: no live call, no key.
 
+**Review (fresh eyes).** APPROVE, with the fixes below committed on the review branch, all inside `owns`. Re-verified from the tree, no live call, $0.
+
+Scope holds: against `main` the change touches only `internal/api/server/` and this task's lines, and no fixture moved. The unknown-code dispute now lands `observe` with its code as reason text and no link, the attached reasoned rows keep `record_action`, and the code-less dispute is stored with no reason, `observe` and no link, and stays out of the ledger. The ledger's visibility rule is the reason-nil and no-link test, not `write_op`, and only a refund files a pending question, so the audit-only decision hides nothing the shopper could answer.
+
+Two store paths did not name a write op when they stored a row. `storeIngestResult` created the record and set the op only after `attachRow`, and `RecordReason` minted the row for a question whose event stored no evidence and set the op only further down. A failed attach — a refused graph write, a failed fit write, a canceled request — left a served row with the zero op, exactly the schema break this task closes. Both rows are now created as observations; an attach still upgrades them to `record_action`. `TestStoredIngestRowCarriesItsOwnWriteOp` and `TestStoredAnswerRowCarriesItsOwnWriteOp` drive a refused attach on each path and read the stored row; either default removed fails its test with `stored write_op = "", want observe`.
+
+The task's `continue` was unpinned. Removing it runs `markUnattached` over an attached dispute row and turns it into `observe` with no link, with the whole server package still green. `TestUnattachedRowsDecode` now ingests the not-arrived dispute and pins `record_action` beside its one link; removing the `continue` fails it on both assertions.
+
+The `belief_ids` fix was only pinned by the new dispute shape. `TestUnattachedRowsDecode` also drives the two rows that were already served before this task — a changed-mind refund and a direction-mismatch answer — and checks each marshals `belief_ids: []` and a write op from the frozen enum, in the same response as an attached answer that keeps `record_action` and its link. Reverting the non-nil copy fails on `changed_mind` and `fit_too_large` with `belief_ids marshal null`.
+
+Mutation-checked, each reverted: the pre-fix tree fails all five tests with the symptoms above; the non-nil copy, either creation default and the `continue` each fail their own test. Gate green in the review worktree after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`. Spend $0.00: no live call, no key.
+
 ---
 
 ### T8.5o: A second feedback with different words

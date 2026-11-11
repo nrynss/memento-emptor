@@ -262,3 +262,235 @@ func TestCodeLessDisputeStaysAuditOnly(t *testing.T) {
 		t.Errorf("the shopper holds %d beliefs, want none: neither dispute earned one", beliefs)
 	}
 }
+
+// wireLedgerRow is one ledger row as the web client sees it on the wire:
+// the emitted write operation and the raw belief link JSON.
+type wireLedgerRow struct {
+	writeOp   string
+	beliefIDs string
+}
+
+// wireLedgerRows marshals one ledger response and returns each row's wire
+// shape by reason category, so an assertion reads what the decoder reads
+// rather than the Go value.
+func wireLedgerRows(t *testing.T, ledger contract.LedgerEvidenceResponse) map[domain.Category]wireLedgerRow {
+	t.Helper()
+	raw, err := json.Marshal(ledger)
+	if err != nil {
+		t.Fatalf("marshal ledger: %v", err)
+	}
+	var wire struct {
+		Evidence []struct {
+			Evidence struct {
+				Reason struct {
+					Category domain.Category `json:"category"`
+				} `json:"reason"`
+				WriteOp string `json:"write_op"`
+			} `json:"evidence"`
+			BeliefIDs json.RawMessage `json:"belief_ids"`
+		} `json:"evidence"`
+	}
+	if err := json.Unmarshal(raw, &wire); err != nil {
+		t.Fatalf("decode ledger JSON: %v", err)
+	}
+	out := map[domain.Category]wireLedgerRow{}
+	for _, row := range wire.Evidence {
+		out[row.Evidence.Reason.Category] = wireLedgerRow{
+			writeOp:   row.Evidence.WriteOp,
+			beliefIDs: string(row.BeliefIDs),
+		}
+	}
+	return out
+}
+
+// TestUnattachedRowsDecode proves the wire shape of the unattached rows
+// the layer already served before this task: a changed-mind refund and a
+// direction-mismatch answer each marshal a write op the frozen schema
+// admits and an empty belief_ids array, never null, and an attached
+// answer in the same response keeps record_action with its one link.
+func TestUnattachedRowsDecode(t *testing.T) {
+	ctx := context.Background()
+	svc, _ := storyHarness(t)
+	shopper := "shopper_01"
+
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-01"); err != nil {
+		t.Fatalf("ingest WH-2EV-01: %v", err)
+	}
+	if res := answerReason(t, svc, shopper, "WH-2EV-01", "changed my mind"); res.BeliefID != nil {
+		t.Fatalf("changed mind linked belief %q, want none", *res.BeliefID)
+	}
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-02"); err != nil {
+		t.Fatalf("ingest WH-2EV-02: %v", err)
+	}
+	attached := answerReason(t, svc, shopper, "WH-2EV-02", "too tight in the shoulders")
+	if attached.BeliefID == nil {
+		t.Fatal("the too-small answer linked no belief, want one")
+	}
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-03"); err != nil {
+		t.Fatalf("ingest WH-2EV-03: %v", err)
+	}
+	if res := answerReason(t, svc, shopper, "WH-2EV-03", "it swims on me, far too big"); res.BeliefID != nil {
+		t.Fatalf("direction-mismatch answer linked belief %q, want none", *res.BeliefID)
+	}
+	// A reasoned ingest row attaches to its belief as it arrives, so it
+	// keeps record_action: only the rows that count toward nothing are
+	// observations.
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-04"); err != nil {
+		t.Fatalf("ingest WH-2EV-04: %v", err)
+	}
+
+	ledger, err := svc.LedgerEvidence(ctx, contract.LedgerEvidenceRequest{ShopperID: shopper})
+	if err != nil {
+		t.Fatalf("ledger evidence: %v", err)
+	}
+	rows := wireLedgerRows(t, ledger)
+	allowed := frozenWriteOps(t)
+
+	for _, category := range []domain.Category{domain.CategoryChangedMind, domain.CategoryFitTooLarge} {
+		row, ok := rows[category]
+		if !ok {
+			t.Fatalf("ledger misses the unattached %s row", category)
+		}
+		if row.writeOp != string(domain.WriteObserve) {
+			t.Errorf("%s write_op = %q, want observe", category, row.writeOp)
+		}
+		if row.beliefIDs != "[]" {
+			t.Errorf("%s belief_ids marshal %s, want [] so the decoder accepts it", category, row.beliefIDs)
+		}
+	}
+
+	attachedRow, ok := rows[domain.CategoryFitTooSmall]
+	if !ok {
+		t.Fatal("ledger misses the attached too-small row")
+	}
+	if attachedRow.writeOp != string(domain.WriteRecordAction) {
+		t.Errorf("attached write_op = %q, want record_action", attachedRow.writeOp)
+	}
+	if want := fmt.Sprintf("[%q]", *attached.BeliefID); attachedRow.beliefIDs != want {
+		t.Errorf("attached belief_ids marshal %s, want %s", attachedRow.beliefIDs, want)
+	}
+
+	dispute, ok := rows[domain.CategoryNotArrived]
+	if !ok {
+		t.Fatal("ledger misses the attached not-arrived dispute")
+	}
+	if dispute.writeOp != string(domain.WriteRecordAction) {
+		t.Errorf("attached dispute write_op = %q, want record_action", dispute.writeOp)
+	}
+	var disputeLinks []string
+	if err := json.Unmarshal([]byte(dispute.beliefIDs), &disputeLinks); err != nil {
+		t.Fatalf("decode dispute belief_ids %s: %v", dispute.beliefIDs, err)
+	}
+	if len(disputeLinks) != 1 {
+		t.Errorf("attached dispute links %v, want its one belief", disputeLinks)
+	}
+
+	for category, row := range rows {
+		if !allowed[row.writeOp] {
+			t.Errorf("%s: emitted write_op %q is not one the frozen schema admits %v",
+				category, row.writeOp, allowed)
+		}
+	}
+}
+
+// TestStoredIngestRowCarriesItsOwnWriteOp pins the same boundary on the
+// ingest path: the row is stored with how it is written before any attach
+// is attempted, so a refused belief write leaves an observation rather
+// than a row with the zero op. The dispute code is one the frozen table
+// knows, so the delivery would attach to the seller belief.
+func TestStoredIngestRowCarriesItsOwnWriteOp(t *testing.T) {
+	ctx := context.Background()
+	svc := ingestWriteOpHarness(t)
+	shopper := "writeop_ingest_attach_fails"
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-04"); err == nil {
+		t.Fatal("ingest dispute: want the refused graph write to fail the call")
+	}
+
+	svc.mu.Lock()
+	st := svc.shoppers[shopper]
+	var stored *evidenceRecord
+	if st != nil {
+		for _, rec := range st.evidence {
+			if rec.row.Link.EventID == "WH-2EV-04" {
+				stored = rec
+			}
+		}
+	}
+	var writeOp domain.WriteOp
+	if stored != nil {
+		writeOp = stored.writeOp
+	}
+	svc.mu.Unlock()
+
+	if stored == nil {
+		t.Fatal("the dispute row was not stored, want the audit row kept")
+	}
+	if writeOp != domain.WriteObserve {
+		t.Errorf("stored write_op = %q, want observe: a stored row names how it is written", writeOp)
+	}
+}
+
+// TestStoredAnswerRowCarriesItsOwnWriteOp pins the store boundary: the
+// row RecordReason mints for a question whose event stored no evidence
+// carries how it is written at the moment it is stored. The graph refuses
+// the belief the answer would create, which is the failure that used to
+// leave the served row with the zero write op.
+func TestStoredAnswerRowCarriesItsOwnWriteOp(t *testing.T) {
+	ctx := context.Background()
+	svc := ingestWriteOpHarness(t)
+	shopper := "writeop_attach_fails"
+	item := domain.Item{
+		BrandID: "brand-x-001", BrandName: "Brand X", LineName: "chino",
+		SKU: "chino-khaki-32", Size: "32", Category: "pants",
+	}
+	link := domain.TransactionLink{
+		OrderID: "ORD-7XK-99", RefundID: "RFD-7XK-99",
+		CustomID: "memento-shopper01-99", EventID: "WH-2EV-99",
+	}
+
+	svc.mu.Lock()
+	st, err := svc.state(ctx, shopper)
+	if err != nil {
+		svc.mu.Unlock()
+		t.Fatalf("partition for %q: %v", shopper, err)
+	}
+	st.pending["q_writeop"] = &pendingRecord{
+		id:            "q_writeop",
+		eventID:       link.EventID,
+		outcome:       domain.Outcome{Kind: domain.OutcomeRefund, Status: "COMPLETED", AmountMinor: 19500, Currency: "USD"},
+		items:         []domain.Item{item},
+		link:          link,
+		awaitingSince: time.Date(2026, 11, 9, 10, 0, 0, 0, time.UTC),
+	}
+	svc.mu.Unlock()
+
+	_, err = svc.RecordReason(ctx, contract.RecordReasonRequest{
+		ShopperID:  shopper,
+		QuestionID: "q_writeop",
+		AnswerText: "too tight in the shoulders",
+	})
+	if err == nil {
+		t.Fatal("record reason: want the refused graph write to fail the call")
+	}
+
+	svc.mu.Lock()
+	st = svc.shoppers[shopper]
+	var stored *evidenceRecord
+	for _, rec := range st.evidence {
+		if rec.row.Link.EventID == link.EventID {
+			stored = rec
+		}
+	}
+	var writeOp domain.WriteOp
+	if stored != nil {
+		writeOp = stored.writeOp
+	}
+	svc.mu.Unlock()
+
+	if stored == nil {
+		t.Fatal("the answer's row was not stored, want the audit row kept")
+	}
+	if writeOp != domain.WriteObserve {
+		t.Errorf("stored write_op = %q, want observe: a stored row names how it is written", writeOp)
+	}
+}

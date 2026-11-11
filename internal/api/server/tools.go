@@ -101,7 +101,11 @@ func (s *Service) storeIngestResult(ctx context.Context, st *shopperState, shopp
 		return WebhookResult{}, err
 	}
 	for _, row := range res.Rows {
-		rec := &evidenceRecord{id: st.mint("ev"), row: row, counts: row.CountsToward()}
+		// A stored row starts as an observation: attachRow makes it a
+		// structural write when it links a belief, and markUnattached
+		// leaves it an observation, so no stored row carries the zero
+		// write op even when a later write fails.
+		rec := &evidenceRecord{id: st.mint("ev"), row: row, counts: row.CountsToward(), writeOp: domain.WriteObserve}
 		st.evidence[rec.id] = rec
 		if row.Outcome.Kind == domain.OutcomeCapture {
 			st.captures[row.Link.CustomID] = append(st.captures[row.Link.CustomID], rec.id)
@@ -713,6 +717,9 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 	counts := reason.Category.CountsToward()
 	rows := st.rowsForEvent(question.eventID)
 	if len(rows) == 0 && len(question.items) > 0 {
+		// The row is stored as an observation: the attach below makes it
+		// a structural write when a belief claims it, and an answer that
+		// attaches nowhere leaves it an observation.
 		rows = []*evidenceRecord{{
 			id: st.mint("ev"),
 			row: domain.Evidence{
@@ -723,7 +730,8 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 				Seeded:     question.seeded,
 				OccurredAt: question.awaitingSince,
 			},
-			counts: counts,
+			counts:  counts,
+			writeOp: domain.WriteObserve,
 		}}
 		st.evidence[rows[0].id] = rows[0]
 	}
