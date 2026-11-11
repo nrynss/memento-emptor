@@ -100,19 +100,7 @@ Also align the `product_fit` example counts with T9.1's seeded population (or la
 
 Staged: the tightened schemas, types, fixtures, examples and byte-pinned docs land with T7.4. The served-layer comparison and the frozen replay refresh ride with it (T8.5c's comparison update and T7.5 below) so `main` never goes red.
 
----
-
-### T7.5: Refresh the frozen replay for the tightened contract
-```yaml
-requires:   [T7.4]
-fixture-ok: yes
-size:       S · mid
-owns:       internal/fakes/, testdata/replay/
-status:     claimed:t75-replay
-```
-T7.4 requires the pivot's pool and precedence fields, but the replay builds contract Go values directly, so its marshaled output already emits the new null keys while frozen `testdata/replay/p3-turns.json` and `p4-ledger.json` do not have them. Update the fakes to emit the required fields where they do not already, and refresh the two frozen replay fixtures to the tightened shape in the same commit (orchestrator's call under rule 1; the freeze manifest gains no new files). Do not change what the replay proves — only the wire shape.
-
-**Done when:** `TestReplayMatchesFixtures`, `TestReplayMatchesContract` and `TestP3TurnsMatchContract` pass against the tightened contract; the refreshed fixtures differ from the old ones only by the required pivot fields; the gate passes.**Notes (in-review).** The tightening is in place, all inside `owns`:
+**Notes (in-review).** The tightening is in place, all inside `owns`:
 - Schemas: `recall_for_purchase.response.schema.json` requires `pool` and `pool_lookup` (the pool stays nullable: a null pool is an answer, not a refusal); `common.schema.json` `Belief` and `Pool` require `precedence` (nullable: recall sets it, the ledger and `product_fit` reads carry null because they show the row rather than the decision).
 - Go types: `BeliefView.Precedence`, `PoolView.Precedence`, `RecallResponse.Pool` and `RecallResponse.PoolLookup` lost their `omitempty` and always serialise, with comments stating the null convention. `TestRequiredFieldsSerialize` pins the keys on empty structs.
 - Fixtures: the base recall fixture is now the unwired shape (`pool: null`, `pool_lookup: unavailable`, belief precedence `own_evidence` overridden by `correction`); `example-none` gains `pool: null`; every ledger/explain belief and the Earned pool gain `precedence: null`. New `product_fit.response.example-claimed.json` (relaxed line, 2 shoppers, Claimed, direction null) and `product_fit.response.example-building.json` (slim line, 8 shoppers, Building small) carry the seeded population's own rows for their lines with no live rows yet, verified by script against `testdata/seed/population/population.json`. The Earned example keeps its counts and is labelled illustrative in `docs/interface.md` (status Earned and direction small match the population; the 48 seeded settled do not — the population has 22).
@@ -120,6 +108,9 @@ T7.4 requires the pivot's pool and precedence fields, but the replay builds cont
 - Rank decision: the rank stays, the limit is documented. Kept/feedback/contested share rank 4 above reason_classified (rank 3), so a classification landing after a rank-4 write cannot apply — the writer's merge keeps the higher rank whatever the event times say, and within rank 4 the later event wins. Renumbering would renumber every row version and `internal/domain` is outside `owns`. In practice each purchase settles once (kept and refund are two arms of one outcome switch; classification answers the pending question the refund opened), and when classification and feedback do meet they point the same way, so the directional counts the rule reads are unchanged.
 
 Two breakages outside `owns`, reported not touched: `internal/api/server` (`TestContractExamplesAgainstService/recall`, `TestHTTPTransport/tools_call_recall`) strips the pivot fields and compares against the base fixture, which now carries the tightened shape — T8.5c owns the served side and its comparison. `internal/fakes` (`TestReplayMatchesFixtures`, `TestReplayMatchesContract`, `TestP3TurnsMatchContract` turns 1 and 6) binds `testdata/replay/` and the ledger/recall/explain fixtures byte-for-byte in meaning; the tightened keys diverge from the frozen replay. Both need an orchestrator call: either T8.5c (or a replay refresh) updates those comparisons, or the freeze accepts the divergence. The gate therefore fails outside `owns`; everything inside `owns` passes (`go test ./internal/api/contract/`, `gofmt`, `go vet`).
+
+
+---
 
 ---
 
