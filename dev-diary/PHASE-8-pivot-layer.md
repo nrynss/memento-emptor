@@ -868,6 +868,48 @@ The T8.5i review found `guidanceForOwnEvidence` defaults the direction clause to
 
 ---
 
+### T8.5w: Two corrected beliefs for one brand (High)
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       M · mid
+owns:       internal/api/server/, internal/api/contract/
+status:     not-started
+```
+The P8 review proved a High: `recallBeliefs` serves every fit belief, but `assembleRecall` allows one override. Rival birth (three opposite answers) plus `record_correction` against each belief makes every recall for that brand hard-fail with `server: contradicted belief has no overriding correction`. The ledger's contest path can trigger it, and it does not heal. Decide the repair (one override per belief in the response, or refusing the second correction at write time) — a response change is contract-shaped and the orchestrator's call — and pin it with a test that fails on today's behaviour.
+
+**Done when:** two corrected beliefs for one brand cannot make recall refuse; the chosen shape is tested and documented; the gate passes.
+
+---
+
+### T8.5x: Kept and contested transitions have no served producer
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/, internal/ingest/, product.md
+status:     not-started
+```
+The P8 review found two pool-row transitions product.md names have no served producer: no served path emits `OutcomeKept` (`Writer.Kept` runs only from the seed and tests), so a live purchase never settles as kept past the window; and `Writer.Contested` has no caller outside tests while `record_reason` cannot re-answer a closed question, so a contested reason never changes a row. Implement the served paths or record the limitations in product.md with their reasons.
+
+**Done when:** each transition has a served producer or a recorded limitation; a test pins whichever was chosen; the gate passes.
+
+---
+
+### T8.2c: Re-run the fit-index transcript
+```yaml
+requires:   [T8.2b]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/fitindex/
+status:     not-started
+```
+The P8 review found T8.2b's step-3 transcript line (`version=3001794233529 state=refunded settled=false`) cannot come from the committed driver: it prints a form `docSource.String` never emits, and a refunded document at the reason-classified rank, which no refund write can carry. The three versions the notes rest on do re-derive; only provenance is wrong. Re-run the driver so the transcript is real, or record the correction in the handoff if a run is not worth the churn.
+
+**Done when:** a real transcript (or an honest correction of the note) is recorded; test indices are erased; spend recorded.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).
