@@ -832,7 +832,7 @@ requires:   [T8.5i]
 fixture-ok: yes
 size:       XS · mid
 owns:       demo/driver/
-status:     in-review
+status:     done
 ```
 `demo/driver/main.go` pins the old withholding at its one-return step ("one return earns nothing…") and its final recall ("feedback grew a rival belief"), so it would fail against the served layer after T8.5i. Update the driver's assertions to the served thin belief, and keep `demo/run.py`'s evidence expectations consistent.
 
