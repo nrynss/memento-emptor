@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 7 / 7 | Done |
 | P8 | 27 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5q, T8.5r, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
-| P10 | 5 / 8 | In progress (T10.4, T10.5, T10.6) |
+| P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T10.6: The reasoner's ladder is pinned to the layer's (done)
+
+**What exists.** `bench/round2/ladder_test.go` drives the layer's own service path — a refund webhook, the shopper's classified answer, then `LedgerBeliefs` — for every rung of the reasoner's ladder in both directions (14 cells) and requires the composed belief's size to equal the reasoner's rung. A swap in `reason.go` fails six cells naming both sizes; the same swap in `internal/api/server/content.go` fails the same six the other way. The test is not a frozen input: no hashed file changed and the manifest stays 116 rows.
+
+**What surprised.** The mutation count in the worker's note was five, not six; the review corrected it. The test pins the composed fit belief, not `guidanceForPool`'s wording, and the test file itself is not hashed, so the gate runs whatever remains of it.
+
+**The next agent should not have to work out.** T10.4 can claim now: the 116 rows verify, no run directory or marker exists, and the marker must be written against the post-landing `FROZEN.md` hash.
 
 ### T8.5p: The live-origin ledger rows stay unmarked (done)
 

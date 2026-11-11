@@ -136,7 +136,7 @@ requires:   [T10.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/round2/
-status:     in-review
+status:     done
 ```
 `bench/round2/reason.go` restates the layer's size ladder (unexported in `internal/api/server/content.go`), as round 1's driver does. A ladder change in the layer would drift the reference reasoner silently, and the freeze would keep the old order.
 
