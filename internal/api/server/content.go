@@ -136,10 +136,13 @@ func guidanceForCorrection(correction contract.CorrectionView, subjectName strin
 
 // guidanceForOwnEvidence tells the agent what to recommend from the
 // shopper's own fit evidence: the size its value recommends, for its
-// subject. When the pooled product fit disagrees, the guidance says so
-// and cites the shopper's evidence count, so the agent can see why their
-// history beat the crowd.
-func guidanceForOwnEvidence(view contract.BeliefView, poolDisagrees bool) contract.GuidanceView {
+// subject. When a pool rides beside the belief, the sentence also states
+// what the shopper's own rows found — fits well, runs small or runs large,
+// read from the belief's own value rather than assumed — with how many rows
+// said it, and whether the pool recommends the same size or another one.
+// With no pool there is nothing to compare: the sentence names the size and
+// makes no claim about a pool.
+func guidanceForOwnEvidence(view contract.BeliefView, poolView *contract.PoolView) contract.GuidanceView {
 	size := lastSize(view.Value)
 	name := view.Subject.Name
 	if name == "" {
@@ -148,12 +151,10 @@ func guidanceForOwnEvidence(view contract.BeliefView, poolDisagrees bool) contra
 	text := fmt.Sprintf("Take size %s for %s", size, name)
 	if size == "" {
 		text = fmt.Sprintf("Follow the earned belief for %s", name)
-	} else if poolDisagrees {
-		direction := "runs small"
-		if domain.DirectionForValue(view.Value) == domain.FitDirectionLarge {
-			direction = "runs large"
-		}
-		text = fmt.Sprintf("%s: %s %s, ahead of the pool.", text, ownEvidenceClause(len(view.Evidence)), direction)
+	} else if poolAgrees(size, poolView) {
+		text = fmt.Sprintf("%s: %s, and the pool agrees.", text, ownEvidenceClause(len(view.Evidence), fitWords(view.Value)))
+	} else if poolView != nil {
+		text = fmt.Sprintf("%s: %s, ahead of the pool.", text, ownEvidenceClause(len(view.Evidence), fitWords(view.Value)))
 	}
 	beliefID := view.BeliefID
 	return contract.GuidanceView{
@@ -163,15 +164,50 @@ func guidanceForOwnEvidence(view contract.BeliefView, poolDisagrees bool) contra
 	}
 }
 
+// fitWords states what one own-evidence belief says about the fit in the
+// sentence's words: runs small, runs large, or fits well. The words come
+// from the belief's own value, so a fits-well belief never claims a
+// direction it did not report. A value naming neither reads empty, and the
+// clause then states the rows alone.
+func fitWords(value string) string {
+	switch domain.DirectionForValue(value) {
+	case domain.FitDirectionSmall:
+		return "runs small"
+	case domain.FitDirectionLarge:
+		return "runs large"
+	}
+	if strings.Contains(strings.ToLower(value), "fits") {
+		return "fits well"
+	}
+	return ""
+}
+
+// poolAgrees reports whether the pool recommends the size the shopper's
+// own evidence does. The pool names a size by stepping its consulted size
+// one rung the way its direction points; a pool naming no direction names
+// no size, so it never agrees.
+func poolAgrees(own string, poolView *contract.PoolView) bool {
+	if own == "" || poolView == nil || poolView.Direction == nil {
+		return false
+	}
+	up := *poolView.Direction == domain.FitDirectionSmall
+	return strings.EqualFold(neighbourSize(poolView.Size, up), own)
+}
+
 // ownEvidenceClause states the shopper's own rows behind a recommendation,
 // with the verb agreeing with the count: one return says, several say. The
-// count itself comes from evidenceCount, so the phrasing has one home.
-func ownEvidenceClause(n int) string {
+// count itself comes from evidenceCount, so the phrasing has one home. The
+// fit words follow the pronoun when the belief names a direction, and the
+// clause says "so" when it names none.
+func ownEvidenceClause(n int, fit string) string {
 	verb := "say"
 	if n == 1 {
 		verb = "says"
 	}
-	return fmt.Sprintf("your own %s %s it", evidenceCount(n), verb)
+	if fit == "" {
+		return fmt.Sprintf("your own %s %s so", evidenceCount(n), verb)
+	}
+	return fmt.Sprintf("your own %s %s it %s", evidenceCount(n), verb, fit)
 }
 
 // evidenceCount states how many evidence rows back a recommendation, in

@@ -945,11 +945,25 @@ requires:   [T8.5i]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/
-status:     claimed:t85v-guidance
+status:     in-review
 ```
 The T8.5i review found `guidanceForOwnEvidence` defaults the direction clause to "runs small" unless the belief's value reads large, and `poolDisagrees` means "a pool is present and own evidence overrode it", not "the pool recommends a different size". A lone fits-well return is served (T8.5i) with the sentence "Take size M for Brand X: your own one return says it runs small, ahead of the pool." — the size is right but the sentence misstates the evidence and self-contradicts, and the "ahead of the pool" clause fires when the pool merely agrees. Make the clause derive from the belief's own value (fits-well, too small, too large) and say whether the pool agrees, is overridden, or is absent.
 
 **Done when:** a fits-well own-evidence recall names fits-well and does not say "runs small"; a pool that agrees is not called overridden; the existing own-evidence texts for too-small/too-large are unchanged where correct; tests pin all three; the gate passes.
+
+**Notes (in-review).** The sentence now reads both halves from the data they are about. `fitWords` maps a runs-small value to "runs small", a runs-large value to "runs large", and the emerging fits-well value ("size M fits this shopper now") to "fits well"; a value naming neither leaves the clause at "your own N returns say so", so no sentence invents a direction. `ownEvidenceClause` takes those words with the count, so a lone fits-well return reads "Take size M for Brand X: your own one return says it fits well, ahead of the pool."
+
+`poolDisagrees` is gone. `poolAgrees` compares the size the pool recommends — its consulted size stepped one rung the way its direction points, the arithmetic `guidanceForPool` already uses — with the size the own evidence names. An agreeing pool reads ", and the pool agrees."; a pool recommending another size keeps the existing ", ahead of the pool."; with no pool the sentence stays the bare "Take size L for Brand X". The last shape is deliberate: the Done-when keeps the too-small and too-large texts unchanged where correct, and a missing pool is not a disagreement to announce. The response already says whether the pool was consulted (`pool` null, `pool_lookup` unavailable), so the sentence claims nothing false by staying silent, and the demo driver and the live layer harness keep the texts they pin.
+
+A directionless Building pool agrees with nothing: it names no size, so `poolAgrees` is false and the sentence reads "ahead of the pool". That is the same pool the precedence step already leaves behind, and the size arithmetic is untouched.
+
+Sizes and precedence are untouched. Every row of the new table also checks that a present pool is still the weaker step, marked overridden by the own evidence that decided, with or without agreement: only the prose distinguishes the two.
+
+`TestOwnEvidenceSentenceTellsTheTruth` (new file `internal/api/server/guidance_test.go`) is a table over the six shapes: a lone fits-well row beside a pool that runs small; a lone too-small row beside a pool that agrees; a too-large row beside a pool that agrees; two too-large returns beside a pool that agrees; two too-large returns beside a pool that disagrees; and two too-large returns with no pool. Each row runs the real service (ingest, then `record_reason` or `record_feedback`, then `recall_for_purchase`) and asserts the exact sentence, the `own_evidence` basis, the phrases that must not appear, and the unchanged pool precedence where a pool rides. The agreeing rows use a new `earnedLargePool` — `earnedSmallPool` with the directions swapped — so the pool recommends the size the shopper's own rows do. On the parent commit the fits-well row fails with "your own one return says it runs small" and the three agreeing rows fail with "ahead of the pool", which is the finding; the disagreeing and no-pool rows pass before and after, which is the "unchanged where correct" half.
+
+Fixtures and docs did not move: the only own-evidence fixture, `recall_for_purchase.response.example-own.json`, is a pool that disagrees, so its sentence is byte-identical, and `TestInterfaceDocExamples` passes against `docs/interface.md` unchanged. `fixture-ok: yes` was available and not needed.
+
+Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree): `gofmt`, `go vet`, `go test -race` over every Go package, both lockfile checks, both Svelte checks, both lints, both test runs and both builds, ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 
