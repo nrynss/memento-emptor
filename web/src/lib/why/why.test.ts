@@ -7,7 +7,8 @@ import {
 	createFixtureTransport,
 	fixtureShopperId,
 	LedgerClient,
-	type LedgerFixtureStep
+	type LedgerFixtureStep,
+	type ReasonCategory
 } from '$lib/api';
 import { tracesForBelief } from './traces';
 import {
@@ -16,6 +17,7 @@ import {
 	matchesEvidenceQuery,
 	notCountedReason,
 	PENDING_WHY_NOT,
+	reasonWord,
 	type WhyViewData
 } from './why';
 
@@ -211,5 +213,42 @@ describe('why view plain language', () => {
 				);
 			}
 		}
+	});
+
+	it('names every reason category in plain words, never the raw code', () => {
+		const categories: ReasonCategory[] = [
+			'fit_too_small',
+			'fit_too_large',
+			'damaged_or_defective',
+			'not_arrived',
+			'changed_mind',
+			'unclear',
+			'none'
+		];
+		for (const category of categories) {
+			const word = reasonWord(category);
+			expect(word).not.toMatch(/_/);
+			expect(word).toMatch(/^[a-z ]+$/);
+		}
+		expect(reasonWord('fit_too_small')).toBe('too small');
+		expect(reasonWord('fit_too_large')).toBe('too large');
+		expect(reasonWord('damaged_or_defective')).toBe('damaged');
+		expect(reasonWord('not_arrived')).toBe('not arrived');
+		expect(reasonWord('changed_mind')).toBe('changed mind');
+		expect(reasonWord('none')).toBe('fits well');
+	});
+
+	it('reads the demo evidence back in plain words', async () => {
+		const view = await whyAt(9, sizingId);
+		expect(
+			view.counted.map((row) => (row.reason === null ? null : reasonWord(row.reason.category)))
+		).toEqual(['too small', 'too small', 'too small']);
+		const dispute = view.not_counted.find((row) => row.evidence.evidence_id === 'ev_9d4c22');
+		const disputeReason = dispute?.evidence.reason;
+		expect(
+			disputeReason === null || disputeReason === undefined
+				? null
+				: reasonWord(disputeReason.category)
+		).toBe('not arrived');
 	});
 });

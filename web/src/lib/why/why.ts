@@ -10,7 +10,8 @@ import type {
 	CorrectionView,
 	EvidenceView,
 	LedgerEvidenceRow,
-	QuestionView
+	QuestionView,
+	ReasonCategory
 } from '$lib/api';
 
 /** One evidence row the layer deliberately did not count toward a belief, and why. */
@@ -46,6 +47,26 @@ export interface WhyViewData {
 /** The shopper-facing word for what a belief kind is about. */
 export function kindWord(kind: BeliefKind): string {
 	return kind === 'fit' ? 'sizing' : 'seller reliability';
+}
+
+/**
+ * The reason categories in the ledger's own words: the merchant grid's reason
+ * columns and the pool's too-small returns. The card prints the shopper's
+ * quote, then this word; the raw category never reaches the screen.
+ */
+const reasonWords: Record<ReasonCategory, string> = {
+	fit_too_small: 'too small',
+	fit_too_large: 'too large',
+	damaged_or_defective: 'damaged',
+	not_arrived: 'not arrived',
+	changed_mind: 'changed mind',
+	unclear: 'unclear',
+	none: 'fits well'
+};
+
+/** The plain-language name of one reason category. */
+export function reasonWord(category: ReasonCategory): string {
+	return reasonWords[category];
 }
 
 /**

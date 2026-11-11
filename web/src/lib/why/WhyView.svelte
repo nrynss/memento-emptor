@@ -7,7 +7,7 @@
 	// below phone width.
 
 	import { kindLabelFor, OUT_OF_TRUE_TOOLTIP, SEEDED_MARK_LABEL, SEEDED_MARK_TOOLTIP } from '$lib/ledger/rows';
-	import { filterWhyView, type WhyViewData } from './why';
+	import { filterWhyView, reasonWord, type WhyViewData } from './why';
 
 	interface Props {
 		view: WhyViewData;
@@ -105,6 +105,15 @@
 					<li class="why-card">
 						<div class="why-columns">
 							<div class="why-column">
+								<h4>Reason</h4>
+								{#if row.reason === null}
+									<p>No reason recorded.</p>
+								{:else}
+									<p class="why-words"><q>{row.reason.text}</q></p>
+									<p class="why-reason-word">{reasonWord(row.reason.category)}</p>
+								{/if}
+							</div>
+							<div class="why-column">
 								<h4>Outcome</h4>
 								<p>{row.outcome.kind} · {row.outcome.status}</p>
 								<p>{money(row.outcome.amount_minor, row.outcome.currency)}</p>
@@ -113,15 +122,6 @@
 								<h4>Item</h4>
 								<p>{row.item.brand_name} {row.item.line_name}, size {row.item.size}</p>
 								<p>SKU {row.item.sku} · {row.item.category}</p>
-							</div>
-							<div class="why-column">
-								<h4>Reason</h4>
-								{#if row.reason === null}
-									<p>No reason recorded.</p>
-								{:else}
-									<p>{row.reason.category}</p>
-									<p><q>{row.reason.text}</q></p>
-								{/if}
 							</div>
 						</div>
 						<p class="why-meta">
@@ -153,6 +153,17 @@
 						<p class="why-not">{row.why_not}</p>
 						<div class="why-columns">
 							<div class="why-column">
+								<h4>Reason</h4>
+								{#if row.evidence.reason === null}
+									<p>No reason recorded.</p>
+								{:else}
+									<p class="why-words"><q>{row.evidence.reason.text}</q></p>
+									<p class="why-reason-word">
+										{reasonWord(row.evidence.reason.category)}
+									</p>
+								{/if}
+							</div>
+							<div class="why-column">
 								<h4>Outcome</h4>
 								<p>{row.evidence.outcome.kind} · {row.evidence.outcome.status}</p>
 								<p>
@@ -166,15 +177,6 @@
 									{row.evidence.item.line_name}, size {row.evidence.item.size}
 								</p>
 								<p>SKU {row.evidence.item.sku} · {row.evidence.item.category}</p>
-							</div>
-							<div class="why-column">
-								<h4>Reason</h4>
-								{#if row.evidence.reason === null}
-									<p>No reason recorded.</p>
-								{:else}
-									<p>{row.evidence.reason.category}</p>
-									<p><q>{row.evidence.reason.text}</q></p>
-								{/if}
 							</div>
 						</div>
 						<p class="why-meta">
@@ -218,10 +220,11 @@
 	<section class="why-traces" aria-label="Agent turns behind the recommendations">
 		<h3>Agent turns behind the recommendations</h3>
 		<p class="why-fixture-note">
-			Fixture placeholders: live mode links each recommendation to its trace.
+			This is a fixture replay: each link is a placeholder on this page, not a trace viewer.
+			A live transport for the trace links is still to come.
 		</p>
 		{#if view.traces.length === 0}
-			<p class="why-empty">No recorded turn touches this belief in fixture mode.</p>
+			<p class="why-empty">No recorded turn touches this belief in the fixture replay.</p>
 		{:else}
 			<ul class="why-trace-list">
 				{#each view.traces as trace (trace.trace_id)}
@@ -369,6 +372,15 @@
 
 	.why-column p {
 		margin: 0 0 0.25rem;
+	}
+
+	.why-words {
+		font-size: 1.0625rem;
+	}
+
+	.why-reason-word {
+		color: var(--dim);
+		font-size: 0.875rem;
 	}
 
 	.why-meta {

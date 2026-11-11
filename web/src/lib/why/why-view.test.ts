@@ -27,10 +27,27 @@ describe('why view simplicity guards', () => {
 		expect(componentSource).toContain('SEEDED_MARK_TOOLTIP');
 	});
 
-	it('searches, links traces as placeholders, and says they are placeholders', () => {
+	it('searches, links traces as placeholders, and says what the replay is', () => {
 		expect(componentSource).toContain('id="why-search-box"');
 		expect(componentSource).toContain('trace.href');
-		expect(componentSource).toContain('Fixture placeholders');
+		expect(componentSource).toContain('This is a fixture replay');
+		expect(componentSource).not.toMatch(/live mode/i);
+	});
+
+	it('leads each card with the shopper words, never a raw reason code', () => {
+		expect(componentSource).toContain('row.reason.text');
+		expect(componentSource).toContain('reasonWord(row.reason.category)');
+		expect(componentSource).toContain('row.evidence.reason.text');
+		expect(componentSource).toContain('reasonWord(row.evidence.reason.category)');
+		expect(componentSource).not.toContain('{row.reason.category}');
+		expect(componentSource).not.toContain('{row.evidence.reason.category}');
+		expect(componentSource).not.toContain('fit_too_small');
+		expect(componentSource.indexOf('<q>{row.reason.text}</q>')).toBeLessThan(
+			componentSource.indexOf('{reasonWord(row.reason.category)}')
+		);
+		expect(componentSource.indexOf('<q>{row.evidence.reason.text}</q>')).toBeLessThan(
+			componentSource.indexOf('{reasonWord(row.evidence.reason.category)}')
+		);
 	});
 
 	it('stacks the evidence columns at phone width', () => {

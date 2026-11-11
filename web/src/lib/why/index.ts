@@ -11,6 +11,7 @@ export {
 	notCountedReason,
 	PENDING_WHY_NOT,
 	pendingSearchText,
+	reasonWord,
 	type BeliefTraceLink,
 	type FilteredWhyLists,
 	type NotCountedEvidence,

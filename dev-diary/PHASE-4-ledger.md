@@ -103,7 +103,8 @@ requires:   [T4.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       web/src/lib/why/
-status:     claimed:t47-why
+status:     in-review
+notes:      The why cards in web/src/lib/why/ now lead with the shopper's quote and name the reason category in the ledger's own words (`reasonWord`: too small, too large, damaged, not arrived, changed mind, unclear, fits well, matching the merchant grid's reason columns); the raw code no longer renders. The reason column comes first in both the counted and the not-counted card. The trace note now says this is a fixture replay whose links are on-page placeholders, with the live transport still to come (T4.8); the traces.ts header no longer promises a live mode. Tests: `reasonWord` maps every category to a word with no underscore, the demo's counted rows read "too small" and the dispute "not arrived", and a source guard fails if the template interpolates `row.reason.category` or prints the category before the quote. Branch task/t47.
 ```
 The P4 review found the why cards print the raw reason category (`fit_too_small`) above the shopper's words, and the trace note promises a "live mode" the fixture-only ledger does not have.
 

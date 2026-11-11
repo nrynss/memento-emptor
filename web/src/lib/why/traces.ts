@@ -1,7 +1,8 @@
 // Fixture trace links for the why view: the Astropods turns behind each
-// recommendation from a belief. Fixture mode has no trace viewer, so every
-// href is an on-page placeholder anchor, and the view says so next to the
-// list; live mode will point these at the trace viewer instead.
+// recommendation from a belief. This is a fixture replay with no trace
+// viewer, so every href is an on-page placeholder anchor, and the view says
+// so next to the list. The live transport that would point these at a real
+// trace viewer is still to come, owned by T4.8.
 //
 // Provenance: the T3.1 turn recommending from the correction while citing
 // the contradicted L belief, the six T3.4 turns (pending poll, reason,
@@ -40,7 +41,7 @@ const emergingTraces: BeliefTraceLink[] = [
 /**
  * The fixture trace links for one belief, oldest turn first. Empty when no
  * recorded turn touches the belief: the seller belief and the general
- * statement have none in fixture mode.
+ * statement have none in the fixture replay.
  */
 export function tracesForBelief(beliefId: string): BeliefTraceLink[] {
 	switch (beliefId) {
