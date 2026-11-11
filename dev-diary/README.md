@@ -81,7 +81,7 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 | **C: Ledger** | P4 | 11 / 11 | Done |
 | **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
 | **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
-| **F: Pivot surfaces** | P9 | 30 / 32 | In progress (T9.15, T9.24) |
+| **F: Pivot surfaces** | P9 | 31 / 32 | In progress (T9.24) |
 | **G: Round 2** | P10 | 8 / 8 | Done |
 
 If capacity is short, run A first and then B: the demo needs both, and the ledger can follow on fixtures.
@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
-| P9 | 30 / 32 | In progress (T9.15, T9.24) |
+| P9 | 31 / 32 | In progress (T9.24) |
 | P10 | 8 / 8 | Done |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.15: A second shopper for day one (done)
+
+**What exists.** The existing agent entry now lists `shopper_01,shopper_02` — same key id, digest, seller and flags, so no token was minted. The keyring entry carries it and the Render service `memento` holds the same value as `MEMENTO_AGENT_KEYS`; the env change was applied through the Render API and a manual deploy. Proved through the edge: `shopper_02`'s first recall answers 200 with `pool_lookup: consulted`, pool Earned/small and no beliefs; `shopper_01` still answers with its three beliefs; an unbound shopper still answers 401.
+
+**What surprised.** A Render env change does not redeploy by itself; the new value sat behind the old instance until a manual deploy was triggered. The widened entry needed no new keyring entry, only the shoppers field.
+
+**The next agent should not have to work out.** The agent key is one string in two places (keyring and the Render secret); a change must move both. `memento-tokens` holds the bearer token, `memento-keys` holds the ring entry — do not confuse them.
 
 ### T8.7b: Live payment events reach the layer (done)
 
