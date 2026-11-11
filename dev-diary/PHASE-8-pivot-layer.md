@@ -755,7 +755,7 @@ requires:   [T8.7, T8.5]
 fixture-ok: no
 size:       M · frontier
 owns:       cmd/memento/, internal/payments/, internal/ingest/, deploy/paypal-webhook.sh
-status:     not-started
+status:     claimed:t87b-live
 ```
 The T9.7 run found the served layer cannot ingest a live PayPal outcome: the verifier is real, but `cmd/memento` builds the ingest service with the recording demo source, and the PayPal app's only webhook subscription does not point at the layer. So a new purchase or dispute cannot be recorded live; the demo re-read the existing capture and wrote feedback through the layer instead. Build the real REST source (order, capture, refund and dispute reads) behind the existing seam, wire it in `cmd/memento`, point the sandbox app's subscription at the public webhook route, and prove one live delivery end to end. Budget: no model spend; sandbox calls only.
 
