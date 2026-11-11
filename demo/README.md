@@ -56,11 +56,13 @@ turn as `step2()` after step 1.
 - Trace `c2a3bf4d`: `recall_for_purchase` (22.637–22.995), `search_catalog`
   (22.640–24.106), then the answer generation at 24.131. The search finished
   before the model wrote the recommendation.
-- The reply opens with "Here's my recommendation:", names the catalog line
-  "Men's Button Down Oxford Shirt" and SKU `tbnrl46`, then gives **size M**
-  under correction `corr_000004`. The size comes from recall: the catalog
-  carries no size for this line (`variants` is null), so the catalog names the
-  line and SKU while recall names the size.
+- The reply says it will "check your purchase history and search the catalog
+  at the same time", then opens its recommendation with "Here's my
+  recommendation:", names the catalog line "Men's Button Down Oxford Shirt"
+  and SKU `tbnrl46`, then gives **size M** under correction `corr_000004`. The
+  size comes from recall: the catalog carries no size for this line
+  (`variants` is null), so the catalog names the line and SKU while recall
+  names the size.
 - Channel3: one search, **one credit**. Product detail calls are free, and
   the turn made none.
 - Spend: trace `c2a3bf4d` cost **$0.0553**; usage spend $5.86 → $5.92 and
@@ -68,12 +70,16 @@ turn as `step2()` after step 1.
 - Evidence: [`02-catalog-candidate.json`](evidence/step2-catalog/02-catalog-candidate.json).
 
 The limit, recorded rather than smoothed over: `tbnrl46` is the SKU the three
-seeded returns carry, so it matches the cut but is not a new candidate. The
-trace keeps tool span names and times, not the tool's arguments or answer, so
-the demo cannot tell whether the SKU came from the search answer or from
-recall. The agent's instruction asks for `exclude_skus` on the products behind
-the belief, and this reply does not show that exclusion. Owner: T9.17 (the
-catalog tool's instruction and default).
+seeded returns carry, so it matches the cut but is not a new candidate, and
+`product.md`'s step 2 asks for a different SKU. The trace keeps tool span
+names and times, not the tool's arguments or answer. What it does show is
+that the two tools were launched together: `search_catalog` starts 3 ms after
+`recall_for_purchase` and ends 1.1 s after it, and the reply says so in as
+many words. A fresh conversation has no SKU in it before the tools run, so
+the search cannot have been handed the returned ones to exclude: the tool's
+`exclude_skus` description offers that exclusion, and the agent's step-2
+instruction never asks for it, nor that the search follow recall's answer.
+Owner: T9.17 (the agent's instruction).
 
 ## Reset
 
@@ -188,9 +194,10 @@ run saw. None is filled in from a fixture:
 10. **Step 2 named the returned SKU.** The catalog search is live since
     T9.20 (the turn above), but the reply named `tbnrl46`, the SKU the
     seeded returns carry, so the demo line's new-candidate step is not met by
-    that reply. The trace does not record the tool's arguments, so the demo
-    cannot tell whether the SKU came from the search answer or from recall.
-    Owner: T9.17 (the catalog tool's instruction and default).
+    that reply. The trace does not record the tool's arguments, but its spans
+    and the reply show recall and the search launched together, before recall
+    answered, so the search was never given the returned SKUs to exclude.
+    Owner: T9.17 (the agent's step-2 instruction).
 
 ## The pre-pivot record
 

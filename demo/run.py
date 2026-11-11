@@ -116,7 +116,7 @@ GAP_OWNERS = (
 
 
 def normalise_gaps(catalog):
-    """Give every gap its owner, and add step 2's missing-tool gap to an old run."""
+    """Give every gap its owner, and record step 2's from the run's own evidence."""
     out = []
     for entry in GAPS:
         if "merchant page reads live pool counts" in entry["text"]:
@@ -130,15 +130,30 @@ def normalise_gaps(catalog):
         out.append({"step": entry["step"], "text": text})
     # A run recorded before the agent had a catalog search has no step-2
     # catalog evidence; its summary keeps the gap that run carried. A run
-    # with that evidence has either searched (nothing to add) or failed
-    # loudly before it reached here.
-    if catalog is None and not any("product-search tool" in entry["text"] for entry in out):
-        out.append({
-            "step": "2",
-            "text": ("the reference agent exposes no product-search tool, so no live turn names "
-                     "the Channel3 candidate; the SKU exists only in step 4's captured purchase. "
-                     "Owner: T9.17."),
-        })
+    # whose turn searched but named a SKU the shopper's memory already
+    # carries searched the catalog without offering a new candidate, so its
+    # summary carries that limit rather than reading as a clean step 2.
+    def recorded(needle):
+        return any(needle in entry["text"] for entry in out)
+
+    if catalog is None:
+        if not recorded("product-search tool"):
+            out.append({
+                "step": "2",
+                "text": ("the reference agent exposes no product-search tool, so no live turn "
+                         "names the Channel3 candidate; the SKU exists only in step 4's captured "
+                         "purchase. Owner: T9.17."),
+            })
+    else:
+        candidate = catalog.get("candidate") or {}
+        if (candidate.get("returned_sku")
+                and not recorded("returned item rather than a new one")):
+            out.append({
+                "step": "2",
+                "text": ("the step-2 turn searched the catalog but named "
+                         f"{candidate.get('sku')}, the SKU the seeded returns carry, so the "
+                         "candidate is a returned item rather than a new one. Owner: T9.17."),
+            })
     GAPS[:] = out
 
 
