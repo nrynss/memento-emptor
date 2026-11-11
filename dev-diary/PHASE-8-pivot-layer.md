@@ -645,7 +645,7 @@ Gate green, `npm ci` in `web/` and `merchant/` first. Against `main` the commit 
 requires:   [T8.5]
 fixture-ok: yes
 size:       XS · mid
-owns:       internal/api/server/, internal/fitindex/
+owns:       internal/api/server/, internal/fitindex/, testdata/api/, docs/interface.md, dev-diary/PHASE-8-pivot-layer.md
 status:     in-review
 ```
 `internal/api/server/recall.go` folds a literal `"not_as_described"` reason category into `not_arrived` counts, a seam for the recorded Elastic population's labels. Since T1.1b, a not-as-described dispute counts under `damaged_or_defective`, so the same cause would read as non-arrival in one path and damage in the other if a classifier label ever reaches evidence. Disputes write no fit rows, so the pool never sees them today; decide and record whether the fold stays (with its reason) or maps to damage.
@@ -669,9 +669,9 @@ Tests. `TestReasonCountsViewGivesEachCauseOneField` feeds every domain category,
 
 Mutations, each reverted: putting `not_as_described` back under `NotArrived` fails the mapping test (`NotArrived: 24`, want 13) and `TestProductFitServed` (`NotArrived: 1`); widening `fitindex.validCategory` to accept the two labels fails the reachability test at the first refusal and at "a refused label wrote 1 fit rows".
 
-Finding, outside `owns` and for the orchestrator's landing call (rule 1): `testdata/api/product_fit.response.example.json`, and the same block repeated in `docs/interface.md`, show `damaged_or_defective: 2, not_arrived: 1` for the two recorded spellings at the example's scale, `damaged` 2 and `not_as_described` 1. The corrected view returns damage 3 / non-arrival 0 for those counts, so the example is one label behind the code. Nothing in the gate compares a served view to that example — `internal/api/contract/contract_test.go` checks its schema and its arithmetic only — so the branch is green and the frozen example needs the orchestrator's decision.
+The delivered finding is closed by the orchestrator's rule-1 call: the fixture and its doc block moved in this commit, with the served view. `testdata/api/product_fit.response.example.json` now reads `damaged_or_defective: 3, not_arrived: 0` in the all block and 2 / 0 in the seeded block, because the old counts were `damaged` 2 + `not_as_described` 1 and `damaged` 1 + `not_as_described` 1; the live and recent blocks carried no `not_as_described` and stay 1 / 0. The same pool block is repeated in `testdata/api/recall_for_purchase.response.example-correction.json`, `...-own.json` and `...-pool.json`, and moved with it. `docs/interface.md` carries four validating copies — the `product_fit` example and the three recall examples — which moved in step, so the byte pin holds. No other frozen example or golden carries the old pair: a search of `testdata/` and `docs/` for `damaged_or_defective` 2 / `not_arrived` 1 and 1 / 1 finds nothing after the move, and `testdata/replay/`, the web fixtures and the merchant fixtures carry no pool reason counts. `TestPoolFixturesMatchTheRule` still finds each block's status and arithmetic, and `TestInterfaceDocExamples` pins every doc block byte-identical to its fixture.
 
-Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree): `gofmt`, `go vet`, `go test -race` over every Go package, both lockfile checks, both Svelte checks, both lints, both test runs and both builds, ending `OK all checks passed`. Spend $0.00: no live call, no key.
+Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree), and green again on a full re-run after the fixture move: `gofmt`, `go vet`, `go test -race` over every Go package, both lockfile checks, both Svelte checks, both lints, both test runs and both builds, ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 

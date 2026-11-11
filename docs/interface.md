@@ -171,7 +171,7 @@ which agrees with the belief; the correction overrides both:
       "kept": 6,
       "returns": {"too_small": 24, "too_large": 4},
       "feedback": {"fits_well": 12, "too_small": 5, "too_large": 2},
-      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 2, "not_arrived": 1, "changed_mind": 4},
+      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 3, "not_arrived": 0, "changed_mind": 4},
       "shoppers": {"fit": 39, "too_small": 25, "too_large": 6}
     },
     "seeded": {
@@ -179,7 +179,7 @@ which agrees with the belief; the correction overrides both:
       "kept": 5,
       "returns": {"too_small": 20, "too_large": 3},
       "feedback": {"fits_well": 9, "too_small": 4, "too_large": 2},
-      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 1, "not_arrived": 1, "changed_mind": 3},
+      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 2, "not_arrived": 0, "changed_mind": 3},
       "shoppers": {"fit": 30, "too_small": 19, "too_large": 5}
     },
     "live": {
@@ -339,7 +339,7 @@ This is the move no single shopper's history can make:
       "kept": 6,
       "returns": {"too_small": 24, "too_large": 4},
       "feedback": {"fits_well": 12, "too_small": 5, "too_large": 2},
-      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 2, "not_arrived": 1, "changed_mind": 4},
+      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 3, "not_arrived": 0, "changed_mind": 4},
       "shoppers": {"fit": 39, "too_small": 25, "too_large": 6}
     },
     "seeded": {
@@ -347,7 +347,7 @@ This is the move no single shopper's history can make:
       "kept": 5,
       "returns": {"too_small": 20, "too_large": 3},
       "feedback": {"fits_well": 9, "too_small": 4, "too_large": 2},
-      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 1, "not_arrived": 1, "changed_mind": 3},
+      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 2, "not_arrived": 0, "changed_mind": 3},
       "shoppers": {"fit": 30, "too_small": 19, "too_large": 5}
     },
     "live": {
@@ -439,7 +439,7 @@ personal, and the pool is returned beside it marked overridden:
       "kept": 6,
       "returns": {"too_small": 24, "too_large": 4},
       "feedback": {"fits_well": 12, "too_small": 5, "too_large": 2},
-      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 2, "not_arrived": 1, "changed_mind": 4},
+      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 3, "not_arrived": 0, "changed_mind": 4},
       "shoppers": {"fit": 39, "too_small": 25, "too_large": 6}
     },
     "seeded": {
@@ -447,7 +447,7 @@ personal, and the pool is returned beside it marked overridden:
       "kept": 5,
       "returns": {"too_small": 20, "too_large": 3},
       "feedback": {"fits_well": 9, "too_small": 4, "too_large": 2},
-      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 1, "not_arrived": 1, "changed_mind": 3},
+      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 2, "not_arrived": 0, "changed_mind": 3},
       "shoppers": {"fit": 30, "too_small": 19, "too_large": 5}
     },
     "live": {
@@ -753,7 +753,7 @@ Response:
       "kept": 6,
       "returns": {"too_small": 24, "too_large": 4},
       "feedback": {"fits_well": 12, "too_small": 5, "too_large": 2},
-      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 2, "not_arrived": 1, "changed_mind": 4},
+      "reasons": {"fit_too_small": 24, "fit_too_large": 4, "damaged_or_defective": 3, "not_arrived": 0, "changed_mind": 4},
       "shoppers": {"fit": 39, "too_small": 25, "too_large": 6}
     },
     "seeded": {
@@ -761,7 +761,7 @@ Response:
       "kept": 5,
       "returns": {"too_small": 20, "too_large": 3},
       "feedback": {"fits_well": 9, "too_small": 4, "too_large": 2},
-      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 1, "not_arrived": 1, "changed_mind": 3},
+      "reasons": {"fit_too_small": 20, "fit_too_large": 3, "damaged_or_defective": 2, "not_arrived": 0, "changed_mind": 3},
       "shoppers": {"fit": 30, "too_small": 19, "too_large": 5}
     },
     "live": {
