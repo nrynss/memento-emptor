@@ -65,6 +65,21 @@ lists no run file — so the casing difference is a record of when a run happene
 not a check that fails. A future run writes the tagged shape; these four say
 what was actually served in round 1.
 
+## The T5.8 and T5.9 recordings predate two layer changes
+
+`recallBeliefs` served Venerable standing only at `a5b57eb` (the T5.8 and T5.9
+recordings): a Candidate belief never reached the response. Two later commits
+moved that gate — `2917e98` opened Candidate and evidenceless Claimed, and
+`13373a8` removed standing as a gate, so every fit belief comes back with its
+label. A re-run on current `main` therefore differs from these records in two
+ways: which beliefs recall serves, and the prompt's memory block, which now
+carries keys the older contract did not have (`precedence` on a served belief,
+`pool` and `pool_lookup` on the response). That makes a re-run a different
+measurement, not a correction: it needs a fresh freeze decision before any of
+its numbers replace or join the round-1 counts. Nothing in this document
+changes; the T5.8b re-run of the two multi-brand cells is in `bench/runs/t58b/`
+and records what the current layer serves.
+
 ## Setup
 
 - Frozen inputs: `bench/FROZEN.md` (25 sha256 rows: the 9 arm-facing
@@ -214,19 +229,19 @@ multi-brand cells the recall response served `"beliefs": []` with the
 guidance "No recommendation yet: too little evidence", and the reply declined
 because of it (`t58-a3-brands-split-r1.json`, `t58-a3-brands-steady-r1.json`).
 
-Those two arm-3 cells carry a limit the counts do not show. The split
+Those two arm-3 cells need the standing they were recorded under (see "The
+T5.8 and T5.9 recordings predate two layer changes" above). The split
 shopper's history holds two Brand R fit returns, which the recorded promotion
 table (`dev-diary/research/lambo.md`: Candidate at dependents from two other
 interactions) treats as enough to serve, yet the response came back empty.
-The steady shopper's Brand Q evidence is one fits-well feedback, which may sit
-below that bar by design. Why nothing was served is not in the record: the
-T5.8 run files carry the served response but no settle note, unlike T5.9's, so
-the belief's standing at recall time cannot be read back. The phase record's
-summary said "Candidate beliefs refuse"; the files do not show that state —
-`recall_for_purchase` serves Candidate standing
-(`internal/api/server/recall.go`), so a Candidate belief would have appeared
-in the response. What the two cells prove is that arm 3 refused when recall
-served nothing; what they do not prove is anything about cross-brand evidence.
+The settle note in each file already said why: the Brand R belief was Candidate
+and the Brand Q belief had no standing, and the `recallBeliefs` of that commit
+served Venerable standing only, so both were withheld. The steady shopper's
+Brand Q evidence is one fits-well feedback, which may sit below that bar by
+design either way. The T5.8b re-run of both cells on current `main`
+(`bench/runs/t58b/`) serves them, so what the two round-1 cells prove is that
+arm 3 refused when recall served nothing; they do not by themselves say
+anything about cross-brand evidence under a layer that serves it.
 
 ## Corrections
 
