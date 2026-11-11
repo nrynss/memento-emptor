@@ -376,6 +376,14 @@ Three things the next agent should not have to rediscover:
 - The platform's messaging history returns the assistant message with empty content on these builds, while the reply text is in the trace's `mastra.agent_run.output`. The T9.7 demo should read the reply from the trace (where T9.4 and T9.5 read it), not rely on `history`.
 - The live pool for the demo line is seeded-only (22 settled, 22 seeded, 0 live) after the T9.6 population seed, and the correction the reference turn wrote is `corr_000001`. A demo reset that replays the arc will mint a new id; nothing in the agents pins either value.
 
+**Review (T9.8).** Re-verified from the committed files and the platform, not from this note. Both offline checks are green as stated (58 and 49). `ast agent trace` returns both traces with the recorded costs, the build ids these deployments report, the recall span before the correction span in the reference turn, and — in the second agent's reply — `corr_000001`'s own words, which its instructions do not carry. `ast deploy --dry-run --var NOT_DECLARED=hello` beside the declared secret validates clean, so the undeclared-input trap is real: the platform drops it silently while a declared input is validated. No keyring value appears in the tree or anywhere in the history. Three findings, all low and none blocking.
+
+- Both agents expose `ledger_beliefs`, `ledger_belief` and `ledger_evidence`, but the edge admits shopper callers only for those three (`internal/auth/surface.go`), so the deployed agent key is refused on each. No instruction asks for them and no T9.8 turn called one; the refusal is reported honestly rather than answered from a copy, so the demo is unaffected. Owner: T9.9 (proposed, `agent/runtime/`, `agent/second/`): align each agent's exposed tools with the edge's access table, or the orchestrator widens the rule.
+- The offline checks inject the transport below `tools.ts`, so the tool ids, schemas and `execute` bindings are not exercised without a deployment. Recall and `record_correction` are the only two proven live. Owner: T9.9 (proposed).
+- The reference agent's step 1 says "If a tool call errors, retry it once". Against a live layer a `record_correction` that landed and then timed out would be written twice. Owner: T9.9 (proposed): retry reads only, or recall before retrying a write. It is a prompt edit plus a redeploy, so it waits for the orchestrator.
+
+Two review fixes, both prose, no behaviour change: `agent/runtime/agent/tools.ts` and its README said the tool descriptions were the layer's own frozen words. That holds for the second agent and for six of the reference agent's eleven; the descriptions are the layer's words plus this agent's recall-first guidance, and both now say names and input shapes are the frozen contract.
+
 
 ---
 

@@ -4,11 +4,12 @@
  * Every tool is a call to the served layer's edge through an injected
  * transport (see layer.ts). There is no stand-in behind any of them, so a
  * turn that reads memory reads the live layer or reports that it could not.
- * Tool names and descriptions are the layer's own frozen words, so the
- * agent reads exactly what the contract publishes. No purchase-execution
- * tool exists here on purpose: orders and double-buy protection belong to
- * T3.3 (agent/orders/), so this agent can recommend and ask approval but
- * cannot move money.
+ * Tool names and input shapes are the layer's frozen contract; the
+ * descriptions keep the layer's own words where they carry the call and add
+ * the recall-first guidance this agent needs. No purchase-execution tool
+ * exists here on purpose: orders and double-buy protection belong to T3.3
+ * (agent/orders/), so this agent can recommend and ask approval but cannot
+ * move money.
  */
 
 import { createTool } from "@mastra/core/tools";

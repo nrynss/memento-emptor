@@ -12,7 +12,9 @@ The Memento Emptor reference shopping agent as a deployed Astropods service.
 - Tools: the layer's eleven frozen interface calls, each one an HTTP call to
   the served layer's edge (`agent/layer.ts`): `POST /tools/<tool>` with the
   deployment's agent key in `Authorization: Bearer` and the shopper id in
-  the body. Tool names and descriptions are the layer's own frozen words.
+  the body. Tool names and input shapes are the layer's frozen contract;
+  the descriptions keep the layer's own words plus this agent's
+  recall-first guidance.
 - Precedence (T9.4): the agent recommends from `guidance.basis` and states
   confidence from the label (Earned, Building, Claimed, Out of true). It
   never refuses when recall returns evidence; only `none` says plainly no
