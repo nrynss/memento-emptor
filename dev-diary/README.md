@@ -161,7 +161,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 12 / 12 | Done |
 | P1 | 5 / 6 | In progress (T1.1b) |
-| P2 | 14 / 16 | In progress (T2.2d, T2.3c) |
+| P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T2.2d: Live reasons driver on thirteen phrases (done)
+
+**What exists.** `tests/live/reasons/` pins thirteen recordings: `expectedPhrases = 13`, `expectedTotalCost = 0.000278040` (the sum of the thirteen fixtures' own usage costs; 6,620 input tokens), and a `-check` mode that refuses a wrong set size, a pin that disagrees with the summed costs, or a pin over the derived bound (10 × the per-call reference × the call count). `run.sh` runs it before requiring the key, so a stale set cannot spend. Review re-derived every number from the fixtures and mutation-checked five refusals.
+
+**What surprised.** The review found the budget prose claimed a cap the post-hoc guard cannot deliver (the over-guard reply is billed before the guard reads it). Fixed to call the figure a ceiling the recorded replay fits under.
+
+**The next agent should not have to work out.** `-check` is the zero-cost way to prove set, pin and guard agree; extend it rather than hand-counting fixtures.
 
 ### T7.6: Subject JSON tags (done)
 

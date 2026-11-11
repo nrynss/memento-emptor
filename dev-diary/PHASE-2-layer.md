@@ -463,7 +463,7 @@ requires:   [T2.2c]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/reasons/
-status:     in-review
+status:     done
 ```
 T2.2c took the labelled Jev set to thirteen recordings, but `tests/live/reasons/` still pins eleven: `main.go`'s `len(want) != 11` guard, `run.sh`, the README and the total-cost line. A live rerun would refuse the set before making a call. Move the driver, its script and its README to the thirteen-phrase set; no live call is needed to make the change.
 
