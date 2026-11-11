@@ -22,11 +22,16 @@ The image chooses three toolchain versions, and each must match the one
 the contract (T0.2) and CI name, so a build cannot pass in one place and
 fail in another:
 
-| Tool | Pin | Where the image pins it | Where CI pins it |
+| Tool | Pin | Where the image pins it | Where the pin is checked |
 |---|---|---|---|
-| Go | 1.27 | `Dockerfile`: `golang:1.27-bookworm` | `go.mod` (`go 1.27.1`), `ci.yml`: `setup-go` 1.27.1 |
-| Node | 26 | `Dockerfile`: `node:26-bookworm`, the `web-build` stage | `ci.yml`: `setup-node` 26 |
-| Lambo | 0.10.1 | `Dockerfile`: the release download, sha256-pinned | the build's own `sha256sum -c` |
+| Go | 1.27 | `Dockerfile`: `golang:1.27-bookworm` | `go.mod` (`go 1.27.1`) and `ci.yml`'s `setup-go` 1.27.1 |
+| Node | 26 | `Dockerfile`: `node:26-bookworm`, the `web-build` stage | `ci.yml`'s `setup-node` 26 |
+| Lambo | 0.10.1 | `Dockerfile`: the release download, sha256-pinned | the image build's own `sha256sum -c`; no CI step pins it |
+
+One asymmetry and one limit, both intended: the Go tag floats the
+latest 1.27 patch where CI and `go.mod` fix 1.27.1, and no CI step reads
+these tags, so the table is the record and the named checks are the
+guard.
 
 The Node major is the whole frontend pin: neither `web/package.json` nor
 `merchant/package.json` declares an `engines` field, so nothing but the
@@ -34,7 +39,7 @@ base image and CI's `setup-node` decides which Node builds the app. The
 `web-build` stage runs the same `npm ci` and `npm run build` as the gate,
 on the same major.
 
-Known drift, one file, with a follow-up task of its own:
+Known drift, one file, owned by the follow-up task T9.3h:
 `deploy/merchant/Dockerfile` still builds `merchant/` on
 `node:22-bookworm`. It is a second, separate image, so aligning it is a
 change to that file, not to this one; until it lands, the merchant image
@@ -275,8 +280,8 @@ pool.
 
 `MEMENTO_IDENTITY_SALT` is required, not optional: `start.sh` always
 exports the hub's URL and token, and the layer refuses those without the
-salt that names its sessions. With the seed off and the fixture
-embedder, the value names sessions and nothing else, so a throwaway
+salt that names its sessions. With the seed off, the fixture embedder and
+no index wired, the value names sessions and nothing else, so a throwaway
 value minted per run is enough here. The same boot runs in the image
 itself: `docker run -e PORT=18099 -e LAMBO_EMBEDDER=fixture -e
 LAMBO_SEED=0 -e LAMBO_MCP_TOKEN=local-run-token -e
