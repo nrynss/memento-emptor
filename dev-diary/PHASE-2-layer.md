@@ -131,6 +131,18 @@ and the 0.86 merge row flagging a 0.88 pair. Every throwaway index deleted,
 empty listing verified; spend ~15 short native inference calls, no
 in-band cost fields, console billing still a user step.
 
+### T2.3c: Evidence survives a restart, or the loss is recorded
+```yaml
+requires:   [T2.3, T8.5]
+fixture-ok: yes
+size:       M · mid
+owns:       internal/evidence/, cmd/memento/, product.md, docs/architecture.md
+status:     not-started
+```
+The served layer builds `internal/evidence.NewStore`, which holds documents in process (`docs []Document`), so a restart loses every shopper's raw evidence while the hub keeps beliefs and the pool keeps rows. `product.md` and `docs/architecture.md` describe Elastic as storing and searching raw evidence, but no code path writes evidence documents to Elastic: the live Elastic path is the `fit-rows` pool. Decide and record: persist raw evidence (an Elastic evidence index with its mapping and contract, or a disk-backed store) so a restart keeps the ledger and recall citations, or record the loss in the docs and make the ledger show it plainly instead of an empty panel.
+
+**Done when:** either evidence survives a layer restart with a test that proves it (ledger and recall citations still answer after the restart), or the loss is documented in `product.md` and `docs/architecture.md` with the decision recorded and the ledger's post-restart state stated; no product doc claims Elastic stores raw evidence unless the served layer does; the gate passes.
+
 ---
 
 ### T2.4: The Lambo writer ★

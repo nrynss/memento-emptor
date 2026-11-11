@@ -161,7 +161,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 12 / 12 | Done |
 | P1 | 5 / 5 | Done |
-| P2 | 12 / 12 | Done |
+| P2 | 12 / 13 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
