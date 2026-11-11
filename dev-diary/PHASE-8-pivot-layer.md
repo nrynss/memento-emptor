@@ -814,6 +814,34 @@ The T8.5m review found `LoadSeed` calls `memory.RecordCorrection` before `takeCo
 
 ---
 
+### T8.5t: The demo driver expects thin evidence to be served
+```yaml
+requires:   [T8.5i]
+fixture-ok: yes
+size:       XS · mid
+owns:       demo/driver/
+status:     not-started
+```
+`demo/driver/main.go` pins the old withholding at its one-return step ("one return earns nothing…") and its final recall ("feedback grew a rival belief"), so it would fail against the served layer after T8.5i. Update the driver's assertions to the served thin belief, and keep `demo/run.py`'s evidence expectations consistent.
+
+**Done when:** the demo driver's one-return and final-recall steps assert the served shape; the gate passes.
+
+---
+
+### T8.5u: Run the layer driver with thin evidence served
+```yaml
+requires:   [T8.5i]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/layer/
+status:     not-started
+```
+T8.5i flipped `tests/live/layer`'s one-return tripwire but did not run it; only a live run proves the served thin belief and its guidance end to end. Run it once with the keys loaded, record the redacted transcript and the spend (the fixture embedder spends $0), and erase the test indices.
+
+**Done when:** the live layer run passes with the thin-evidence assertion active; the transcript is recorded; indices erased and spend recorded.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).
