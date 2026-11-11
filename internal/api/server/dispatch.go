@@ -18,7 +18,7 @@ func (s *Service) dispatch(ctx context.Context, tool string, raw json.RawMessage
 		return decodeSingle(raw, target, tool)
 	}
 	encode := func(value any) (json.RawMessage, error) {
-		out, err := marshalResponse(value)
+		out, err := json.Marshal(value)
 		if err != nil {
 			return nil, fmt.Errorf("encode %s response: %w", tool, err)
 		}
@@ -153,52 +153,4 @@ func decodeSingle(raw json.RawMessage, target any, what string) error {
 		return fmt.Errorf("bad %s request: trailing data", what)
 	}
 	return nil
-}
-
-// marshalResponse encodes one tool response. It then normalizes the
-// tagless subject shape: the frozen domain.Subject carries no JSON tags,
-// so the encoder emits Go field names while the contract schemas pin
-// lowercase kind, id and name with no additional properties. The walk
-// renames those three keys inside every subject object, and nothing
-// else, so the service serves exactly the frozen shape.
-func marshalResponse(value any) (json.RawMessage, error) {
-	raw, err := json.Marshal(value)
-	if err != nil {
-		return nil, err
-	}
-	var decoded any
-	if err := json.Unmarshal(raw, &decoded); err != nil {
-		return nil, err
-	}
-	fixSubjectKeys(decoded)
-	return json.Marshal(decoded)
-}
-
-// fixSubjectKeys renames the tagless subject keys in place.
-func fixSubjectKeys(node any) {
-	switch current := node.(type) {
-	case map[string]any:
-		for key, value := range current {
-			if key == "subject" {
-				if obj, ok := value.(map[string]any); ok {
-					renameKey(obj, "Kind", "kind")
-					renameKey(obj, "ID", "id")
-					renameKey(obj, "Name", "name")
-				}
-			}
-			fixSubjectKeys(value)
-		}
-	case []any:
-		for _, value := range current {
-			fixSubjectKeys(value)
-		}
-	}
-}
-
-// renameKey moves one key's value when present.
-func renameKey(obj map[string]any, from, to string) {
-	if value, ok := obj[from]; ok {
-		delete(obj, from)
-		obj[to] = value
-	}
 }

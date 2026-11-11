@@ -33,14 +33,16 @@ const (
 	SubjectSeller SubjectKind = "seller"
 )
 
-// Subject is what a belief is about: a brand or a seller.
+// Subject is what a belief is about: a brand or a seller. Its JSON keys are
+// the contract's: every belief schema declares kind, id and name with no
+// additional properties, so the tags belong here rather than in a rename.
 type Subject struct {
 	// Kind is whether the subject is a brand or a seller.
-	Kind SubjectKind
+	Kind SubjectKind `json:"kind"`
 	// ID identifies the subject, such as the brand id.
-	ID string
+	ID string `json:"id"`
 	// Name is the subject's display name.
-	Name string
+	Name string `json:"name"`
 }
 
 // BeliefStatus is what the ledger shows for a belief.

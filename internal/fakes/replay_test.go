@@ -208,7 +208,7 @@ func TestReplayMatchesFixtures(t *testing.T) {
 	}
 
 	ledgerDoc := replayFile(t, "p4-ledger.json")
-	if !jsonEqual(normalizeWire(encode(result.Final)), ledgerDoc) {
+	if !jsonEqual(encode(result.Final), ledgerDoc) {
 		t.Error("replay final state differs from testdata/replay/p4-ledger.json")
 	}
 
@@ -248,37 +248,6 @@ func TestReplayMatchesContract(t *testing.T) {
 	if !jsonEqual(ledgerDoc["pending"], pending) {
 		t.Error("p4-ledger.json pending differs from the frozen pending_questions example")
 	}
-}
-
-// normalizeWire renames the frozen domain.Subject's Go field names to the
-// wire lowercase the frozen snapshots use. The subject type carries no
-// json tags and contracts freeze at the end of P1, so the replay's
-// marshaled output and the hand-written snapshots differ only here;
-// decoding is case-insensitive, so the interface is unaffected.
-func normalizeWire(doc map[string]any) map[string]any {
-	var walk func(v any)
-	walk = func(v any) {
-		switch node := v.(type) {
-		case map[string]any:
-			if subject, ok := node["subject"].(map[string]any); ok {
-				for _, key := range []string{"Kind", "ID", "Name"} {
-					if value, present := subject[key]; present {
-						delete(subject, key)
-						subject[strings.ToLower(key)] = value
-					}
-				}
-			}
-			for _, value := range node {
-				walk(value)
-			}
-		case []any:
-			for _, value := range node {
-				walk(value)
-			}
-		}
-	}
-	walk(doc)
-	return doc
 }
 
 // TestP3TurnsMatchContract binds the agent's fixture to the frozen

@@ -1,9 +1,34 @@
 package domain
 
 import (
+	"encoding/json"
 	"errors"
 	"testing"
 )
+
+// TestSubjectSerializesAsTheContract pins the subject's wire keys. Every
+// belief schema declares kind, id and name and refuses any other key, so
+// the domain type carries the tags rather than a caller renaming the
+// marshaled output afterwards.
+func TestSubjectSerializesAsTheContract(t *testing.T) {
+	raw, err := json.Marshal(Subject{Kind: SubjectBrand, ID: "brand-x-001", Name: "Brand X"})
+	if err != nil {
+		t.Fatalf("marshal subject: %v", err)
+	}
+	var keys map[string]any
+	if err := json.Unmarshal(raw, &keys); err != nil {
+		t.Fatalf("parse subject: %v", err)
+	}
+	want := map[string]any{"kind": "brand", "id": "brand-x-001", "name": "Brand X"}
+	if len(keys) != len(want) {
+		t.Fatalf("subject serialises %s, want exactly %d keys", raw, len(want))
+	}
+	for key, value := range want {
+		if keys[key] != value {
+			t.Errorf("subject %q = %v, want %v", key, keys[key], value)
+		}
+	}
+}
 
 func TestStatusGraphRoundTrip(t *testing.T) {
 	cases := []struct {
