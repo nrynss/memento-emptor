@@ -142,6 +142,7 @@ function earlySizingBelief(returnCount: 1 | 2 | 3): BeliefView {
 		contradicted: false,
 		contradicted_by: null,
 		evidence,
+		precedence: null,
 		seeded: true,
 		updated_at: evidence[evidence.length - 1].occurred_at
 	};
@@ -158,6 +159,7 @@ const lateSizingBelief: BeliefView = {
 	contradicted: true,
 	contradicted_by: fixtureCorrection,
 	evidence: fitReturns,
+	precedence: null,
 	seeded: true,
 	updated_at: '2026-11-05T14:02:11Z'
 };
@@ -197,6 +199,7 @@ const emergingFitBelief: BeliefView = {
 			occurred_at: '2026-11-08T20:10:00Z'
 		}
 	],
+	precedence: null,
 	seeded: false,
 	updated_at: '2026-11-08T20:10:00Z'
 };
@@ -241,6 +244,7 @@ const sellerBelief: BeliefView = {
 			occurred_at: '2026-11-06T11:30:00Z'
 		}
 	],
+	precedence: null,
 	seeded: false,
 	updated_at: '2026-11-06T11:30:00Z'
 };
@@ -256,6 +260,7 @@ const generalStatement: BeliefView = {
 	contradicted: false,
 	contradicted_by: null,
 	evidence: [],
+	precedence: null,
 	seeded: true,
 	updated_at: '2026-10-14T10:00:00Z'
 };

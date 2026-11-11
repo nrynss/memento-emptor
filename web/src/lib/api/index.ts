@@ -24,6 +24,7 @@ export { ledgerToolNames, type LedgerToolName } from './types';
 export type {
 	BeliefKind,
 	BeliefKindOrNull,
+	BeliefPrecedenceView,
 	BeliefStatus,
 	BeliefView,
 	CorrectionView,

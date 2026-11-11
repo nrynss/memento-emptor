@@ -7,6 +7,7 @@ import { LedgerApiError } from './errors';
 import type {
 	BeliefKind,
 	BeliefKindOrNull,
+	BeliefPrecedenceView,
 	BeliefStatus,
 	BeliefView,
 	CorrectionView,
@@ -164,6 +165,24 @@ function decodeCorrection(value: unknown): CorrectionView | null {
 	};
 }
 
+function decodeBeliefPrecedence(value: unknown): BeliefPrecedenceView | null {
+	if (value === null) return null;
+	if (!isRecord(value)) fail('belief precedence');
+	const step = value['step'];
+	const overriddenBy = value['overridden_by'];
+	const steps: readonly string[] = ['correction', 'own_evidence', 'pool', 'statement', 'none'];
+	if (typeof step !== 'string' || !steps.includes(step)) fail('belief precedence step');
+	if (typeof value['overridden'] !== 'boolean') fail('belief precedence flag');
+	if (overriddenBy !== null && (typeof overriddenBy !== 'string' || !steps.includes(overriddenBy))) {
+		fail('belief precedence winner');
+	}
+	return {
+		step: step as BeliefPrecedenceView['step'],
+		overridden: value['overridden'] as boolean,
+		overridden_by: overriddenBy as BeliefPrecedenceView['overridden_by']
+	};
+}
+
 function decodeBelief(value: unknown): BeliefView {
 	if (!isRecord(value)) fail('belief');
 	const evidence = value['evidence'];
@@ -196,6 +215,8 @@ function decodeBelief(value: unknown): BeliefView {
 			typeof value['contradicted'] === 'boolean' ? value['contradicted'] : fail('belief warning'),
 		contradicted_by: decodeCorrection(value['contradicted_by']),
 		evidence: evidence.map(decodeEvidence),
+		precedence:
+			'precedence' in value ? decodeBeliefPrecedence(value['precedence']) : fail('belief precedence'),
 		seeded: typeof value['seeded'] === 'boolean' ? value['seeded'] : fail('belief seeded'),
 		updated_at: stringField(value, 'updated_at', 'belief')
 	};

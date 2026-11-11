@@ -146,12 +146,17 @@ describe('precedence lines for the ledger', () => {
 		);
 	});
 
-	it('accepts the pre-pool belief without a precedence view', () => {
+	it('decodes the unwired belief with its precedence step', () => {
 		const recall = decodeRecallResponse(baseExample);
 		expect(recall.guidance.basis).toBe('correction');
 		expect(recall.beliefs).toHaveLength(1);
-		expect(recall.beliefs[0].precedence).toBeNull();
-		expect(recall.pool ?? null).toBeNull();
+		expect(recall.beliefs[0].precedence).toEqual({
+			step: 'own_evidence',
+			overridden: true,
+			overridden_by: 'correction'
+		});
+		expect(recall.pool).toBeNull();
+		expect(recall.pool_lookup).toBe('unavailable');
 		expect(decodePrecedence(null)).toBeNull();
 		expect(decodePrecedence(undefined)).toBeNull();
 	});

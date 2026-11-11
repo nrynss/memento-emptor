@@ -73,12 +73,18 @@ requires:   [T7.4]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/lib/ledger/, web/src/lib/api/, web/src/routes/belief/, web/src/lib/contest/
-status:     claimed:t92b-tighten-web
+status:     in-review
 ```
 T7.4 requires the pivot pool and precedence fields, so the ledger decoders and fixture tests that expected them absent now fail (6 tests: api snapshots, pool precedence, pre-pool belief). Update the decoders to the required shape and the tests to the tightened fixtures. No behaviour change beyond the contract.
 
 **Done when:** the 6 failing tests pass against the tightened fixtures; the gate passes.
 
+**Notes (worker).** The decoders now require the tightened shape: `BeliefView` carries `precedence` (new `BeliefPrecedenceView` in `web/src/lib/api/types.ts`, decoded strictly in `decode.ts`, null on ledger and explain reads per the contract; the five fixture beliefs gain `precedence: null`), `decodePoolView` requires `precedence` and always returns it (null on `product_fit`), and `decodeRecallResponse` requires `pool` and `pool_lookup` plus `precedence` on every belief (`pool: null` with `unavailable` is an answer, never a refusal). `RecallBelief` is now an alias of `BeliefView`: the old optional override conflicted with the required field, and the empty-interface form tripped the lint. Tests updated to the tightened fixtures: the frozen pool decodes with `precedence: null` (the key-set pin gains `precedence`), and the unwired recall case decodes its belief precedence (`own_evidence` overridden by `correction`) with a null pool and `unavailable` lookup. The belief page and contest code needed no changes; `rows.test.ts` gained the one new literal field. All 6 tests pass and web is green (158 tests, svelte-check, eslint, build).
+
+Two things the next agent should not have to rediscover:
+
+- `merchant/src/lib/pool/pool.test.ts` (`serves the Earned demo oxford equal to the frozen snapshot`) fails the same way: merchant's `decodePool` drops `precedence`, so the decoded fixture no longer equals the raw example. `merchant/` is outside this task's `owns`; it needs a T9.3 follow-up to carry the required pool `precedence` the same way. Until then the gate stops at merchant vitest.
+- The T9.2 note saying `decodePoolView` omits `precedence` when the fixture has none is stale after this task (the field is now required and always returned); left untouched because T9.2 is done.
 ---
 
 ### T9.3: The merchant app ★

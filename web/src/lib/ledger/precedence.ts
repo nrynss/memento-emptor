@@ -27,9 +27,7 @@ export interface RecallCorrectionView {
 }
 
 /** One of the shopper's own beliefs, with the step that produced it. */
-export interface RecallBelief extends BeliefView {
-	precedence?: PrecedenceView | null;
-}
+export type RecallBelief = BeliefView;
 
 /** What the layer states to recommend now, by precedence step. */
 export interface RecallGuidance {
@@ -46,8 +44,8 @@ export type PoolLookup = 'consulted' | 'unavailable';
 export interface RecallResponse {
 	shopper_id: string;
 	beliefs: RecallBelief[];
-	pool?: PoolView | null;
-	pool_lookup?: PoolLookup;
+	pool: PoolView | null;
+	pool_lookup: PoolLookup;
 	overriding_correction: RecallCorrectionView | null;
 	guidance: RecallGuidance;
 	pending_count: number;
@@ -189,14 +187,11 @@ export function decodeRecallResponse(value: unknown): RecallResponse {
 	if (typeof pending !== 'number' || !Number.isInteger(pending) || pending < 0) {
 		fail('recall pending count');
 	}
+	if (!('pool' in value)) fail('recall pool');
+	const pool = value['pool'];
+	if (!('pool_lookup' in value)) fail('recall pool lookup');
 	const lookup = value['pool_lookup'];
-	if (
-		lookup !== undefined &&
-		(lookup === null || (typeof lookup !== 'string' && typeof lookup !== 'undefined'))
-	) {
-		fail('recall pool lookup');
-	}
-	if (lookup !== undefined && lookup !== 'consulted' && lookup !== 'unavailable') {
+	if (lookup !== 'consulted' && lookup !== 'unavailable') {
 		fail('recall pool lookup');
 	}
 	const traceId = value['trace_id'];
@@ -207,15 +202,16 @@ export function decodeRecallResponse(value: unknown): RecallResponse {
 		shopper_id: stringField(value, 'shopper_id', 'recall response'),
 		beliefs: beliefs.map((belief) => {
 			if (!isRecord(belief)) fail('recall belief');
-			const precedence = 'precedence' in belief ? decodePrecedence(belief['precedence']) : null;
+			if (!('precedence' in belief)) fail('recall belief precedence');
 			const rest: Record<string, unknown> = { ...belief };
 			delete rest['precedence'];
-			return { ...(rest as unknown as BeliefView), precedence };
+			return {
+				...(rest as unknown as BeliefView),
+				precedence: decodePrecedence(belief['precedence'])
+			};
 		}),
-		...('pool' in value
-			? { pool: value['pool'] === null || value['pool'] === undefined ? null : decodePoolView(value['pool']) }
-			: {}),
-		...(lookup === undefined ? {} : { pool_lookup: lookup as PoolLookup }),
+		pool: pool === null ? null : decodePoolView(pool),
+		pool_lookup: lookup,
 		overriding_correction: decodeRecallCorrection(value['overriding_correction']),
 		guidance: decodeRecallGuidance(value['guidance']),
 		pending_count: pending,

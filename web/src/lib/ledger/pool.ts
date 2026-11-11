@@ -63,7 +63,7 @@ export interface PoolView {
 	seeded: PoolCountsView;
 	live: PoolCountsView;
 	recent: PoolCountsView;
-	precedence?: PoolPrecedenceView | null;
+	precedence: PoolPrecedenceView | null;
 }
 
 /** Which precedence step a pool came from, and whether a stronger step won. */
@@ -167,6 +167,7 @@ function decodePoolPrecedence(value: unknown): PoolPrecedenceView | null {
 /** Decodes one pooled product-fit belief: counts, never shopper rows. */
 export function decodePoolView(value: unknown): PoolView {
 	if (!isRecord(value)) fail('pool');
+	if (!('precedence' in value)) fail('pool precedence');
 	const line = value['line'];
 	if (!isRecord(line)) fail('pool line');
 	const direction = value['direction'];
@@ -180,7 +181,6 @@ export function decodePoolView(value: unknown): PoolView {
 	if (typeof status !== 'string' || !(poolStatuses as readonly string[]).includes(status)) {
 		fail('pool status');
 	}
-	const precedence = 'precedence' in value ? decodePoolPrecedence(value['precedence']) : undefined;
 	return {
 		line: {
 			brand_id: stringField(line, 'brand_id', 'pool line'),
@@ -194,7 +194,7 @@ export function decodePoolView(value: unknown): PoolView {
 		seeded: decodePoolCounts(value['seeded']),
 		live: decodePoolCounts(value['live']),
 		recent: decodePoolCounts(value['recent']),
-		...(precedence === undefined ? {} : { precedence })
+		precedence: decodePoolPrecedence(value['precedence'])
 	};
 }
 

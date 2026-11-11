@@ -42,7 +42,7 @@ describe('pooled belief from the frozen example', () => {
 		});
 		expect(pool.precedence).toEqual({ step: 'pool', overridden: true, overridden_by: 'correction' });
 		const plain = decodePoolView(productFitExample.pool);
-		expect(plain.precedence).toBeUndefined();
+		expect(plain.precedence).toBeNull();
 	});
 
 	it('serves the demo pool through the fixture transport', () => {
@@ -76,7 +76,7 @@ describe('pooled row shows counts only', () => {
 		}
 		expect(serialised).not.toContain('too tight in the shoulders');
 		expect(Object.keys(pool).sort()).toEqual(
-			['counts', 'direction', 'line', 'live', 'recent', 'seeded', 'size', 'status'].sort()
+			['counts', 'direction', 'line', 'live', 'precedence', 'recent', 'seeded', 'size', 'status'].sort()
 		);
 	});
 });

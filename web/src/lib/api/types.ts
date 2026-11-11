@@ -97,6 +97,13 @@ export interface CorrectionView {
 	takes_precedence: true;
 }
 
+/** Which precedence step a belief came from, and whether a stronger step decided. */
+export interface BeliefPrecedenceView {
+	step: 'correction' | 'own_evidence' | 'pool' | 'statement' | 'none';
+	overridden: boolean;
+	overridden_by: 'correction' | 'own_evidence' | 'pool' | 'statement' | 'none' | null;
+}
+
 /** One belief with its ledger status, underlying standing and warning. */
 export interface BeliefView {
 	belief_id: string;
@@ -108,6 +115,7 @@ export interface BeliefView {
 	contradicted: boolean;
 	contradicted_by: CorrectionView | null;
 	evidence: EvidenceView[];
+	precedence: BeliefPrecedenceView | null;
 	seeded: boolean;
 	updated_at: string;
 }

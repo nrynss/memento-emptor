@@ -66,6 +66,7 @@ function keptBeliefRow(): LedgerBeliefRow {
 				occurred_at: '2026-11-09T10:00:00Z'
 			}
 		],
+		precedence: null,
 		seeded: false,
 		updated_at: '2026-11-09T10:00:00Z'
 	};
