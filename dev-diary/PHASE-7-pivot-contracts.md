@@ -187,7 +187,7 @@ Limits: the re-run scope is read from the types and the committed records, not o
 
 ## Exit Criteria
 
-- [ ] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).
+- [x] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).
 - [x] Every stored key is built in one place, with the salt from the keyring (T7.2).
 - [x] Consent for pooling is decided: opt-out (T7.3).
 - [x] The contract requires the pool and per-item precedence once the served layer supports them (T7.4).
@@ -278,7 +278,7 @@ in `product_fit.response.example-claimed.json` fails `TestPoolFixturesMatchTheRu
    P7 as 7 / 7 Done and the tree proves the box (the 33 pinned examples and the three table-tested
    rules recorded above). `dev-diary/README.md` is the orchestrator's alone, so neither is touched
    here. **Owner: orchestrator, landing edit.**
-6. **Low — the T7.6 note above still says two round-1 files (owner: orchestrator).** T7.7 and its
+6. **Low — the T7.6 note above still says four round-1 files (owner: orchestrator).** T7.7 and its
    review re-derived four, and the diary's T7.6 entry already says four, so this document
    contradicts itself at the T7.6 bullet; T7.7's review delegated the fix to the orchestrator and
    it was not made. **Owner: orchestrator, landing edit** — the same one-clause correction the T7.7

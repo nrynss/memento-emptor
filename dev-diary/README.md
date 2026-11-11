@@ -15,7 +15,7 @@ Each phase document gives an engineer starting cold the complete context for its
 
 **This diary is public.** The repository goes public for submission. Nothing private goes in here: no key, no account detail, no IP address, no personal path beyond `~`, no private repository's name.
 
-**Current status:** P0 to P5 are done as first built, and the pivot in product.md is decided. P7 to P10 carry it out. T7.1 (pivot contracts) and the round 1 relabel are landed; T10.1 (what arm 2 gets) is in final review; T7.2 waits on the identity salt. P6 resumes after P9 and P10.
+**Current status:** P0 to P5 are done as first built, and the pivot in product.md is decided. P7 and P8 are done; P9 and P10 carry the remaining work (surfaces, the demo's live gaps, and round 2's runs). P6 resumes after P9 and P10.
 
 ---
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P7 E2E review: FINDINGS, one Medium opened
+
+**What exists.** The review verified the contract end to end: eleven tools each with schema and both examples, all 33 examples round-trip deep-equal, every object schema closed, the pivot fields required, the docs byte-pinned, the pool and usual-size tables covering their boundaries, and T7.5/T7.6/T7.7's shapes intact. It landed three fixes on `0b071c5`: a test now pins the four required lists T7.4 tightened, `docs/architecture.md` states the identity HMAC construction instead of a sketch, and `pool_lookup`'s definition names all three `unavailable` reasons. P7's first exit box now ticks.
+
+**What surprised.** A pool with no leading direction decides recall: `presence.Pool` is set from the view alone, so a Building pool with four fits-well shoppers and no returns answers "Size down to S … 0 of 4 came back too large, against 0 too small", and a level 2/2 pool takes the same path. product.md says the pool decides only when it says the product runs off-size. Owner: **T8.5r**, with both counts as regressions.
+
+**Findings with owners.** (Medium) directionless pool decides → **T8.5r**. The diary's status paragraph and the T7.6 two-file note were stale → fixed here.
 
 ### T8.5j: The harness's seeded statement is marked (done)
 

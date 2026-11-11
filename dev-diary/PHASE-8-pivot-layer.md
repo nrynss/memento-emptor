@@ -776,6 +776,20 @@ T8.5j's Done-when says a live run still passes after the harness marks its seede
 
 ---
 
+### T8.5r: A pool with no direction never decides recall
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/
+status:     not-started
+```
+The P7 review found `tools.go` sets `presence.Pool` from the pool view alone, so a Building pool with no leading direction wins precedence step 3 and `guidanceForPool` reads "no direction" as "runs large": four distinct fits-well shoppers with no returns and a shopper with no history produce "Size down to S for brand-x-001: 0 of the 4 fit-classified settled purchases at size M came back too large, against 0 too small." A level Building pool (2/2) takes the same path. product.md says the pool decides only when it says the product runs off-size.
+
+**Done when:** a pool with no direction never decides a recommendation (the next step decides, or the pool rides as context without a size); both counts (0/4 and 2/2) are regression cases; the guidance text cannot read a missing direction as a direction; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).
