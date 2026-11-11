@@ -262,13 +262,32 @@ Two consequences are part of the freeze, not a surprise to report later:
     the shopper said fits; PayPal shows a fits-well verdict exactly as it shows
     any unremarked purchase, which is why the tie exists and why the verdict
     itself stays out of arm 2's reach.
-  - The other six hold none, because every candidate-line purchase came back.
+  - The other six hold none: on the four whose records carry candidate-line
+    purchases, every one came back with a refund or a dispute, and the two
+    shoppers who are new to the brand carry no purchase on that line at all, so
+    arm 2's reason there is `MissingNoBrandHistory` rather than
+    `MissingNoCause`.
 
   A kept purchase on another brand is not read: it names the shopper's usual
   size rather than the candidate line's fit, and arm 2 has neither a statement
   nor a pool to carry a usual size into an answer. A refund's status still says
   nothing about fit, so nothing in the records separates a fit return from
   damage, non-arrival, changed mind or an unexplained return.
+
+Two properties of the frozen records bound that reading, and T10.4 must not
+report more than they hold:
+
+- **No return window has closed.** A kept row's purchase sits inside the
+  session, so the fixture declares the row kept rather than deriving it from a
+  window, and `payPalKeptSizes` reads only "came back with no refund and no
+  dispute". No arm can see a window either way, and no answer in the hold table
+  depends on one having passed.
+- **The order–capture pairing key is the report time.** An order and its capture
+  share no id; the generator writes both from the same instant (`create_time`
+  and `transaction_initiation_date`). An order that does not tie to exactly one
+  capture is dropped rather than counted as kept, so a broken pairing loses an
+  answer instead of inventing one, and `TestFairness` fails on
+  `r2-corr-standing` if it happens.
 
 ## 5. The rival-birth threshold is mirrored, not approximated
 
