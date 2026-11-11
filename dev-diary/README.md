@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 7 / 8 | In progress (T1.1d) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
-| P4 | 6 / 8 | In progress (T4.6, T4.8) |
+| P4 | 7 / 9 | In progress (T4.8, T4.9) |
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T4.6: One shopper at a time on the belief page (done)
+
+**What exists.** The pooling fixture decodes each frozen answer and refuses when its shopper is not the transport's, so a case shopper with no frozen pooling answer fails closed instead of replaying the demo shopper's three removed rows. The correction fixture takes the shopper it answers, rejects another, refuses the demo belief from another shopper, and answers the frozen standing request's `shopper_02` byte for byte. The belief page builds its `ContestState` from the case shopper's transport and keys both the standing editor and the toggle by shopper, so a case change remounts them; the duplicate empty-state lede is gone so the sentence prints once. The frozen standing test now sends its own shopper, and a review test proves the editor remounts too (removing its key left the original suite green).
+
+**What surprised.** The pooling fixtures carry the demo shopper's answers only, so the other four cases now say they have no answer rather than restamping three removed rows under another shopper — honest, and visible. `createFixtureContestState` still builds its transport for the demo shopper; **T4.9** fixes the helper.
+
+**The next agent should not have to work out.** `{#key caseShopper}` (not the case) is right: two cases can share one shopper, and keying by shopper keeps that shopper's result.
 
 ### T8.5m: A correction id is never reused (done)
 
