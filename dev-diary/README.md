@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 8 / 8 | Done |
 | P2 | 17 / 18 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
-| P4 | 8 / 10 | In progress (T4.9, T4.10) |
+| P4 | 9 / 11 | In progress (T4.10, T4.11) |
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T4.9: The fixture contest state uses its shopper (done)
+
+**What exists.** `createFixtureContestState(shopperId)` passes its shopper to the fixture transport, so a state's requests and the fixture that answers them agree; the belief page's fixture branch now builds through the helper (the live branch keeps its direct construction). `state.test.ts` proves `shopper_02` gets its frozen standing answer and `shopper_04` records fresh wording, and that the demo path and T4.6's single-shopper guard are unchanged. Review mutation-checked the argument (three non-demo tests fail without it) and fixed a glued doc comment from T4.4.
+
+**What surprised.** A non-demo shopper's *belief* correction cannot succeed through the fixture: `blf_8f2c41` is the demo shopper's and the fixture refuses it by ownership, so the test proves the shopper check passed by the refusal reason. A real non-demo belief needs its own belief id.
+
+**The next agent should not have to work out.** T4.6's handoff line saying the helper still used the demo shopper is now history; the helper honours its argument.
 
 ### T9.22: Catalog search after recall (done)
 
