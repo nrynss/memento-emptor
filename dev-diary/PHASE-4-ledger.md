@@ -141,6 +141,20 @@ status:     not-started
 
 ---
 
+### T4.10: The ledger page stops loading evidence it never shows
+```yaml
+requires:   [T4.8]
+fixture-ok: yes
+size:       XS · mid
+owns:       web/src/lib/api/, web/src/routes/ledger/
+status:     not-started
+```
+`LedgerState.refresh` fetches `ledger_evidence` on every load, but the ledger table renders none of it (the per-row count comes from the belief row; the evidence lives in the why view). Because the three reads share one `Promise.all`, a failed evidence read labels the whole page failed although nothing from it is displayed. Decide: drop the read, or load it lazily for the row that needs it, or record why the shared loader is deliberate.
+
+**Done when:** the ledger page no longer fails over data it does not show (or the reason is recorded); the why view still renders evidence; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] The ledger reads through a typed client (T4.1).
