@@ -184,6 +184,20 @@ Review (P5 E2E, round 1). Re-derived from the committed files: 27 rows, `correct
 
 ---
 
+### T5.8b: Re-run the two multi-brand cells with a settle note
+```yaml
+requires:   [T5.8]
+fixture-ok: no
+size:       XS · mid
+owns:       bench/runs/
+status:     not-started
+```
+The P5 review found T5.8's note says both multi-brand Candidate beliefs refuse, but the run files show `"beliefs": []` with "No recommendation yet: too little evidence", and `recallBeliefs` serves Candidate standing, so a Candidate belief would have appeared; the split shopper has enough fit returns for Candidate. The cause is unrecoverable from the committed files because the t58 runs carry no settle note. Re-run the two cells with the settle note and a pre/post recall, and record what the belief actually was.
+
+**Done when:** both cells are re-run and recorded with the settle note and the pre/post recall; the cause of the empty belief is stated or the cells are recorded as still unexplained; spend is recorded; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] The harness and grader work on fixtures (T5.1, T5.2).

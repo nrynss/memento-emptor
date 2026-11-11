@@ -164,7 +164,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 5 / 8 | In progress (T4.6, T4.7, T4.8) |
-| P5 | 10 / 10 | Done |
+| P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 19 / 22 | In progress (T8.5i, T8.5j, T8.5k) |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P5 E2E review: APPROVE, one Medium re-run opened
+
+**What exists.** The P5 review re-derived every published count from `bench/runs/scores.json`, regraded all three rounds from copies (45 + 12 + 27 rows identical), and re-derived **111 prompt strings** against the frozen harness with **0 mismatches** (one instrument, arm names consistent). The freeze bites on a tampered file; the grader's rules are pinned by two mutation-checked tests. It landed four fixes on `b3a7374`: the hardened set is now published with its counts (the one set where arm 2 stops being perfect and arm 3 stops being zero was missing and wrongly called "not built"), the overruled contamination hit is recorded, the pilot's `deployment` label and cite counts are corrected, and t59's prompt-tail comment is accurate. All five P5 exit boxes tick.
+
+**What surprised.** T5.8's note gives the wrong cause for two multi-brand refusals: the files show an empty belief list, and a Candidate belief should have been served; the runs carry no settle note, so the cause is unrecoverable. T5.5 overwrote one $0.0018 shakedown turn against the freeze's own "never deleted" rule — disclosed and accepted as a recorded deviation. T5.7 edited the freeze check and the grader test outside its owns — verified and recorded as an approved owns extension.
+
+**Findings with owners.** (Medium) the two multi-brand cells need a re-run with a settle note → **T5.8b**. (Low) T5.5's overwritten shakedown turn → accepted deviation, recorded. (Low) T5.7's owns extension → approved in its notes.
 
 ### T9.7: The pivoted demo (done)
 
