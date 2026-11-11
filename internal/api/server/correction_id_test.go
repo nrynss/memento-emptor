@@ -8,6 +8,7 @@ import (
 	"github.com/nrynss/memento-emptor/internal/api/contract"
 	"github.com/nrynss/memento-emptor/internal/evidence"
 	"github.com/nrynss/memento-emptor/internal/fakes"
+	"github.com/nrynss/memento-emptor/internal/standing"
 )
 
 // secondCorrectionWords is a correction the story world does not know. The
@@ -249,9 +250,9 @@ func TestRestartAndReseedListEachCorrectionOnce(t *testing.T) {
 	assertCorrectionIDsOnce(t, ledger.Corrections)
 }
 
-// TestExplainBeliefListsARepeatedOrderOnce proves the read itself never
-// doubles a correction: a journal written before the order deduplicated
-// names one id twice, and the listing still shows one row.
+// TestExplainBeliefListsARepeatedOrderOnce proves the read does not rely
+// on the order being deduplicated: an order that names one id twice still
+// lists one row.
 func TestExplainBeliefListsARepeatedOrderOnce(t *testing.T) {
 	ctx := context.Background()
 	svc := seededService(t)
@@ -278,4 +279,145 @@ func TestExplainBeliefListsARepeatedOrderOnce(t *testing.T) {
 		t.Fatalf("a repeated order doubled the listing: %d rows, want %d", len(after.Corrections), len(before.Corrections))
 	}
 	assertCorrectionIDsOnce(t, after.Corrections)
+}
+
+// t97Corrections is the correction journal the T9.7 live run left behind:
+// five ids in seven rows, because the seed replaying beside the restored
+// journal appended corr_3b7e52 and corr_000001 a second time. The rows are
+// the ones demo/evidence/run-6/02-belief-explained.json served, oldest
+// first.
+func t97Corrections() []contract.CorrectionView {
+	views := []contract.CorrectionView{
+		{
+			CorrectionID: "corr_3b7e52", Text: "I've lost weight, use M",
+			ContradictsBeliefID: seededFitBelief, RecordedAt: "2026-11-05T14:02:11Z", TakesPrecedence: true,
+		},
+		{
+			CorrectionID: "corr_000001", Text: "I've lost weight - for Brand X oxfords, use M for me",
+			ContradictsBeliefID: seededFitBelief, RecordedAt: "2026-11-11T11:29:21Z", TakesPrecedence: true,
+		},
+		{
+			CorrectionID: "corr_000002", Text: "I've dropped a size since October. For Brand X oxfords, take M for me, and record that as my correction.",
+			ContradictsBeliefID: seededFitBelief, RecordedAt: "2026-11-11T11:32:11Z", TakesPrecedence: true,
+		},
+		{
+			CorrectionID: "corr_000003", Text: "I've dropped a size since October. For Brand X oxfords, I take M now - please record that as my correction.",
+			ContradictsBeliefID: seededFitBelief, RecordedAt: "2026-11-11T11:34:39Z", TakesPrecedence: true,
+		},
+		{
+			CorrectionID: "corr_000004", Text: "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction.",
+			ContradictsBeliefID: seededFitBelief, RecordedAt: "2026-11-11T11:40:20Z", TakesPrecedence: true,
+		},
+	}
+	// The two the run appended a second time, at the end of its order.
+	return append(views, views[1], views[0])
+}
+
+// TestRestoredJournalOfSevenRowsServesFive proves the fix against the
+// journal the T9.7 run left: a snapshot naming five correction ids in
+// seven rows restores to one row per id, holds the order at five, keeps
+// the view and place each id already had, mints the next correction past
+// every restored id, and writes the rows back once each.
+func TestRestoredJournalOfSevenRowsServesFive(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	seed, err := SeedFromExamples(apiDir(t))
+	if err != nil {
+		t.Fatalf("build seed: %v", err)
+	}
+	store, err := standing.NewDirStore(dir)
+	if err != nil {
+		t.Fatalf("open standing store: %v", err)
+	}
+	snap := standing.Snapshot{Pooling: true, Corrections: t97Corrections()}
+	if err := store.Save(ctx, seed.ShopperID, snap); err != nil {
+		t.Fatalf("save the run's journal: %v", err)
+	}
+
+	svc := seededCorrectionHarness(t, dir, seed)
+	if err := svc.LoadSeed(ctx, seed); err != nil {
+		t.Fatalf("replay the seed beside the restored journal: %v", err)
+	}
+	explained, err := svc.ExplainBelief(ctx, contract.ExplainBeliefRequest{ShopperID: seed.ShopperID, BeliefID: seededFitBelief})
+	if err != nil {
+		t.Fatalf("explain the seeded belief: %v", err)
+	}
+	listed := assertCorrectionIDsOnce(t, explained.Corrections)
+	if len(listed) != 5 {
+		t.Fatalf("the run's seven rows served %d corrections, want the five its ids name", len(listed))
+	}
+	// The order is unchanged: newest first, the duplicated rows in the
+	// one place their id already held.
+	for i, want := range []string{"corr_000004", "corr_000003", "corr_000002", "corr_000001", "corr_3b7e52"} {
+		if got := explained.Corrections[i].CorrectionID; got != want {
+			t.Fatalf("row %d is %q, want the run's %q", i, got, want)
+		}
+	}
+	ledger, err := svc.LedgerBelief(ctx, contract.LedgerBeliefRequest{ShopperID: seed.ShopperID, BeliefID: seededFitBelief})
+	if err != nil {
+		t.Fatalf("ledger read of the seeded belief: %v", err)
+	}
+	if len(ledger.Corrections) != 5 {
+		t.Fatalf("the ledger lists %d corrections, want the same five", len(ledger.Corrections))
+	}
+	assertCorrectionIDsOnce(t, ledger.Corrections)
+
+	// The duplicate rows did not double the timeline: the correction the
+	// seed's history recorded stays one event, as it stays one row.
+	correctionEvents := 0
+	for _, event := range explained.Timeline {
+		if event.Kind == contract.TimelineCorrection {
+			correctionEvents++
+		}
+	}
+	if correctionEvents != 1 {
+		t.Fatalf("the timeline holds %d correction events, want the seed's one", correctionEvents)
+	}
+
+	svc.mu.Lock()
+	order := len(svc.shoppers[seed.ShopperID].corrOrder)
+	svc.mu.Unlock()
+	if order != 5 {
+		t.Fatalf("the restored order holds %d rows, want the five ids once each", order)
+	}
+
+	// A second sighting of an id keeps the view on file: a seed that
+	// changed one must not rewrite the journal's copy.
+	svc.mu.Lock()
+	svc.shoppers[seed.ShopperID].takeCorrection("corr_000004", &correctionRecord{
+		view: contract.CorrectionView{CorrectionID: "corr_000004", Text: "rewritten by a later seed"},
+	})
+	svc.mu.Unlock()
+	again, err := svc.ExplainBelief(ctx, contract.ExplainBeliefRequest{ShopperID: seed.ShopperID, BeliefID: seededFitBelief})
+	if err != nil {
+		t.Fatalf("explain the seeded belief after a second sighting: %v", err)
+	}
+	if len(again.Corrections) != 5 || again.Corrections[0].CorrectionID != "corr_000004" {
+		t.Fatalf("a second sighting moved or doubled the row: %v", again.Corrections)
+	}
+	if want := "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction."; again.Corrections[0].Text != want {
+		t.Fatalf("the second sighting rewrote the row to %q, want %q", again.Corrections[0].Text, want)
+	}
+
+	// The restored ids keep their numbers, so the next correction is 000005
+	// rather than a second 000001.
+	recorded, err := svc.RecordCorrection(ctx, contract.RecordCorrectionRequest{
+		ShopperID: seed.ShopperID, Text: secondCorrectionWords, ContradictsBeliefID: seededFitBelief,
+	})
+	if err != nil {
+		t.Fatalf("record a correction after the restore: %v", err)
+	}
+	if want := "corr_000005"; recorded.Correction.CorrectionID != want {
+		t.Fatalf("the next correction is %q, want the fresh %q", recorded.Correction.CorrectionID, want)
+	}
+
+	// The five rows go back to disk once each, beside the new correction.
+	written, found, err := store.Load(ctx, seed.ShopperID)
+	if err != nil || !found {
+		t.Fatalf("read the journal back (found %t): %v", found, err)
+	}
+	if len(written.Corrections) != 6 {
+		t.Fatalf("the journal was written with %d rows, want the six distinct corrections", len(written.Corrections))
+	}
+	assertCorrectionIDsOnce(t, written.Corrections)
 }

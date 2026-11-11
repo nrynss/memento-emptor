@@ -1103,10 +1103,10 @@ func (s *Service) ExplainBelief(ctx context.Context, req contract.ExplainBeliefR
 }
 
 // correctionsFor lists one belief's corrections newest first, each
-// correction id once. The arrival order may name an id twice — a journal
-// written before the order de-duplicated, or a replayed seed beside its
-// restored view — and one correction stays one row however often the
-// order names it. The caller holds the lock.
+// correction id once. Every insertion goes through takeCorrection, so
+// the arrival order names an id once; this read does not depend on that:
+// it keeps one row per id, the newest occurrence, so one correction
+// stays one row however the order was built. The caller holds the lock.
 func correctionsFor(st *shopperState, beliefID string) []contract.CorrectionView {
 	out := []contract.CorrectionView{}
 	seen := map[string]bool{}
