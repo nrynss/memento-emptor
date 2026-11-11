@@ -163,11 +163,19 @@ requires:   [T7.6]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/runs/cmd/, bench/README.md, dev-diary/PHASE-5-comparison.md, dev-diary/PHASE-2-layer.md
-status:     claimed:t77-bench-wire
+status:     in-review
 ```
 `bench/runs/cmd/t55`, `t58` and `t59` marshal contract values directly (`json.Marshal`), bypassing the service's encode path, so their committed recordings under `bench/runs/t59/` show the subject as `Kind`/`ID`/`Name`. T7.6's tags make a re-run emit `kind`/`id`/`name`, so a future re-run would differ from the frozen recordings. Nothing in the gate compares them and the freeze check is green. Decide: leave round 1 as frozen history and state that its recordings predate the tags wherever the commands are documented, or make the commands emit the tagged shape and record that a re-run now differs.
 
 **Done when:** the decision is recorded with its reason where the commands are documented, and no committed round-1 run file is altered; the gate passes.
+
+**Notes (in-review).** Decision: leave round 1 as frozen history. The commands are unchanged in what they emit; they now produce the tagged shape on their own because of T7.6. The reason is recorded where the commands are documented: a new `bench/README.md` section, "The round-1 recordings predate the subject tags", states that the recordings were written before the tags, that a re-run now emits `kind`/`id`/`name` and would differ in exactly that key casing, and why the record stays — these files are published output that every count in the document is read from, so changing the commands would revise future runs, never history. The drivers carry the same note at `renderMemoryBlock`, where the raw marshal happens, in `t55`, `t58` and `t59`.
+
+Four committed run files carry a subject, not the two the task text names, and all four are left byte-identical: `bench/runs/t58/t58-a3-noisy-large-r1.json`, `bench/runs/t58/t58-a3-noisy-small-r1.json`, `bench/runs/t59/t59-a3-noisy-large.json` and `bench/runs/t59/t59-a3-noisy-small.json`. `git status` shows no change under `bench/runs/`. `t55`'s recordings carry no belief, so no subject appears in them, though its driver writes the same shape for a future run and says so.
+
+`dev-diary/PHASE-5-comparison.md` gains one clause in the T5.8 and T5.9 worker notes, each naming its two files and pointing at the README section. `dev-diary/PHASE-2-layer.md`'s T2.5 note is corrected: the encode-boundary rename is stated as what that task built, not what the code does now, with T7.6 named as the change that removed it.
+
+Two things the next agent should not have to rediscover: the task text and T7.6's note both say two files, and the count is four because T5.8's noisy pair records the same subject; and the grade block in those files is uppercase for a different reason (the grader's own types carry no tags) and does not change on a re-run, so the casing difference is confined to the subject.
 
 ---
 

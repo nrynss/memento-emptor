@@ -880,6 +880,14 @@ func beliefContents(s server.Seed) []string {
 
 // renderMemoryBlock renders the served memory as the prompt's memory
 // block: the recall request and the full live responses, nothing added.
+//
+// The marshal below is the raw contract value, not the service's encode
+// path, so it writes whatever the domain type says. domain.Subject gained
+// its json tags in T7.6, which makes the subject read kind/id/name. The two
+// committed T5.9 recordings that carry a belief,
+// t59-a3-noisy-large.json and t59-a3-noisy-small.json, predate the tags and
+// show Kind/ID/Name; they stay as recorded, and T7.7's record of that
+// decision sits in bench/README.md.
 func renderMemoryBlock(shopper, brand string, mem arm3Memory) string {
 	recallReq, _ := json.Marshal(map[string]string{
 		"shopper_id": shopper, "brand_id": brand, "trace_id": mem.recallReq.TraceID,

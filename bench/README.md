@@ -33,6 +33,34 @@ the layer made, against Memento shopper-only and Memento full. Its tasks and
 freeze live in `dev-diary/PHASE-10-comparison-round-2.md`; this document
 remains the round 1 record.
 
+## The round-1 recordings predate the subject tags
+
+The run files were written by `bench/runs/cmd/t55`, `t58` and `t59`, which
+marshal the layer's contract values straight to JSON (`json.Marshal` on the
+served recall response) instead of going through the service's encode path. At
+the time they ran, `domain.Subject` carried no JSON tags, so a subject in their
+recordings reads `Kind`/`ID`/`Name`. T7.6 tagged the type (`kind`, `id`,
+`name`), so a re-run of any of the three now emits the lowercase keys and would
+differ from the committed files in exactly that key casing, and nowhere else:
+the grade in each file comes from the grader's own types, which keep their field
+names either way.
+
+Four committed files carry a subject, and all four stay exactly as recorded:
+
+- `bench/runs/t58/t58-a3-noisy-large-r1.json`
+- `bench/runs/t58/t58-a3-noisy-small-r1.json`
+- `bench/runs/t59/t59-a3-noisy-large.json`
+- `bench/runs/t59/t59-a3-noisy-small.json`
+
+The other arm-3 recordings hold no belief, so no subject appears in them. The
+decision is to leave round 1 as frozen history rather than change the commands
+to match the tags: these files are output already published, and every count in
+this document is read from them, so a re-run would revise history instead of
+the code. Nothing in the gate compares or hashes a run file — `bench/FROZEN.md`
+lists no run file — so the casing difference is a record of when a run happened,
+not a check that fails. A future run writes the tagged shape; these four say
+what was actually served in round 1.
+
 ## Setup
 
 - Frozen inputs: `bench/FROZEN.md` (25 sha256 rows: the 9 arm-facing
