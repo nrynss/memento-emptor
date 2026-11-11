@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 35 / 37 | In progress (T8.5u, T8.7b) |
+| P8 | 36 / 37 | In progress (T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5u: The layer driver ran live with thin evidence served (done)
+
+**What exists.** One live run of `tests/live/layer/run.sh` with the keys loaded, the pinned Lambo 0.10.1 release asset, live Jev and the live Elastic deployment. The one-return tripwire passed with T8.5i's shape: exactly one belief, `Claimed/None`, one too-small row, `own_evidence` deciding and not overridden, guidance "Take size L for Brand X" (the driver wires no pool, so the sentence carries no pool clause). Every other leg passed: Earned/Venerable at blast radius 3, the vague answer pending, the dispute only against the seller, the correction overriding at once, the Claimed fits-well belief beside the sizing one. Every throwaway index and session was erased; the final listing holds only the pool's two indices. Spend $0.000085596, all four Jev calls; embeddings carry no cash charge on the trial.
+
+**What surprised.** The review corrected five note claims: there was no pre-run index listing, the leg deletes three indices (its own plus two), six excerpt elisions are now marked, and two limits were missing. The binary under test had to be the release asset (the cargo build reports 0.10.1 but hashes differently), and leg 2 hardcodes `/tmp/lambo-0.10.1` regardless of `LAMBO_BIN`.
+
+**The next agent should not have to work out.** This run proves the layer harness, not `demo/driver`; a re-run needs the release asset at `/tmp/lambo-0.10.1`, a fresh `OUT` or session (the old one is tombstoned), and the transcript lives only in the git-ignored `out/`.
 
 ### T8.5q: The precedence driver ran live with the mark assertion (done)
 
