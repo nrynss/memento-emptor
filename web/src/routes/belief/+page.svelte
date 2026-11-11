@@ -31,7 +31,7 @@
 	import {
 		ContestState,
 		CorrectionClient,
-		createFixtureCorrectionTransport
+		createFixtureContestState
 	} from '$lib/contest';
 	import type { ContestCorrectionView } from '$lib/contest';
 	import ContestEditor from '$lib/contest/ContestEditor.svelte';
@@ -115,20 +115,14 @@
 		liveLink !== null ? liveLink.shopperId : recallCaseShopper[recallCase]
 	);
 	// One correction transport per shopper: a live link's corrects for that
-	// shopper through the edge, and a replay's answers the shopper its case
-	// names, so a standing correction can never be recorded under another
-	// shopper's name. The editor is keyed by that shopper below, so a change
-	// remounts it with no earlier words or answer on screen.
+	// shopper through the edge, and a replay's is the fixture's for the
+	// shopper its case names, so a standing correction can never be recorded
+	// under another shopper's name. The editor is keyed by that shopper below,
+	// so a change remounts it with no earlier words or answer on screen.
 	const contestState = $derived(
-		new ContestState(
-			new CorrectionClient(
-				liveLink !== null
-					? createLiveTransport(liveLink)
-					: createFixtureCorrectionTransport(caseShopper)
-			),
-			caseShopper,
-			[]
-		)
+		liveLink !== null
+			? new ContestState(new CorrectionClient(createLiveTransport(liveLink)), caseShopper, [])
+			: createFixtureContestState(caseShopper, [])
 	);
 	const poolingState = $derived(
 		liveLink !== null
