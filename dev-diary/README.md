@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 22 / 31 | In progress (T8.5i, T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5s, T8.7b) |
-| P9 | 19 / 26 | In progress (T9.11, T9.14, T9.15, T9.17, T9.18, T9.19, T9.9) |
+| P9 | 21 / 27 | In progress (T9.11, T9.14, T9.15, T9.17, T9.19, T9.20) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.18: The deploy README's pins cover bun (done)
+
+**What exists.** `deploy/README.md`'s toolchain table lists Go, Node and Bun with their sources and says what the check reads (18 declarations); the Bun row is a required source in `tools/pincheck`, so a drifted or missing row fails the gate naming the file. The table test covers both new cases. Review corrected two prose claims (the quoted output line and "the four agent images"), and confirmed that a patch-stating row (`1.3.0`) is compared exactly against CI while a major-only row (`1.3`) is not.
+
+**What surprised.** The table row is bun's third source; `tools/check.sh`'s pin comment still named two, which T9.19 carries.
+
+**The next agent should not have to work out.** Adding a toolchain means adding it to `readmeKinds()` and the table together, or the row is unread.
 
 ### T9.9: Agent tool surface and retry discipline (done)
 

@@ -661,7 +661,7 @@ requires:   [T9.16]
 fixture-ok: yes
 size:       XS · mid
 owns:       deploy/README.md, tools/pincheck/
-status:     in-review
+status:     done
 ```
 `tools/pincheck` now compares Go, Node and bun, but `deploy/README.md`'s toolchain section still lists only Go and Node and still says what the gate reads. Add bun's pin and its sources, and correct the paragraph about what the check covers.
 
