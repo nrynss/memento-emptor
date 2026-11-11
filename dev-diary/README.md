@@ -160,15 +160,15 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 12 / 12 | Done |
-| P1 | 5 / 6 | In progress (T1.1b) |
+| P1 | 5 / 7 | In progress (T1.1b, T1.1c) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 7 | In progress (T4.5, T4.6, T4.7) |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 6 / 7 | In progress (T7.7) |
-| P8 | 19 / 21 | In progress (T8.5i, T8.5j) |
-| P9 | 15 / 19 | In progress (T9.7, T9.9, T9.11, T9.12) |
+| P8 | 19 / 22 | In progress (T8.5i, T8.5j, T8.5k) |
+| P9 | 16 / 21 | In progress (T9.7, T9.9, T9.11, T9.13, T9.14) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.12: The public shopper page is guarded (done)
+
+**What exists.** The relay's body validator, 30-turn budget and validate-then-charge decision live in `agent/frontend/server/relay.ts` with 15 `node:test` cases; the T3.8 result is committed as `agent/frontend/testdata/t38-public-page.txt`, a reassembly with per-line provenance (the raw output was never captured); the gate runs the relay tests and type-checks the package where bun and its modules exist, else `server/relay.ts`. Review re-ran the three mutations and widened one: charging a turn before validating failed only one case, so a malformed body now has its own spent-budget case.
+
+**What surprised.** `node`'s ESM resolver needs the `.ts` extension where bun and `tsc` take `.js`, so the test imports `./relay.ts` and the tsconfig allows it. CI carries no bun, so the full-package typecheck is workstation-only until T9.13.
+
+**The next agent should not have to work out.** Keep `relay.ts` import-free: one import takes both the node test run and the fallback typecheck away. T9.14 owns the status-mapping test that needs bun.
 
 ### P4 E2E review: FINDINGS, fixes landed
 

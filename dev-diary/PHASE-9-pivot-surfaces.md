@@ -465,7 +465,7 @@ requires:   [T3.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/frontend/, tools/check.sh
-status:     in-review
+status:     done
 ```
 The P3 review found T3.8's live result has no committed transcript, nothing tests `validateMessages` or the 30-turn cap, and no gate step type-checks `agent/frontend/` (the gate checks `web/` and `merchant/` only), so a future edit there is unguarded. Add the transcript (redacted), tests for message validation and the cap, and a frontend typecheck step to the gate.
 
@@ -501,6 +501,20 @@ status:     not-started
 T9.12 wired the frontend guard into the gate, but the full-package typecheck needs `bun` and the package's modules, which the CI runner does not have: CI takes the reduced fallback that checks only `server/relay.ts`. Add `setup-bun` and a frozen `bun install` for `agent/frontend/` to the workflow so CI runs the same full typecheck as a workstation.
 
 **Done when:** CI installs bun and the package's frozen dependencies and the gate's frontend step runs the full typecheck there; a run shows it green; no other gate step changes.
+
+---
+
+### T9.14: Test the relay's status mapping
+```yaml
+requires:   [T9.13]
+fixture-ok: yes
+size:       XS · mid
+owns:       agent/frontend/
+status:     not-started
+```
+`agent/frontend/server/index.ts` maps kinds to statuses (400 for an invalid body, 429 for an exhausted budget, 502 for a relay failure), and no test pins that mapping: a future edit could answer 500 for an exhausted budget with the gate green. The file starts `Bun.serve` and cannot be imported under `node --test`, so the test needs the bun runner T9.13 adds to CI.
+
+**Done when:** a test runs the mapping under bun and fails if any kind answers a different status; the gate runs it where bun exists; the gate passes.
 
 ---
 
