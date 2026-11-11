@@ -128,7 +128,7 @@ requires:   [T10.4]
 fixture-ok: yes
 size:       S · frontier
 owns:       bench/round2/README.md
-status:     not-started
+status:     claimed:t105-results
 ```
 The results as counts, each linked to its runs, with the limits first: we wrote the shoppers, the answers and the population, so this shows the mechanism on constructed cases, not real-world accuracy. Per case and per arm: right size first time, wrong-cause errors, corrections honoured (next turn, next session, other agent), which precedence step decided, citations that support, tokens. Where arms match, say so. List the headline candidates with exact counts; the user picks one.
 
