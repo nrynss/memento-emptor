@@ -444,6 +444,34 @@ Spend: $0.00 of the $0.20 embedding budget (the fixture embedder computes vector
 
 ---
 
+### T8.5f: Hub client honours the attach bound, with offline shape tests
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       S · mid
+owns:       cmd/memento/
+status:     not-started
+```
+P0's review found two gaps in `cmd/memento/`. First, the hub client does not honour T0.11's attach-bound refusal: `postLocked` turns any non-200 into an error, and `call`'s single retry re-initialises, which cannot relieve a hub whose `max_attached` places are all full — so a burst of more than fifteen concurrent shoppers surfaces errors where the documented behaviour is 503 plus `Retry-After` and a retry after that delay. Second, the MCP reply shapes the client depends on (receipts, admission checks, warnings, blast radius) have no offline test: no test reads `testdata/lambo/`, so shape drift is caught only live.
+
+**Done when:** a refused attach (503 with `Retry-After`) is retried after the stated delay, bounded, and surfaces a typed error when the bound persists, with a table test; a replay test reads `testdata/lambo/01-seed.jsonl` (or the recorded turns) and pins the reply shapes the client parses; the client's existing behaviour is unchanged on the happy path; the gate passes.
+
+---
+
+### T8.1c: Record the hub's recall tier decision
+```yaml
+requires:   [T8.1]
+fixture-ok: no
+size:       XS · mid
+owns:       deploy/start.sh, deploy/README.md
+status:     not-started
+```
+`deploy/start.sh` never writes a `[recall]` section, so the deployed hub runs store-only, while T0.11's check 4 and `research/elastic.md` describe the deployment as Lambo's Elastic recall tier. Decide one of two: configure `[recall]` with the Elastic backend (and record what it costs per write and what changes in recall), or record store-only as the deliberate deployment decision and correct the two documents that claim otherwise. If configuring needs embedding spend or a new secret beyond the standing budget, stop and ask the user first.
+
+**Done when:** either the hub's config carries the recall tier with its cost and behaviour recorded, or the store-only decision is recorded in `deploy/README.md` and the stale claims are corrected; the deploy still boots; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).

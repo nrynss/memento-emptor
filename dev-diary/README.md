@@ -167,8 +167,8 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 5 | Done |
-| P8 | 15 / 15 | Done |
-| P9 | 9 / 10 | In progress (T9.7) |
+| P8 | 15 / 16 | In progress (T8.1c, T8.5f) |
+| P9 | 9 / 11 | In progress (T9.3g, T9.7) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P0 E2E review: FINDINGS, remediation opened
+
+**What exists.** The P0 review verified all thirteen tasks against committed evidence and landed the small fixes on `0500d9f`: PayPal recordings scrubbed of shopper country, street address, given/surname and three real `debug_id`s (two resend files also normalised to JSON); research-doc corrections (Puma size list, Elastic document inventory, Astropods spend reconciliation, hosting's docker runtime, the `states.json` aliasing quirk plus a harness deep-copy, the 37-scope grant's location, the `inspect` warnings key, the per-run store path); `research/README.md` gained its three missing rows; `.gitignore` ignores the AG Grid spike build; `product.md`'s Elastic-trial bullet is corrected to the Vector Database licence. The reviewer re-derived the Lambo GC epochs, the fit-index truth table, the latency medians and the Jev cost from the raw recordings; mutation-checked three replay tests (all bite); and confirmed the gate/CI installs now agree. Gate green.
+
+**What surprised.** The PayPal recordings carried real shopper detail beyond the placeholders the doc listed (country, street, given/surname, debug ids) — all redacted now. The `states.json` step bodies are the purchase's final row because the harness recorded the dict it later mutated; the per-step truth is `reads[].get._source`. And the Elastic "trial" was never a trial.
+
+**Findings with owners.** (S1, Medium) the hub client ignores the attach-bound 503/`Retry-After` → **T8.5f**, which also folds S2 (offline MCP shape tests over `testdata/lambo/`). (S3, Low) `start.sh` writes no `[recall]`, so the hub is store-only while two docs claim the Elastic tier → **T8.1c** (configure or record the decision). (S4, Low) the image builds `web/` on Node 22 against the Node 26 pin → **T9.3g**. (S5, Medium, user decision) the sandbox shopper email is in git history across 93 commits (tree clean, repo private); removing it needs a history rewrite and force-push, which is outward and invalidates the diary's commit citations — the user decides before publication.
 
 ### T8.5e: Flip the re-link tripwires live (done, P8 closed)
 

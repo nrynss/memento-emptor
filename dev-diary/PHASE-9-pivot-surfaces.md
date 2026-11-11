@@ -282,6 +282,20 @@ Two things the next agent should not have to rediscover:
 
 ---
 
+### T9.3g: Align the image's Node pin
+```yaml
+requires:   [T9.3d]
+fixture-ok: no
+size:       XS · mid
+owns:       deploy/Dockerfile
+status:     not-started
+```
+The demo image builds `web/` on Node 22 while T0.2's contract and CI pin Node 26. The deployed build works, but the pin has drifted, so a future frontend build could pass locally and CI and fail in the image (or the reverse). Align the image's build stage with the pinned Node version, prove the image builds and serves the app, and record the pin so it is checked with the rest of the toolchain.
+
+**Done when:** the Dockerfile's frontend build uses the pinned Node major; the image builds and serves `/` and `/healthz`; the pin is named where the other toolchain pins are recorded; the gate passes.
+
+---
+
 ### T9.7: The demo, after the pivot ★
 ```yaml
 requires:   [T9.2, T9.3d, T9.5, T9.6]
