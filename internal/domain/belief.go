@@ -29,7 +29,10 @@ type SubjectKind string
 const (
 	// SubjectBrand is a brand, for fit beliefs.
 	SubjectBrand SubjectKind = "brand"
-	// SubjectSeller is a seller, for seller-reliability beliefs.
+	// SubjectSeller is a seller, for seller-reliability beliefs. The id is
+	// derived from the brand that sold the item, `seller-for-{brand id}`:
+	// the records carry one merchant account for the whole layer, not a
+	// per-brand seller id. See docs/architecture.md, "The seller subject".
 	SubjectSeller SubjectKind = "seller"
 )
 

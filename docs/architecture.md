@@ -72,6 +72,34 @@ the recording that proves it.
    refuses; thin evidence comes back labelled thin.
    (`research/lambo.md` checks 3 and 5, `research/elastic-fit.md` check 3)
 
+## The seller subject: keyed by the brand
+
+A seller-reliability belief is about the seller of the item that failed to
+arrive. The layer keys that subject `seller-for-{brand id}`, named
+`{brand} seller`, and the derivation is the shape by decision, not a
+placeholder for a field nobody read.
+
+A dispute does carry a seller identity: every disputed transaction carries
+`seller.merchant_id`, `seller.email` and `seller.name`, and the capture and
+order reads carry the same account as `payee.merchant_id`, the refund as
+`payer.merchant_id`. What it identifies is the account that received the
+money, and in a layer that account is one value: a seller or a platform
+runs one layer beside its own payment app, and the recordings show the same
+merchant id on captures of two different orders (`capture-get.json`,
+`capture2-get.json`, `order-get-approved-line-items.json`). Keyed on it,
+every brand in the catalog would answer to one seller subject, and a
+dispute over one brand's parcel would count against every brand the layer
+serves. The brand is the unit the shopper's purchase, the fit row and the
+merchant app's pool already use, so it is the unit the seller belief uses.
+
+The derivation changes when a layer serves more than one seller account: a
+marketplace whose sellers each settle their own payments. Then the record's
+seller id tells them apart. `domain.Item` gains the seller id, populated
+from the dispute's `seller.merchant_id` or the capture's
+`payee.merchant_id`, the subject keys on it, and `seller-for-{brand}` goes.
+No id is invented before a layer needs one.
+(`testdata/paypal/dispute-get.json`, `capture-get.json`)
+
 ## The second write path: ingest to the fit index
 
 The pooled product-fit belief is an aggregation over structured rows in

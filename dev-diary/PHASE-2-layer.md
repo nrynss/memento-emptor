@@ -449,11 +449,17 @@ requires:   [T2.5]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/version/, internal/domain/, docs/architecture.md
-status:     claimed:t25b-housekeeping
+status:     in-review
 ```
 `internal/version/pin.go`'s blank Keel import is redundant (the server and auth import `keel/wire` for real) and its comment ("until the first package imports Keel for real") is now false. Seller subjects are `seller-for-{brand}` because dispute records carry no seller id; decide the seller-id source or record the derivation as the decision.
 
 **Done when:** the redundant import and comment are gone or justified; the seller-subject derivation is either replaced by a real seller id or recorded as the deliberate shape with its reason; the gate passes.
+
+Notes (worker t25b-housekeeping). `internal/version/pin.go` is deleted: the tools-tagged blank import was the file's whole content and the requirement is carried by real imports, so `go mod why -m github.com/nrynss/keel` still resolves through `internal/api/server`, and the default build, a `-tags tools` build, vet and the tests pass without it. `go mod tidy -diff` would prune go.sum's unused module-only hashes but keeps the Keel requirement; go.mod and go.sum are outside this task's owning paths and are unchanged. The seller subject keeps its brand derivation, now recorded as the decision: `docs/architecture.md` "The seller subject: keyed by the brand" states what a dispute actually carries, why the layer does not key on it, and the condition that would change it. `domain.SubjectSeller`'s doc names the derivation and points there. No code path, wire shape or fixture changed.
+
+Proven: `./tools/check.sh` passes in the worktree (gofmt, vet, `go test -race` over every package, both node lockfile checks, svelte-check, eslint, vitest and build for web/ and merchant/). No live calls; spend $0.
+
+Handoff. (1) The premise that dispute records carry no seller id does not hold: `testdata/paypal/dispute-get.json` carries `seller.merchant_id`, `seller.email` and `seller.name` on each disputed transaction, and the capture and order reads carry the same account as `payee.merchant_id`. What the records lack is a per-brand seller, which is the reason the derivation stands. (2) Because of that, `internal/api/server/content.go`'s comment above `sellerSubject` ("Dispute records carry no seller identity") is false and needs an owner: that file is outside this task's `owns`, so either widen `owns` to it or open a one-line comment fix. (3) `dev-diary/README.md`'s T1 handoff gives `pin.go`'s blank import as why `go mod tidy` keeps the Keel requirement; the real imports are the reason now. (4) A `go mod tidy` run here would remove go.sum entries nothing needs; the gate never asks for tidy, so they stay until a task owning go.mod and go.sum decides.
 
 ---
 
