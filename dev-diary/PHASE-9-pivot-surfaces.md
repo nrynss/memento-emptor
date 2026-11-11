@@ -1094,7 +1094,7 @@ reference agent's offline check.
 
 **Findings.**
 
-- (Medium) **The live why view cannot show the pool.** On a linked page the belief page
+- (Medium) **The live why view cannot show the pool.** *Fixed by T4.11: the page now names the brand and the one agreed category, and the layer resolves the single population line for them, so the pool renders; a missing or ambiguous line is answered loudly.* On a linked page the belief page
   sends `recall_for_purchase` with `{shopper_id}` alone, but the frozen request schema
   requires `brand_id` and the pool read needs brand, category and fit handle, so the served
   layer answers `pool: null` and `pool_lookup: unavailable`. Read live through the edge with

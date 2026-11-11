@@ -38,7 +38,7 @@ Do not wait for a whole phase to finish. If a task requires only `T1.1`, start i
 | **P2** The layer | [PHASE-2-layer.md](PHASE-2-layer.md) | P1 | 8 / 8 | Done |
 | **P3** Reference agent | [PHASE-3-agent.md](PHASE-3-agent.md) | P1 | 8 / 8 | Done |
 | **P4** Evidence ledger | [PHASE-4-ledger.md](PHASE-4-ledger.md) | T1.2, T1.4 | P2, P3 | T6.2, T6.4 |
-| **P5** Comparison | [PHASE-5-comparison.md](PHASE-5-comparison.md) | T1.3, T3.1 for the harness; T2.6 and T3.6 for arm 3 | P4 | 10 / 11 | In progress (T4.11) |
+| **P5** Comparison | [PHASE-5-comparison.md](PHASE-5-comparison.md) | T1.3, T3.1 for the harness; T2.6 and T3.6 for arm 3 | P4 | 11 / 11 | Done |
 | **P7** Pivot contracts | [PHASE-7-pivot-contracts.md](PHASE-7-pivot-contracts.md) | T0.11, T0.12 | none | P8 to P10 |
 | **P8** The layer, after the pivot | [PHASE-8-pivot-layer.md](PHASE-8-pivot-layer.md) | T7.1, T7.2 | T10.1, T10.2 | P9, T10.3 |
 | **P9** Population and surfaces | [PHASE-9-pivot-surfaces.md](PHASE-9-pivot-surfaces.md) | T7.1, T7.2 for T9.1; T8.3 for T9.3; T8.5 for the rest | P8's live twins | T10.3, T10.4, P6 |
@@ -78,7 +78,7 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 |---|---|---|---|---|
 | **A: The layer** | P2 | 18 / 18 | Done |
 | **B: Reference agent** | P3 | 8 / 8 | Done |
-| **C: Ledger** | P4 | 10 / 11 | In progress (T4.11) |
+| **C: Ledger** | P4 | 11 / 11 | Done |
 | **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
 | **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
 | **F: Pivot surfaces** | P9 | 30 / 32 | In progress (T9.15, T9.24) |
@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 8 / 8 | Done |
 | P2 | 18 / 18 | Done |
 | P3 | 8 / 8 | Done |
-| P4 | 10 / 11 | In progress (T4.11) |
+| P4 | 11 / 11 | Done |
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T4.11: The live why view reads the pool (done)
+
+**What exists.** The live why view recalls with the line it can honestly name: `brand_id` from the belief's subject when it is a brand, and `category` from the counted evidence rows when they agree on one, never a `fit_handle`. `internal/api/server` resolves a request that names brand and category but no handle against `seed.PopulationLines()`: exactly one match supplies its handle, no match and two matches both answer `pool_lookup: unavailable` and query the index zero times, and an explicit handle is authoritative. There is no demo-brand special case. The page renders a served pool, says it was consulted with nothing to say, or says it was not consulted and which cause applies (no line, ambiguous line, no size, no index); the bare "No pooled belief applies here" is gone. Fixture replay still sends `{shopper_id}` alone, now pinned by `fixture-replay.test.ts`.
+
+**What surprised.** The demo belief's wider evidence list also holds a `pants` row, so only the counted rows agree on `shirts`. `pool_lookup` is a two-value enum, so the page cannot tell the unavailable causes apart from the response and names them all. The unavailable case also includes "no size to read", which the first sentence had missed — a shopper whose only history is an off-size return is not a missing index.
+
+**The next agent should not have to work out.** `PopulationLines()` covers the round-1 lines only; a handle-less recall for any other line stays unavailable rather than guessing, so a new population must travel with its line list. A seller-subject belief sends no `brand_id` (a seller is not a brand) and says the pool was not consulted; the layer answers 200 unavailable.
 
 ### T8.5x: Kept and contested are recorded as limitations (done)
 
