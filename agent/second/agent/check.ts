@@ -5,17 +5,22 @@
  *
  * The point is unchanged from T9.5 — its first recommendation follows a
  * correction it never saw spoken, because the layer carries it — and it now
- * runs over the same code the deployment dials with (agent/edge.ts). Two
- * checks guard the freshness that proof rests on: the deployment's
- * instructions carry no correction story and no belief id, and the tool
- * layer is the eleven frozen calls with nothing standing behind them.
+ * runs over the same code the deployment dials with (agent/edge.ts). Three
+ * things guard the freshness that proof rests on: the deployment's
+ * instructions carry no correction story and no belief id; the tools offered
+ * are exactly the eight calls the edge's access table admits to an agent key
+ * (the shopper-only ledger reads are absent), each binding checked against
+ * the contract's own request schema and example; and the retry rule lets a
+ * read be tried again while a write must be looked up before it is resent.
  *
  * Run: bun agent/check.ts
  */
 import { join } from "node:path";
 import { bindLanding, connectEdge, EdgeRefusal, type Edge, type Wire } from "./edge.js";
+import { createTools, tools } from "./tools.js";
 
 const API_DIR = join(import.meta.dir, "../../../testdata/api");
+const REPO_DIR = join(import.meta.dir, "../../..");
 
 let failures = 0;
 
@@ -45,7 +50,8 @@ interface Seen {
  * standInEdge answers with the contract's examples: the demo shopper's
  * correction story, the pool rung for a newcomer, and no memory for anyone
  * else. A standing correction it records is served back on that shopper's
- * next recall, which is what the layer does.
+ * next recall, which is what the layer does. A tool outside the agent's
+ * eight is an error: this deployment offers no such call.
  */
 async function standInEdge(): Promise<{ edge: Edge; seen: Seen[] }> {
   const correction = await example("recall_for_purchase.response.example-correction.json");
@@ -60,9 +66,6 @@ async function standInEdge(): Promise<{ edge: Edge; seen: Seen[] }> {
   const unclear = await example("record_reason.response.example-unclear.json");
   const feedback = await example("record_feedback.response.example.json");
   const explain = await example("explain_belief.response.example.json");
-  const ledgerAll = await example("ledger_beliefs.response.example.json");
-  const ledgerOne = await example("ledger_belief.response.example.json");
-  const evidence = await example("ledger_evidence.response.example.json");
   const pooling = await example("set_pooling.response.example.json");
 
   const copy = (value: JSON_): JSON_ => JSON.parse(JSON.stringify(value));
@@ -104,12 +107,6 @@ async function standInEdge(): Promise<{ edge: Edge; seen: Seen[] }> {
         return copy(feedback);
       case "explain_belief":
         return copy(explain);
-      case "ledger_beliefs":
-        return copy(ledgerAll);
-      case "ledger_belief":
-        return copy(ledgerOne);
-      case "ledger_evidence":
-        return copy(evidence);
       case "set_pooling":
         return copy(pooling);
       default:
@@ -208,7 +205,7 @@ check(
   (stranger.beliefs as unknown[]).length === 0 && (stranger.guidance as JSON_).basis === "none",
 );
 
-// Answers, feedback, questions, explanation and the ledger reads behave.
+// Answers, feedback, questions, explanation and the pooled read behave.
 const vague = await landing.reason({ shopper_id: "shopper_01", question_id: "q_9f04ab", answer_text: "it was fine I guess" });
 check("a vague answer asks again", vague.ask_again === true && vague.accepted === false);
 const plain = await landing.reason({
@@ -229,12 +226,6 @@ const asks = await landing.questions({ shopper_id: "shopper_01" });
 check("one question is open for the demo shopper", (asks.questions as unknown[]).length === 1);
 const why = await landing.explain({ shopper_id: "shopper_01", belief_id: "blf_8f2c41" });
 check("the explanation carries history and the note", (why.timeline as unknown[]).length > 0 && (why.corrections as unknown[]).length === 1);
-const rows = await landing.ledger({ shopper_id: "shopper_01" });
-check("the ledger serves rows", (rows.beliefs as unknown[]).length > 0);
-const one = await landing.ledgerRow({ shopper_id: "shopper_01", belief_id: "blf_8f2c41" });
-check("one ledger row reads in full", (one.belief as JSON_).belief_id === "blf_8f2c41");
-const proof = await landing.ledgerProof({ shopper_id: "shopper_01" });
-check("the ledger proof serves rows", (proof.evidence as unknown[]).length > 0);
 const fit = await landing.fit({ brand_id: "brand-x-001", category: "shirts", fit_handle: "regular", size: "M" });
 check("the pooled read is Earned on the demo line", (fit.pool as JSON_).status === "Earned");
 const bare = await landing.fit({ brand_id: "brand-x-001", category: "shirts", fit_handle: "regular", size: "XL" });
@@ -242,31 +233,200 @@ check("an empty line reads Claimed", (bare.pool as JSON_).status === "Claimed");
 const out = await landing.pooling({ shopper_id: "shopper_02", pooling: false });
 check("opting out reports the rows removed", out.pooling === false && out.rows_removed === 3);
 
-// The tool layer is the eleven frozen calls, all through the edge.
-check("the landing holds the eleven frozen tools", Object.keys(landing).length === 11);
-for (const tool of [
-  "recall_for_purchase",
-  "record_correction",
-  "pending_questions",
-  "record_reason",
-  "record_feedback",
-  "explain_belief",
-  "product_fit",
-  "set_pooling",
-  "ledger_beliefs",
-  "ledger_belief",
-  "ledger_evidence",
-]) {
-  check(`every frozen tool reached the edge: ${tool}`, seen.some((s) => s.tool === tool));
+// --- The tool surface: what the edge admits to an agent key ---
+//
+// The table is read from the layer's own source, so it cannot drift away from
+// the tools this deployment offers without this check going red.
+
+/** contractNames maps every frozen tool constant to its frozen name. */
+async function contractNames(): Promise<Map<string, string>> {
+  const source = await Bun.file(join(REPO_DIR, "internal/api/contract/tools.go")).text();
+  const names = new Map<string, string>();
+  for (const match of source.matchAll(/^\t(Tool\w+)\s+ToolName\s*=\s*"([a-z_]+)"/gm)) {
+    names.set(match[1], match[2]);
+  }
+  return names;
 }
 
+/** agentAdmitted names the tools the edge's access table admits to an agent key. */
+async function agentAdmitted(): Promise<string[]> {
+  const names = await contractNames();
+  const source = await Bun.file(join(REPO_DIR, "internal/auth/surface.go")).text();
+  const table = source.slice(source.indexOf("var toolAccess = map[contract.ToolName]ToolAccess{"));
+  const admitted: string[] = [];
+  let entries = 0;
+  for (const match of table.matchAll(/^\tcontract\.(Tool\w+):\s*\{Callers:\s*\[\]CallerKind\{([^}]*)\}/gm)) {
+    entries += 1;
+    if (!/\bCallerAgent\b/.test(match[2])) {
+      continue;
+    }
+    const name = names.get(match[1]);
+    if (name === undefined) {
+      throw new Error(`the access table names ${match[1]}, which the contract does not define`);
+    }
+    admitted.push(name);
+  }
+  if (entries !== names.size) {
+    throw new Error(`the access table parsed ${entries} entries against ${names.size} frozen names`);
+  }
+  return admitted.sort();
+}
+
+const sameList = (a: string[], b: string[]) => a.length === b.length && a.every((value, i) => value === b[i]);
+
+let admitted: string[] = [];
+try {
+  admitted = await agentAdmitted();
+} catch (cause) {
+  check("the edge's access table parses", false, cause instanceof Error ? cause.message : String(cause));
+}
+check("the access table admits the eight agent calls", sameList(admitted.slice(), [
+  "explain_belief",
+  "pending_questions",
+  "product_fit",
+  "recall_for_purchase",
+  "record_correction",
+  "record_feedback",
+  "record_reason",
+  "set_pooling",
+]));
+check(
+  "the deployment offers exactly the tools an agent key reaches",
+  sameList(Object.keys(tools).sort(), admitted),
+  `offers ${JSON.stringify(Object.keys(tools).sort())}`,
+);
+check(
+  "the landing holds one method per admitted tool",
+  Object.keys(landing).length === admitted.length,
+  `landing has ${Object.keys(landing).length}`,
+);
+for (const name of admitted) {
+  check(`every admitted call reached the edge: ${name}`, seen.some((entry) => entry.tool === name));
+}
+for (const shopperOnly of ["ledger_beliefs", "ledger_belief", "ledger_evidence"]) {
+  check(
+    `${shopperOnly} is not offered: the edge admits shoppers only`,
+    !(shopperOnly in tools) && admitted.every((name) => name !== shopperOnly),
+  );
+}
+
+// Each binding, against the contract's own request schema and example.
+type ZodField = {
+  isOptional(): boolean;
+  _def?: { typeName?: string; innerType?: ZodField };
+};
+type ToolLike = {
+  id?: string;
+  description?: string;
+  inputSchema?: { shape?: Record<string, ZodField> };
+  execute?: unknown;
+};
+
+/** unwrap peels the optional and default wrappers off a zod field. */
+function unwrap(field: ZodField): ZodField {
+  let current = field;
+  for (let depth = 0; depth < 4; depth += 1) {
+    const inner = current._def?.innerType;
+    if (inner === undefined) {
+      return current;
+    }
+    current = inner;
+  }
+  return current;
+}
+
+/** zodKind names the type a zod field carries, in the contract's words. */
+function zodKind(field: ZodField): string {
+  const typeName = unwrap(field)._def?.typeName ?? "";
+  const kinds: Record<string, string> = {
+    ZodString: "string",
+    ZodNumber: "number",
+    ZodBoolean: "boolean",
+  };
+  return kinds[typeName] ?? typeName.replace(/^Zod/, "").toLowerCase();
+}
+
+/** schemaKind names a JSON Schema property type in the same words. */
+const schemaKind = (type: string | undefined): string => (type === "integer" ? "number" : (type ?? ""));
+
+/** canonical renders the fields a body actually carries, so undefined adds nothing. */
+function canonical(value: Record<string, unknown>): string {
+  const keys = Object.keys(value)
+    .filter((key) => value[key] !== undefined)
+    .sort();
+  return JSON.stringify(keys.map((key) => [key, value[key]]));
+}
+
+const sent: Seen[] = [];
+const bound = createTools(
+  bindLanding({
+    async call(tool, field) {
+      sent.push({ tool, field });
+      return {};
+    },
+  }),
+);
+
+for (const name of Object.keys(tools).sort()) {
+  const offered = (tools as Record<string, ToolLike>)[name];
+  const executable = (bound as Record<string, ToolLike>)[name];
+  if (offered === undefined || executable === undefined) {
+    check(`the ${name} binding exists`, false, "the deployment offers no such tool");
+    continue;
+  }
+  check(`the ${name} binding carries its frozen id`, offered.id === name, `id ${String(offered.id)}`);
+  check(`the ${name} binding has a description`, typeof offered.description === "string" && offered.description.length > 0);
+  check(`the ${name} binding has an execute`, typeof offered.execute === "function");
+
+  const schema = await example(`${name}.request.schema.json`);
+  const properties = (schema.properties ?? {}) as Record<string, { type?: string }>;
+  const shape = offered.inputSchema?.shape ?? {};
+  const names = Object.keys(shape);
+  const required = names.filter((field) => !shape[field].isOptional()).sort();
+  check(
+    `the ${name} input schema requires the contract's fields`,
+    sameList(required, [...((schema.required ?? []) as string[])].sort()),
+    `requires ${JSON.stringify(required)}, contract requires ${JSON.stringify(schema.required)}`,
+  );
+  const unknown = names.filter((field) => properties[field] === undefined);
+  check(`the ${name} input schema names only contract fields`, unknown.length === 0, `unknown ${JSON.stringify(unknown)}`);
+  const mistyped = names.filter(
+    (field) => properties[field] !== undefined && zodKind(shape[field]) !== schemaKind(properties[field].type),
+  );
+  check(`the ${name} input schema keeps the contract's types`, mistyped.length === 0, `mistyped ${JSON.stringify(mistyped)}`);
+
+  const request = await example(`${name}.request.example.json`);
+  await (executable.execute as (input: unknown, options?: unknown) => Promise<unknown>)(request, {});
+  const last = sent[sent.length - 1];
+  check(
+    `the ${name} execute posts the contract's example request`,
+    last?.tool === name && canonical(last.field) === canonical(request),
+    `sent ${last ? JSON.stringify(last.field) : "nothing"}`,
+  );
+  check(`the ${name} execute sends one request per call`, sent.filter((call) => call.tool === name).length === 1);
+}
+
+// --- The prompt and the retry rule ---
+//
 // The prompt carries no correction story and no belief id: whatever this
-// agent answers about the shopper's size came from the layer.
+// agent answers about the shopper's size came from the layer. And the retry
+// rule lets a read be tried again while a write is looked up before it is
+// resent, so a write that landed cannot be written twice by a retry.
 const prompt = await Bun.file(join(import.meta.dir, "index.ts")).text();
 check("the instructions carry no correction story", !/lost weight|corr_[0-9a-z]/i.test(prompt));
 check("the instructions carry no belief id", !/blf_[0-9a-z]/i.test(prompt.split("const INSTRUCTIONS")[1] ?? ""));
+const instructions = prompt.split("const INSTRUCTIONS")[1] ?? "";
+check("the retry rule is in the instructions", /look before sending it again/.test(instructions));
+check("a lookup may be tried again", instructions.includes("earns one more try with shopper_01"));
+check("a write is never resent on a guess", instructions.includes("never send it again on a guess"));
+for (const reader of ["recall_for_purchase shows a correction", "pending_questions shows whether the question has been answered", "explain_belief shows a remark in the record"]) {
+  check(`the rule names its confirmation: ${reader.split(" ")[0]}`, instructions.includes(reader));
+}
+check("the rule asks before filing a second time", instructions.includes("ask them before filing it a second time"));
+check("set_pooling is named as safe to repeat", instructions.includes("set_pooling only states a preference"));
+check("no blanket retry survives", !/give it one more attempt/.test(instructions));
 
-// The HTTP path: the request this deployment sends, against a local stub.
+// --- The HTTP path: the request this deployment sends, against a local stub ---
 interface Caught {
   method: string;
   path: string;
@@ -286,11 +446,15 @@ const stub = Bun.serve({
       authorization: request.headers.get("authorization") ?? "",
       body,
     });
+    // The ledger reads are the paths the edge refuses an agent key on.
     if (url.pathname === "/tools/ledger_belief") {
       return new Response(JSON.stringify({ error: { code: "unauthenticated", message: "unauthorized" } }), {
         status: 401,
         headers: { "content-type": "application/json" },
       });
+    }
+    if (url.pathname === "/tools/ledger_evidence") {
+      return new Response("<html>bad gateway</html>", { status: 502 });
     }
     return new Response(JSON.stringify(await example("recall_for_purchase.response.example-correction.json")), {
       status: 200,
@@ -307,13 +471,24 @@ const answer = await dialled.recall({
   size_considered: "M",
 });
 check("the HTTP path answers with the layer's response", (answer.guidance as JSON_).basis === "correction");
-const sent = caught[caught.length - 1];
-check("the call posts to the tool's edge path", sent.method === "POST" && sent.path === "/tools/recall_for_purchase");
-check("the key travels as a bearer token", sent.authorization === "Bearer offline-check-key");
-check("the body carries the shopper and the brand", sent.body.shopper_id === "shopper_01" && sent.body.brand_id === "brand-x-001");
+const posted = caught[caught.length - 1];
+check("the call posts to the tool's edge path", posted.method === "POST" && posted.path === "/tools/recall_for_purchase");
+check("the key travels as a bearer token", posted.authorization === "Bearer offline-check-key");
+check("the body carries the shopper and the brand", posted.body.shopper_id === "shopper_01" && posted.body.brand_id === "brand-x-001");
+
+// One call, one request: nothing here retries on its own, so a write can be
+// duplicated only by the model, never by this code.
+const before = caught.length;
+await dialled.questions({ shopper_id: "shopper_01" });
+check("one tool call sends exactly one request", caught.length === before + 1);
+
+// A refused call carries the edge's own code and status.
 let refused: unknown;
 try {
-  await dialled.ledgerRow({ shopper_id: "shopper_01", belief_id: "blf_8f2c41" });
+  await connectEdge({ host: stub.url.toString(), token: "offline-check-key" }).call("ledger_belief", {
+    shopper_id: "shopper_01",
+    belief_id: "blf_8f2c41",
+  });
 } catch (cause) {
   refused = cause;
 }
@@ -321,6 +496,15 @@ check(
   "a refusal surfaces the edge's own code",
   refused instanceof EdgeRefusal && refused.status === 401 && refused.code === "unauthenticated",
 );
+let garbled: unknown;
+try {
+  await connectEdge({ host: stub.url.toString(), token: "offline-check-key" }).call("ledger_evidence", {
+    shopper_id: "shopper_01",
+  });
+} catch (cause) {
+  garbled = cause;
+}
+check("a non-JSON answer is a reported failure", garbled instanceof EdgeRefusal && garbled.status === 502);
 let keyless: unknown;
 try {
   await bindLanding(connectEdge({ host: stub.url.toString() })).fit({
@@ -339,4 +523,4 @@ if (failures > 0) {
   console.log(`${failures} check(s) failed`);
   process.exit(1);
 }
-console.log("offline check passed: second agent answers from the served layer's edge");
+console.log("offline check passed: second agent answers from the served layer's edge, only the calls it may make");

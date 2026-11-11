@@ -425,11 +425,33 @@ requires:   [T9.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/runtime/, agent/second/
-status:     claimed:t99-agent-surface
+status:     in-review
 ```
 The T9.8 review found three low defects in the live agent surface. Both agents expose `ledger_beliefs`, `ledger_belief` and `ledger_evidence`, which the edge admits for `CallerShopper` only, so an agent key gets a 403 on each. `tools.ts` has no offline coverage: the checks inject the transport below it, so tool ids, schemas and execute bindings are exercised only by a live build. And the reference prompt tells the agent to retry any failed tool call once, so a `record_correction` that landed and then timed out could be written twice; retries must be for reads only, or a write must recall before retrying.
 
 **Done when:** each agent's exposed tools match the edge's access table (or the table is widened deliberately, recorded), a check exercises the tool bindings themselves against the frozen contract, and the retry instruction cannot duplicate a write; the gate passes and the deployed builds match the committed code.
+
+**Notes (in-review).** Both agents now offer exactly the eight calls the edge's access table admits to an agent key. `ledger_beliefs`, `ledger_belief` and `ledger_evidence` are gone from `agent/runtime/agent/tools.ts`, `agent/runtime/agent/layer.ts`, `agent/second/agent/tools.ts` and `agent/second/agent/edge.ts`, so an agent key is never offered a call the edge would refuse. The table was not widened, and widening it is not advised: those three reads return one shopper's ledger rows, the ledger is the shopper's own view (T9.2 serves it to a shopper link), and an agent key is bound to no shopper, so a shopper's whole ledger is the wrong thing for it to read. Nothing in either agent's instructions asks for one; `explain_belief` and `recall_for_purchase` already carry the evidence an agent needs to justify a recommendation. If a later task wants an agent to read ledger rows, it should widen the table as its own change, with its own fixture.
+
+Both `tools.ts` files are now a factory — `createTools(layer)` and `createTools(landing)` — with the deployed `tools` export as that factory over the transport built from the environment. The deployed path is otherwise untouched: same ids, same descriptions, same schemas, same HTTP request. The factory is what makes the bindings testable offline.
+
+The checks now exercise the bindings themselves rather than only the transport below them (130 checks for the reference agent, 123 for the second). Each reads the edge's access table from `internal/auth/surface.go` and the frozen names from `internal/api/contract/tools.go` and compares the offered tool set with the set admitted to `CallerAgent`; for every tool it reads `<tool>.request.schema.json` from `testdata/api`, compares required fields, field names and field types against the zod schema, then calls that tool's `execute` through the factory and compares the body the transport received with `<tool>.request.example.json`. A changed id, a renamed or retyped field, or an extra or missing tool on either side fails the check: `id: "record_feedback"` renamed to `record_feedbackx` and `pooling` retyped to a string were both tried, both failed, and both were reverted.
+
+The retry rule is its own step in each agent's instructions, and step 1 now points at it instead of carrying "retry it once". A failing read may be called once more. `record_correction`, `record_reason` and `record_feedback` each append a row, so a write that errored or timed out is read back first — `recall_for_purchase` for a correction, `pending_questions` for a reason, `explain_belief` for feedback — reported if it landed, and resent only when the read shows it did not; when the read cannot show it, the agent asks the shopper. `set_pooling` states a choice instead of appending a row, so it is named safe to repeat. The checks pin that wording. Neither transport retries on its own — a stub-server check counts exactly one request per call — so a duplicated write could only come from the model, and the instructions are where it is prevented.
+
+The deployed builds do not match the committed code until the orchestrator redeploys both. This task made no live call and spent nothing. The build and redeploy commands are the standing ones, run per agent from its own directory after the offline check is green:
+
+```sh
+cd agent/runtime && bun agent/offline-check.ts && ast push -V private -y && ast agent redeploy --id <deployment-id> --latest --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY --wait
+cd agent/second && bun agent/check.ts && ast push -V private -y && ast agent redeploy --id <deployment-id> --latest --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY --wait
+```
+
+Three things the next agent should not have to rediscover:
+
+- The check parses the Go access table and the contract's name constants. A reformatted table (a field beside `Callers`, an entry split across lines) makes the parse throw and the run fail with the counts it parsed, rather than passing with an empty set. Widen the expression then; keep the count assertion, because it is what turns a silent no-op into a failure.
+- The tool set bound by `Layer`/`Landing` and the set offered to the model are two lists that must agree, and the factory keeps them one: `createTools` calls one layer method per binding. A frozen tool an agent may call needs both, and the check stays red until both exist.
+- The retry wording is load-bearing and pinned sentence by sentence. Rewording that step without updating the check reds the agent's own offline check; rewording it without any check would let a `record_correction` that landed be written twice.
+
 
 ---
 

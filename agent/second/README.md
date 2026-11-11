@@ -6,19 +6,25 @@ the same layer as the reference agent.
 
 - Stack: TypeScript/Bun + Mastra, gateway model `claude-sonnet-4-6` like
   the reference agent, so a turn costs the same on either side.
-- Tools: the layer's eleven frozen interface calls, each one an HTTP call
-  to the served layer's edge (`agent/edge.ts`): `POST /tools/<tool>` with
-  this deployment's agent key in `Authorization: Bearer` and the shopper id
-  in the body. The descriptions are the layer's own frozen words;
-  everything else in the instructions is written fresh, with no correction
-  story inside. That is the point: when this agent honours a correction on
-  its first recommendation, the layer carried it, not the prompt.
+- Tools: the eight layer calls the edge's access table admits to an agent
+  key, each one an HTTP call to the served layer's edge (`agent/edge.ts`):
+  `POST /tools/<tool>` with this deployment's agent key in
+  `Authorization: Bearer` and the shopper id in the body. The three ledger
+  reads are shopper-only there, so no tool exists here for them. The
+  descriptions are the layer's own frozen words; everything else in the
+  instructions is written fresh, with no correction story inside. That is the
+  point: when this agent honours a correction on its first recommendation,
+  the layer carried it, not the prompt.
 - State: none of its own. Both deployments read and write the one served
   layer, so a correction recorded through the reference agent is what this
   agent recalls next.
 - Money: no ordering tool on purpose. The agent asks for an explicit
   "yes" before anything purchase-shaped and says outright that buying is
   not connected here.
+- Retries: a lookup gets one more attempt; a writing note is looked up
+  before it is resent, and asked about when the lookup cannot show it.
+  Nothing in `agent/edge.ts` retries, so a duplicate write could only come
+  from the prompt, and the offline check pins the rule there.
 
 ## Configuration
 

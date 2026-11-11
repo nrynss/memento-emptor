@@ -9,12 +9,15 @@ The Memento Emptor reference shopping agent as a deployed Astropods service.
 - Model: `claude-sonnet-4-6` via the gateway provider (no personal key; the
   platform injects `ASTRO_GATEWAY_URL`/`KEY`, deploy picks `MODEL_DEFAULT`).
   The same model runs in all three comparison arms.
-- Tools: the layer's eleven frozen interface calls, each one an HTTP call to
-  the served layer's edge (`agent/layer.ts`): `POST /tools/<tool>` with the
-  deployment's agent key in `Authorization: Bearer` and the shopper id in
-  the body. Tool names and input shapes are the layer's frozen contract;
-  the descriptions keep the layer's own words plus this agent's
-  recall-first guidance.
+- Tools: the eight layer calls the edge's access table admits to an agent
+  key, each one an HTTP call to the served layer's edge (`agent/layer.ts`):
+  `POST /tools/<tool>` with the deployment's agent key in
+  `Authorization: Bearer` and the shopper id in the body. The three ledger
+  reads (`ledger_beliefs`, `ledger_belief`, `ledger_evidence`) are
+  shopper-only in that table, so this agent holds no tool for them rather
+  than offering one the edge would refuse. Tool names and input shapes are
+  the layer's frozen contract; the descriptions keep the layer's own words
+  plus this agent's recall-first guidance.
 - Precedence (T9.4): the agent recommends from `guidance.basis` and states
   confidence from the label (Earned, Building, Claimed, Out of true). It
   never refuses when recall returns evidence; only `none` says plainly no
@@ -26,6 +29,12 @@ The Memento Emptor reference shopping agent as a deployed Astropods service.
   double-buy protection belong to T3.3 (`agent/orders/`). The agent asks for
   an explicit "yes" before any purchase and says plainly the purchase step
   is not wired yet instead of claiming it happened.
+- Retries: a read that fails may be called once more; a write
+  (`record_correction`, `record_reason`, `record_feedback`) is read back
+  first — recall, pending questions, explanation — and resent only when the
+  read shows it did not land. `set_pooling` states a choice, so repeating it
+  changes nothing extra. The offline check pins that wording, because nothing
+  in the tool code retries a call on its own.
 
 ## The served layer
 
@@ -40,10 +49,14 @@ deployment's environment and never from a file:
   fails as `unconfigured` rather than answering from anywhere else.
 - `MEMENTO_LAYER_URL` — the edge's base, defaulting to the hosted layer.
 
-`agent/layer.ts` builds the call, `agent/tools.ts` binds the eleven tools to
+`agent/layer.ts` builds the call, `agent/tools.ts` binds the eight tools to
 it, and `agent/offline-check.ts` swaps the transport for the contract's own
 frozen examples, which is how the recall-first contract and the request
-shape are proved without a deployment.
+shape are proved without a deployment. It also reads the edge's access table
+(`internal/auth/surface.go`) and the contract's request schemas
+(`testdata/api`) and compares them with the tools this deployment offers, so
+a tool id or an input field that drifts from the layer fails the check here
+rather than as a refusal on a live turn.
 
 ## Run
 

@@ -7,6 +7,11 @@
  * check can answer from the contract's frozen examples, but the deployed
  * path always dials the live edge: a deployment with no key refuses to call
  * rather than answer from anywhere local.
+ *
+ * Only the eight tools the edge admits to an agent key are bound. The three
+ * ledger reads (ledger_beliefs, ledger_belief, ledger_evidence) are
+ * shopper-only in the edge's access table, so an agent key is refused on
+ * each and this deployment holds no method for one.
  */
 
 /** HOSTED_EDGE is the served layer when the deployment names no other edge. */
@@ -117,7 +122,7 @@ export function connectEdge(where: Where): Edge {
   };
 }
 
-/** Landing is the layer bound to the eleven frozen tools. */
+/** Landing is the layer bound to the eight frozen tools an agent key reaches. */
 export interface Landing {
   recall(call: {
     shopper_id: string;
@@ -162,14 +167,11 @@ export interface Landing {
     pooling: boolean;
     trace_id?: string;
   }): Promise<Record<string, unknown>>;
-  ledger(call: { shopper_id: string; include_seeded?: boolean }): Promise<Record<string, unknown>>;
-  ledgerRow(call: { shopper_id: string; belief_id?: string }): Promise<Record<string, unknown>>;
-  ledgerProof(call: { shopper_id: string; belief_id?: string }): Promise<Record<string, unknown>>;
 }
 
 /**
- * bindLanding puts the eleven frozen tools on one edge. Each method sends
- * the contract's request fields and nothing else.
+ * bindLanding puts the eight frozen tools an agent key reaches on one edge.
+ * Each method sends the contract's request fields and nothing else.
  */
 export function bindLanding(edge: Edge): Landing {
   return {
@@ -224,15 +226,6 @@ export function bindLanding(edge: Edge): Landing {
         pooling: call.pooling,
         trace_id: call.trace_id,
       }),
-    ledger: (call) =>
-      edge.call("ledger_beliefs", {
-        shopper_id: call.shopper_id,
-        include_seeded: call.include_seeded ?? true,
-      }),
-    ledgerRow: (call) =>
-      edge.call("ledger_belief", { shopper_id: call.shopper_id, belief_id: call.belief_id }),
-    ledgerProof: (call) =>
-      edge.call("ledger_evidence", { shopper_id: call.shopper_id, belief_id: call.belief_id }),
   };
 }
 

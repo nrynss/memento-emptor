@@ -11,6 +11,11 @@
  *
  * The transport is injected, which is how the offline check runs the same
  * tool code against the contract's own frozen examples without a network.
+ *
+ * Only the eight tools the edge admits to an agent key are bound here. The
+ * three ledger reads (ledger_beliefs, ledger_belief, ledger_evidence) are
+ * shopper-only in the edge's access table, so an agent key is refused on
+ * each; binding them would offer the model a call that can only fail.
  */
 
 /** DEFAULT_LAYER_URL is the hosted layer's edge when the deployment names none. */
@@ -211,20 +216,7 @@ export interface PoolingInput {
   trace_id?: string;
 }
 
-/** LedgerInput selects one shopper's ledger rows. */
-export interface LedgerInput {
-  shopper_id: string;
-  include_seeded?: boolean;
-}
-
-/** LedgerRowInput is a single ledger row, or one row's evidence. */
-export interface LedgerRowInput {
-  shopper_id: string;
-  /** belief_id narrows the read to one belief; ledger_belief requires it. */
-  belief_id?: string;
-}
-
-/** The layer the agent's tools call: one method per frozen tool. */
+/** The layer the agent's tools call: one method per frozen tool an agent key reaches. */
 export interface Layer {
   recallForPurchase(input: RecallInput): Promise<Record<string, unknown>>;
   recordCorrection(input: CorrectionInput): Promise<Record<string, unknown>>;
@@ -234,14 +226,12 @@ export interface Layer {
   explainBelief(input: ExplainInput): Promise<Record<string, unknown>>;
   productFit(input: FitInput): Promise<Record<string, unknown>>;
   setPooling(input: PoolingInput): Promise<Record<string, unknown>>;
-  ledgerBeliefs(input: LedgerInput): Promise<Record<string, unknown>>;
-  ledgerBelief(input: LedgerRowInput): Promise<Record<string, unknown>>;
-  ledgerEvidence(input: LedgerRowInput): Promise<Record<string, unknown>>;
 }
 
 /**
- * buildLayer binds a transport to the eleven frozen tools. Each method sends
- * exactly the contract's request fields: the layer rejects anything else.
+ * buildLayer binds a transport to the eight tools an agent key reaches. Each
+ * method sends exactly the contract's request fields: the layer rejects
+ * anything else.
  */
 export function buildLayer(transport: LayerTransport): Layer {
   return {
@@ -301,21 +291,6 @@ export function buildLayer(transport: LayerTransport): Layer {
         shopper_id: input.shopper_id,
         pooling: input.pooling,
         trace_id: input.trace_id,
-      }),
-    ledgerBeliefs: (input) =>
-      transport.call("ledger_beliefs", {
-        shopper_id: input.shopper_id,
-        include_seeded: input.include_seeded ?? true,
-      }),
-    ledgerBelief: (input) =>
-      transport.call("ledger_belief", {
-        shopper_id: input.shopper_id,
-        belief_id: input.belief_id,
-      }),
-    ledgerEvidence: (input) =>
-      transport.call("ledger_evidence", {
-        shopper_id: input.shopper_id,
-        belief_id: input.belief_id,
       }),
   };
 }
