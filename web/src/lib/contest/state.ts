@@ -189,10 +189,19 @@ export class ContestState extends Notifier {
 	}
 }
 
-/** Editable rows over the fixture correction path, for the ledger page. */
+/**
+ * Editable rows over the fixture correction path, for the ledger page. The
+ * transport is built for the same shopper the state acts for, so every
+ * request it sends names the shopper it was given rather than the demo
+ * shopper; a fixture that does not answer that shopper fails loudly.
+ */
 export function createFixtureContestState(
 	shopperId: string,
 	rows: LedgerBeliefRow[]
 ): ContestState {
-	return new ContestState(new CorrectionClient(createFixtureCorrectionTransport()), shopperId, rows);
+	return new ContestState(
+		new CorrectionClient(createFixtureCorrectionTransport(shopperId)),
+		shopperId,
+		rows
+	);
 }
