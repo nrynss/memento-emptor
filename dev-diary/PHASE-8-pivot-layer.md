@@ -1152,7 +1152,7 @@ recall after one return: belief blf_000001 Claimed/None, 1 row, guidance "Take s
 
 That is one belief, Claimed/None, its one evidence row, the `own_evidence` step deciding and not overridden, and guidance basis `own_evidence`. The sentence has no pool clause because the driver's wiring has no pool, which is the shape T8.5v leaves for an absent pool.
 
-Every other leg passed. Leg 1 read the sandbox records back with both signatures verified, one refund row and one dispute row, each redelivery a duplicate and nothing created. Leg 2 passed every hybrid check (index, 8 native vectors at 1024 dims, bulk, bm25, knn shape, returned line, roomier cut, rrf top 3, distractors last, paraphrase band) and ended `ALL LIVE LEGS PASS`. Leg 3 carried three my-size returns to Earned/Venerable, kept the vague answer pending, counted the non-arrival dispute only against the seller, overrode with the correction at once while the belief stood, served the Claimed fits-well belief beside the sizing one after feedback, and logged recall then correction under `trace-R`.
+Every other leg passed. Leg 1 read the sandbox records back with both signatures verified, one refund row and one dispute row, each redelivery a duplicate and nothing created. Leg 2's hybrid checks all passed (index, 8 native vectors at 1024 dims, bulk, bm25, knn shape, returned line, roomier cut, rrf top 3, distractors last, paraphrase band) and printed `ALL LIVE LEGS PASS`; the same leg then booted the 0.10.1 asset for its timeout and recall checks and cleaned up. Leg 3 carried three too-small returns to Earned/Venerable, kept the vague answer pending, counted the non-arrival dispute only against the seller, overrode with the correction at once while the belief stood, served the Claimed fits-well belief beside the sizing one after feedback, and logged recall then correction under `trace-R`.
 
 Redacted excerpt (transcript kept in the git-ignored `tests/live/layer/out/`):
 
@@ -1162,30 +1162,50 @@ LIVE OK: 1 refund + 1 dispute ingested, signatures verified, no new sandbox reco
 PASS throwaway index deleted, no t23b* remains
 indices now: [{'index': 'fit-rows'}, {'index': 't104-fit-rows'}]
 ALL LIVE LEGS PASS
+...
 === leg 3: interface story on live Lambo + live Jev ===
 lambo: lambo 0.10.1
+...
 ingest WH-2EV-01: 1 row(s), pending=true
 ...
 reason WH-2EV-01 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted=true ask_again=false belief=blf_000001
+...
 recall after one return: belief blf_000001 Claimed/None, 1 row, guidance "Take size L for Brand X" (vote 1 of 3)
 ...
 live inspect: Venerable, blast radius 3, coverage 1.000, distinct 3
 recall: belief blf_000001 Earned/Venerable, guidance "Take size L for Brand X", evidence 3 rows
 ...
 seller belief blf_000002: Claimed, 1 row (one dispute never earns)
+...
 recall after correction: Out of true, standing Venerable, guidance "Take size M for Brand X"
+...
 feedback: verdict fits_well, recall serves the earned sizing belief and the Claimed fits-well one
+...
 LIVE OK: story end to end on live Lambo + live Jev (4 Jev calls)
 erased session t26-layer: {"session":"t26-layer","already_absent":false,"removed":{...}}
 === leak check: no secret value entered tests/live/layer ===
 done: T2.6 live legs pass; transcripts under tests/live/*/out (git-ignored)
 ```
 
-Cleanup: leg 2 deleted both throwaway indices (`deleted <index> 200` twice), listed `remaining t23b*: []`, and the driver erased session `t26-layer` and leg 2 erased `t23b-live` and `t23b-neg`. The pre-run and post-run index listings both read only `fit-rows` and `t104-fit-rows`, the pool's pre-existing indices, which were not touched. No throwaway index survived the run, so none needed deleting by hand. The leak check printed nothing between its header and the final line: no key value entered `tests/live/layer`, and no deployment URL entered a file outside `out/`.
+Cleanup: leg 2 deleted its own throwaway index (`PASS throwaway index deleted, no t23b* remains`), then the two `t23b-live*` indices the leg had created (`deleted <index> 200` twice), and listed `remaining t23b*: []`; the driver erased session `t26-layer` and leg 2 erased `t23b-live` and `t23b-neg`. The run's two all-index listings — live.py's `indices now` after its own delete and the leg's final `all indices` — both read only `fit-rows` and `t104-fit-rows`: the deployment's pool index and T10.4's round-2 index, neither this run's and neither touched. No throwaway index survived the run, so none needed deleting by hand. The leak check printed nothing between its header and the final line: no key value entered `tests/live/layer`, and no deployment URL entered a file outside `out/`.
 
 Spend, itemised. Four live Jev classifications: 0.000021336 + 0.000021630 + 0.000021420 + 0.000021210 USD = $0.000085596, each under the 10x reference guard. PayPal was sandbox reads only, creating nothing. Embeddings cost no cash: the brief's fixture-embedder note does not describe this driver, whose generated config uses `kind = "elastic"` with the deployment's native `.jina-embeddings-v3` at 1024 dims; the layer session's 9 vectors and leg 2's vectors ride the existing Elastic trial, and every throwaway index was deleted. Total cash spend $0.000085596.
 
+Two limits. The run proves the live layer harness (`tests/live/layer`), not `demo/driver`, so T8.5t's live demo run stays open. And leg 2 boots `/tmp/lambo-0.10.1` by name (hardcoded in `tests/live/evidence/lambo.sh`), so a re-run without that asset fails at leg 2 and the layer driver never runs; the driver's `lambo: lambo 0.10.1` line names the version, not the file.
+
 Gate green in this worktree after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`; the two bun packages were skipped for their absent modules, the same workstation limit the script prints. Re-run on the committed tree: green. Hygiene: plain commit message; the transcript's one deployment host, printed by leg 2's negative timeout probe, stays in the git-ignored `out/` and is redacted as `<deployment-url>` here.
+
+**Review (fresh eyes).** APPROVE, with the note corrections below committed here, all inside this task's phase lines; no live call, $0. Re-verified from the tree and the builder's git-ignored transcript at `tests/live/layer/out/transcript-redacted.txt`.
+
+Scope holds: against the task's claim commit the only change is this phase block, and `tests/live/layer/` is byte-identical. Provenance was checked against the producers, not the note: `main.go`'s format string renders the quoted one-return line exactly (`recall after one return: belief %s %s/%s, 1 row, guidance %q (vote 1 of 3)`, the vote wording included), and every other quoted line matches its producer — `main.go`'s prints, `live.py`'s `PASS`/`indices now`/`ALL LIVE LEGS PASS`, `evidence/lambo.sh`'s `deleted <index> 200`/`remaining t23b*`/`all indices`, `ingest/main.go`'s `LIVE OK`, and `run.sh`'s header and done line.
+
+The one-return leg proves T8.5i's shape in code: `main.go` asserts one belief, `Claimed`/`None`, one evidence row, the `own_evidence` precedence step deciding and not overridden, and guidance basis `own_evidence` with that text, before it prints. The no-pool wiring is real — `Deps` leaves `Pool` nil, and `guidanceForOwnEvidence` appends a pool clause only when `poolView != nil`, which is the bare sentence T8.5v records for an absent pool.
+
+Cleanup re-read from the transcript: live.py deletes its named index, then `lambo.sh`'s loop deletes the leg's two and prints `remaining t23b*: []`; the driver erases `t26-layer` and the leg erases `t23b-live` and `t23b-neg`; both all-index listings read only `fit-rows` and `t104-fit-rows`. Spend re-added from the four `jev:` lines: $0.000085596, all under the guard, embeddings on the trial, and the generated config's `kind = "elastic"` confirms this is not a fixture-embedder run.
+
+Five findings, each fixed in this note, none needing a task: (1) it called the two all-index listings "pre-run and post-run"; the run prints no pre-run all-index listing, and the two are live.py's after its own delete and the leg's final one. (2) "leg 2 deleted both throwaway indices" undercounted: live.py deleted its named index, then the loop deleted the leg's two. (3) Six elisions in the excerpt were unmarked — after `ALL LIVE LEGS PASS`, after `lambo:`, after the first reason (the `jev:` line), after the seller belief, after the correction recall, and after the feedback — so adjacency read as transcript order; every elision is now marked. (4) "three my-size returns" is now the transcript's three `fit_too_small` ones. (5) The note stated no limit on what the run proves; it now names the harness-not-demo-driver limit and leg 2's required `/tmp/lambo-0.10.1`.
+
+Gate green in the review worktree after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`; the two bun checks skipped on their absent modules exactly as printed. Spend $0.00: no live call, no key.
 
 ---
 
