@@ -748,11 +748,21 @@ requires:   [T1.1b]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/
-status:     claimed:t85n-writeop
+status:     in-review
 ```
 The T1.1b review found an unknown-code dispute is stored, is kept in the ledger (its reason is non-nil), and is emitted with the zero `write_op`, which the frozen schema forbids (`record_action`, `derive` or `observe`) and the web decoder rejects, so `ledger_evidence` fails to decode for that shopper. `markUnattached` already sets `observe` for a changed-mind refund; the ingest store path does not. Also decide whether a code-less dispute (stored, no reason, skipped by the ledger) should appear unattached or remain audit-only, and make the comment match.
 
 **Done when:** every unattached ingest row carries `observe`; the frozen schema and the web decoder accept it; the code-less dispute's visibility is decided and tested; the gate passes.
+
+**Notes (T8.5n, in-review).** The ingest store path now calls `markUnattached` for every row that counts toward nothing, so an unknown-code dispute is stored with `write_op: observe` instead of the zero value. The row keeps the source's code as its reason text with category `none`, counts toward nothing, links no belief, and still appears in `ledger_evidence` unattached.
+
+A code-less dispute stays audit-only: the outcome is stored with no reason, no belief link and `observe`, so no stored ingest row carries a zero write op, but `ledger_evidence` still leaves it out. It has nothing to show beside the outcome and nothing to ask: a refund with no reason waits in pending questions, while a dispute with no code has no shopper answer to collect, so it stays an audit row. `markUnattached` and `LedgerEvidence` now say exactly that, and the ledger's filter is unchanged: a row with no reason and no belief link stays out.
+
+A second decode failure sat beside the write op. `LedgerEvidence` copied an unattached row's belief links with `append([]string(nil), ...)`, which collapses an empty list to `nil` and marshals `belief_ids: null`; the frozen row requires an array and the web decoder's `Array.isArray` rejects null, so a changed-mind refund or a direction-mismatch answer could already fail to decode. The copy now goes through a non-nil slice and an unattached row emits `[]`.
+
+Tests. `TestUnknownDisputeCodeRidesAsObservation` ingests a dispute whose code is outside the frozen table and pins the emitted row: reason text is the code, category `none`, `counts_toward` null, `write_op` `observe`, no belief link; it then marshals the response and checks the emitted `write_op` against the frozen schema's enum (`testdata/api/common.schema.json`, the same three values as `web/src/lib/api/decode.ts`'s `writeOps`) and `belief_ids` against `[]`. `TestCodeLessDisputeStaysAuditOnly` ingests a dispute with no code and pins the decided shape: stored, no reason, `observe`, no belief link, no belief born, and no ledger row. Both fail on the pre-fix tree: `write_op = ""`, plus `belief_ids = null` in the first.
+
+No fixture moves: every frozen evidence row is attached to a belief, so none describes an unattached row. Gate green (`OK all checks passed`) after `npm ci` in `web/` and `merchant/`. Spend $0.00: no live call, no key.
 
 ---
 

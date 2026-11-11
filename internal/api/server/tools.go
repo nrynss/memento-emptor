@@ -110,7 +110,14 @@ func (s *Service) storeIngestResult(ctx context.Context, st *shopperState, shopp
 			if err := s.attachRow(ctx, st, rec); err != nil {
 				return WebhookResult{}, err
 			}
+			continue
 		}
+		// A row that counts toward nothing is stored as an observation:
+		// an unknown dispute code keeps its reason and shows unattached
+		// in the ledger, while a row with no reason — a capture, or a
+		// dispute that arrived without a code — stays audit-only.
+		// Neither writes a structural edge.
+		markUnattached([]*evidenceRecord{rec})
 	}
 	if res.Pending != nil {
 		question := res.Pending
@@ -818,10 +825,12 @@ func (st *shopperState) rowsForEvent(eventID string) []*evidenceRecord {
 	return out
 }
 
-// markUnattached stores classified rows that count toward nothing as
-// observations with no belief link: the reason stays visible on the row
-// while no structural edge is written. The slice is never nil-linked, so
-// the ledger renders an empty belief list instead of a missing one.
+// markUnattached stores rows that count toward nothing as observations
+// with no belief link: a reason the row carries stays visible while no
+// structural edge is written. The slice is never nil-linked, so the
+// ledger renders an empty belief list instead of a missing one. A row
+// with no reason lands here too and stays audit-only: the ledger leaves
+// an unexplained outcome out of its list.
 func markUnattached(rows []*evidenceRecord) {
 	for _, rec := range rows {
 		rec.counts = domain.BeliefKindNone
@@ -1233,12 +1242,14 @@ func (s *Service) LedgerBelief(ctx context.Context, req contract.LedgerBeliefReq
 
 // LedgerEvidence lists the ledger's evidence rows, newest first: outcomes
 // with their reasons, what each counts toward, seeded marks and belief
-// links. Rows that count toward a belief carry its link. Classified rows
-// that count toward nothing — a changed mind, or a fit answer pointing
-// nowhere the shopper's beliefs point — still appear, unattached but with
-// their reason, so nothing the shopper said goes silent. Only an
-// unexplained outcome stays out: with no reason it counts toward nothing
-// and stays in pending questions.
+// links. Rows that count toward a belief carry its link. Rows that count
+// toward nothing but carry a reason — a changed mind, an unknown dispute
+// code, or a fit answer pointing nowhere the shopper's beliefs point —
+// still appear, unattached but with their reason, so nothing the shopper
+// said goes silent. An outcome with no reason stays out of the list: a
+// refund waits in pending questions for its reason, a capture proves only
+// that the purchase happened, and a dispute that arrived with no code has
+// nothing to ask and stays an audit row.
 func (s *Service) LedgerEvidence(ctx context.Context, req contract.LedgerEvidenceRequest) (contract.LedgerEvidenceResponse, error) {
 	if strings.TrimSpace(req.ShopperID) == "" {
 		return contract.LedgerEvidenceResponse{}, fmt.Errorf("server: ledger evidence: %w", ErrMissingShopper)
@@ -1267,9 +1278,13 @@ func (s *Service) LedgerEvidence(ctx context.Context, req contract.LedgerEvidenc
 				continue
 			}
 		}
+		// The link list is copied through a non-nil slice: the frozen
+		// row requires an array, so an unattached row marshals [] and
+		// never null.
+		beliefIDs := append([]string{}, rec.beliefIDs...)
 		rows = append(rows, contract.LedgerEvidenceRow{
 			Evidence:  evidenceView(rec),
-			BeliefIDs: append([]string(nil), rec.beliefIDs...),
+			BeliefIDs: beliefIDs,
 		})
 	}
 	sort.Slice(rows, func(i, j int) bool {
