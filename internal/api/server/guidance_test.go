@@ -99,8 +99,8 @@ func TestOwnEvidenceSentenceTellsTheTruth(t *testing.T) {
 			name:   "lone fits-well row beside a pool that runs small",
 			pool:   earnedSmallPool,
 			setup:  answerFitsWell,
-			want:   "Take size M for Brand X: your own one return says it fits well, ahead of the pool.",
-			forbid: []string{"runs small"},
+			want:   "Take size M for Brand X: your own one purchase says it fits well, ahead of the pool.",
+			forbid: []string{"runs small", "return"},
 		},
 		{
 			name:   "lone too-small row beside a pool that agrees",
@@ -180,5 +180,30 @@ func TestOwnEvidenceSentenceTellsTheTruth(t *testing.T) {
 				t.Fatalf("pool precedence %+v, want the pool still overridden by own_evidence", recall.Pool)
 			}
 		})
+	}
+}
+
+// TestOwnEvidenceWordsFollowTheValue pins the clause's source: the fit words
+// come from the belief's own value, a fits-well value names the purchases its
+// feedback came from rather than returns, and a value naming no direction
+// leaves the clause stating the rows without inventing one.
+func TestOwnEvidenceWordsFollowTheValue(t *testing.T) {
+	cases := []struct {
+		value  string
+		words  string
+		clause string
+	}{
+		{"runs small, take size L", "runs small", "your own two returns say it runs small"},
+		{"runs large, take size S", "runs large", "your own two returns say it runs large"},
+		{"size M fits this shopper now", "fits well", "your own two purchases say it fits well"},
+		{"shopper says they usually take M", "", "your own two returns say so"},
+	}
+	for _, tc := range cases {
+		if got := fitWords(tc.value); got != tc.words {
+			t.Errorf("fitWords(%q) = %q, want %q", tc.value, got, tc.words)
+		}
+		if got := ownEvidenceClause(2, tc.words); got != tc.clause {
+			t.Errorf("ownEvidenceClause(2, %q) = %q, want %q", tc.words, got, tc.clause)
+		}
 	}
 }

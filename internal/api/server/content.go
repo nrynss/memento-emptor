@@ -196,30 +196,36 @@ func poolAgrees(own string, poolView *contract.PoolView) bool {
 
 // ownEvidenceClause states the shopper's own rows behind a recommendation,
 // with the verb agreeing with the count: one return says, several say. The
-// count itself comes from evidenceCount, so the phrasing has one home. The
-// fit words follow the pronoun when the belief names a direction, and the
-// clause says "so" when it names none.
+// count and its noun come from evidenceCount, so the phrasing has one home.
+// The noun follows the evidence: a runs-small or runs-large belief is backed
+// by returns, while the fits-well belief is backed by the purchases whose
+// feedback said the size fits. The fit words follow the pronoun when the
+// belief names a direction, and the clause says "so" when it names none.
 func ownEvidenceClause(n int, fit string) string {
 	verb := "say"
 	if n == 1 {
 		verb = "says"
 	}
 	if fit == "" {
-		return fmt.Sprintf("your own %s %s so", evidenceCount(n), verb)
+		return fmt.Sprintf("your own %s %s so", evidenceCount(n, "return"), verb)
 	}
-	return fmt.Sprintf("your own %s %s it %s", evidenceCount(n), verb, fit)
+	noun := "return"
+	if fit == "fits well" {
+		noun = "purchase"
+	}
+	return fmt.Sprintf("your own %s %s it %s", evidenceCount(n, noun), verb, fit)
 }
 
 // evidenceCount states how many evidence rows back a recommendation, in
-// the words the guidance uses.
-func evidenceCount(n int) string {
+// the words the guidance uses, with the noun the rows are.
+func evidenceCount(n int, noun string) string {
 	switch n {
 	case 1:
-		return "one return"
+		return "one " + noun
 	case 2:
-		return "two returns"
+		return "two " + noun + "s"
 	default:
-		return fmt.Sprintf("%d returns", n)
+		return fmt.Sprintf("%d %ss", n, noun)
 	}
 }
 
