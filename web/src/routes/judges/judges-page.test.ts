@@ -66,7 +66,7 @@ describe('the judges page', () => {
 			expect(link.textContent?.trim()).not.toBe('');
 		}
 
-		const rows = [...host.querySelectorAll('tbody tr')];
+		const rows = [...host.querySelectorAll('table[data-judges-table] tbody tr')];
 		for (const row of rows) {
 			expect(row.querySelectorAll('a[href]').length).toBeGreaterThanOrEqual(2);
 			const evidence = row.querySelector('td:last-child a[href]');
@@ -99,38 +99,60 @@ describe('the judges page', () => {
 		expect(host.querySelectorAll('[data-simulated-mark]').length).toBeGreaterThanOrEqual(1);
 	});
 
-	it('reports no round-2 result and promises none', async () => {
+	it('reports the round-2 counts without choosing a headline', async () => {
 		const host = await render();
 		const round2 = host.querySelector('[data-round2]');
 		expect(round2).not.toBeNull();
 
 		const text = round2!.textContent ?? '';
 		expect(text).toContain('T10.5');
-		expect(text).toContain('Results pending');
+		expect(text).toContain('10/16');
+		expect(text).toContain('12/16');
+		expect(text).toContain('16/16');
+		expect(text).toContain('$0.789309');
+		expect(text).toContain('Headline candidates');
+		expect(text).toContain('the user picks');
+		expect(text).toContain('none is chosen here');
 
-		const withoutNames = text
-			.replace(/PHASE-10-comparison-round-2\.md/g, '')
-			.replace(/T10\.5/g, '')
-			.replace(/round[-\s]?2/gi, '');
-		expect(withoutNames).not.toMatch(/\d/);
+		// Counts, never percentages; and the page states no verdict and picks
+		// no headline for the user.
 		expect(text).not.toMatch(/%/);
-		expect(withoutNames).not.toMatch(
-			/\b(?:better|worse|wins?|winning|ahead|leads?|proves?|matches?|percent|rate)\b/i
+		expect(text).not.toMatch(
+			/\b(?:better|worse|wins?|winning|ahead|leads?|proves?|matches?|percent|rate|best|winner|selected)\b/i
 		);
 		expect(text).not.toMatch(/\b(?:will|soon|coming|expected|future)\b/i);
+
+		const candidates = [...round2!.querySelectorAll('[data-round2-candidate]')];
+		expect(candidates).toHaveLength(4);
+		for (const candidate of candidates) {
+			expect(candidate.querySelector('a[href]')).not.toBeNull();
+		}
+
+		const first = round2!.querySelector('[data-round2-first]');
+		expect(first).not.toBeNull();
+		expect(first!.textContent).toContain('0/16');
+		expect(first!.textContent).toContain('10/16');
+		expect(first!.textContent).toContain('12/16');
+
+		const hand = round2!.querySelector('[data-round2-hand]');
+		expect(hand).not.toBeNull();
+		expect(hand!.textContent).toContain('12/16');
+		expect(hand!.textContent).toContain('16/16');
+
+		const corrections = round2!.querySelector('[data-round2-corrections]');
+		expect(corrections).not.toBeNull();
+		expect(corrections!.textContent).toContain('4/12');
+		expect(corrections!.textContent).toContain('12/12');
 
 		const row = host.querySelector('[data-round2-row]');
 		expect(row).not.toBeNull();
 		const rowText = row!.textContent ?? '';
-		expect(rowText).toContain('T10.5');
-		const rowWithoutNames = rowText
-			.replace(/PHASE-10-comparison-round-2\.md/g, '')
-			.replace(/FROZEN\.md/g, '')
-			.replace(/T10\.5/g, '')
-			.replace(/round[-\s]?2/gi, '');
-		expect(rowWithoutNames).not.toMatch(/\d/);
-		expect(rowWithoutNames).not.toMatch(
-			/\b(?:better|worse|wins?|winning|ahead|leads?|proves?|matches?|percent|rate)\b/i
+		expect(rowText).toContain('10/16');
+		expect(rowText).toContain('12/16');
+		expect(rowText).toContain('$0.789309');
+		expect(rowText).not.toMatch(/%/);
+		expect(rowText).not.toMatch(
+			/\b(?:better|worse|wins?|winning|ahead|leads?|proves?|matches?|percent|rate|best|winner|selected)\b/i
 		);
 	});
 

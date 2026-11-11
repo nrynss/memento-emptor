@@ -16,6 +16,11 @@
 
 	const repository = 'https://github.com/nrynss/memento-emptor';
 	const repositoryFile = (path: string): string => `${repository}/blob/main/${path}`;
+	const round2Run = (name: string): string => repositoryFile(`bench/round2/runs/${name}`);
+	const round2Scores = round2Run('r2-scores.json');
+	const round2Summary = round2Run('r2-summary.json');
+	const round2Recall = round2Run('r2-recall-compare.json');
+	const round2Readme = repositoryFile('bench/round2/README.md');
 	const merchantApp = 'https://memento-merchant.onrender.com';
 	const astropods = 'https://astropods.com';
 </script>
@@ -172,19 +177,15 @@
 				<tr data-round2-row>
 					<th scope="row">Comparison, round 2</th>
 					<td>
-						<a
-							href={repositoryFile('dev-diary/PHASE-10-comparison-round-2.md')}
-							rel="external">Read the round-2 task record</a
-						>
+						<a href="#round2-heading">Read the measured counts</a>
 					</td>
 					<td>
-						Results pending. T10.5 publishes them, and this page reports no round-2 count or
-						verdict.
+						First-turn right size, committed: arm 3 10/16, arm 4 12/16 (hand reading 12/16
+						and 16/16). Correction honoured: 4/4 next turn in every arm; 4/4 next session and
+						4/4 for another agent in both Memento arms. Spend $0.789309 of $5.00.
 					</td>
 					<td>
-						<a href={repositoryFile('bench/round2/FROZEN.md')} rel="external"
-							>bench/round2/FROZEN.md</a
-						>
+						<a href={round2Scores} rel="external">r2-scores.json</a>
 					</td>
 				</tr>
 
@@ -373,18 +374,254 @@
 </section>
 
 <section class="judges-section judges-round2" data-round2 aria-labelledby="round2-heading">
-	<h2 id="round2-heading">Comparison, round 2: results pending</h2>
-	<p>
-		Round 2 is the comparison the product spec asks for. Its results are not published on this
-		page.
+	<h2 id="round2-heading">Comparison, round 2: measured counts</h2>
+	<p class="lede" data-claim>
+		T10.5's results. Eight constructed shoppers, four cases, four arms, two repeats. We wrote the
+		shoppers, the hidden answers and the population, so this shows the mechanism on constructed
+		cases, not real-world accuracy. Counts, never percentages; every count links to its run file or
+		the round-2 record, read from
+		<a href={round2Scores} rel="external">r2-scores.json</a> and
+		<a href={round2Readme} rel="external">bench/round2/README.md</a>.
 	</p>
-	<p class="judges-pending" data-round2-line>
-		<strong>Results pending.</strong> T10.5 is the task that publishes the round-2 results, and it
-		has not landed. This page reports no round-2 count, no run and no verdict; the comparison
-		above is the one that is published.
-		<a href={repositoryFile('dev-diary/PHASE-10-comparison-round-2.md')} rel="external">PHASE-10-comparison-round-2.md</a
-		>.
+
+	<p data-claim>
+		<strong>Extraction artifact, before the counts.</strong> Six Memento replies open with the
+		recommendation but later name another size — the size that came back or the size the pool
+		reports — so the frozen size rule reads that later size. The committed scores give arm 3 10/16
+		first turns and arm 4 12/16. A hand reading of the same 64 replies, kept beside the scores and not
+		substituted for them, gives arm 3 12/16 and arm 4 16/16. No score is overridden. The six runs are
+		named in
+		<a href={`${round2Readme}#the-extraction-artifact-before-any-count`} rel="external"
+			>the round-2 record</a
+		>, and the committed scores are in
+		<a href={round2Scores} rel="external">r2-scores.json</a>.
 	</p>
+
+	<h3>Right size first time</h3>
+	<div class="judges-table-wrap">
+		<table class="judges-table judges-round2-table" data-round2-first>
+			<caption class="judges-caption">
+				Committed scores: the extracted size equals the hidden answer. Each cell is 4 turns.
+				<a href={round2Scores} rel="external">r2-scores.json</a>
+			</caption>
+			<thead>
+				<tr>
+					<th scope="col">Case</th>
+					<th scope="col">Arm 1 no memory</th>
+					<th scope="col">Arm 2 PayPal history</th>
+					<th scope="col">Arm 3 Memento shopper only</th>
+					<th scope="col">Arm 4 Memento full</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row">New to the brand</th>
+					<td>0/4</td>
+					<td>0/4</td>
+					<td>0/4</td>
+					<td>3/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Unlike the crowd</th>
+					<td>0/4</td>
+					<td>2/4</td>
+					<td>4/4</td>
+					<td>2/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Noisy refunds</th>
+					<td>0/4</td>
+					<td>0/4</td>
+					<td>2/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Correction, first turn</th>
+					<td>0/4</td>
+					<td>2/4</td>
+					<td>4/4</td>
+					<td>3/4</td>
+				</tr>
+				<tr>
+					<th scope="row">All four cases</th>
+					<td>0/16</td>
+					<td>4/16</td>
+					<td>10/16</td>
+					<td>12/16</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="judges-table-wrap">
+		<table class="judges-table judges-round2-table" data-round2-hand>
+			<caption class="judges-caption">
+				Hand reading of the same 64 replies, not the measurement; no score is changed.
+			</caption>
+			<thead>
+				<tr>
+					<th scope="col">Case</th>
+					<th scope="col">Arm 1</th>
+					<th scope="col">Arm 2</th>
+					<th scope="col">Arm 3</th>
+					<th scope="col">Arm 4</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row">New to the brand</th>
+					<td>0/4</td>
+					<td>0/4</td>
+					<td>0/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Unlike the crowd</th>
+					<td>0/4</td>
+					<td>2/4</td>
+					<td>4/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Noisy refunds</th>
+					<td>0/4</td>
+					<td>0/4</td>
+					<td>4/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Correction, first turn</th>
+					<td>0/4</td>
+					<td>2/4</td>
+					<td>4/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">All four cases</th>
+					<td>0/16</td>
+					<td>4/16</td>
+					<td>12/16</td>
+					<td>16/16</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<p data-claim>
+		The reading moves four cells: arm 3's noisy refunds 2/4 becomes 4/4, and arm 4's new-to-brand
+		3/4, unlike-the-crowd 2/4 and correction 3/4 each become 4/4. Arm 3's new-to-brand stays 0/4
+		under either reading.
+		<a href={`${round2Readme}#right-size-first-time`} rel="external">The round-2 record</a> names
+		the six runs.
+	</p>
+
+	<h3>Corrections</h3>
+	<p data-claim>
+		Case 4 only: two shoppers, one correction each, recorded through
+		<code>record_correction</code> after the first turn and before every later turn. Counts from
+		<a href={round2Scores} rel="external">r2-scores.json</a>.
+	</p>
+	<div class="judges-table-wrap">
+		<table class="judges-table judges-round2-table" data-round2-corrections>
+			<caption class="judges-caption">
+				Correction honoured, by turn and arm. Each cell is 4 turns.
+				<a href={round2Scores} rel="external">r2-scores.json</a>
+			</caption>
+			<thead>
+				<tr>
+					<th scope="col">Turn</th>
+					<th scope="col">Arm 1 no memory</th>
+					<th scope="col">Arm 2 PayPal history</th>
+					<th scope="col">Arm 3 shopper only</th>
+					<th scope="col">Arm 4 full</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<th scope="row">Next turn, same conversation</th>
+					<td>4/4</td>
+					<td>4/4</td>
+					<td>4/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Next session, no conversation</th>
+					<td>0/4</td>
+					<td>2/4</td>
+					<td>4/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">Another agent, no conversation</th>
+					<td>0/4</td>
+					<td>2/4</td>
+					<td>4/4</td>
+					<td>4/4</td>
+				</tr>
+				<tr>
+					<th scope="row">All three later turns</th>
+					<td>4/12</td>
+					<td>8/12</td>
+					<td>12/12</td>
+					<td>12/12</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<p data-claim>
+		The correction turn is 4/4 in every arm: its prompt carries the correction in the
+		conversation, so it measures the conversation, not memory. The belief stays on record beside
+		the correction in both Memento arms.
+		<a href={round2Run('r2-corrections.json')} rel="external">r2-corrections.json</a>.
+	</p>
+
+	<p data-claim>
+		<strong>Spend.</strong> $0.789309 of the $5.00 cap: arm 1 $0.031134, arm 2 $0.460746, arm 3
+		$0.137073, arm 4 $0.160356.
+		<a href={round2Summary} rel="external">r2-summary.json</a>.
+	</p>
+
+	<p data-claim>
+		<strong>Recall difference:</strong> The live recall differed from the frozen
+		<code>recall_for_purchase</code> response in 28 of 56 Memento turns — in belief status and
+		standing labels, contradiction marks, and which of the rival's returns the belief carries —
+		while the answers and the deciding precedence step agreed.
+		<a href={round2Recall} rel="external">r2-recall-compare.json</a>.
+	</p>
+
+	<h3>Headline candidates (the user picks one — none is chosen here)</h3>
+	<ol class="judges-candidates">
+		<li data-round2-candidate data-claim>
+			<strong>The correction crosses sessions and agents for both Memento arms.</strong> 4/4 in
+			the next session and 4/4 for another agent, against 2/4 and 2/4 for PayPal history and 0/4
+			and 0/4 for no memory.
+			<a href={round2Scores} rel="external">r2-scores.json</a>.
+		</li>
+		<li data-round2-candidate data-claim>
+			<strong>The pool answers the new-to-brand case that no shopper's history can.</strong> Arm 4
+			3/4 by the committed scores and 4/4 by hand, against 0/4 for Memento shopper-only, 0/4 for
+			PayPal history and 0/4 for no memory.
+			<a href={round2Run('r2-a4-new-plain-r1-first.json')} rel="external"
+				>r2-a4-new-plain-r1-first.json</a
+			>,
+			<a href={round2Scores} rel="external">r2-scores.json</a>.
+		</li>
+		<li data-round2-candidate data-claim>
+			<strong>Own evidence outranks the pool when the pool points the wrong way.</strong> In both
+			Memento arms, 8/8 by hand and 6/8 by the committed scores; arm 2 is 2/4 and arm 1 is 0/4.
+			<a href={round2Run('r2-a4-crowd-rival-r1-first.json')} rel="external"
+				>r2-a4-crowd-rival-r1-first.json</a
+			>,
+			<a href={round2Scores} rel="external">r2-scores.json</a>.
+		</li>
+		<li data-round2-candidate data-claim>
+			<strong>PayPal history costs more and carries the larger prompt.</strong> Arm 2 spends
+			$0.460746 and carries 28197 words; arm 4 spends $0.160356 and carries 11263 words. First-turn
+			right size is 4/16 against 12/16.
+			<a href={round2Summary} rel="external">r2-summary.json</a>,
+			<a href={round2Scores} rel="external">r2-scores.json</a>.
+		</li>
+	</ol>
 </section>
 
 <style>
@@ -459,7 +696,7 @@
 	.judges-seeded-notice a,
 	.judges-facts a,
 	.judges-credential-note a,
-	.judges-pending a {
+	.judges-round2 a {
 		color: var(--accent);
 		text-decoration: underline;
 		text-underline-offset: 2px;
@@ -542,18 +779,29 @@
 	}
 
 	.judges-round2 {
-		padding: 1rem 1.25rem;
-		border: 1px dashed var(--dim);
+		padding: 1.25rem;
+		border: 1px solid var(--line);
 		border-radius: var(--radius-panel);
-		color: var(--dim);
+		background: var(--surface);
 	}
 
 	.judges-round2 h2 {
 		color: var(--text);
 	}
 
-	.judges-pending {
+	.judges-round2 h3 {
+		margin: 1.5rem 0 0.75rem;
+	}
+
+	.judges-round2 .judges-table-wrap {
+		margin: 0 0 1rem;
+	}
+
+	.judges-candidates {
+		display: grid;
+		gap: 0.85rem;
 		margin: 0;
+		padding-left: 1.25rem;
 	}
 
 	@media (max-width: 720px) {
