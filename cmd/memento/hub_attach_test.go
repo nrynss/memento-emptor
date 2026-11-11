@@ -309,7 +309,7 @@ func TestAttachRetryReadsSeconds(t *testing.T) {
 		{name: "seconds", header: "90", want: 90 * time.Second},
 		{name: "negative", header: "-3", want: attachRetryDefault},
 		{name: "a date", header: "Wed, 21 Oct 2026 07:28:00 GMT", want: attachRetryDefault},
-		{name: "a fraction", header: "1.5", want: attachRetryDefault},
+		{name: "a fraction", header: "2.5", want: attachRetryDefault},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {

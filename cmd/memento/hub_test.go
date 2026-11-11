@@ -296,6 +296,40 @@ func TestInspectNoConceptErrorMapsToNone(t *testing.T) {
 	}
 }
 
+// TestInspectStructuredStatusWins pins the one inspect reading the
+// recordings cannot separate: a real reply renders the state in
+// structuredContent.admission.status and in the text mark from the same
+// value, so either alone covers the recorded cases. These replies name
+// different states in the two places on purpose, so a client that stopped
+// reading the structured status (or no longer maps one of its values) fails
+// here instead of falling back to the text unnoticed.
+func TestInspectStructuredStatusWins(t *testing.T) {
+	cases := []struct {
+		name   string
+		status string
+		mark   string
+		want   domain.GraphState
+	}{
+		{name: "venerable status over a candidate text mark", status: "Venerable", mark: "candidate", want: domain.GraphVenerable},
+		{name: "candidate status over a venerable text mark", status: "Candidate", mark: "venerable", want: domain.GraphCandidate},
+	}
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			reply := json.RawMessage(fmt.Sprintf(
+				`{"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"focus: a belief [Logic, %s]"}],"structuredContent":{"admission":{"status":%q},"focus":{"blast_radius":0},"warnings":[]},"isError":false}}`,
+				testCase.mark, testCase.status))
+			hub := newReplayHub(t, map[string][]json.RawMessage{"lambo_inspect": {reply}})
+			report, err := hub.graph().Inspect(context.Background(), "a belief")
+			if err != nil {
+				t.Fatalf("inspect: %v", err)
+			}
+			if report.State != testCase.want {
+				t.Fatalf("state = %q, want %q", report.State, testCase.want)
+			}
+		})
+	}
+}
+
 // TestWriterRepliesCarryReceipts replays every recorded write and its
 // settling stats poll through the client and pins the receipt it reads and
 // the applied state it waits out.
