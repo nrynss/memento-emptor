@@ -130,12 +130,13 @@ the fit index (Elastic), not a belief in the graph. One purchase is one row.
   or by feedback, and classification answers the pending question the
   refund opened. The kept write has no served producer — the seeded
   population declares its kept rows — and the contested write has no
-  served caller, so the rank-4 collision this rule guards is not
-  reachable from a served event today. When a classification and a
-  feedback do meet on one row, they point the same way — the shopper's
-  answer and their feedback agree on how the size ran — so the
-  directional counts the status rule reads are unchanged; only the
-  settled-kind attribution differs.
+  served caller, so neither the kept nor the contested write can collide
+  with a later classification. Feedback is the one rank-4 write the
+  served layer reaches; when a classification and a feedback do meet on
+  one row, they point the same way — the shopper's answer and their
+  feedback agree on how the size ran — so the directional counts the
+  status rule reads are unchanged; only the settled-kind attribution
+  differs.
 - **The row carries no prose and no identity.** Product line (brand,
   category, fit handle), size, purchase state, settled kind, reason
   category, fit direction, feedback verdict, the contested mark, a
