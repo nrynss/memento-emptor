@@ -31,10 +31,11 @@ fi
 bench/round2/freeze_check.sh $round2_freeze_flag || fail "freeze round 2" "frozen round 2 inputs mismatch (bench/round2/FROZEN.md section 1)"
 
 # The Go and Node pins live in six places: both images' FROM lines, CI's
-# setup-go and setup-node, go.mod, and deploy/README.md's table. An image
+# setup-go and setup-node, go.mod, and deploy/README.md's table. Bun's live in
+# every Dockerfile's `oven/bun:` build stage and CI's setup-bun. An image
 # built on a toolchain CI does not use builds green in both places, so the
-# pins are compared here, first in the gate. tools/pincheck's own table
-# test proves the disagreement it catches; `go test` below runs it.
+# pins are compared here, first in the gate. tools/pincheck's own table test
+# proves the disagreements it catches; `go test` below runs it.
 echo "-- toolchain pins"
 go run ./tools/pincheck || fail "pins" "toolchain pins disagree (see above)"
 
@@ -110,16 +111,18 @@ run_frontend "agent/frontend relay tests" node --test agent/frontend/server/rela
 # The package's own check is `bun run typecheck` (tsc --noEmit over server/),
 # and it needs bun plus agent/frontend/node_modules, which only `bun install`
 # provides: the package tracks bun.lock, not package-lock.json, so `npm ci`
-# cannot stand in for it, and CI installs neither. Where both are present the
-# whole package is checked. Where they are not, the gate type-checks the
-# module the tests above cover with the TypeScript it already installed for
-# web/ (that install is required by check_frontend above), and prints the
-# limit instead of passing the package silently.
+# cannot stand in for it. CI supplies both -- setup-bun at the version
+# `tools/pincheck` compares against the images, then `bun install
+# --frozen-lockfile` in agent/frontend/ -- so the whole package is checked on
+# every push. A workstation with neither bun nor the modules checks the module
+# the tests above cover, with the TypeScript it already installed for web/
+# (that install is required by check_frontend above), and prints the limit
+# instead of passing the package silently.
 if command -v bun >/dev/null 2>&1 && [ -d agent/frontend/node_modules ]; then
 	echo "-- agent/frontend typecheck (bun run typecheck)"
 	(cd agent/frontend && bun run typecheck) || fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server"
 else
-	echo "-- agent/frontend typecheck (bun or agent/frontend/node_modules absent: server/relay.ts only)"
+	echo "-- agent/frontend typecheck (no bun here, or agent/frontend/node_modules absent: server/relay.ts only)"
 	(cd agent/frontend && ../../web/node_modules/.bin/tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler server/relay.ts) ||
 		fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server/relay.ts"
 fi

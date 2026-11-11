@@ -27,6 +27,16 @@ RUN CGO_ENABLED=0 go build -o /out/merchant-edge ./deploy/merchant
 FROM node:26-bookworm AS web-build
 RUN npm ci && npm run build
 `,
+		"agent/frontend/Dockerfile": `FROM oven/bun:1
+WORKDIR /app
+CMD ["bun", "run", "server/index.ts"]
+`,
+		"agent/runtime/Dockerfile": `FROM oven/bun:1 AS builder
+RUN bun install
+
+FROM oven/bun:1-slim
+CMD ["bun", "run", "agent/index.ts"]
+`,
 		".github/workflows/ci.yml": `steps:
   - uses: actions/setup-go@v5
     with:
@@ -35,6 +45,10 @@ RUN npm ci && npm run build
   - uses: actions/setup-node@v4
     with:
       node-version: '26'
+
+  - uses: oven-sh/setup-bun@v2
+    with:
+      bun-version: '1.3.14'
 `,
 		"go.mod": `module example.com/x
 
@@ -80,9 +94,8 @@ func writeTree(t *testing.T, files map[string]string) string {
 	return root
 }
 
-// TestCheckTable proves both failure modes and the pass: a Node pin that
-// drifts from the rest, a Go pin that does, a lost source, and the current pins
-// agreeing.
+// TestCheckTable proves each failure mode and the pass: a Node, Go or bun pin
+// that drifts from the rest, a lost source, and the current pins agreeing.
 func TestCheckTable(t *testing.T) {
 	cases := []struct {
 		name string
@@ -152,6 +165,34 @@ func TestCheckTable(t *testing.T) {
 			want: []string{"go.mod: no go directive"},
 		},
 		{
+			name: "bun drifts in the shopper image",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "agent/frontend/Dockerfile", "oven/bun:1", "oven/bun:2")
+			},
+			want: []string{"bun: agent/frontend/Dockerfile", "says 2"},
+		},
+		{
+			name: "bun drifts in the runtime image's build stage",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "agent/runtime/Dockerfile", "FROM oven/bun:1 AS builder", "FROM oven/bun:2 AS builder")
+			},
+			want: []string{"bun: agent/runtime/Dockerfile's bun build stage (line 1)", "says 2"},
+		},
+		{
+			name: "bun drifts in ci",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, ".github/workflows/ci.yml", "bun-version: '1.3.14'", "bun-version: '2.0.0'")
+			},
+			want: []string{"bun: .github/workflows/ci.yml", "says 2.0.0"},
+		},
+		{
+			name: "a dockerfile that gains a bun stage is read",
+			edit: func(t *testing.T, files map[string]string) {
+				files["agent/second/Dockerfile"] = "FROM oven/bun:3 AS builder\n"
+			},
+			want: []string{"bun: agent/second/Dockerfile", "says 3"},
+		},
+		{
 			name: "the two images agree with each other and disagree with ci and the table",
 			edit: func(t *testing.T, files map[string]string) {
 				replace(t, files, "deploy/Dockerfile", "node:26-bookworm", "node:22-bookworm")
@@ -185,6 +226,28 @@ func TestCheckTable(t *testing.T) {
 				replace(t, files, "deploy/README.md", "| Node | 26 | `node:26-bookworm` |\n", "")
 			},
 			want: []string{"deploy/README.md: no node row"},
+		},
+		{
+			name: "ci loses setup-bun",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, ".github/workflows/ci.yml", "      bun-version: '1.3.14'\n", "")
+			},
+			want: []string{"ci.yml: no bun-version: line"},
+		},
+		{
+			name: "a dockerfile's bun tag names no version",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "agent/runtime/Dockerfile", "oven/bun:1 AS builder", "oven/bun:latest AS builder")
+			},
+			want: []string{"agent/runtime/Dockerfile's bun build stage (line 1)", `"latest" is not a numeric version`},
+		},
+		{
+			name: "the tree states no bun image",
+			edit: func(t *testing.T, files map[string]string) {
+				delete(files, "agent/frontend/Dockerfile")
+				delete(files, "agent/runtime/Dockerfile")
+			},
+			want: []string{"no Dockerfile states a base image for oven/bun"},
 		},
 		{
 			name: "the image tag names no version",

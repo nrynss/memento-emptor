@@ -1,19 +1,23 @@
-// Command pincheck reads every toolchain pin the repository states for Go and
-// Node and fails when two of them disagree. It is the gate's mechanical guard
-// for the drift T9.3g and T9.3h fixed by hand: an image built on a Node major
-// CI does not use builds green in both places and ships the wrong one.
+// Command pincheck reads every toolchain pin the repository states for Go,
+// Node and bun and fails when two of them disagree. It is the gate's
+// mechanical guard for the drift T9.3g and T9.3h fixed by hand: an image built
+// on a Node major CI does not use builds green in both places and ships the
+// wrong one.
 //
 // The sources are the two images' build stages (`deploy/Dockerfile` and
-// `deploy/merchant/Dockerfile`), CI's `setup-go` and `setup-node`,
+// `deploy/merchant/Dockerfile`), the `oven/bun:` build stage of every
+// Dockerfile in the tree, CI's `setup-go`, `setup-node` and `setup-bun`,
 // `go.mod`'s Go directive, and the pins `deploy/README.md`'s table states.
 // Each file must state its pin: a source that has lost one is a failure, not a
 // shorter list, so the check cannot pass by reading less.
 //
 // The comparison granularity is the granularity each file carries. Node is
 // compared by major, because an image tag names a major and nothing in the
-// tree pins a Node patch. Go is compared by major.minor for the same reason --
-// the image tag floats the patch -- and the files that do name a patch,
-// `go.mod` and CI, must also agree with each other exactly.
+// tree pins a Node patch. Bun is compared by major for the same reason: its
+// images carry `oven/bun:1` while CI names the patch it installs. Go is
+// compared by major.minor for the same reason -- the image tag floats the
+// patch -- and the files that do name a patch, `go.mod` and CI, must also
+// agree with each other exactly.
 //
 // It reads files and prints; it has no network, no key and no dependency
 // outside the standard library. The gate runs it as
@@ -27,6 +31,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -39,6 +44,7 @@ type kind string
 const (
 	kindGo   kind = "go"
 	kindNode kind = "node"
+	kindBun  kind = "bun"
 )
 
 // pin is one version one file states for one toolchain.
@@ -59,6 +65,11 @@ func check(root string) ([]pin, error) {
 		}
 		pins = append(pins, got...)
 	}
+	bun, err := bunPins(root)
+	if err != nil {
+		return nil, err
+	}
+	pins = append(pins, bun...)
 	for _, reader := range []func(string) ([]pin, error){ciPins, goModPins, readmePins} {
 		got, err := reader(root)
 		if err != nil {
@@ -112,19 +123,114 @@ func dockerPins(root, rel string) ([]pin, error) {
 	return pins, nil
 }
 
+// bunPins reads the `oven/bun:` base image of every build stage in every
+// Dockerfile the tree carries. The Dockerfiles are discovered rather than
+// listed, so one that gains a bun stage is checked without an edit here.
+// Because CI is bun's other pin, a tree whose Dockerfiles state none is a
+// failure: the check would otherwise be comparing CI against itself.
+func bunPins(root string) ([]pin, error) {
+	rels, err := dockerfiles(root)
+	if err != nil {
+		return nil, err
+	}
+	var pins []pin
+	for _, rel := range rels {
+		got, err := bunDockerPins(root, rel)
+		if err != nil {
+			return nil, err
+		}
+		pins = append(pins, got...)
+	}
+	if len(pins) == 0 {
+		return nil, fmt.Errorf("no Dockerfile states a base image for %s, so CI's bun pin has no second source", imageName(kindBun))
+	}
+	return pins, nil
+}
+
+// bunDockerPins reads the bun base image of every `FROM` line in one
+// Dockerfile. Both stages count: the image that installs modules and the slim
+// one that runs them are built on the same bun, so a file that drifts one of
+// them is named at its line.
+func bunDockerPins(root, rel string) ([]pin, error) {
+	body, err := os.ReadFile(filepath.Join(root, rel))
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %w", rel, err)
+	}
+	var pins []pin
+	for i, line := range strings.Split(string(body), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 || !strings.EqualFold(fields[0], "FROM") {
+			continue
+		}
+		for _, field := range fields[1:] {
+			ref, ok := imageTag(field, imageName(kindBun))
+			if !ok {
+				continue
+			}
+			version, err := imageVersion(ref)
+			if err != nil {
+				return nil, fmt.Errorf("%s line %d: %w", rel, i+1, err)
+			}
+			source := fmt.Sprintf("%s's bun build stage (line %d)", rel, i+1)
+			if err := requireParts(version, minParts(kindBun), source); err != nil {
+				return nil, err
+			}
+			pins = append(pins, pin{kind: kindBun, version: version, source: source})
+		}
+	}
+	return pins, nil
+}
+
+// dockerfiles lists every Dockerfile under root, relative to it and in walk
+// order. `.git` and `node_modules` are skipped: neither holds a file this
+// repository builds.
+func dockerfiles(root string) ([]string, error) {
+	var rels []string
+	err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		name := d.Name()
+		if d.IsDir() {
+			if path == root {
+				return nil
+			}
+			if name == ".git" || name == "node_modules" {
+				return fs.SkipDir
+			}
+			return nil
+		}
+		if name != "Dockerfile" && !strings.HasPrefix(name, "Dockerfile.") {
+			return nil
+		}
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		rels = append(rels, filepath.ToSlash(rel))
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("walk %s for Dockerfiles: %w", root, err)
+	}
+	return rels, nil
+}
+
+// imageTag reports whether a `FROM` field names the image repository repo, and
+// returns the reference after the name when it does.
+func imageTag(field, repo string) (string, bool) {
+	rest, ok := strings.CutPrefix(field, repo+":")
+	return rest, ok
+}
+
 // imageKind reports whether an image reference is the Go or the Node base
 // image, and returns the toolchain and the reference's tag.
 func imageKind(field string) (kind, string, bool) {
-	for _, image := range []struct {
-		k    kind
-		name string
-	}{
-		{kindGo, "golang"},
-		{kindNode, "node"},
-	} {
-		if rest, ok := strings.CutPrefix(field, image.name+":"); ok {
-			return image.k, rest, true
-		}
+	if ref, ok := imageTag(field, imageName(kindGo)); ok {
+		return kindGo, ref, true
+	}
+	if ref, ok := imageTag(field, imageName(kindNode)); ok {
+		return kindNode, ref, true
 	}
 	return "", "", false
 }
@@ -145,9 +251,9 @@ func imageVersion(tag string) (string, error) {
 	return tag, nil
 }
 
-// ciPins reads the versions CI installs, one `go-version:` and one
-// `node-version:`. Two of either would leave the check comparing against
-// whichever came first, so a duplicate is an error.
+// ciPins reads the versions CI installs, one `go-version:`, one
+// `node-version:` and one `bun-version:`. Two of any would leave the check
+// comparing against whichever came first, so a duplicate is an error.
 func ciPins(root string) ([]pin, error) {
 	const rel = ".github/workflows/ci.yml"
 	body, err := os.ReadFile(filepath.Join(root, rel))
@@ -162,6 +268,7 @@ func ciPins(root string) ([]pin, error) {
 	}{
 		{kindGo, "go-version:", "setup-go", false},
 		{kindNode, "node-version:", "setup-node", false},
+		{kindBun, "bun-version:", "setup-bun", false},
 	}
 	var pins []pin
 	for i, line := range strings.Split(string(body), "\n") {
@@ -268,7 +375,7 @@ func readmePins(root string) ([]pin, error) {
 // float where go.mod and CI fix.
 func disagreements(pins []pin) error {
 	var lines []string
-	for _, k := range []kind{kindGo, kindNode} {
+	for _, k := range []kind{kindGo, kindNode, kindBun} {
 		var group []pin
 		for _, p := range pins {
 			if p.kind == k {
@@ -348,14 +455,19 @@ func hasTie(buckets map[string][]pin, keys []string, expected string) bool {
 // imageName is the repository an image of a toolchain comes from, as the
 // Dockerfile writes it.
 func imageName(k kind) string {
-	if k == kindGo {
+	switch k {
+	case kindGo:
 		return "golang"
+	case kindNode:
+		return "node"
+	case kindBun:
+		return "oven/bun"
 	}
-	return "node"
+	return ""
 }
 
 // minParts is how many version components a toolchain's pin must carry: Go a
-// major and a minor, Node a major.
+// major and a minor, Node and bun a major.
 func minParts(k kind) int {
 	if k == kindGo {
 		return 2
@@ -364,7 +476,7 @@ func minParts(k kind) int {
 }
 
 // comparisonKey is the part of a version two files are held to: major.minor
-// for Go, the major for Node.
+// for Go, the major for Node and bun.
 func comparisonKey(version string, n int) string {
 	split := strings.Split(version, ".")
 	if len(split) > n {
@@ -408,5 +520,6 @@ func main() {
 	for _, p := range pins {
 		agree[p.kind] = comparisonKey(p.version, minParts(p.kind))
 	}
-	fmt.Printf("go %s and node %s agree across %d declarations\n", agree[kindGo], agree[kindNode], len(pins))
+	fmt.Printf("go %s, node %s and bun %s agree across %d declarations\n",
+		agree[kindGo], agree[kindNode], agree[kindBun], len(pins))
 }

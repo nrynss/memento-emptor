@@ -584,11 +584,21 @@ requires:   [T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/pincheck/, tools/check.sh
-status:     claimed:t916-bun-pin
+status:     in-review
 ```
 T9.13 made CI's `bun-version: '1.3.14'` the repository's first toolchain pin with no second source: `tools/pincheck` compares Go and Node only, and the `oven/bun:1` image tags float past it. Extend the pin check to read the Dockerfiles' `oven/bun:` build tags and CI's `bun-version:` and compare them by major, as Node is compared. Also correct `tools/check.sh`'s comment and fallback text, which still say CI installs neither bun nor the package's modules.
 
 **Done when:** the pin check covers bun and fails on a major disagreement or a missing pin; the gate's prose matches what CI does; the table test proves the new failure mode; the gate passes.
+
+**Notes (worker).** `tools/pincheck` compares a third toolchain. `kindBun` reads the `oven/bun:` `FROM` line of every Dockerfile in the tree and CI's `bun-version:`, and compares them by major, as Node is. The Dockerfiles are discovered by a walk (`.git` and `node_modules` skipped; a file named `Dockerfile` or `Dockerfile.*`), not listed, so a file that gains a bun stage is read without an edit here. Both stages of a two-stage file are pins, so one that drifts its builder or its slim runtime is named at its line. The check fails when no Dockerfile states a bun base image: CI would then be the only source, and the comparison this task exists for would be CI against itself. Go and Node are untouched: the two deploy images are still held to a Go and a Node stage, `ciPins` now requires all three keys, and the majority, tie and exact-Go-patch rules are the same code path. The tree reads 17 declarations, `go 1.27, node 26 and bun 1 agree`.
+
+`tools/check.sh` says what CI does now: the frontend comment names `setup-bun` at the version `tools/pincheck` compares against the images plus `bun install --frozen-lockfile` in `agent/frontend/`, so CI checks the whole package; the fallback is what a workstation without bun or the modules takes, and its `--` line says that rather than implying CI takes it. The gate's pin comment names bun's two sources beside Go's and Node's.
+
+Proof. `go test ./tools/pincheck/` is green over 21 table cases, four of them bun: a drift in the shopper image, a drift in the runtime image's builder stage, a drift in CI, and a Dockerfile added with a bun stage (the discovery clause); plus CI losing `bun-version:`, a tag of `oven/bun:latest`, and a tree whose Dockerfiles state no bun image. Mutation-checked against the real tree, each reverted with `git checkout` and `git status` clean afterwards: `agent/runtime/Dockerfile`'s builder moved to `oven/bun:2` fails naming `agent/runtime/Dockerfile's bun build stage (line 2) says 2, but agent/frontend/Dockerfile's bun build stage (line 9) says 1`; `ci.yml`'s `bun-version: '2.0.0'` fails naming the file and both versions; deleting that line fails with `no bun-version: line`; a probe `Dockerfile` added under a new directory and removed after fails naming it. `./tools/check.sh` is green both ways: first with `agent/frontend/node_modules` absent, where the frontend step prints its new fallback line, then after `bun install --frozen-lockfile` (bun 1.3.14, 282 packages, `bun.lock` untouched), where it runs `bun run typecheck`. `npm ci` in `web/` and `merchant/` supplied the other dependencies.
+
+Limit, stated: the comparison is by major, as the task specifies, so the images' `oven/bun:1` and CI's 1.3.14 agree and a Dockerfile that moved to another 1.x patch would stay green. That asymmetry is the same one the table records for Go, and tightening it would need the images to name a patch. No GitHub Actions run backs this; the workflow's steps are unchanged and pushing is the orchestrator's.
+
+Finding (Low), owner: a future task the orchestrator numbers, `owns: deploy/README.md`. That section's prose still lists what the gate reads as "both images' `FROM` lines, CI's `go-version` and `node-version`, `go.mod` and these rows", and its table has no Bun row, so a reader is not told bun is checked or where its pins live. `deploy/README.md` is outside this task's `owns`.
 
 ---
 
