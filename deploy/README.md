@@ -339,11 +339,13 @@ neither; the subscription id it prints is account detail, so a transcript
 redacts it as `SUBSCRIPTION-ID-REDACTED`. Keys stay in the environment,
 never in a file.
 
-The live delivery path is implemented but not yet proved on the hosted
-layer. That needs the redeploy of this branch and the resume steps
-(register the subscription, create/capture/refund, file the dispute,
-resend all three) recorded in `dev-diary/PHASE-8-pivot-layer.md`; this
-section is not a live-delivery transcript.
+The live delivery path is proved on the hosted layer: one sandbox
+capture, one refund and one dispute reached the layer through the
+registered subscription, wrote their evidence and fit rows, and a resend
+of all three wrote nothing while the rows and versions stayed the same.
+The transcript, the event ids and the row evidence are in
+`dev-diary/PHASE-8-pivot-layer.md` (T8.7b); this section is the runbook,
+not the transcript.
 
 ## Spend guard
 

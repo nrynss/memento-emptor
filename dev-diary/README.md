@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 36 / 37 | In progress (T8.7b) |
+| P8 | 37 / 37 | Done |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 8 / 8 | Done |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.7b: Live payment events reach the layer (done)
+
+**What exists.** `internal/payments/source.go` is the real PayPal REST source behind the seam (event, order, capture, refund, dispute; typed errors; 15 s bounds; no credential in an error), wired in `cmd/memento` when the app credentials are present and sharing one client with the verifier; the recording source stays for no-credential paths. Dispute deliveries join on `disputed_transactions[].custom`, with a distinct refusal when none is present. `deploy/paypal-webhook.sh` is idempotent on URL and event list. Proved live: one sandbox capture, one refund and one dispute reached the layer through the registered subscription; the refund filed `q_000001`, its fit row reads `refunded`/`settled:false`, the dispute wrote one seller row (`not_arrived`) against a Claimed seller belief with no fit-row change, and a resend of all three answered duplicate with the same ids and `_version`s.
+
+**What surprised.** The checkout approval needs `&useraction=commit` on the payer-action URL or the funding page loops; the resolution-center filing URL wants the activity transaction id, not the capture id; the resend endpoint answers 415 without `Content-Type: application/json` even for an empty body. A PayPal retry can add a `webhook_ingest` call with no second write, so rows and versions are the proof, not the call count.
+
+**The next agent should not have to work out.** The verifier caches subscription ids for the process lifetime, so register before the first delivery after any restart. A dispute carries its shopper in `disputed_transactions[].custom`, not `resource.custom_id`. The deployed layer now uses the real source; the sandbox-only rule still binds.
 
 ### T10.5: The round-2 results are published (done)
 
