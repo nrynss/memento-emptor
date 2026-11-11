@@ -231,7 +231,10 @@ the ledger as `PAYMENT.CAPTURE.COMPLETED` with auto-delivery. Recordings:
   less (`400 INVALID_REQUEST` otherwise); `transaction_details[]` carries
   `transaction_info`, `payer_info`, `cart_info`, `shipping_info` and the other
   reporting blocks. The ledger still reads orders/captures for evidence; the
-  reporting API is arm 2's transaction-listing source (T10.1).
+  reporting API is arm 2's transaction-listing source (T10.1). The committed
+  `token-scopes-us-app.json` is the pre-enablement grant (31 scopes, no
+  reporting scope); the 37-scope grant and the reporting read are recorded in
+  `bench/round2/arm2/README.md` and its recordings.
 
 ## 6. Agent Toolkit / MCP server vs plain REST
 
@@ -280,8 +283,10 @@ placeholders that keep the shape:
 | `WEBHOOK-EVENT-ID-1`, `-2` | webhook event ids (first app) |
 | `WEBHOOK-EVENT-US-1` | webhook event id (replacement app, refund) |
 | `WEBHOOK-EVENT-DISPUTE-1`, `WEBHOOK-EVENT-CAP3-1` | dispute-created and capture event ids |
-| `BUYER-EMAIL-REDACTED`, `BUYER-NAME-REDACTED` | shopper account email and name on the dispute, order and capture reads |
+| `BUYER-EMAIL-REDACTED`, `BUYER-NAME-REDACTED` | shopper account email and shipping name on the dispute, order and capture reads |
+| `BUYER-GIVEN-NAME-REDACTED`, `BUYER-SURNAME-REDACTED` | shopper account given name and surname on the capture and order reads |
 | `SHOPPER-ADDRESS-REDACTED`, `SHOPPER-CITY-REDACTED`, `SHOPPER-STATE-REDACTED`, `SHOPPER-POSTAL-REDACTED` | shopper shipping street, city, state and postal code on the order and capture reads |
+| `SHOPPER-COUNTRY-REDACTED` | shopper account country on the first cycle's order and capture reads |
 | `INVOICE-ID-SANDBOX-1` | invoice id and URL fragment |
 | `PRODUCT-ID-SANDBOX-1` | catalog product id |
 | `ITEM-ID-REDACTED`, `TEMPLATE-ID-REDACTED` | invoice item / template ids |
@@ -292,6 +297,17 @@ placeholders that keep the shape:
 | `WEBHOOK-SITE-UUID-REDACTED`, `DELIVERY-UUID-REDACTED`, `TRANSMISSION-ID-REDACTED`, `TRANSMISSION-SIG-REDACTED` | ephemeral capture URL, delivery and signature values |
 | `DEBUG-ID-REDACTED` | PayPal debug ids |
 | `CAPTURE-ID-NONEXISTENT-PLACEHOLDER` | the fake capture id in the refund probe |
+
+The replacement app's captures 2 and 3 recorded the sandbox's own default US
+address and persona; the street, city, state, postal code and given name and
+surname are redacted like the rest, and `country_code` stays `US` so the
+replacement app's US-home evidence remains visible. The first cycle's shopper
+country was the one real account detail this directory held, and it is
+redacted. The two resend recordings carry the HTTP status as a `status` field
+(`202`), so every file here parses as JSON. The later delivery recordings keep
+their real `paypal-transmission-id` and signature: a signature is not a
+secret, and one over a body whose ids are redacted can never verify, so the
+placeholder rows above describe the invoice-sent recording only.
 
 Keys never entered any recording: the client id/secret travelled only in
 Authorization headers, and a filename scan for both values returns nothing.

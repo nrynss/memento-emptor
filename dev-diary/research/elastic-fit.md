@@ -127,6 +127,18 @@ write is a whole-document `PUT` to `_id = txn_hash` with
 | replay older webhook | A | reason_classified (v3) | 409 conflict | — | 3 | 1 |
 | strict `external`, equal version | C | kept | 409 conflict | — | 3 | 1 |
 
+The table's per-step state comes from the `GET` reads (one after each
+accepted write) and the `_version` from each write's response. One quirk in
+the committed recording: `states.json`'s `steps[].request` bodies for
+purchases A, B and C all show that purchase's **final** row, because the
+harness handed the same dict to the recorder and then mutated it for the next
+state. `steps[].params` (the version) and `reads[].get._source` carry the
+per-step truth; `harness.py` now copies the body so a re-run records each
+state's own body. The replay test that reads this fixture takes the first
+`steps[].request` whose `purchase_state` is `contested` — in the committed
+file that is the A purchase's final row — and checks its field set against the
+mapping.
+
 The contested row after the last write; its category and direction were
 corrected in place, it stayed settled, and it is still one document:
 
@@ -424,7 +436,12 @@ provided):
   supplies the mode and settings.
 - Write one row per purchase to `_id = sha256("txn|" + transaction id)`, whole-document,
   `version = event_seq`, `version_type=external_gte`. Treat a `409` as an older
-  event that must not win; a same-version write is a harmless retry.
+  event that must not win; a same-version write is a harmless retry. (T7.1
+  superseded the version value: the shipped row's version is the purchase
+  state's rank with the event time breaking ties inside it
+  (`internal/domain/fitrow.go`, `FitRow.Version`), and `event_seq` is not a
+  field. The external-version rule, one row per purchase and the `409`
+  meaning are unchanged.)
 - Set `settled` and `settled_kind` in the writer: settled on a classified
   return reason, fit feedback, or kept past the window. A refund with no reason
   and a purchase still inside the window stay `false`.
@@ -432,7 +449,11 @@ provided):
   denominator never uses it.
 - The line-and-size query in check 3 is `product_fit`'s source and, with the
   `reason_category` terms, the merchant view. Filter the three line fields plus
-  size; the denominator is the `settled` filter's `doc_count`.
+  size; the denominator is the `settled` filter's `doc_count`. The shipped
+  query (`internal/pool`'s `aggregationBody`) is a superset: it adds the
+  fit-classified and per-direction shopper buckets the pooled-status floors
+  read, and a `recent` aggregation over `settled_at` for the window rule. The
+  recorded query is the shape those extend, not the exact body the layer sends.
 - Count distinct shoppers with `cardinality` at the default 3000 up to that
   population; raise it to 40000 past 3000 per line, or move to an exact
   per-shopper row.

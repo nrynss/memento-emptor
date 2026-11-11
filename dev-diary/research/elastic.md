@@ -1,6 +1,18 @@
 # Elastic evidence store (T0.6)
 
-Deployment under test: Elastic Serverless, engine 9.7.0 (`You Know, for Search`).
+> Current direction (pointer, not a re-verdict): the demo runs the native
+> `.jina-embeddings-v3` embedder since the P2 live twins adopted it (T0.6b's
+> "Later direction", proved in `PHASE-2-pivot-layer.md` and configured in
+> `deploy/start.sh`). This file's BGE-M3-through-OpenRouter contract is the
+> measured fallback and the evidence T0.6b compared against; a later task
+> adopts the native contract and re-verifies calibration on the demo shopper.
+> T0.12 also found the deployment is an Elasticsearch **Vector Database**
+> project, not a general Serverless project; its mode and billing limits are
+> in `research/elastic-fit.md` check 8.
+
+Deployment under test: the Elastic Cloud project, engine 9.7.0 (`You Know,
+for Search`). T0.6 knew it as a Serverless deployment; T0.12 identified the
+project type.
 Every request below sent the key as `Authorization: ApiKey` with the value read
 from the environment (`LAMBO_ES_API_KEY`, via `source tools/env.sh`). No value
 appears here or in `testdata/elastic/`; the host is written as `<deployment>`,
@@ -9,8 +21,9 @@ the cluster and licence ids as placeholders (see `deployment.json`).
 ## Hybrid search: yes on both legs
 
 Eight documents in a throwaway index (created, queried, deleted): four product
-texts in one brand line (three returned for fit, one kept), two distractors,
-two bare reason phrases (`hybrid-documents.json`).
+texts in one brand line (three returned for fit and one roomier cut, the
+new-SKU candidate), two distractors, two bare reason phrases
+(`hybrid-documents.json`).
 
 - BM25 for a new-SKU-shaped text finds the returned items: the new candidate
   and the three returned shirts rank above both distractors.

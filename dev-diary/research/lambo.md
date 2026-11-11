@@ -204,7 +204,7 @@ seller, never to sizing. Transcript in `02-correction-dispute.jsonl`.
 
 | Ledger shows | Lambo reads | Evidence |
 |---|---|---|
-| Claimed | `status: None`, `blast_radius: 0`, `warnings: null`, admission `dependent_interactions 0.0 < 2.0` | `api-inspect-assertion.json` |
+| Claimed | `status: None`, `blast_radius: 0`, no `warnings` key, admission `dependent_interactions 0.0 < 2.0` | `api-inspect-assertion.json` |
 | Building | `status: Candidate` (not reached here; the admission block names the failing gate the same way) | inspect text `None -> Candidate refused` lines |
 | Earned | `status: Venerable`, `gate_progress` with all Stage-2 bars met, `admission.next: Canonical, eligible: false` | `api-inspect-belief.json` |
 | Out of true | same as Earned plus `warnings: ["⚠ Contradicted ..."]` | `api-inspect-belief.json` |

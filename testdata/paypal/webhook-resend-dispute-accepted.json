@@ -1,5 +1,5 @@
-HTTP 202
 {
+  "status": 202,
   "id": "WEBHOOK-EVENT-DISPUTE-1",
   "event_type": "CUSTOMER.DISPUTE.CREATED",
   "note": "Resend accepted. The event had already auto-delivered within a minute of creation, and no duplicate delivery was observed in the window watched; redelivery itself is evidenced by the earlier invoice-sent and refunded resends."

@@ -17,6 +17,7 @@ to the rows it describes.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import fnmatch
@@ -105,7 +106,10 @@ def call(method: str, path: str, body=None, params=None, raw=False, timeout=120)
         "method": method,
         "path": path,
         "params": params or {},
-        "request": body,
+        # Deep-copied: check 2 mutates one row dict through its states, and a
+        # recorded body that shares it would show the purchase's final row at
+        # every step.
+        "request": copy.deepcopy(body),
         "status": response.status_code,
     }
     if raw:

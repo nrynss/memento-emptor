@@ -1,4 +1,6 @@
 # T0.3 seeded-promotion run: local-only (SQLite + fixture embedder, no network).
+# `path` is the run directory the task used; a replay must create its own
+# directory and change this line, because nothing else here depends on the path.
 [store]
 kind = "sqlite"
 path = "/tmp/opencode/t03/lambo.db"

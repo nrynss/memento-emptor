@@ -280,7 +280,7 @@ Assumptions this spec rests on, checked before anything is built on them.
 - The seeded history reaches Venerable, and the contradiction warning shows on it (see the Lambo section).
 - How the PayPal sandbox produces a refund webhook and a dispute with a reason code.
 - Astropods' input forms, traces and evals behave as the concept describes, on the free tier.
-- Elastic stays available through 21 Dec (a 14-day trial plus a 30-day extension only just reaches it).
+- ~~Elastic stays available through 21 Dec (a 14-day trial plus a 30-day extension only just reaches it).~~ Proved differently: the deployment is not a trial — it is a Vector Database project with an active licence, so there is no clock to extend (T0.6, T0.12). Staying available is a billing question for the console, not a trial window.
 - Whether Channel3's data says enough about a product's cut to match a new SKU to the returned ones.
 - ~~Whether one Lambo `serve` can write to many shopper sessions, or needs one writer per session. The deploy today runs one writer for one session (`LAMBO_SESSION`, default `demo-shopper`). If Lambo can't multiplex, that's a Lambo issue for the user to file, not a workaround here. (T0.11)~~ Proved: one `lambo serve --transport http` hub hosts one writer per session and many sessions, attaching on demand (T0.11); the deploy runs that hub (T8.1).
 - The fit index on the Elastic deployment: per-purchase rows updated in place, settled-only aggregations by product line, size, reason category and direction, distinct-shopper counts, and its speed inside recall. (T0.12)

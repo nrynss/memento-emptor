@@ -70,8 +70,9 @@ per the docs and is not live on these shirts. Where variants exist, the shape
 works as documented:
 
 - Puma `VWvTIPF` detail returns `variants.options: [{name: "Size", values:
-  [{label, exists, available, thumbnail_url, product_id}]}]`; sizes 7.5–10.5
-  exist and are `InStock`, the rest have `exists: false`.
+  [{label, exists, available, thumbnail_url, product_id}]}]`; sizes 7.5, 9,
+  9.5, 10 and 10.5 exist and are `InStock`, while 8, 8.5 and the rest have
+  `exists: false` — the recorded order is 4 to 14, not a contiguous run.
 - `GET /v1/products/VWvTIPF?option_Size=10` echoes
   `variants.selected: [{name: "Size", label: "10"}]` and narrows `offers` to
   that selection (1 offer).

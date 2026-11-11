@@ -66,7 +66,8 @@ for the demo chat. No model key is needed if it uses the gateway.
 
 ## Pause for typed input and resume
 
-Partly confirmed; the live two-turn exchange is still to run (see the gap).
+Partly confirmed at the time of the first pass; the live exchange
+has since run (see "Gap closed: the live conversation" below).
 
 - Proven live: `ast agent pause` moves the deployment to `Stopped`
   ("Deployment is paused"); `ast agent resume` restarts it (`pending` while
@@ -96,7 +97,8 @@ block-until-allowed connection gate. No separate "forms" primitive was found.
 
 ## Feedback arriving with trace context
 
-Shape confirmed in the CLI; live write still to run (needs a trace).
+Shape confirmed in the CLI; the live write ran with the close-out turns
+(`13-eval-run-review.txt`).
 
 - `ast eval review --trace-id <id> --set key=value` "saves your values for a
   trace's evaluators as its human review", replacing any earlier review;
@@ -113,7 +115,8 @@ items. The write itself is one CLI call per trace once the demo turns exist.
 
 ## OpenTelemetry traces showing tool calls in order
 
-Platform side confirmed; a live trace with tool spans still to run.
+Platform side confirmed; a live trace with tool spans has since run
+(`12-traces.txt`).
 
 - The probe deployment runs two workloads: `agent` and `collector`. The
   platform injects `OTEL_EXPORTER_OTLP_ENDPOINT` (deployed environments only)
@@ -130,7 +133,8 @@ Platform side confirmed; a live trace with tool spans still to run.
   and compute (`0.000 CU-hours`). Empty states: `10-trace-usage-empty.txt`.
 - The probe agent carries one demo tool (`lookup_return`: order id in, item
   plus reason out), so the first real turn will show whether tool spans land in
-  order. Not yet run, for the same SSO reason as above.
+  order. Since run through the messaging proxy (see the gap below): the spans
+  land in order, with the tool between the two generations.
 
 Meaning for the build: "the agent recalled first, honoured the correction, and
 never skipped approval" is evidenced by per-deployment OTel traces the
@@ -379,3 +383,6 @@ Usage spend `$0.35` of the `$10.00` signup credit at the T3.7 close-out
 and two model turns at $0.0056 + $0.0057). Billed spend `$0.00`, credit
 left `$9.65`. The T3.7 probe-period delta was $0.06, inside its $0.25
 budget. Every live step re-checked billing; nothing spent past its guard.
+The later public-probe verification (below) read usage `$0.66` after one
+more $0.0057 turn, so that is the latest number; the `$0.35` above is the
+T3.7 close-out reading, not the file's final one.

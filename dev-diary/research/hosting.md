@@ -1,5 +1,12 @@
 # Hosting on Render (T0.9)
 
+> Current deploy (pointer, not a re-verdict): the service runs as a **Docker**
+> image, not the `runtime: go` shape in the provisioning call below; the
+> deviation and its reason are recorded at the top of `deploy/Dockerfile`. The
+> plan, region, 1 GB disk and $7.25/month are unchanged. A second paid web
+> service for the merchant view (T9.3d, `deploy/merchant/render.yaml`) brings
+> the combined run-rate to $14.25/month, still against the same credit.
+
 Decision (user, confirmed before this task): everything on Render. Lambo runs
 there too, beside the service, on a persistent disk. This file records what
 that costs against the credit, the endpoint shape PayPal delivers to, and

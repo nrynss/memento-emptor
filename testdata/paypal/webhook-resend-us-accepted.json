@@ -1,5 +1,5 @@
-HTTP 202
 {
+ "status": 202,
  "id": "WEBHOOK-EVENT-US-1",
  "event_type": "PAYMENT.CAPTURE.REFUNDED",
  "summary": "A $ 34.0 USD capture payment was refunded"

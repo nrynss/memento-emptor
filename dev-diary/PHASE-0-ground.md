@@ -239,9 +239,11 @@ status:     done
 
 **Notes.** Research in `research/astropods.md`, recordings in
 `testdata/astropods/`. Vault, pause/resume, eval activation, and the deploy
-shape are proven live with `$0.00` spent. One step left for the orchestrator:
-a 3-turn chat with the running probe to evidence traces, tool order, and
-feedback; the file names both ways to close it.
+shape are proven live; the first pass spent `$0.00`. The 3-turn chat with the
+running probe ran later as the close-out: traces, tool order and feedback are
+recorded in `testdata/astropods/11-chat-turns.txt` to `14-vault-clean.txt`,
+and that close-out cost $0.02. A later public-reachability probe (T3.7) cost
+$0.06 more and is recorded in the same file and the handoff log.
 On the free tier, confirm the features the concept relies on, which so far come only from the brief: pause for typed input and resume; feedback that arrives with trace context; OpenTelemetry traces showing tool calls in order; evaluators over those traces; a secrets vault; calling an external MCP server. Record which language the agent is written in and how it deploys.
 
 If a feature is missing, record what the reference agent would do instead, and the orchestrator asks the user.
