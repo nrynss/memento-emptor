@@ -166,7 +166,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 7 | In progress (T4.5, T4.6, T4.7) |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
-| P7 | 6 / 7 | In progress (T7.7) |
+| P7 | 7 / 7 | Done |
 | P8 | 19 / 22 | In progress (T8.5i, T8.5j, T8.5k) |
 | P9 | 16 / 21 | In progress (T9.7, T9.9, T9.11, T9.13, T9.14) |
 | P10 | 3 / 6 | In progress |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T7.7: The round-1 wire shape (done, P7 closed)
+
+**What exists.** Round 1 stays frozen history: the drivers are untouched, and the reason is recorded in `bench/README.md` (published output every count is read from; changing commands revises future runs, never history; no gate or freeze row covers a run file), at `renderMemoryBlock` in all three drivers, and in the T5.8/T5.9 notes. `PHASE-2-layer.md`'s stale encode-boundary sentence now states the walk as what T2.5 built and names T7.6 as its removal.
+
+**What surprised.** Four committed round-1 files carry a subject, not two: the t58 noisy pair records it inside prompt/arm_memory_response, and the t59 pair also writes it structurally in the arm-3 pre/post recall blocks. The uppercase grade block has a different cause and does not move on a re-run.
+
+**The next agent should not have to work out.** A re-run's only shape difference is the subject key casing; the grade block stays uppercase because the grader's own types are untagged.
 
 ### T9.12: The public shopper page is guarded (done)
 
@@ -205,7 +213,7 @@ Newest first. What exists, what surprised, and what the next agent must not have
 
 **What exists.** `domain.Subject` carries `json:"kind"`, `json:"id"`, `json:"name"`; both rename workarounds are deleted (the server's encode walk and the fakes' normalization), and `TestExamplesMarshalBackToSchema` now validates marshaled output with no forgiveness. `TestSubjectSerializesAsTheContract` pins the three keys. No fixture changed: every `testdata/api` example marshals back deep-equal to its file, verified with a throwaway check over all 33. Mutation: stripping the tags fails the domain pin, seven contract examples, the served-examples test and the replay comparison.
 
-**What surprised.** A third, undeclared reliance existed: `bench/runs/cmd/t55|t58|t59` marshal contract values directly, so two committed round-1 files (`t59-a3-noisy-large.json`, `t59-a3-noisy-small.json`) carry `Kind`/`ID`/`Name`. They are not in the freeze manifest and nothing reads them, so nothing broke; T7.7 owns the decision.
+**What surprised.** A third, undeclared reliance existed: `bench/runs/cmd/t55|t58|t59` marshal contract values directly, so four committed round-1 files (the t58 noisy pair and the t59 noisy pair) carry `Kind`/`ID`/`Name`. They are not in the freeze manifest and nothing reads them, so nothing broke; T7.7 owns the decision.
 
 **The next agent should not have to work out.** Decoding was never broken (encoding/json matches field names case-insensitively), so old documents still load. T7.7 must state the decision where the commands are documented and may amend `PHASE-2-layer.md`'s now-false encode-boundary sentence (its `owns` covers both).
 
