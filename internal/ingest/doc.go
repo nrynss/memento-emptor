@@ -12,8 +12,9 @@
 // writes one row per line item. A refund record carries no reason, so a
 // refund row keeps a nil reason and is also filed as a pending question
 // for the shopper to answer; it counts toward nothing meanwhile. A
-// dispute carries the source's reason code, which maps through the frozen
-// dispute table to a reason category on arrival.
+// dispute carries the source's reason code, which the frozen dispute table
+// maps to a reason category on arrival; a code the table does not name, or
+// no code at all, keeps no category and counts toward nothing.
 //
 // Each delivery stands alone: a refund read needs only its order and
 // refund reads, never the capture delivery, so a refund that arrives
@@ -23,8 +24,7 @@
 // A delivery that touches a purchase also writes that purchase's fit row
 // through a FitRecorder, from the same event: a capture creates the row
 // and a refund marks it returned. A dispute writes no fit row, because it
-// says the item did not arrive, which is about the seller and not how the
-// product fits.
+// is about the seller and not how the product fits.
 //
 // Verification itself happens before a delivery changes anything.
 // HandleDelivery takes the transport's raw bytes, parses the event id so
