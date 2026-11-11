@@ -498,11 +498,25 @@ requires:   [T9.7, T9.9]
 fixture-ok: yes
 size:       XS · mid
 owns:       demo/drive.py, demo/run.py, agent/second/drive.py
-status:     claimed:t911-org-scrub
+status:     in-review
 ```
 The P3 review found the Astropods org id committed in `demo/drive.py` and `agent/second/drive.py` as a `secret-tool` attribute. It is an identifier, not a credential, but the diary's own rule excludes account detail and the scrub rule lists user ids as placeholders. Replace it with a placeholder and read the org from the environment or the CLI's own config.
 
 **Done when:** neither driver carries the org id; both read it from the environment or the CLI; a run still works; the gate passes.
+
+**Notes (in-review).** The org id is gone from all three drivers (`demo/drive.py`, `demo/run.py`, `agent/second/drive.py`), which carried it in the `secret-tool` username. Each gained one `astro_org()` helper: `ASTRO_ORG` when set, otherwise the current profile's single org from the ast CLI's own config (`~/.ast/credentials.json`, `profiles[current_profile].org_tokens`), and a stop naming both sources when there is no file, no org, unreadable JSON, or more than one logged-in org. There is no default and no silent pick; the keyring lookup is now `default_<org>_access_token` with the org from that helper, and a keyring miss is a clear message rather than a `CalledProcessError`. `demo/drive.py` and `agent/second/drive.py` resolve it at import, before billing or any request; `demo/run.py` resolves it inside `astro_token()`, so `--summary-only` and its free layer reads still need no Astro login. Both drivers' `main()` gained the `if __name__ == "__main__":` guard `demo/run.py` already had, which is what lets the resolution be exercised without a call.
+
+Proof, no live call and $0: with the real CLI config each driver resolves the org and reads a non-empty token from the keyring (no network); the same three fail against an empty `HOME` with `drive: no org: set ASTRO_ORG, or log in with the ast CLI (~/.ast/credentials.json: No such file or directory)` and exit 1 before billing or any request; a two-org config fails naming `ASTRO_ORG`, a malformed config fails the same way, `ASTRO_ORG` alone resolves with no config present, and an `ASTRO_ORG` with no keyring entry fails with the keyring message. `grep` for the id over the three files finds nothing.
+
+Three things the next agent should not have to rediscover:
+
+- The CLI's config key form is `org_…`, and the keyring username is `default_<that key>_access_token`. `ASTRO_ORG` takes that same form; a bare id builds a username no keyring entry matches and surfaces as the keyring message, not as a bad org.
+- `bench/pilot/cmd/drive/main.go` reads the same config file, but takes an arbitrary key from the map. These helpers sort the keys and refuse more than one org, so a second logged-in org is a loud stop rather than a coin toss; nothing else reads the config.
+- `astro_org` is repeated in the three scripts on purpose: they are standalone scripts with no shared module, and each `owns` line is three files. A fourth caller should copy the helper; a shared module is a new task, not a quiet import.
+
+The operator-facing documentation is each script's docstring plus the comment over the constant, because `demo/README.md` is outside this task's `owns`. If the README's environment list should name `ASTRO_ORG`, that is a one-line follow-up in a `demo/` task.
+
+Finding (Low), owner: a proposed task for the orchestrator to number (`owns: tools/check.sh`). The gate has no step over the Python the demo runs, so a syntax error in these three drivers reaches the run rather than the gate; `python3 -m py_compile` over `demo/` and `agent/*/drive.py` would close it, on the `node`/`python3` the gate already requires.
 
 ---
 

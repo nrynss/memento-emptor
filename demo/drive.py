@@ -6,6 +6,11 @@ at astropods.com, authenticated with the CLI's own login held in process
 memory and never printed or stored. The token travels only in the
 Authorization header; SHOPPER/merchant values never enter this file.
 
+The org the token belongs to is account detail: the driver reads it from the
+ast CLI's own config (`~/.ast/credentials.json`), or from ASTRO_ORG when more
+than one org is logged in, and never writes it here. An org that cannot be
+resolved stops the driver with a message before any call is made.
+
 Usage:
   OUT=demo/out python3 demo/drive.py create
   OUT=demo/out python3 demo/drive.py send <conv-id> <text>
@@ -29,6 +34,11 @@ UA = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
 
 OUT = os.environ.get("OUT", "demo/out")
 
+# The ast CLI's own login file, and the org it is logged in to. The org id is
+# account detail, so it is read from here or from ASTRO_ORG, never written in
+# this file.
+ASTRO_CONFIG = "~/.ast/credentials.json"
+
 
 def log(*parts):
     print("[drive]", *parts, flush=True, file=sys.stderr)
@@ -37,11 +47,49 @@ def log(*parts):
         f.write(" ".join(str(p) for p in parts) + "\n")
 
 
+def astro_org():
+    """The Astropods org the CLI is logged in to, from ASTRO_ORG or its config.
+
+    ASTRO_ORG names the org when more than one is logged in; otherwise the
+    current profile's single org is the answer. There is no default: an org
+    that cannot be resolved stops the driver before it makes a call.
+    """
+    named = os.environ.get("ASTRO_ORG", "").strip()
+    if named:
+        return named
+    try:
+        with open(os.path.expanduser(ASTRO_CONFIG)) as f:
+            config = json.load(f)
+    except OSError as e:
+        raise SystemExit(f"drive: no org: set ASTRO_ORG, or log in with the ast CLI "
+                         f"({ASTRO_CONFIG}: {e.strerror})")
+    except ValueError:
+        raise SystemExit(f"drive: no org: {ASTRO_CONFIG} is not JSON; set ASTRO_ORG")
+    profiles = config.get("profiles") if isinstance(config, dict) else None
+    current = config.get("current_profile") if isinstance(config, dict) else None
+    profile = profiles.get(current or "") if isinstance(profiles, dict) else None
+    tokens = profile.get("org_tokens") if isinstance(profile, dict) else None
+    orgs = sorted(tokens) if isinstance(tokens, dict) else []
+    if not orgs:
+        raise SystemExit(f"drive: no org: the ast CLI profile in {ASTRO_CONFIG} holds none; "
+                         "set ASTRO_ORG")
+    if len(orgs) > 1:
+        raise SystemExit(f"drive: no org: the ast CLI profile in {ASTRO_CONFIG} holds "
+                         f"{len(orgs)}; set ASTRO_ORG to name one")
+    return orgs[0]
+
+
+ORG = astro_org()
+
+
 def token():
     out = subprocess.run(
         ["secret-tool", "lookup", "service", "astro-cli",
-         "username", "default_org_01M46R4F87ZN49Y0SAKHQE8HP8_access_token"],
-        capture_output=True, check=True)
+         "username", f"default_{ORG}_access_token"],
+        capture_output=True)
+    if out.returncode != 0 or not out.stdout.strip():
+        raise SystemExit("drive: no token in the keyring for the resolved org "
+                         f"(ASTRO_ORG or {ASTRO_CONFIG}); log in with the ast CLI")
     return out.stdout.decode().strip()
 
 
@@ -101,4 +149,5 @@ def main():
         print(b[:2000])
 
 
-main()
+if __name__ == "__main__":
+    main()

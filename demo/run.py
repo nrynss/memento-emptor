@@ -16,6 +16,10 @@ Environment:
                               it never lives in the repository)
   MEMENTO_LAYER_URL           default https://memento-emptor.onrender.com
   MEMENTO_MERCHANT_URL        default https://memento-merchant.onrender.com
+  ASTRO_ORG                   the org key the messaging token belongs to;
+                              default: the ast CLI profile's own org, read
+                              from ~/.ast/credentials.json. The id is
+                              account detail, so it is never in this file.
   OUT                         default demo/out
 
 Usage:
@@ -237,14 +241,53 @@ def messaging_call(method, path, body=None):
 
 _ASTRO_TOKEN = None
 
+# The ast CLI's own login file, and the org it is logged in to: account
+# detail, read here and never written in this file.
+ASTRO_CONFIG = "~/.ast/credentials.json"
+
+
+def astro_org():
+    """The Astropods org the CLI is logged in to, from ASTRO_ORG or its config.
+
+    ASTRO_ORG names the org when more than one is logged in; otherwise the
+    current profile's single org is the answer. There is no default: an org
+    that cannot be resolved stops the run before it makes a messaging call.
+    """
+    named = os.environ.get("ASTRO_ORG", "").strip()
+    if named:
+        return named
+    try:
+        with open(os.path.expanduser(ASTRO_CONFIG)) as f:
+            config = json.load(f)
+    except OSError as e:
+        raise SystemExit(f"[t97] no org: set ASTRO_ORG, or log in with the ast CLI "
+                         f"({ASTRO_CONFIG}: {e.strerror})")
+    except ValueError:
+        raise SystemExit(f"[t97] no org: {ASTRO_CONFIG} is not JSON; set ASTRO_ORG")
+    profiles = config.get("profiles") if isinstance(config, dict) else None
+    current = config.get("current_profile") if isinstance(config, dict) else None
+    profile = profiles.get(current or "") if isinstance(profiles, dict) else None
+    tokens = profile.get("org_tokens") if isinstance(profile, dict) else None
+    orgs = sorted(tokens) if isinstance(tokens, dict) else []
+    if not orgs:
+        raise SystemExit(f"[t97] no org: the ast CLI profile in {ASTRO_CONFIG} holds none; "
+                         "set ASTRO_ORG")
+    if len(orgs) > 1:
+        raise SystemExit(f"[t97] no org: the ast CLI profile in {ASTRO_CONFIG} holds "
+                         f"{len(orgs)}; set ASTRO_ORG to name one")
+    return orgs[0]
+
 
 def astro_token():
     global _ASTRO_TOKEN
     if _ASTRO_TOKEN is None:
         out = subprocess.run(
             ["secret-tool", "lookup", "service", "astro-cli",
-             "username", "default_org_01M46R4F87ZN49Y0SAKHQE8HP8_access_token"],
-            capture_output=True, check=True)
+             "username", f"default_{astro_org()}_access_token"],
+            capture_output=True)
+        if out.returncode != 0 or not out.stdout.strip():
+            raise SystemExit("[t97] no token in the keyring for the resolved org "
+                             f"(ASTRO_ORG or {ASTRO_CONFIG}); log in with the ast CLI")
         _ASTRO_TOKEN = out.stdout.decode().strip()
     return _ASTRO_TOKEN
 
