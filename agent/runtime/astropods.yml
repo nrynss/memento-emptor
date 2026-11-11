@@ -8,6 +8,18 @@ agent:
     dockerfile: Dockerfile
   interfaces:
     messaging: true
+  # The served layer's edge. The key is a secret input: it is never written
+  # in this file or the image, and reaches the container from the platform's
+  # secret store at deploy time.
+  inputs:
+    - name: MEMENTO_AGENT_KEY
+      datatype: string
+      secret: true
+      description: Agent key the Memento layer's edge authenticates.
+    - name: MEMENTO_LAYER_URL
+      datatype: string
+      description: Base URL of the layer's edge.
+      default: https://memento-emptor.onrender.com
 
 models:
   # Astro AI Gateway — managed model access (injects ASTRO_GATEWAY_URL +
