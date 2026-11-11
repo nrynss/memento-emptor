@@ -132,11 +132,23 @@ requires:   [T6.3]
 fixture-ok: yes
 size:       S · mid
 owns:       docs-site/
-status:     claimed:t68-docs
+status:     in-review
 ```
 An Astro Starlight site publishing the builder documentation: what the layer is, the interface reference from `docs/interface.md`, the architecture from `docs/architecture.md`, the submission summary, and links to the demo, ledger, and repo. Separate from the ledger web app; static build.
 
 **Done when:** the site builds statically; every page a judge or builder needs is reachable from its front page.
+
+**Notes (worker, T6.8, staged).** `docs-site/` is an Astro Starlight site with its own pinned `package.json` and `package-lock.json`. `npm ci && npm run build` inside it builds eight static pages into `docs-site/dist/`, which is git-ignored; the build has no server and makes no network request beyond the package install. The front page links the six documentation pages plus the live demo, the ledger, the merchant app and the repository. `interface.md` and `architecture.md` are not maintained here: `scripts/sync-docs.mjs` copies `docs/interface.md` and `docs/architecture.md` at the start of every build, strips each source H1 so Starlight's title is the only page heading, and adds a generated-page note; the copies are git-ignored, so `docs/` stays the only source. The other pages are written here from `product.md` (`what-the-layer-is`), `demo/README.md` (`demo-and-evidence`), and `bench/README.md` plus `product.md` (`comparison`). `tools/check.sh` is untouched (outside `owns`) and stays green with the site present.
+
+Three parts are deliberately incomplete, and the task is `in-review` rather than `done` for that reason:
+
+- `submission-summary.md` is a labelled placeholder naming T6.3. It contains no submission text.
+- `comparison.md` reports round 1 and marks round 2 as not measured; it carries round 2's arms and cases from `product.md` and no counts.
+- The front page links the repository and the hosted URLs named in `demo/README.md` and `go.mod`, but the repository is still private (T6.5) and no docs-site deployment exists; neither is claimed as live.
+
+**Resume when T6.3 lands.** (1) Fill `docs-site/src/content/docs/submission-summary.md` from the final `README.md` and `docs/submission.md`: the description, each tool and how it was used, what changed in Lambo, what is simulated and seeded, and the "where it could go next" paragraph. Replace the placeholder and its caution block; invent nothing. (2) Re-check every page against the final README: the front page and `what-the-layer-is` must match its description and setup claims, and `demo-and-evidence` and `comparison` must match its final numbers and limits. Fix a divergence at the source, never by pasting a second copy into the site. (3) Once T6.5 makes the repository public, check the front page's repository link resolves; once the docs site has a deployment, set Astro's `site` option to its URL (this also enables the sitemap Starlight currently skips with a warning), and record the URL here and on the front page. (4) When T10.5 publishes round 2, replace `comparison.md`'s "Round 2: pending" section with the measured counts, the freeze and the same constructed-case limits; do not fold them into round 1's figures. (5) Add T6.4's video link to the submission summary when it exists.
+
+**Finding.** The repository has no root `README.md` and no `docs/submission.md` yet (T6.3 has not run), so this brief's "the repository README (currently the pre-submission one)" names a file that does not exist. Nothing in this task depends on its text: the placeholder names T6.3, and the resume steps above assume both files arrive with it.
 
 ## Exit Criteria
 

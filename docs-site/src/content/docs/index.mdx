@@ -1,0 +1,93 @@
+---
+title: Memento Emptor
+description: "Builder documentation for a memory layer that turns classified payment outcomes into earned beliefs for shopping agents."
+template: splash
+hero:
+  tagline: PayPal tells your agent what happened to the money. Memento Emptor tells it why, and what every other shopper's returns already taught.
+  actions:
+    - text: What the layer is
+      link: /what-the-layer-is/
+      icon: right-arrow
+    - text: Interface reference
+      link: /interface/
+      variant: secondary
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Memento Emptor is a memory layer for shopping agents, not an agent. Your agent
+plugs in over MCP: evidence arrives from the payment side without the agent
+doing anything, the agent asks what applies before it recommends, and it reports
+what the shopper says. The layer never moves money.
+
+The two levels of memory are the product. It keeps what this shopper's own
+evidence earned, and it pools classified outcomes across shoppers so a product
+can run off-size before any one shopper has a history with it. A belief at
+either level has to be earned from a reason that matches the evidence, and the
+shopper stays in charge of every decision.
+
+## Documentation
+
+<CardGrid>
+  <LinkCard
+    title="What the layer is"
+    href="/what-the-layer-is/"
+    description="The problem, the evidence model, the two levels of memory, precedence, and the limits to know before adopting it."
+  />
+  <LinkCard
+    title="Interface reference"
+    href="/interface/"
+    description="The eleven MCP tools, the turn pattern, the precedence order, and every request and response shape."
+  />
+  <LinkCard
+    title="Architecture"
+    href="/architecture/"
+    description="How a payment event becomes evidence and then a belief, where each store lives, and what the layer depends on."
+  />
+  <LinkCard
+    title="The demo and evidence"
+    href="/demo-and-evidence/"
+    description="What the reference demo runs, what is live, what is replayed, and what the run record does not prove."
+  />
+  <LinkCard
+    title="The comparison"
+    href="/comparison/"
+    description="What the first round measured, honestly labelled, and the second round's arms and cases while its results are pending."
+  />
+  <LinkCard
+    title="Submission summary"
+    href="/submission-summary/"
+    description="Placeholder: the submission text and final links are not written yet."
+  />
+</CardGrid>
+
+## The running project
+
+<CardGrid>
+  <LinkCard
+    title="Live demo"
+    href="https://memento-emptor.onrender.com"
+    description="The hosted layer and reference agent on PayPal's sandbox. Purchases are simulated."
+  />
+  <LinkCard
+    title="Evidence ledger"
+    href="https://memento-emptor.onrender.com/ledger"
+    description="What the layer believes, the evidence behind each belief, and every correction. Seeded rows are marked."
+  />
+  <LinkCard
+    title="Merchant app"
+    href="https://memento-merchant.onrender.com"
+    description="The seller's read-only view: why a product line comes back, by reason and size. No shopper rows."
+  />
+  <LinkCard
+    title="Repository"
+    href="https://github.com/nrynss/memento-emptor"
+    description="The layer, the reference agent, the ledger, the merchant app, the comparison harness, and the dev diary."
+  />
+</CardGrid>
+
+:::caution[Sandbox and seeded history]
+The demo runs against PayPal's sandbox. Purchases are simulated, and the
+payment history the demo starts from is seeded. Every seeded row carries a mark,
+and the ledger shows it.
+:::

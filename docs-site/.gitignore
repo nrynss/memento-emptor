@@ -1,0 +1,9 @@
+# Installed dependencies and the static build output.
+node_modules/
+dist/
+.astro/
+
+# The interface and architecture pages are copied from ../docs by
+# scripts/sync-docs.mjs at build time. The copies are build output, not sources.
+src/content/docs/interface.md
+src/content/docs/architecture.md
