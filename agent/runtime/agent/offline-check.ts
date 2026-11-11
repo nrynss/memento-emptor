@@ -572,7 +572,16 @@ for (const name of admitted) {
 // duplicated write could only come from the model repeating it. The
 // instructions therefore decide, and this pins them.
 
-const instructions = (await Bun.file(join(import.meta.dir, "index.ts")).text()).split("const INSTRUCTIONS")[1] ?? "";
+// The text the model receives is the template body: from the backtick that
+// opens `const INSTRUCTIONS =` to the `;` that closes it. Reading only that
+// span keeps a phrase outside it — a comment, say — from satisfying a check
+// about what the model is told.
+const indexSource = await Bun.file(join(import.meta.dir, "index.ts")).text();
+const instructionMarker = "const INSTRUCTIONS = `";
+const instructionStart = indexSource.indexOf(instructionMarker);
+const instructionBody = instructionStart === -1 ? "" : indexSource.slice(instructionStart + instructionMarker.length);
+const instructionEnd = instructionBody.indexOf("`;");
+const instructions = instructionEnd === -1 ? "" : instructionBody.slice(0, instructionEnd);
 check("the retry rule is in the instructions", /Retries\./.test(instructions));
 check(
   "a read may be tried again",
@@ -867,8 +876,10 @@ check(
   /never name a SKU from memory as the catalog candidate/.test(instructions),
 );
 check(
-  "the instructions allow one search per turn unless the first returns no products",
-  /One search per turn unless the first returns no products/.test(instructions) && /never a third/.test(instructions),
+  "the instructions allow one search per turn, and a second only with the same exclusions",
+  /One search per turn unless the first returns no products/.test(instructions) &&
+    /earns a second, which keeps the same exclude_skus/.test(instructions) &&
+    /never a third/.test(instructions),
 );
 
 // --- The HTTP path: the request the deployment sends, against a local stub ---
