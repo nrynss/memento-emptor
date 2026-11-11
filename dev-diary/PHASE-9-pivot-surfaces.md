@@ -884,11 +884,31 @@ requires:   [T9.17]
 fixture-ok: yes
 size:       XS · mid
 owns:       agent/runtime/
-status:     claimed:t922-sequencing
+status:     in-review
 ```
 T9.20's live turn proved the mechanism but named `tbnrl46`, a SKU the three seeded returns carry: the agent issued `search_catalog` 3 ms after recall started and before recall answered, so it had no returned SKUs to exclude, and its step-2 instruction never asks for sequencing or exclusion (the tool description offers `exclude_skus`; the instruction does not). product.md's step 2 wants a *different* SKU sharing the cut. Change the instruction: recall answers first, then `search_catalog` with `exclude_skus` from the returned rows' `item.sku`, and name only a SKU the search returned.
 
 **Done when:** the instruction sequences recall before the catalog search and passes the returned SKUs as `exclude_skus`; the offline check covers the sequencing rule; the deployment is redeployed from the committed code; the gate passes.
+
+**Notes (in-review).** The reference agent's step-2 instruction now sequences the two calls and excludes the returned SKUs, and five offline checks pin it.
+
+What the live turn showed. T9.20's `demo/evidence/step2-catalog/02-catalog-candidate.json` records `search_catalog` starting 3 ms after `recall_for_purchase` and ending before recall answered, with `candidate.returned_sku: true` — the named SKU is one the three seeded returns carry. Nothing under `agent/runtime/agent/` sequences two tool calls: the model decides when to call, so the instruction is the only lever, and the tool description offered `exclude_skus` without ever saying where its list comes from.
+
+The instruction. Step 2 is now `FIND THE CANDIDATE, AFTER RECALL ANSWERS`: recall's answer comes first, `search_catalog` is never called in the same step as `recall_for_purchase` and never before recall answers, `exclude_skus` is built from the `item.sku` of every evidence item in the beliefs recall served, the no-evidence case passes no `exclude_skus`, and the candidate's line and SKU come from that search — never a SKU recall's own rows carry. Step 1, the tool schemas and every layer call are untouched: the branch changes `agent/runtime/agent/index.ts`, `agent/runtime/agent/offline-check.ts` and this block.
+
+The checks. Five, beside the catalog instruction checks that were already there: the search waits for recall to answer (the renamed header plus "never call search_catalog … before recall answers"), the two calls never run together, `exclude_skus` is built from the rows recall returned (`exclude_skus` and `item.sku` in the text), only a SKU the search returned is named, and the no-rows case passes no exclusion. Offline, `bun agent/runtime/agent/offline-check.ts` is 184 checks (179 before) and `tsc --noEmit` in `agent/runtime` is clean. Mutation-checked, each restored from a byte-for-byte copy with a clean `git status`: deleting the header fails one check, deleting the sequencing sentence fails two, deleting the exclusion sentences fails two, deleting the naming clause fails one. `./tools/check.sh` is green with `npm ci` in `web/` and `merchant/` and `bun install --frozen-lockfile` in `agent/runtime` and `agent/second`.
+
+Not done here, on purpose. The Done-when's redeploy clause is the orchestrator's: this task's brief forbids a live call and any spend, so the deployment still runs the old instruction. The command, from this commit:
+
+```sh
+cd agent/runtime && bun agent/offline-check.ts && ast spec validate && ast push -V private -y && ast agent redeploy --id <deployment-id> --latest --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY --var CHANNEL3_API_KEY=@CHANNEL3_API_KEY --wait
+```
+
+Limit, stated. The sequencing is model behaviour, so one live turn is what proves the model obeys it; the offline check proves the instruction says so and nothing more. A second lever stays unused: `search_catalog`'s `exclude_skus` description still says only "Catalog ids the shopper already returned", without naming recall as their source. If the live turn still searches before recall answers, the next move is that description — or a tool that takes the recall answer — not a longer instruction. `demo/run.py` can also assert the coupling it already records: `catalog.search_start` after the recall tool's `end`.
+
+Surprise. The evidence file this brief cites is not on this branch's base, `d91924b`: T9.20's commit was on `task/t920-review` then, so the live turn was read with `git show` from there. The instruction change is independent of it — the gap it names is in `agent/runtime/`, which T9.20 did not touch. `main` moved while this branch was open: T9.20 and its review landed at `03fe2a8`, changing `demo/` and this document's own T9.20 block and nothing under `agent/runtime/`, so the two merge without overlap and this branch lands after it.
+
+Finding (Low), owner: a proposed T9.23 (`owns: demo/`, `requires: [T9.20]`), for the orchestrator to number. One live step-2 turn after the redeploy above is the only thing that proves the model obeys the sequencing; the turn T9.20 recorded ran the old instruction, and no landed task carries a rerun.
 
 ---
 

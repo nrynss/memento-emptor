@@ -816,6 +816,32 @@ check(
   "the instructions forbid inventing a size",
   /Never state a size the catalog does not carry/.test(instructions),
 );
+// The gap T9.20's live turn showed: the search ran 3 ms after recall started,
+// so it had no returned SKUs to leave out and named one of them. Nothing in
+// the code sequences the two calls, so the instructions decide, and this pins
+// them: recall answers first, its returned SKUs are passed as exclude_skus,
+// and the candidate is a SKU the search itself returned.
+check(
+  "the instructions wait for recall to answer before searching",
+  /FIND THE CANDIDATE, AFTER RECALL ANSWERS/.test(instructions) &&
+    /never call search_catalog[^.]*before recall answers/.test(instructions),
+);
+check(
+  "the instructions never run recall and the search together",
+  instructions.includes("never call search_catalog in the same step as recall_for_purchase"),
+);
+check(
+  "the instructions exclude the SKUs recall returned",
+  instructions.includes("exclude_skus built from the rows recall returned") && instructions.includes("item.sku"),
+);
+check(
+  "the instructions name only a SKU the search returned",
+  instructions.includes("from that search, never a SKU recall's own rows carry"),
+);
+check(
+  "the instructions pass no exclusion when recall served no rows",
+  instructions.includes("When recall returned no evidence rows, pass no exclude_skus"),
+);
 
 // --- The HTTP path: the request the deployment sends, against a local stub ---
 interface Seen {
