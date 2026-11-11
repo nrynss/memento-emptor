@@ -862,7 +862,7 @@ requires:   [T9.17]
 fixture-ok: yes
 size:       XS · mid
 owns:       agent/runtime/
-status:     not-started
+status:     claimed:t922-sequencing
 ```
 T9.20's live turn proved the mechanism but named `tbnrl46`, a SKU the three seeded returns carry: the agent issued `search_catalog` 3 ms after recall started and before recall answered, so it had no returned SKUs to exclude, and its step-2 instruction never asks for sequencing or exclusion (the tool description offers `exclude_skus`; the instruction does not). product.md's step 2 wants a *different* SKU sharing the cut. Change the instruction: recall answers first, then `search_catalog` with `exclude_skus` from the returned rows' `item.sku`, and name only a SKU the search returned.
 
