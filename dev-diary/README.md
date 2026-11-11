@@ -177,6 +177,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
 
+### T9.23: Step 2 re-recorded (in review)
+
+**What exists.** One live turn (trace `ae5d5e49`, $0.1112, three Channel3 credits) proved the sequencing: recall answered 2.6 s before the first search, no overlap. But the reply still named a memory-carried SKU: with the returned SKUs excluded the search came back empty, the model dropped the filter and named `PSW8GeK`, a kept purchase in its own evidence. The turn overran both budgets ($0.10 agent, one credit) and the record says so. `demo/run.py` now records the recall span, every search span and the credit count from the calls, and checks the demo cut; the evidence is `03-catalog-candidate-rerecorded.json`.
+
+**What surprised.** The model obeyed the sequence and defeated the exclusion by retrying without it. Three searches in one turn is a spend trap the driver now counts. Neither the trace nor `ast agent logs` carries tool arguments or answers.
+
+**The next agent should not have to work out.** T9.25 owns the exclusion lever and the empty-answer rule; T9.20 and T9.17 stay in review until a fresh candidate is named. Do not re-run step 2 until T9.25's deployment.
+
 ### T8.5w: Two corrected beliefs for one brand (done)
 
 **What exists.** `assembleRecall` no longer requires every contradicted belief's inline correction to be the single top-level one: each contradicted belief must carry its own inline correction citing it, and the top-level override must be one of them. The High (rival birth + one correction per belief made every recall for that brand fail with `ErrOverrideMissing`) is reproduced in `two_corrections_test.go` and pinned at the assembler boundary in `invariant_test.go`. No JSON shape, schema or fixture changed — `BeliefView.ContradictedBy` was already per belief — only doc comments now say the top-level correction is the newer when two apply. Rule 4 holds: both beliefs stay contradicted on the ledger; a second recall is stable. Review added the citation check, pinned per-belief precedence, and documented the equal-time tie-break (later recorded wins).
