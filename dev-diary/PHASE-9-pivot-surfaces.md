@@ -465,7 +465,7 @@ requires:   [T3.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/frontend/, tools/check.sh
-status:     not-started
+status:     claimed:t912-frontend-guard
 ```
 The P3 review found T3.8's live result has no committed transcript, nothing tests `validateMessages` or the 30-turn cap, and no gate step type-checks `agent/frontend/` (the gate checks `web/` and `merchant/` only), so a future edit there is unguarded. Add the transcript (redacted), tests for message validation and the cap, and a frontend typecheck step to the gate.
 
