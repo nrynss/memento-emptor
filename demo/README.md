@@ -139,8 +139,10 @@ The run's summary carries gaps 1, 3, 4, 5 and 7; gap 2's probe and
 subscription facts are in
 [`04-purchase-blockers.json`](evidence/run-6/04-purchase-blockers.json); gaps
 6, 8, 9 and 10 were read from the traces and the served layer while this
-record was written. Gap 3 is closed by T4.8; its item below records what this
-run saw. None is filled in from a fixture:
+record was written. None is filled in from a fixture. Fixed since this run:
+gaps 3, 5, 6, 8 and 9 are closed in the tree (gap 8 also on the served page
+after its next deploy); gap 7 is covered by T9.22's sequencing rule, proved by
+T9.23's re-record. Gaps 1, 2, 4 and 10 remain open with the owners below.
 
 1. **Step 0's empty shopper** is refused by the edge: the agent key binds
    `shopper_01` only. Until an operator adds the day-one shopper to the key's
@@ -165,39 +167,44 @@ run saw. None is filled in from a fixture:
    and stay labelled as such. Closed by T4.8.
 4. **The seller belief never reaches recall**, and the agent key is refused
    on ledger reads, so no live agent turn can mention the dispute; the live
-   reads prove sizing is untouched. Owner: T9.9 (surface alignment) or a
-   layer recall extension.
+   reads prove sizing is untouched. Owner: T9.24 (a live path for the dispute).
 5. **`record_feedback` is not idempotent per purchase** in the shopper's
    belief: a second feedback for the same purchase appends the same evidence
    again. The seeded arc's one copy plus this run's two feedback calls left
    `ev_51c2d8` three times on `blf_2b9d60` (which lifted it from Claimed to
-   Building). The pool row is idempotent; the belief is not. Owner: T8.5l (feedback idempotency).
+   Building). The pool row is idempotent; the belief is not. Closed by T8.5l
+   (one feedback per purchase).
 6. **A correction can reuse an id after a restart.** The served layer
    restores the standing journal but not the id sequence, so the next mint
    overwrote the restored `corr_000001` during an early attempt (the run's
-   own `corr_000004` is unaffected). Recorded, not worked around. Owner: T8.5m (correction id reuse).
+   own `corr_000004` is unaffected). Recorded, not worked around. Closed by
+   T8.5m (a correction id is never reused).
 7. **The reference agent skipped recall** on the correction turn in one
    attempt and on the recorded feedback turn; recall-first holds on the ask
-   and next-recommendation turns. The traces show it as it happened. Owner:
-   T9.9.
+   and next-recommendation turns. The traces show it as it happened. Closed
+   by T9.9 (the retry rule and step 1 now defer to it) and T9.22 (recall before
+   the catalog search).
 8. **Both deployed apps render their own source comments** as visible text
    above the heading (the `// ...` blocks), and the belief page prints its
    standing-correction empty-state sentence twice. Presentation defects
-   outside this task's `owns`; owner T4.6 for the belief page and the deployed-app redeploy for the comments.
+   outside this task's `owns`. Closed by the P4 header guard and T4.6; the
+   served page shows it after its next deploy.
 9. **`explain_belief` lists a correction twice.** The live answer for
    `blf_8f2c41` carries seven corrections for five ids: `corr_000001` and
    `corr_3b7e52` each appear twice
    ([`02-belief-explained.json`](evidence/run-6/02-belief-explained.json)).
    `restoreStanding` appends the journal's ids to the correction order and
    `LoadSeed` adds the seeded one again, and a reused id is appended a second
-   time; the read does not de-duplicate. Owner: T8.5m (duplicate listing).
+   time; the read does not de-duplicate. Closed by T8.5m (one row per id).
 10. **Step 2 named the returned SKU.** The catalog search is live since
     T9.20 (the turn above), but the reply named `tbnrl46`, the SKU the
     seeded returns carry, so the demo line's new-candidate step is not met by
     that reply. The trace does not record the tool's arguments, but its spans
     and the reply show recall and the search launched together, before recall
     answered, so the search was never given the returned SKUs to exclude.
-    Owner: T9.17 (the agent's step-2 instruction).
+    T9.22 changed the instruction to wait for recall and exclude the returned
+    SKUs; T9.23 owns the redeploy and the re-record, and T9.17 stays in review
+    until that turn names a new candidate.
 
 ## The pre-pivot record
 
