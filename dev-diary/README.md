@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 31 / 35 | In progress (T8.5o, T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
+| P8 | 32 / 35 | In progress (T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5o: Feedback tells the truth about seller verdicts and repeats (done)
+
+**What exists.** `record_feedback` records a fit verdict toward fit, `damaged_or_defective`/`not_arrived` toward seller reliability through the same belief helper `record_reason` uses (never a fit belief and never a fit row), and `unclear`/`changed_mind` toward nothing. A same-verdict repeat answers the recorded id and verdict and writes nothing; a different verdict for a purchase that already holds one is refused with `ErrFeedbackConflict` (400) before anything is minted; a no-count first delivery records its id so resends answer the same id with `accepted: false`. The tool description agents read, both agents' copied description, the frozen request schema's description and `docs/architecture.md` now say so.
+
+**What surprised.** On the parent, a seller delivery created a fit belief and then failed with a kind mismatch, leaving the belief behind; and `feedbackFitRow`'s comment claimed seller verdicts were refused earlier while the switch silently returned. The review also found the seller write dated the belief's last change at the capture time, before the belief existed, and moved it to the feedback time. The no-count marker is in memory like all evidence, so a restart between delivery and resend still answers unknown purchase.
+
+**The next agent should not have to work out.** The conflict check must stay before the mint. Both deployed agents still carry the old fit-only description until the next redeploy, so the seller path is described but not yet live on the deployments.
 
 ### T8.5k: not-as-described reads as damage (done)
 
