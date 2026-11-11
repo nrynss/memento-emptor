@@ -314,7 +314,7 @@ requires:   [T9.3d, T9.3g]
 fixture-ok: no
 size:       XS · mid
 owns:       deploy/merchant/Dockerfile, deploy/README.md
-status:     not-started
+status:     claimed:t93h-merchant-node
 ```
 T9.3g aligned the demo image's frontend build to the pinned Node 26, but `deploy/merchant/Dockerfile` still builds `merchant/` on `node:22-bookworm`. It is a separate image, so the pin drifted independently; align it the same way, prove the merchant image builds and serves `/` and `/healthz`, and record the pin beside the others.
 
