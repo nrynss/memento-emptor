@@ -67,8 +67,8 @@ Review fixes: the corrections rule said the shopper names "a different size than
 requires:   [T9.1, T10.1, T8.5]
 fixture-ok: yes
 size:       M · frontier
-owns:       bench/round2/ (except arm2/ and runs/), seed/round2.go, seed/round2_test.go
-status:     in-review
+owns:       bench/round2/ (except arm2/ and runs/), seed/round2.go, seed/round2_test.go, tools/check.sh
+status:     done
 ```
 The four cases in product.md, at least two shoppers each, with hidden answers kept apart as in T1.3:
 
@@ -110,7 +110,7 @@ size:       M · frontier
 owns:       bench/round2/runs/
 status:     not-started
 ```
-Every shopper through every arm, three repeats, plus the cross-session and cross-agent correction turns for case 4 (agent B is T9.5's agent for arms 3 and 4; for arms 1 and 2 it is the same instrument with no shared conversation). Arm 4 uses the live layer and the frozen population. Per-run token and spend caps as in P5. Budget: $5.00 cumulative. Run one cell first and check its cost.
+Every shopper through every arm, two repeats (the freeze's two, not the three this text carried before it), plus the cross-session and cross-agent correction turns for case 4 (agent B is T9.5's agent for arms 3 and 4; for arms 1 and 2 it is the same instrument with no shared conversation). Arm 4 uses the live layer and the frozen population. Per-run token and spend caps as in P5. Budget: $5.00 cumulative. Run one cell first and check its cost.
 
 **Done when:** every run is committed in the frozen run schema, graded by the frozen grader, with the freeze check green before the first run and after the last. Spend is recorded.
 
@@ -127,6 +127,20 @@ status:     not-started
 The results as counts, each linked to its runs, with the limits first: we wrote the shoppers, the answers and the population, so this shows the mechanism on constructed cases, not real-world accuracy. Per case and per arm: right size first time, wrong-cause errors, corrections honoured (next turn, next session, other agent), which precedence step decided, citations that support, tokens. Where arms match, say so. List the headline candidates with exact counts; the user picks one.
 
 **Done when:** every claim links to run files and the scores; the headline candidates are listed and none is chosen.
+
+---
+
+### T10.6: Keep the reference reasoner's ladder in step with the layer
+```yaml
+requires:   [T10.3]
+fixture-ok: yes
+size:       XS · mid
+owns:       bench/round2/
+status:     not-started
+```
+`bench/round2/reason.go` restates the layer's size ladder (unexported in `internal/api/server/content.go`), as round 1's driver does. A ladder change in the layer would drift the reference reasoner silently, and the freeze would keep the old order.
+
+**Done when:** the reference reasoner's ladder is checked against the layer's (an exported constant, a behaviour test through the served path, or a recorded reason), and a mismatch fails a test; the gate passes.
 
 ---
 

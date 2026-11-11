@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 7 / 7 | Done |
 | P8 | 19 / 22 | In progress (T8.5i, T8.5j, T8.5k) |
 | P9 | 18 / 23 | In progress (T9.7, T9.9, T9.11, T9.14, T9.16) |
-| P10 | 3 / 6 | In progress |
+| P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T10.3: Round-2 freeze (done)
+
+**What exists.** Eight frozen round-2 shoppers (two per case), hidden answers apart, a 121-row population, 99 arm-2 PayPal records, the four arms with separation statements, the reference reasoner and hold table, phase-aware expected recall (the first turn precedes the correction), and a 116-row freeze manifest the gate verifies. Review found and fixed the blockers: runs can now land (`freeze_check.sh --allow-runs` plus a `runs/FREEZE.json` marker bound to the manifest hash, so a run directory without a marker is still a freeze break), case 4's first-turn prompts no longer carry the correction, the frozen `Missing` text is enforced, and repeats drop from three to two — the P9 mean puts three at 168 turns ≈ $5.66 against the $5.00 cap, two at 112 ≈ $3.77.
+
+**What surprised.** The marker's commit id is shape-checked rather than looked up, because CI is a shallow clone; the manifest hash is the binding. Case 4's first turn would have been answered after the correction it must precede if the prompts rendered the post-correction recall.
+
+**The next agent should not have to work out.** T10.4's text now says two repeats. T10.6 owns the size-ladder mirror between the reference reasoner and the layer. Running a cell first and recording its cost is still the guard.
 
 ### T1.1b: Not-as-described disputes (done)
 
