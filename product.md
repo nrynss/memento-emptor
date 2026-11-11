@@ -162,7 +162,7 @@ The stack, settled 9 Nov. Each piece has a job no other piece covers; the "witho
 | **PayPal** | Outcomes (refunds, disputes with reason codes, captures, line items, webhooks) and the action (the approved purchase, with idempotent request IDs) | Nothing happens and nothing is evidenced |
 | **Lambo** | Short, keyed, evidence-gated beliefs; contradiction flags; supersession; provenance; per-agent attribution | The agent can store facts, but can't tell an earned belief from a claim |
 | **Channel3** | Candidate products and variants from real retailers | There's nothing to recommend |
-| **Elastic** | Stores and searches raw evidence; Lambo evidence concepts carry the Elastic document ID; serves as Lambo's recall tier for vector search. Holds the fit index that pooled product-fit beliefs and the merchant app aggregate over (decided 10 Nov) | Prose ends up in Lambo's graph, evidence can't carry across products, and nothing learns across shoppers |
+| **Elastic** | Holds the fit index that pooled product-fit beliefs and the merchant app aggregate over (decided 10 Nov); stores and searches raw evidence, and Lambo evidence concepts carry the Elastic document ID. **Not Lambo's recall tier** (decided in T8.1c): the hub runs store-only, because the served reads never ask the graph for a vector search and its one real vector use, a hybrid derive, is answered exactly in process. Enabling the tier is config-only, but it would add metered Elastic ingest and a lagging approximate mirror | Prose ends up in Lambo's graph, evidence can't carry across products, and nothing learns across shoppers |
 | **Astropods** | Runs the reference agent as a service: approval and correction forms, feedback tied to traces, evals. Independent proof of how the agent behaved | Approval and feedback become ad-hoc UI, and "the agent checked memory first" is only our own claim about our own agent |
 | **Evidence ledger (AG Grid)** | Beliefs, the evidence behind each, contradictions and corrections, with editable rows. Each item shows which precedence step decided it, and pooled rows show their seeded count | The shopper can't see or contest what the agent believes |
 | **Merchant app (AG Grid)** | A separate read-only app: returns per product line by reason and size, pool status and seeded count, read through `product_fit` with no shopper rows (decided 10 Nov) | The merchant can't see why a SKU comes back |
@@ -182,7 +182,7 @@ The Agent Toolkit / MCP server covers orders, refunds, invoices, disputes (list,
 | Contradiction declared with `against`, shown beside the stale fact on recall | Exists (#19, #179) |
 | Undeclared replacements flagged as possibly superseded | Exists (#198) |
 | Newer structural evidence demotes a canonical belief; assertions never do | Exists (#20) |
-| Elasticsearch recall tier | Exists, optional (`--features recall-elastic`, #18) |
+| Elasticsearch recall tier | Exists, optional (`--features recall-elastic`, #18). Not the deploy's shape (T8.1c): the hub runs store-only, on its store's exact scan |
 
 The promotion bar under the default Swarm policy:
 

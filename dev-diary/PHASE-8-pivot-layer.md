@@ -509,11 +509,25 @@ requires:   [T8.1c]
 fixture-ok: yes
 size:       XS · mid
 owns:       product.md, docs/architecture.md, dev-diary/research/README.md, dev-diary/PHASE-0-ground.md
-status:     claimed:t81d-product-docs
+status:     in-review
 ```
 T8.1c recorded the hub as store-only and corrected `research/elastic.md`, but present-tense claims that Elastic is the graph's or Lambo's recall tier remain in `product.md` (the consumption section and the stack table), `docs/architecture.md`, `dev-diary/research/README.md` and T0.11's check 4 ("as the deploy runs it"). `product.md` is the first file a reader opens, so it must not assert the retired shape.
 
 **Done when:** each listed passage either states the store-only decision with its reason or is marked historical; no product doc asserts the tier as the deployed shape; the gate passes.
+
+**Notes (in-review).** Retired the claim in all four listed files. No code, fixture or pool claim changed: `fit-rows` stays the layer's own index with its own mapping and fixed name, and every passage about it is untouched.
+
+- `product.md`: the Shape section's Elastic row now leads with the fit index and says it is **not Lambo's recall tier** (decided in T8.1c), with the reason: the served reads never ask the graph for a vector search, the graph's one real vector use (a hybrid derive) is answered exactly in process, and enabling the tier is config-only but would add metered Elastic ingest and a lagging approximate mirror. The "What Lambo gives us" row keeps the true capability fact (exists, optional, `--features recall-elastic`, #18) and adds that it is not the deploy's shape.
+- `docs/architecture.md`: the "What lives where" Evidence store row and the "Dependencies" Evidence store row drop "the graph's recall tier" and name the store-only decision; the paragraph after the tables states the decision and its reason, and scopes the 20 s cold-handshake finding to what enabling the tier would need.
+- `dev-diary/research/README.md`: the `elastic.md` index entry now scopes the tier to what was measured against this deployment and not deployed (T8.1c); `elastic-fit.md`'s "coexistence with Lambo's recall tier" becomes "with a Lambo recall index", which is what T0.12 check 7 actually ran.
+- `dev-diary/PHASE-0-ground.md`: T0.11's check 4 is marked superseded in sequence by T8.1c ("as the deploy ran it at the time"; the check measured the tier with the flag on, not the deploy's shape). T0.6's "Lambo also uses this deployment as its recall tier" paragraph carries the same note: it was not on the task's list but asserted the same retired shape in the same file.
+
+Two things the next agent should not have to rediscover:
+
+- `product.md` has no recall-tier claim in "How it is consumed". The two claims the brief calls the consumption section and the stack table are the "What Lambo gives us" capability row and the Shape section's Elastic row; both are the ones above.
+- `docs/architecture.md`'s Configuration section still says the embedder direction is native embeddings served by the evidence store. That is about the embedder, not the recall tier, so it stands.
+
+Gate green (`npm ci` in `web/` and `merchant/` first; both were unpopulated in this worktree). Spend $0.00: no live call, no key.
 
 ---
 

@@ -180,16 +180,25 @@ are the second audience", `docs/interface.md` "product_fit")
 | Store | Holds | Never holds |
 |---|---|---|
 | **Evidence graph** | Short, keyed beliefs and evidence stubs; contradiction flags; supersession; provenance; per-agent attribution. One session per shopper isolates them on a shared store file. | Prose. The graph holds stubs; the documents live in the evidence store. Pooled beliefs: a pooled session would break shopper isolation. |
-| **Evidence store** | Raw evidence documents with their vectors; hybrid text-plus-vector search over past purchases; the graph's recall tier. Also the fit index: one structured row per purchase, aggregated into the pooled product-fit belief and read by the merchant app. | Beliefs. Search finds evidence; promotion decides belief. The fit index holds no shopper identity, no row detail and no prose. |
+| **Evidence store** | Raw evidence documents with their vectors; hybrid text-plus-vector search over past purchases. Not the graph's recall tier: the deploy leaves `[recall]` unset, so the hub recalls from its own store's exact scan (T8.1c). Also the fit index: one structured row per purchase, aggregated into the pooled product-fit belief and read by the merchant app. | Beliefs. Search finds evidence; promotion decides belief. The fit index holds no shopper identity, no row detail and no prose. |
 | **App's own store** | Durable order state (proposed → approved → captured, or failed and refunded) with one open order per shopper and need; webhook event ids for idempotency; seeded marks; ledger reads. | Money movement. Orders and captures are issued from the reference agent, never from the layer. |
 
 The evidence store keeps the existing hosted deployment; no index is
-self-hosted. Hybrid search needs the `retriever: { rrf: ... }` shape on
-this deployment; the graph re-scores neighbours itself, so that syntax
-note covers hand-written queries only. The graph's recall tier needs a
-20 s timeout against this deployment's cold handshake; the failure mode
-without it is a dropped error source, recorded for the graph's
-maintainers. (`research/elastic.md`, `research/lambo.md` check 6)
+self-hosted. The hub does not use its recall tier: `start.sh` writes no
+`[recall]` section, so the vector leg of recall is the store's exact
+scan and the deployment holds the layer's `fit-rows` pool rather than a
+graph index. The served reads never ask the graph for a vector search,
+and its one real vector use, a hybrid derive, is answered exactly in
+process; the tier would add metered Elastic ingest and a lagging
+approximate mirror for scale this demo does not have.
+(`deploy/README.md`, "The hub's recall tier: store-only, by decision")
+Hybrid search needs the `retriever: { rrf: ... }` shape on this
+deployment; the graph re-scores neighbours itself, so that syntax
+note covers hand-written queries only. Enabling the tier is a config
+change and would need a 20 s timeout against this deployment's cold
+handshake; the failure mode without it is a dropped error source,
+recorded for the graph's maintainers. (`research/elastic.md`,
+`research/lambo.md` check 6)
 
 ## Configuration
 
@@ -224,7 +233,7 @@ floor measurement. (`research/lambo.md`, `research/jev.md`)
 |---|---|---|
 | **Payment evidence source** | Outcomes with reason codes, line items, webhooks; the approved purchase | Nothing happens and nothing is evidenced |
 | **Evidence graph** | Short, keyed, evidence-gated beliefs; contradiction flags; provenance | The agent can store facts but cannot tell an earned belief from a claim |
-| **Evidence store** | Raw evidence and vector search; the graph's recall tier; the fit index behind the pooled belief and the merchant app | Prose ends up in the graph, and nothing learns across shoppers |
+| **Evidence store** | Raw evidence and vector search; the fit index behind the pooled belief and the merchant app. Not the graph's recall tier: the hub runs store-only (T8.1c) | Prose ends up in the graph, and nothing learns across shoppers |
 | **Reason classifier** | Return text to category with calibrated confidence | Every refund is a guess about its cause |
 | **Catalog and agent host** | Candidate products; the reference agent as a service with approval, correction forms, feedback tied to traces, and evals | There is nothing to recommend and no independent proof the agent checked memory first |
 
