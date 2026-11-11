@@ -1000,7 +1000,7 @@ Mutations, each restored from a byte-for-byte copy with `git status` clean: the 
 
 Limits. The checks prove the levers say this and that a removal is caught; they cannot make a model obey, so one live turn remains the only evidence. `exclude_skus` is still optional in the schema, so nothing at runtime forces it; only the text asks. And the turn may return a "no new candidate" answer rather than the different SKU `product.md`'s step 2 wants, which is a shelf-population question outside this task.
 
-Fixes to the note: "the tool schemas untouched" contradicted the parameter description this task changed, so it now says the keys and types are unchanged and only the description texts moved; T9.22's stale description-lever sentence is annotated in place, no new task; and the fresh turn names T9.23 as its owner. Verdict: the Done-when's two clauses are met and pinned, the gate is green, and the remaining live turn is T9.23's, under its own budget.
+Fixes to the note: "the tool schemas untouched" contradicted the parameter description this task changed, so it now says the keys and types are unchanged and only the description texts moved; T9.22's stale description-lever sentence is annotated in place, no new task; and the fresh turn names T9.23 as its owner. T9.23's block on `main` also still says its turn reopens T9.22; T9.25 was opened instead, and that sentence resolves when T9.23 re-records against these levers, so it needs no separate owner. Verdict: the Done-when's two clauses are met and pinned, the gate is green, and the remaining live turn is T9.23's, under its own budget.
 
 ---
 
