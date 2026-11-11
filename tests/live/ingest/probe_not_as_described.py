@@ -131,8 +131,15 @@ def main():
     status, payload = call(tok, "POST", "/v1/customer/disputes", body)
     payload.pop("debug_id", None)
     print(f"POST /v1/customer/disputes -> {status}")
+    if status == 201:
+        # A created case carries the buyer's and seller's account detail,
+        # so only the id's suffix is printed. This is not the refusal the
+        # probe records: filing a case is the owner's decision, not a
+        # probe's, so stop and report rather than carry on.
+        print(f"created ...{payload.get('dispute_id', '')[-6:]}: stop and report")
+        return 0
     print(json.dumps(payload, indent=2))
-    return 0 if status == 201 else 1
+    return 1
 
 
 if __name__ == "__main__":
