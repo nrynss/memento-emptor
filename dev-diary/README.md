@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 7 / 7 | Done |
 | P8 | 25 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.5x, T8.7b) |
 | P9 | 27 / 31 | In progress (T9.15, T9.17, T9.20, T9.23, T9.24) |
-| P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
+| P10 | 5 / 8 | In progress (T10.4, T10.5, T10.6) |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T10.7: Arm 2 reads kept purchases (done)
+
+**What exists.** The round-2 reference reasoner reads unreturned purchases on the candidate line (pairing order to capture by the report time both records share), marks returns by refund reference or dispute seller transaction, applies `domain.UsualSizeFor`, and answers arm 2 on the own-evidence rung. Two new `Missing*` texts and per-turn `MissingAfter`. Measured: `r2-corr-standing` holds M on the first turn (the P10 review's flaw), `r2-crowd-plain` ties M–S and holds nothing (the review's "kept S" was wrong; the S purchase is the feedback capture), the other six hold none. FROZEN's claims now state the measurement, §11's stale repeats sentence is gone, the manifest is re-frozen at 116 rows. Review re-derived every shopper from the records, mutation-checked the kept read, the tie branch and `MissingAfter`, and corrected a §4 sentence about the two new-to-brand shoppers.
+
+**What surprised.** The kept rows are declared inside the session, so no return window has closed; no arm can see a window, so it is an accepted limit now stated in the freeze. The review's original "kept S" was a measurement error. T10.5's limits must say the kept rows were declared.
+
+**The next agent should not have to work out.** T10.6 (ladder) must land before T10.4, or its edit fails the freeze under an open run marker. The order–capture pairing key is the report time; a record without `create_time` would unpair every purchase.
 
 ### T9.23: Step 2 re-recorded (in review)
 
