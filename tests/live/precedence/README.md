@@ -74,11 +74,15 @@ daemon's promotion; a timeout there is a finding, not a cut.
 ## Guards
 
 - **Prefix first.** The driver lists `_cat/indices/t85b-*` before
-  creating anything and refuses to run when the prefix is not empty, so
-  it never deletes an index it did not create.
+  creating anything and refuses to run when the prefix is not empty. The
+  listing it found is recorded, and cleanup never deletes a name from it:
+  a refused run leaves that index alone and the after-listing check names
+  it.
 - **Cleanup always.** The delete runs in a deferred function, so a failed
-  check still removes the test indices. It deletes only names under the
-  prefix, then prints the empty listing and removes the run dir.
+  check still removes the test indices it created, prints the empty
+  listing and removes the run dir. `run.sh` runs its own listing check
+  and its leak check even when the driver failed, so a failed run still
+  shows the namespace state and a clean tree.
 - **No secret reaches a file.** The deployment is printed as
   `<deployment>`; keys, the salt and the per-run token are scrubbed
   before printing; `run.sh` greps the whole directory for the URL, the

@@ -41,7 +41,8 @@ cd "$HERE/../../.."
 OUT="${OUT:-$HERE/out}"
 mkdir -p "$OUT"
 
-go run ./tests/live/precedence | tee "$OUT/transcript.txt"
+driver_status=0
+go run ./tests/live/precedence | tee "$OUT/transcript.txt" || driver_status=$?
 
 echo "--- cleanup check: the t85b- prefix is empty ---"
 curl -s -m 60 -H "Authorization: ApiKey $LAMBO_ES_API_KEY" \
@@ -73,5 +74,13 @@ fi
 
 # The full transcript stays out of git.
 git check-ignore -q "$HERE/out"
+
+# The driver's own deferred cleanup deletes the indices it created whatever
+# happens, and the checks above run even when it failed, so a failing run
+# still shows the namespace state and the leak check's result.
+if [ "$driver_status" -ne 0 ]; then
+	echo "the driver failed (status $driver_status); the cleanup and leak checks above still ran" >&2
+	exit "$driver_status"
+fi
 
 echo "done: T8.5b live checks pass; indices deleted; transcript in $OUT (git-ignored)"

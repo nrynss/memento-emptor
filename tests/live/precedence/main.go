@@ -709,6 +709,11 @@ type driver struct {
 	keyer      *identity.Keyer
 	classifier *fakes.RecordingReasonClassifier
 	hubPort    int
+	// existing holds the indices the prefix listing found before the
+	// driver created anything. Cleanup never deletes them: the run
+	// refuses to start on a non-empty prefix, and a refusal must not
+	// take someone else's index with it.
+	existing map[string]bool
 }
 
 func (d *driver) printf(format string, args ...any) {
@@ -988,6 +993,10 @@ func run(ctx context.Context) (err error) {
 		return err
 	}
 	d.printf("-- prefix listing before: GET /_cat/indices/%s* -> %v", recallPrefix, before)
+	d.existing = make(map[string]bool, len(before))
+	for _, name := range before {
+		d.existing[name] = true
+	}
 	if err := check(len(before) == 0, "prefix %s is not clean: %v; refusing so no index is deleted by mistake", recallPrefix, before); err != nil {
 		return err
 	}
@@ -1463,12 +1472,17 @@ func (d *driver) cleanup(done bool) error {
 				return &fail{fmt.Sprintf("refusing to delete %q: it is not a %s index", name, prefix)}
 			}
 		}
+		deleted := 0
 		for _, name := range before {
+			if d.existing[name] {
+				continue
+			}
 			if err := d.store.deleteIndex(ctx, name); err != nil {
 				return err
 			}
+			deleted++
 		}
-		d.printf("\n-- cleanup: deleted %d index(es) under %s", len(before), prefix)
+		d.printf("\n-- cleanup: deleted %d index(es) under %s", deleted, prefix)
 		after, err := d.store.indices(ctx, prefix)
 		if err != nil {
 			return err
