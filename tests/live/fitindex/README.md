@@ -77,8 +77,11 @@ bash tests/live/fitindex/run.sh
 
 The driver reads `ELASTIC_URL`, `LAMBO_ES_API_KEY` (the elastic keyring
 entry) and `MEMENTO_IDENTITY_SALT`. `run.sh` runs the driver, saves the
-transcript under `out/` (git-ignored), and then checks the `t82b-` listing is
-empty and that no key or deployment location entered any file.
+driver's output as `out/transcript.txt` (git-ignored), and then checks the
+`t82b-` listing is empty and that no key or deployment location entered any
+file. The prefix and leak checks print to the terminal rather than into that
+file, so a transcript that carries them came from the terminal, not from
+`out/`.
 
 On any 401, throttle or unexpected status: stop and report, do not retry in
 a loop.
