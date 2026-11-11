@@ -35,10 +35,10 @@ Do not wait for a whole phase to finish. If a task requires only `T1.1`, start i
 |---|---|---|---|---|
 | **P0** Ground | [PHASE-0-ground.md](PHASE-0-ground.md) | none | none | everything |
 | **P1** Contracts | [PHASE-1-contracts.md](PHASE-1-contracts.md) | T0.3 to T0.8 | none | P2 to P5 |
-| **P2** The layer | [PHASE-2-layer.md](PHASE-2-layer.md) | P1 | P3, P4 | T3.6, T5.5 |
-| **P3** Reference agent | [PHASE-3-agent.md](PHASE-3-agent.md) | P1 | P2, P4 | T5.1, T6.4 |
+| **P2** The layer | [PHASE-2-layer.md](PHASE-2-layer.md) | P1 | 8 / 8 | Done |
+| **P3** Reference agent | [PHASE-3-agent.md](PHASE-3-agent.md) | P1 | 8 / 8 | Done |
 | **P4** Evidence ledger | [PHASE-4-ledger.md](PHASE-4-ledger.md) | T1.2, T1.4 | P2, P3 | T6.2, T6.4 |
-| **P5** Comparison | [PHASE-5-comparison.md](PHASE-5-comparison.md) | T1.3, T3.1 for the harness; T2.6 and T3.6 for arm 3 | P4 | T6.2 |
+| **P5** Comparison | [PHASE-5-comparison.md](PHASE-5-comparison.md) | T1.3, T3.1 for the harness; T2.6 and T3.6 for arm 3 | P4 | 10 / 11 | In progress (T4.11) |
 | **P7** Pivot contracts | [PHASE-7-pivot-contracts.md](PHASE-7-pivot-contracts.md) | T0.11, T0.12 | none | P8 to P10 |
 | **P8** The layer, after the pivot | [PHASE-8-pivot-layer.md](PHASE-8-pivot-layer.md) | T7.1, T7.2 | T10.1, T10.2 | P9, T10.3 |
 | **P9** Population and surfaces | [PHASE-9-pivot-surfaces.md](PHASE-9-pivot-surfaces.md) | T7.1, T7.2 for T9.1; T8.3 for T9.3; T8.5 for the rest | P8's live twins | T10.3, T10.4, P6 |
@@ -76,13 +76,13 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 
 | Track | Phase | Network required? | First task | Notes |
 |---|---|---|---|---|
-| **A: The layer** | P2 | `b` tasks only | T2.1 | Evidence in, Earned beliefs out. Everything else demonstrates this |
-| **B: Reference agent** | P3 | Yes | T3.1 | Runs on Astropods; replays the layer's contract until P2 lands |
-| **C: Ledger** | P4 | No | T4.1 | Builds against fixtures |
-| **D: Comparison** | P5 | Yes | T5.1 | The baseline pilot runs before the layer is finished |
+| **A: The layer** | P2 | 17 / 18 | In progress (T2.3c) |
+| **B: Reference agent** | P3 | 8 / 8 | Done |
+| **C: Ledger** | P4 | 10 / 11 | In progress (T4.11) |
+| **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
 | **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
-| **F: Pivot surfaces** | P9 | Yes, for agents and deploys | T9.1 | The population, ledger, merchant app, two agents, the demo |
-| **G: Round 2** | P10 | Yes, for T10.1 and the runs | T10.1, T10.2 | Both start now; the freeze waits on T9.1 and T8.5 |
+| **F: Pivot surfaces** | P9 | 30 / 32 | In progress (T9.15, T9.24) |
+| **G: Round 2** | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
 If capacity is short, run A first and then B: the demo needs both, and the ledger can follow on fixtures.
 
@@ -159,15 +159,15 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 | Phase | Tasks complete | Status |
 |---|---|---|
-| P0 | 12 / 12 | Done |
+| P0 | 13 / 13 | Done |
 | P1 | 8 / 8 | Done |
 | P2 | 17 / 18 | In progress (T2.3c) |
-| P3 | 6 / 6 | Done |
+| P3 | 8 / 8 | Done |
 | P4 | 10 / 11 | In progress (T4.11) |
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 32 / 35 | In progress (T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
+| P8 | 32 / 37 | In progress (T8.5q, T8.5s, T8.5u, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
