@@ -612,7 +612,7 @@ requires:   [T8.5e]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/precedence/
-status:     in-review
+status:     done
 ```
 The T8.5h review found `tests/live/precedence/main.go` builds its statement belief with `Seeded: false` and `LoadSeed` copies the mark through, so rule 7 ("seeded means marked") does not hold at that row. No product path is built that way, but the harness's own fixture should be honest. Mark every seeded row the harness builds and assert the mark where it checks the served statement.
 

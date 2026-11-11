@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 20 / 28 | In progress (T8.5i, T8.5j, T8.5k, T8.5m, T8.5n, T8.5o, T8.5p, T8.7b) |
+| P8 | 21 / 30 | In progress (T8.5i, T8.5k, T8.5m, T8.5n, T8.5o, T8.5p, T8.5q, T8.7b) |
 | P9 | 18 / 24 | In progress (T9.9, T9.11, T9.14, T9.15, T9.16, T9.17) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.5j: The harness's seeded statement is marked (done)
+
+**What exists.** `tests/live/precedence/main.go` marks `seed_stmt_001` and the statement step asserts exactly that belief with the mark, so a lost mark fails the driver. The pool seed already marked its ten rows. Proven offline through the real `LoadSeed` and `beliefView` (a flipped mark serves `seeded=false`), and the frozen seed's own statement is already `seeded: true`, so the path is pinned offline too. The README's proof row now includes the assertion. Review's only finding: the live leg needs an owner → **T8.5q** (run the driver once with the mark active).
+
+**What surprised.** The statement row was the only unmarked row the harness built; `LoadSeed` copies the mark rather than forcing it, which is right for a loader.
+
+**The next agent should not have to work out.** T8.5q is the live proof; the harness itself is honest offline.
 
 ### T8.5l: Feedback is idempotent per purchase (done)
 
