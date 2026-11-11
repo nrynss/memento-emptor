@@ -34,7 +34,8 @@ var ErrInvalidContract = errors.New("evidence: embedding contract is not usable"
 // set. Match it with errors.Is.
 var ErrBadJournalShopper = errors.New("evidence: shopper id cannot name a journal file")
 
-// ErrBadJournalDir is returned when the journal directory is missing.
+// ErrBadJournalDir is returned when the journal directory is empty, missing
+// or not a directory. Match it with errors.Is.
 var ErrBadJournalDir = errors.New("evidence: missing journal directory")
 
 // ErrCorruptJournal is returned when a stored evidence journal does not

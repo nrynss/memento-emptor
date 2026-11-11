@@ -168,22 +168,23 @@ last change, the timelines the evidence wrote, and the last brand
 context. `Store.RestoreDocuments` installs the texts under their own ids
 and continues the sequence, so a restarted store never re-mints one. The
 journal is written at the mutation points the service already persists
-at — webhook ingest, `record_reason` including the ask-again path,
-`record_feedback`, `record_correction` and `set_pooling` — and read when
-a partition is created, before `LoadSeed` replays the seed. An empty
-`StandingDir` builds no journal, so the offline demo keeps its in-memory
-shape.
+at — webhook ingest, `record_reason` including the ask-again and
+unattached-answer paths, `record_feedback`, `record_correction` and
+`set_pooling` — and read when a partition is created, before `LoadSeed`
+replays the seed. An empty `StandingDir` builds no journal, so the
+offline demo keeps its in-memory shape.
 
 Idempotence with the seed: `LoadSeed` reuses a restored row under the
 same id instead of inserting a second, reuses its doc id instead of
 re-indexing, keeps a restored question's ask count and a restored
 feedback marker, and merges the journal's citations and timelines only
 after the beliefs are rebuilt, so an id the seed also restores is named
-once and no id is re-minted. A restored seed row is still written to the
-graph: every pivot boot already rebuilds the graph's edges that way, and
-skipping it would drop the fake graph's promotion state. The ledger needs
-no new field: restored rows keep their own seeded mark, and the belief
-read's evidence carries the restored citations and count.
+once and no id the journal stores is minted again. A restored seed row
+is still written to the graph: every pivot boot already rebuilds the
+graph's edges that way, and skipping it would drop the fake graph's
+promotion state. The ledger needs no new field: restored rows keep their
+own seeded mark, and the belief read's evidence carries the restored
+citations and count.
 
 Proven: `TestEvidenceJournalSurvivesRestart` drives a live refund and its
 classified reason over a temp `StandingDir`, then boots a fresh service
@@ -194,10 +195,13 @@ still cited last behind the belief, the store holds the six documents
 while the journal file stays byte-identical (a boot writes nothing).
 `TestEvidenceRestartWithoutJournalKeepsMemoryBehaviour` proves the old
 shape: with no directory the live row and its citation are gone after a
-restart. `internal/evidence`'s journal tests cover the round trip, the
-file beside the corrections journal, bad shopper ids, a corrupt or newer
-file, and document restore with sequence continuation. The package's
-vectors comment is corrected: the store keeps texts, not vectors.
+restart. `TestEvidenceJournalKeepsAnUnattachedAnswer` proves a classified
+answer that counts toward nothing keeps its reason and its closed
+question across a restart too. `internal/evidence`'s journal tests cover
+the round trip, the file beside the corrections journal, bad shopper ids,
+a corrupt or newer file, and document restore with sequence continuation.
+The package's vectors comment is corrected: the store keeps texts, not
+vectors.
 
 Handoff. (1) Only evidence is journalled. Belief records still come back
 from the boot seed alone, so a live-created belief's own record (value,
@@ -205,19 +209,50 @@ subject, direction, citations) is not restored; its evidence rows are,
 but a belief the seed does not rebuild keeps them only in the ledger.
 `product.md` and `docs/architecture.md` say so. (2) The ingest service's
 event table is not journalled, so a pre-restart event redelivered after a
-restart is ingested again and the ledger holds both rows. A guard on the
-stored event id was written and reverted: the pivot restart tests and the
-deployed restart path rebuild the layer's belief records by re-ingesting
-events, and the guard stopped that replay. The fix belongs with a task
-that restores belief records independently; the orchestrator owns the
-choice of task. (3) The journal rewrites the whole partition at each
-mutation; that is fine at demo volume and a later task can make it
-append-only. (4) The store restores only documents a live row cites, so
-an orphan left by a failed graph write is dropped. (5) The existing
-restart tests' graph allowlist covered `doc-0001` to `doc-0008` for one
-fresh store; a restoring boot continues the sequence, so the test-only
-allowlist now covers 1 to 32. No wire shape, frozen fixture or `testdata/`
-file moved. `./tools/check.sh` passes in the worktree.
+restart is ingested again and the partition holds a second row for it;
+the ledger shows both once each carries a reason, so a redelivered refund
+stays audit-only until it is answered again while a dispute shows at
+once. A guard on the stored event id was written and reverted: the pivot
+restart tests and the deployed restart path rebuild the layer's belief
+records by re-ingesting events, and the guard stopped that replay. The
+fix belongs with a task that restores belief records independently; the
+orchestrator owns the choice of task. (3) The journal rewrites the whole
+partition at each mutation; that is fine at demo volume and a later task
+can make it append-only. (4) The store restores only documents a live row
+cites, so an orphan left by a failed graph write is dropped. (5) The
+existing restart tests' graph allowlist covered `doc-0001` to `doc-0008`
+for one fresh store; a restoring boot continues the sequence, so the
+test-only allowlist now covers 1 to 32. No wire shape, frozen fixture or
+`testdata/` file moved. (6) The evidence journal and the corrections
+journal are two files, saved one after the other; a crash between the
+two saves can leave the evidence ahead of the corrections and pooling
+snapshot, with a correction's timeline event written before the
+correction view that names it. The window is a process crash during a
+save, not a normal failure, and the shopper can record the correction or
+opt out again; a single atomic write across both files is a later
+change. `./tools/check.sh` passes in the worktree.
+
+**Review (fresh eyes).** Re-verified from the committed files on a branch
+cut at the task tip, no live call, $0. One finding, fixed here:
+`record_reason`'s unattached-answer branch (`counts == none`, such as
+"changed my mind") set the row's reason, unattached it and closed its
+question without saving, so a restart dropped the reason and reopened the
+question; it now saves like the other classified paths, and
+`TestEvidenceJournalKeepsAnUnattachedAnswer` pins it. Two doc findings,
+also fixed: the handoff's claim that the product docs state the
+belief-record limit was false as committed, so `product.md` and
+`docs/architecture.md` now state it; and `docs/architecture.md`'s ingest
+step said every delivery is ingested idempotently on the event id, which
+stops being true across a restart, so it now says the event table is not
+journalled and a redelivery after a restart is ingested again. Mutation
+checks, each reverted: with the restore removed from `state`, the restart
+test fails on the live citation, recall's citation and the store's
+document count; with the seed's doc reuse removed, it fails on 11
+documents instead of 6; without the new save, the unattached-answer test
+fails with the row's reason gone and the question back. The restart test
+fails on the parent (no evidence journal is written there), and its
+no-journal twin passes on the parent. `./tools/check.sh` is green at the
+review tip.
 
 ---
 

@@ -62,10 +62,10 @@ func bootRestartedService(t *testing.T, dir string, seed Seed) (*Service, *evide
 	return svc, store
 }
 
-// driveLiveEvidence delivers a live refund the seed holds no row for and
-// records its classified reason, so the layer holds evidence no boot
-// replay can rebuild.
-func driveLiveEvidence(t *testing.T, svc *Service) {
+// fileLiveRefund delivers a live refund the seed holds no row for and
+// returns the question the delivery filed, which the seed's own question
+// for the event does not name.
+func fileLiveRefund(t *testing.T, svc *Service) string {
 	t.Helper()
 	ctx := context.Background()
 	before := map[string]bool{}
@@ -92,6 +92,16 @@ func driveLiveEvidence(t *testing.T, svc *Service) {
 	if questionID == "" {
 		t.Fatal("the live refund filed no question of its own")
 	}
+	return questionID
+}
+
+// driveLiveEvidence delivers a live refund the seed holds no row for and
+// records its classified reason, so the layer holds evidence no boot
+// replay can rebuild.
+func driveLiveEvidence(t *testing.T, svc *Service) {
+	t.Helper()
+	ctx := context.Background()
+	questionID := fileLiveRefund(t, svc)
 	res, err := svc.RecordReason(ctx, contract.RecordReasonRequest{
 		ShopperID:  restartShopper,
 		QuestionID: questionID,
@@ -271,6 +281,73 @@ func TestEvidenceJournalSurvivesRestart(t *testing.T) {
 	if !bytes.Equal(saved, kept) {
 		t.Error("a second restart rewrote the evidence journal")
 	}
+}
+
+// ledgerRow returns the ledger row with one id.
+func ledgerRow(t *testing.T, reads restartReads, id string) contract.LedgerEvidenceRow {
+	t.Helper()
+	for _, row := range reads.Evidence.Evidence {
+		if row.Evidence.EvidenceID == id {
+			return row
+		}
+	}
+	t.Fatalf("the ledger holds no row %q", id)
+	return contract.LedgerEvidenceRow{}
+}
+
+// assertUnattachedAnswer proves one ledger row carries the shopper's
+// words, counts toward nothing, and keeps the live event's link.
+func assertUnattachedAnswer(t *testing.T, reads restartReads, liveID string) {
+	t.Helper()
+	row := ledgerRow(t, reads, liveID)
+	if row.Evidence.Reason == nil || row.Evidence.Reason.Text != "changed my mind" {
+		t.Fatalf("the unattached row reason = %+v, want the shopper's words", row.Evidence.Reason)
+	}
+	if row.Evidence.CountsToward != nil || len(row.BeliefIDs) != 0 {
+		t.Fatalf("the unattached row counts toward %v %v, want nothing", row.Evidence.CountsToward, row.BeliefIDs)
+	}
+	if row.Evidence.Link.EventID != liveEventID {
+		t.Fatalf("the unattached row names event %q, want %q", row.Evidence.Link.EventID, liveEventID)
+	}
+}
+
+// TestEvidenceJournalKeepsAnUnattachedAnswer proves an answer that counts
+// toward nothing is saved like any other classified answer: the row keeps
+// the shopper's words, the question stays closed, and a restart answers
+// both the same.
+func TestEvidenceJournalKeepsAnUnattachedAnswer(t *testing.T) {
+	dir := t.TempDir()
+	seed, err := SeedFromExamples(apiDir(t))
+	if err != nil {
+		t.Fatalf("build seed: %v", err)
+	}
+	first, firstStore := bootRestartedService(t, dir, seed)
+	questionID := fileLiveRefund(t, first)
+	res, err := first.RecordReason(context.Background(), contract.RecordReasonRequest{
+		ShopperID:  restartShopper,
+		QuestionID: questionID,
+		AnswerText: "changed my mind",
+	})
+	if err != nil {
+		t.Fatalf("record the unattached answer: %v", err)
+	}
+	if res.Accepted || res.AskAgain || res.CountsToward != nil || res.BeliefID != nil {
+		t.Fatalf("unattached answer = %+v, want it classified and stored with no belief", res)
+	}
+	before := readRestartState(t, first)
+	liveID := liveEvidenceID(t, before)
+	assertUnattachedAnswer(t, before, liveID)
+	if got := len(firstStore.Documents()); got != 5 {
+		t.Fatalf("live boot holds %d documents, want the 5 the seed indexes: an unattached answer writes no document", got)
+	}
+
+	second, _ := bootRestartedService(t, dir, seed)
+	after := readRestartState(t, second)
+	assertSameRestartReads(t, before, after)
+	if got := liveEvidenceID(t, after); got != liveID {
+		t.Errorf("restarted ledger holds the unattached row as %q, want %q", got, liveID)
+	}
+	assertUnattachedAnswer(t, after, liveID)
 }
 
 // TestEvidenceRestartWithoutJournalKeepsMemoryBehaviour proves the empty

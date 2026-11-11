@@ -86,8 +86,8 @@ func testSnapshot() Snapshot {
 
 // TestJournalRoundTrip proves a snapshot survives the file byte for byte
 // in meaning: the documents, rows with their reasons, links, write ops
-// and feedback markers, the pending question, the stored events, the
-// citations, timelines, counters and brand context.
+// and feedback markers, the pending question, the citations, timelines,
+// counters and brand context.
 func TestJournalRoundTrip(t *testing.T) {
 	ctx := context.Background()
 	journal, err := NewJournal(t.TempDir())

@@ -762,6 +762,13 @@ func (s *Service) RecordReason(ctx context.Context, req contract.RecordReasonReq
 	if counts == domain.BeliefKindNone {
 		markUnattached(rows)
 		delete(st.pending, question.id)
+		// The answer changed the rows and closed the question even though
+		// it attaches nowhere, so the partition is saved like any other
+		// classified answer: a restart keeps the reason and does not
+		// reopen the question.
+		if err := s.persistIfJournal(ctx, st, req.ShopperID); err != nil {
+			return contract.RecordReasonResponse{}, err
+		}
 		return contract.RecordReasonResponse{
 			ReasonID:     id,
 			QuestionID:   question.id,

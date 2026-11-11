@@ -258,6 +258,15 @@ frozen evidence row already carries its seeded mark, and the belief read
 already carries its evidence. explain_belief reads the same restored
 citations and history. A service with no standing directory keeps the
 in-memory shape: only the boot replay's rows and citations come back.
+One limit: the journal holds evidence, not belief records. The boot seed
+rebuilds the beliefs, so a belief the seed does not carry — one a live
+answer created — keeps its rows in the ledger but not its own record,
+and recall does not serve it again until its writes replay. The ingest
+service's event table is not journalled either, so a delivery redelivered
+after a restart is ingested again and the partition holds a second row:
+a redelivered refund stays audit-only until it is answered again, while
+a dispute carries its reason and shows in the ledger. Within one boot a
+redelivery is still a duplicate.
 
 ## Configuration
 

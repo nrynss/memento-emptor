@@ -179,6 +179,8 @@ That store keeps the evidence texts, not vectors, and the served layer runs no v
 
 The consequence is at the ledger. Its evidence panel is read from the layer's own record, so after a restart it holds both the live rows the journal restored and the demo story's rows the boot replay restores, each with the seeded mark it was written with, and each belief's evidence count is the citations the journal restored. No new field was needed: the frozen row already carries the seeded mark, and the belief read already carries its evidence. Recall and explain_belief read the same restored citations, so a restart keeps them instead of answering from the pool and the corrections alone.
 
+One limit is worth stating plainly: the journal holds evidence, not belief records. Beliefs come back from the boot seed, so a belief the seed does not carry — one a live answer created — keeps its evidence rows in the ledger, but not its own record, and recall does not serve it again until its writes replay.
+
 ### What PayPal's tools cover
 
 The Agent Toolkit / MCP server covers orders, refunds, invoices, disputes (list, get, accept the claim), subscriptions, shipment tracking, transaction listing, merchant insights and the product catalog. It has no payouts, no contesting a dispute or submitting evidence, and no vaulting; those need the regular REST API. Checkout needs the buyer's approval, so each purchase needs one approval or a vaulted payment method set up once.
