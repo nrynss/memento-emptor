@@ -1129,11 +1129,63 @@ requires:   [T8.5i]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/layer/
-status:     claimed:t85u-layer
+status:     in-review
 ```
 T8.5i flipped `tests/live/layer`'s one-return tripwire but did not run it; only a live run proves the served thin belief and its guidance end to end. Run it once with the keys loaded, record the redacted transcript and the spend (the fixture embedder spends $0), and erase the test indices.
 
 **Done when:** the live layer run passes with the thin-evidence assertion active; the transcript is recorded; indices erased and spend recorded.
+
+**Notes (in-review).** The driver ran once against the live pieces with the keys loaded and passed end to end, exit 0, with T8.5i's one-return assertion active. From the worktree root:
+
+```sh
+source tools/env.sh
+LAMBO_BIN=<v0.10.1 release asset> OUT=tests/live/layer/out bash tests/live/layer/run.sh
+```
+
+The binary was the `v0.10.1` release asset, `lambo 0.10.1`, sha256 `b04eeab4a40af9e5e698ee446d50745f488da3a551114b0e3c195c3cdf30b92d`, which is the published `.sha256` the deploy pins and fetches. The cargo build under `~/work/lambo/target/release` reports the same version and hashes differently (T8.5q recorded the same), so it was not the binary under test. Jev resolved to `typesafe/jev-1.14-20261014`, the pinned build.
+
+The one-return leg served the thin belief and its guidance exactly as T8.5i pinned. Verbatim:
+
+```text
+recall after one return: belief blf_000001 Claimed/None, 1 row, guidance "Take size L for Brand X" (vote 1 of 3)
+```
+
+That is one belief, Claimed/None, its one evidence row, the `own_evidence` step deciding and not overridden, and guidance basis `own_evidence`. The sentence has no pool clause because the driver's wiring has no pool, which is the shape T8.5v leaves for an absent pool.
+
+Every other leg passed. Leg 1 read the sandbox records back with both signatures verified, one refund row and one dispute row, each redelivery a duplicate and nothing created. Leg 2 passed every hybrid check (index, 8 native vectors at 1024 dims, bulk, bm25, knn shape, returned line, roomier cut, rrf top 3, distractors last, paraphrase band) and ended `ALL LIVE LEGS PASS`. Leg 3 carried three my-size returns to Earned/Venerable, kept the vague answer pending, counted the non-arrival dispute only against the seller, overrode with the correction at once while the belief stood, served the Claimed fits-well belief beside the sizing one after feedback, and logged recall then correction under `trace-R`.
+
+Redacted excerpt (transcript kept in the git-ignored `tests/live/layer/out/`):
+
+```text
+LIVE OK: 1 refund + 1 dispute ingested, signatures verified, no new sandbox records created
+...
+PASS throwaway index deleted, no t23b* remains
+indices now: [{'index': 'fit-rows'}, {'index': 't104-fit-rows'}]
+ALL LIVE LEGS PASS
+=== leg 3: interface story on live Lambo + live Jev ===
+lambo: lambo 0.10.1
+ingest WH-2EV-01: 1 row(s), pending=true
+...
+reason WH-2EV-01 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted=true ask_again=false belief=blf_000001
+recall after one return: belief blf_000001 Claimed/None, 1 row, guidance "Take size L for Brand X" (vote 1 of 3)
+...
+live inspect: Venerable, blast radius 3, coverage 1.000, distinct 3
+recall: belief blf_000001 Earned/Venerable, guidance "Take size L for Brand X", evidence 3 rows
+...
+seller belief blf_000002: Claimed, 1 row (one dispute never earns)
+recall after correction: Out of true, standing Venerable, guidance "Take size M for Brand X"
+feedback: verdict fits_well, recall serves the earned sizing belief and the Claimed fits-well one
+LIVE OK: story end to end on live Lambo + live Jev (4 Jev calls)
+erased session t26-layer: {"session":"t26-layer","already_absent":false,"removed":{...}}
+=== leak check: no secret value entered tests/live/layer ===
+done: T2.6 live legs pass; transcripts under tests/live/*/out (git-ignored)
+```
+
+Cleanup: leg 2 deleted both throwaway indices (`deleted <index> 200` twice), listed `remaining t23b*: []`, and the driver erased session `t26-layer` and leg 2 erased `t23b-live` and `t23b-neg`. The pre-run and post-run index listings both read only `fit-rows` and `t104-fit-rows`, the pool's pre-existing indices, which were not touched. No throwaway index survived the run, so none needed deleting by hand. The leak check printed nothing between its header and the final line: no key value entered `tests/live/layer`, and no deployment URL entered a file outside `out/`.
+
+Spend, itemised. Four live Jev classifications: 0.000021336 + 0.000021630 + 0.000021420 + 0.000021210 USD = $0.000085596, each under the 10x reference guard. PayPal was sandbox reads only, creating nothing. Embeddings cost no cash: the brief's fixture-embedder note does not describe this driver, whose generated config uses `kind = "elastic"` with the deployment's native `.jina-embeddings-v3` at 1024 dims; the layer session's 9 vectors and leg 2's vectors ride the existing Elastic trial, and every throwaway index was deleted. Total cash spend $0.000085596.
+
+Gate green in this worktree after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`; the two bun packages were skipped for their absent modules, the same workstation limit the script prints. Re-run on the committed tree: green. Hygiene: plain commit message; the transcript's one deployment host, printed by leg 2's negative timeout probe, stays in the git-ignored `out/` and is redacted as `<deployment-url>` here.
 
 ---
 
