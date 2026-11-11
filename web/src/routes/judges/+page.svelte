@@ -1,9 +1,9 @@
 <script lang="ts">
 	// The judges' page: a static guide, never a live read. Every row and every
 	// walkthrough step names the page or the committed record behind it, so a
-	// claim here is one link from its evidence. The comparison's round 2 has a
-	// placeholder instead of results: T10.5 publishes them, and this page does
-	// not restate a number before it lands.
+	// claim here is one link from its evidence. Round 2 reports T10.5's
+	// committed counts, with the hand reading kept beside them and labelled
+	// as a reading, never substituted for the measurement.
 	//
 	// The repository links are absolute because this page is served from the
 	// demo deployment, not from GitHub. They name the public repository and no
@@ -185,7 +185,8 @@
 						4/4 for another agent in both Memento arms. Spend $0.789309 of $5.00.
 					</td>
 					<td>
-						<a href={round2Scores} rel="external">r2-scores.json</a>
+						<a href={round2Scores} rel="external">r2-scores.json</a>,
+						<a href={round2Summary} rel="external">r2-summary.json</a>
 					</td>
 				</tr>
 
@@ -228,7 +229,10 @@
 				The ledger without a shopper token replays the demo story from fixtures and says so on
 				the page. Choose a story step to see the beliefs at that moment; every seeded row carries
 				the seeded mark.
-				<a href={resolve('/ledger')}>Evidence ledger</a>,
+				<a href={resolve('/ledger')} data-seeded-link>Evidence ledger</a>
+				<span class="judges-seeded" data-seeded-mark title={SEEDED_MARK_TOOLTIP}
+					>{SEEDED_MARK_LABEL}</span
+				>,
 				<a href={repositoryFile('demo/evidence/run-6/06-ledger.json')} rel="external"
 					>06-ledger.json</a
 				>.
@@ -241,7 +245,10 @@
 				The why view opens the sizing belief first. Its three seeded returns are all classified
 				<em>fit: too small</em> with the shopper's words; the correction sits beside the belief,
 				which stays on record as <em>Out of true</em>.
-				<a href={resolve('/belief')}>Why view</a>,
+				<a href={resolve('/belief')} data-seeded-link>Why view</a>
+				<span class="judges-seeded" data-seeded-mark title={SEEDED_MARK_TOOLTIP}
+					>{SEEDED_MARK_LABEL}</span
+				>,
 				<a
 					href={repositoryFile('demo/evidence/run-6/02-belief-explained.json')}
 					rel="external">02-belief-explained.json</a
@@ -297,14 +304,13 @@
 		</li>
 
 		<li data-claim>
-			<h3>Stop at round 2</h3>
+			<h3>Read round 2's measured counts</h3>
 			<p>
-				Round 2 has no result on this page. Its results are T10.5's to publish, with every claim
-				linked to its run files.
-				<a
-					href={repositoryFile('dev-diary/PHASE-10-comparison-round-2.md')}
-					rel="external">PHASE-10-comparison-round-2.md</a
-				>.
+				Round 2 reports counts, never percentages, on eight constructed shoppers: the committed
+				first-turn counts, the correction carried into a new session and to another agent, the
+				spend and the recall difference, each linked to its run file.
+				<a href="#round2-heading">Round 2 on this page</a>,
+				<a href={round2Readme} rel="external">bench/round2/README.md</a>.
 			</p>
 		</li>
 	</ol>
@@ -510,9 +516,14 @@
 	<p data-claim>
 		The reading moves four cells: arm 3's noisy refunds 2/4 becomes 4/4, and arm 4's new-to-brand
 		3/4, unlike-the-crowd 2/4 and correction 3/4 each become 4/4. Arm 3's new-to-brand stays 0/4
-		under either reading.
-		<a href={`${round2Readme}#right-size-first-time`} rel="external">The round-2 record</a> names
-		the six runs.
+		under either reading. Arm 1 named no size at all in its 16 first turns, so its 0/16 is 16
+		refusals, not 16 wrong sizes.
+		<a href={`${round2Readme}#right-size-first-time`} rel="external">The round-2 record</a> reads
+		the same four cells, and its
+		<a href={`${round2Readme}#the-extraction-artifact-before-any-count`} rel="external"
+			>extraction-artifact table</a
+		>
+		names the six runs.
 	</p>
 
 	<h3>Corrections</h3>

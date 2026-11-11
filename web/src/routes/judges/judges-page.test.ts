@@ -1,8 +1,9 @@
 // The judges' page under a real mount. The page is a static guide: the table
 // renders every place to start, every link is an anchor with an href, every
 // claim carries a link to its evidence, the seeded links carry the ledger's
-// own mark, and the round-2 placeholder reports no result. Nothing here may
-// make a live read, so a fetch spy stays untouched.
+// own mark, and the round-2 section reports the committed counts with no
+// verdict and no percentage. Nothing here may make a live read, so a fetch
+// spy stays untouched.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 // @ts-expect-error: deep client entry ships no types; same signature as 'svelte'.
@@ -154,6 +155,11 @@ describe('the judges page', () => {
 		expect(rowText).not.toMatch(
 			/\b(?:better|worse|wins?|winning|ahead|leads?|proves?|matches?|percent|rate|best|winner|selected)\b/i
 		);
+	});
+
+	it('states no percentage anywhere on the page', async () => {
+		const host = await render();
+		expect(host.textContent ?? '').not.toMatch(/%/);
 	});
 
 	it('makes no live read when it mounts', async () => {
