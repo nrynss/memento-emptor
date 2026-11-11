@@ -754,6 +754,20 @@ The T8.5h review note says the boot seed "marks every row it carries", but `blf_
 
 ---
 
+### T8.5q: Run the precedence driver once with the mark assertion
+```yaml
+requires:   [T8.5j]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/precedence/
+status:     not-started
+```
+T8.5j's Done-when says a live run still passes after the harness marks its seeded statement. The offline check proves the mark path up to the served belief, but only a live run proves the seeded statement reaches `Recall` on the real hub. Run `tests/live/precedence/run.sh` once with the keys loaded, paste the transcript (redacted), and record the spend. Budget: under $0.20 of embedding spend (the fixture embedder spends $0).
+
+**Done when:** the live run passes with the mark assertion active; the transcript is recorded; test indices are erased and spend recorded.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).
