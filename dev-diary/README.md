@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 28 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5q, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
+| P8 | 29 / 35 | In progress (T8.5k, T8.5o, T8.5q, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5n: Unattached ingest rows carry an operation (done)
+
+**What exists.** Every ingest row is born `observe` and upgraded to `record_action` only when it attaches, so no failed attach can leave a zero `write_op` in `ledger_evidence`. A code-less dispute is decided audit-only: stored, reasonless, `observe`, no link, out of the ledger, because the ledger's visibility rule is reason-nil plus no-link and not the write op. `LedgerEvidence` also emits `belief_ids: []` instead of `null` for an unattached row, which the frozen schema and the web decoder require.
+
+**What surprised.** The `belief_ids: null` bug was not limited to unknown codes: any changed-mind refund or direction-mismatch row already failed the web decoder, so the ledger panel could break for a shopper with no unknown code at all. The review found the same zero-op window in `RecordReason` (a row minted for a question whose event stored no evidence) and closed it; it also pinned the attach `continue`, which removing was previously invisible to the whole server package.
+
+**The next agent should not have to work out.** Any new evidence source outside `storeIngestResult` must set `write_op` itself; nothing validates it at the store boundary. Do not add a reasonless row to the ledger to make an audit-only row visible.
 
 ### T8.5r: A pool with no direction never decides recall (done)
 

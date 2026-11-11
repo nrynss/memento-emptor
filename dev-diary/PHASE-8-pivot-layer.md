@@ -748,7 +748,7 @@ requires:   [T1.1b]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/
-status:     in-review
+status:     done
 ```
 The T1.1b review found an unknown-code dispute is stored, is kept in the ledger (its reason is non-nil), and is emitted with the zero `write_op`, which the frozen schema forbids (`record_action`, `derive` or `observe`) and the web decoder rejects, so `ledger_evidence` fails to decode for that shopper. `markUnattached` already sets `observe` for a changed-mind refund; the ingest store path does not. Also decide whether a code-less dispute (stored, no reason, skipped by the ledger) should appear unattached or remain audit-only, and make the comment match.
 
