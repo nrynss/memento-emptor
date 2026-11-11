@@ -160,7 +160,7 @@ requires:   [T4.8]
 fixture-ok: yes
 size:       XS · mid
 owns:       web/src/lib/api/, web/src/routes/ledger/
-status:     not-started
+status:     claimed:t410-evidence-read
 ```
 `LedgerState.refresh` fetches `ledger_evidence` on every load, but the ledger table renders none of it (the per-row count comes from the belief row; the evidence lives in the why view). Because the three reads share one `Promise.all`, a failed evidence read labels the whole page failed although nothing from it is displayed. Decide: drop the read, or load it lazily for the row that needs it, or record why the shared loader is deliberate.
 

@@ -776,7 +776,7 @@ requires:   [T8.5h]
 fixture-ok: yes
 size:       XS · mid
 owns:       testdata/api/, dev-diary/PHASE-8-pivot-layer.md
-status:     not-started
+status:     claimed:t85p-marks
 ```
 The T8.5h review note says the boot seed "marks every row it carries", but `blf_2b9d60`/`ev_51c2d8` and `blf_1a5e09`/`ev_9d4c22` are `seeded: false` in the frozen ledger fixtures, and `LoadSeed` copies the mark. Decide whether those live-origin rows should be marked (rule 7 says seeded means marked) or whether `seeded: false` is the deliberate record of their origin, correct the fixtures and the note accordingly, and keep the doc pin byte-exact.
 
@@ -832,7 +832,7 @@ requires:   [T8.5i]
 fixture-ok: yes
 size:       XS · mid
 owns:       demo/driver/
-status:     not-started
+status:     claimed:t85t-demo-driver
 ```
 `demo/driver/main.go` pins the old withholding at its one-return step ("one return earns nothing…") and its final recall ("feedback grew a rival belief"), so it would fail against the served layer after T8.5i. Update the driver's assertions to the served thin belief, and keep `demo/run.py`'s evidence expectations consistent.
 
@@ -910,7 +910,7 @@ requires:   [T8.2b]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/fitindex/
-status:     not-started
+status:     claimed:t82c-transcript
 ```
 The P8 review found T8.2b's step-3 transcript line (`version=3001794233529 state=refunded settled=false`) cannot come from the committed driver: it prints a form `docSource.String` never emits, and a refunded document at the reason-classified rank, which no refund write can carry. The three versions the notes rest on do re-derive; only provenance is wrong. Re-run the driver so the transcript is real, or record the correction in the handoff if a run is not worth the churn.
 
