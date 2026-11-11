@@ -790,6 +790,20 @@ The P7 review found `tools.go` sets `presence.Pool` from the pool view alone, so
 
 ---
 
+### T8.5s: A boot replay does not re-write a restored correction
+```yaml
+requires:   [T8.5m]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/hub/
+status:     not-started
+```
+The T8.5m review found `LoadSeed` calls `memory.RecordCorrection` before `takeCorrection` decides the id is already restored, so every boot re-issues that correction's graph write even when the journal holds it. No served-state effect offline; prove it against the live hub and either make the boot skip the write for a restored id or record that the repeat is harmless and why.
+
+**Done when:** a live boot replay shows whether the correction's graph write is duplicated, and the boot either skips it or the harmlessness is recorded; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).
