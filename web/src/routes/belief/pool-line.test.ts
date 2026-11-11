@@ -115,6 +115,7 @@ describe('what the page says when the recall carries no pool', () => {
 		expect(note?.text).toContain('not consulted');
 		expect(note?.text).toContain('no pool index for brand-x-001 · shirts');
 		expect(note?.text).toContain('no single product line');
+		expect(note?.text).toContain('no size to read');
 		expect(note?.text).toContain('could not reach');
 	});
 });

@@ -98,7 +98,7 @@ export function poolNoteFor(recall: RecallResponse, line: RecallLine | null): Po
 		case null:
 			return {
 				kind: 'unavailable',
-				text: `The pool was not consulted: the layer has no pool index for ${line.brand} · ${line.category}, no single product line matching them (none matched, or more than one did), or an index it could not reach. Nothing pooled applies.`
+				text: `The pool was not consulted: the layer has no pool index for ${line.brand} · ${line.category}, no single product line matching them (none matched, or more than one did), no size to read (no usual size learned and none under consideration), or an index it could not reach. Nothing pooled applies.`
 			};
 	}
 }
