@@ -20,7 +20,11 @@
 		type LedgerBeliefRow,
 		type LedgerFixtureStep
 	} from '$lib/api';
-	import { createFixtureContestState } from '$lib/contest';
+	import {
+		ContestState,
+		CorrectionClient,
+		createFixtureCorrectionTransport
+	} from '$lib/contest';
 	import type { ContestCorrectionView } from '$lib/contest';
 	import ContestEditor from '$lib/contest/ContestEditor.svelte';
 	import {
@@ -78,7 +82,17 @@
 	let recallLoading = $state(true);
 
 	const caseShopper = $derived(recallCaseShopper[recallCase]);
-	const contestState = $derived(createFixtureContestState(caseShopper, []));
+	// One correction transport per case: the fixture answers the shopper the
+	// case names, so a standing correction can never be recorded under
+	// another shopper's name. The editor is keyed by that shopper below, so a
+	// case change remounts it with no earlier words or answer on screen.
+	const contestState = $derived(
+		new ContestState(
+			new CorrectionClient(createFixtureCorrectionTransport(caseShopper)),
+			caseShopper,
+			[]
+		)
+	);
 	const poolingState = $derived(createFixturePoolingState(caseShopper));
 	let standingList = $state<ContestCorrectionView[]>([]);
 
@@ -272,9 +286,6 @@
 {/if}
 
 <h2>Your standing correction</h2>
-<p class="lede">
-	No belief yet: record a correction that stands on its own and decides at once.
-</p>
 {#key caseShopper}
 	<ContestEditor
 		contest={contestState}
@@ -294,7 +305,9 @@
 	Pooling is opt-out. Opting out stops new fit rows and removes the ones already
 	written; the layer says how many rows went.
 </p>
-<PoolingToggle pooling={poolingState} />
+{#key caseShopper}
+	<PoolingToggle pooling={poolingState} />
+{/key}
 
 <style>
 	.why-controls {

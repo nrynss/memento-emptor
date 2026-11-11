@@ -73,10 +73,17 @@ export class PoolingClient {
 	}
 }
 
+/** The frozen answer for one pooling choice, decoded. */
+function fixtureAnswer(pooling: boolean): SetPoolingResponse {
+	return decodeSetPoolingResponse(pooling ? optInExample : optOutExample);
+}
+
 /**
- * A transport that replays the frozen pooling answers for the demo
- * shopper: opting out removes three fit rows, opting back in removes
- * nothing. Any other shopper fails instead of touching the pool.
+ * A transport that replays the frozen pooling answers for the shopper they
+ * belong to: opting out removes three fit rows, opting back in removes
+ * nothing. The examples are the demo shopper's, so a transport built for
+ * any other shopper has no answer and fails instead of handing back
+ * another shopper's choice.
  */
 export function createFixturePoolingTransport(shopperId: string): PoolingTransport {
 	return {
@@ -85,15 +92,20 @@ export function createFixturePoolingTransport(shopperId: string): PoolingTranspo
 				throw new LedgerApiError('unknown-tool', `fixture pooling knows no ${tool}`);
 			}
 			if (request['shopper_id'] !== shopperId) {
-				throw new LedgerApiError('unknown-request', 'fixture pooling knows only this shopper');
+				throw new LedgerApiError('unknown-request', 'fixture pooling knows only one shopper');
 			}
-			if (request['pooling'] === false) {
-				return { ...(optOutExample as unknown as Record<string, unknown>) };
+			const pooling = request['pooling'];
+			if (pooling !== true && pooling !== false) {
+				throw new LedgerApiError('unknown-request', 'pooling needs the shopper in true or false');
 			}
-			if (request['pooling'] === true) {
-				return { ...(optInExample as unknown as Record<string, unknown>) };
+			const answer = fixtureAnswer(pooling);
+			if (answer.shopper_id !== shopperId) {
+				throw new LedgerApiError(
+					'unknown-request',
+					'the pooling fixture has no answer for this shopper'
+				);
 			}
-			throw new LedgerApiError('unknown-request', 'pooling needs the shopper in true or false');
+			return { ...answer } satisfies SetPoolingResponse;
 		}
 	};
 }
