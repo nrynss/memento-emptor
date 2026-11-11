@@ -636,12 +636,14 @@ The T9.7 run found product.md's demo step 2 has no live path: the reference agen
 requires:   [T9.16]
 fixture-ok: yes
 size:       XS · mid
-owns:       deploy/README.md
+owns:       deploy/README.md, tools/pincheck/
 status:     not-started
 ```
 `tools/pincheck` now compares Go, Node and bun, but `deploy/README.md`'s toolchain section still lists only Go and Node and still says what the gate reads. Add bun's pin and its sources, and correct the paragraph about what the check covers.
 
-**Done when:** the pin section lists all three toolchains with their sources and the check's coverage; the gate passes.
+The T9.16 review found the row that task adds would be a pin nothing compares: `readmePins` filters to Go and Node, so a Bun row moved to 2 leaves the gate green. Make the Bun row a required source, or record why it stays unread.
+
+**Done when:** the pin section lists all three toolchains with their sources and the check's coverage; the Bun row is read by the check (or its exclusion is recorded with its reason); the gate passes.
 
 ---
 
