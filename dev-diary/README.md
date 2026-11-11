@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 23 / 34 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.7b) |
-| P9 | 21 / 27 | In progress (T9.11, T9.14, T9.15, T9.17, T9.19, T9.20) |
+| P9 | 24 / 29 | In progress (T9.11, T9.15, T9.17, T9.20, T9.21) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.19: The gate runs the agents' offline checks (done)
+
+**What exists.** `tools/check.sh` runs both agents' offline checks behind the same bun/modules guard the frontend typecheck uses, prints which check it skipped and why, and fails on a check failure; `ci.yml` installs both packages' frozen dependencies after setup-bun and caches on all three lockfiles. Review proved all four branch combinations (full, no bun, one package missing, both missing), mutation-checked a broken tool id (gate exit 1), and confirmed the pin comment and the `server/status.ts` fallback. The gate's counts are 130 and 125 on this tree (179 for the reference agent after T9.17).
+
+**What surprised.** Neither agent package is type-checked anywhere: Bun transpiles without checking, and both `tsc` runs are green today → **T9.21**.
+
+**The next agent should not have to work out.** The skip lines mean a bun-less workstation still does not exercise the tool surface; CI does, because it installs the frozen packages.
 
 ### T9.17: The reference agent searches the catalog (in review until T9.20)
 

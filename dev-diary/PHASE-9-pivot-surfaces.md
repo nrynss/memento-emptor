@@ -747,7 +747,7 @@ requires:   [T9.9, T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/check.sh, .github/workflows/ci.yml
-status:     in-review
+status:     done
 ```
 T9.9 gave both agents' tool bindings offline coverage, but `tools/check.sh` does not invoke it: `bun agent/offline-check.ts` and `bun agent/check.ts` run only when someone runs them by hand, so a tool-surface drift passes the gate. Add both checks to the gate behind the same bun guard the frontend step uses, and install the two agent packages' frozen dependencies in CI, or the runner lacks `agent/runtime/node_modules` and `agent/second/node_modules` and both checks fall through.
 
@@ -802,6 +802,20 @@ status:     not-started
 T9.17 gave the reference agent a catalog search, but no live turn has used it and `demo/run.py` does not call it, so product.md's step 2 still has no live path. After the agent is redeployed with `CHANNEL3_API_KEY`, add the catalog call to the demo driver, take one live turn that names the matched candidate (line, size, SKU) before its recommendation, and record the step-2 evidence and the one Channel3 credit it costs.
 
 **Done when:** a live reference-agent turn searches the catalog and names the matched candidate before its recommendation; the demo driver records it; the credit and any spend are recorded; the gate passes.
+
+---
+
+### T9.21: Type-check the agent packages
+```yaml
+requires:   [T9.19]
+fixture-ok: yes
+size:       XS · mid
+owns:       tools/check.sh
+status:     not-started
+```
+Neither agent package is type-checked anywhere: both carry a `tsconfig.json` and `typescript` as a devDependency but no `typecheck` script, and the gate runs them through Bun, which transpiles without checking. `./node_modules/.bin/tsc --noEmit -p tsconfig.json` exits 0 in both today, so the step is green to add inside `check_agent`'s modules guard.
+
+**Done when:** the gate type-checks both agent packages where their modules exist, and a type error fails it; the gate passes.
 
 ---
 
