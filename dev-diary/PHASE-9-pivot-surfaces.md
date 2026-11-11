@@ -834,11 +834,21 @@ requires:   [T9.19]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/check.sh
-status:     claimed:t921-agent-tsc
+status:     in-review
 ```
 Neither agent package is type-checked anywhere: both carry a `tsconfig.json` and `typescript` as a devDependency but no `typecheck` script, and the gate runs them through Bun, which transpiles without checking. `./node_modules/.bin/tsc --noEmit -p tsconfig.json` exits 0 in both today, so the step is green to add inside `check_agent`'s modules guard.
 
 **Done when:** the gate type-checks both agent packages where their modules exist, and a type error fails it; the gate passes.
+
+**Notes (worker).** `check_agent` in `tools/check.sh` now type-checks each package after its offline check: it `cd`s into the package in a subshell and runs `./node_modules/.bin/tsc --noEmit -p tsconfig.json` through the `run_frontend` capture the other steps use, so tsc's own diagnostics reach the terminal and a failure ends the gate at `FAIL [<dir> typecheck] <dir> typecheck reported problems`. The `cd` is what makes it the package's own TypeScript and the package's own tsconfig: `-p tsconfig.json` is relative to the working directory, and `./node_modules/.bin/tsc` is the binary `bun install --frozen-lockfile` puts there. The offline checks still run from the repository root, unchanged, because they resolve the contract examples from `import.meta.dir`.
+
+Both type-checks sit inside the guard that already existed, so the fallback is the frontend's, unchanged: without bun, `skipped: bun is not on PATH; it cannot be run on node` for each package, and with bun present but a package's modules absent, `skipped: <dir>/node_modules is absent; run bun install --frozen-lockfile in <dir>` for that package while the other runs both its steps. The section comment gains T9.21 in its heading and one paragraph saying why the step exists — Bun transpiles without checking types, so a type error its runtime passes over would otherwise reach the gate green.
+
+Proof. `./tools/check.sh` exits 0 and prints `-- agent/runtime typecheck (tsc --noEmit)` after that package's offline check, then `-- agent/second typecheck (tsc --noEmit)`; both commands run by hand in their packages exit 0 with no diagnostics. The two mutations, each reverted with `git checkout` and a clean `git status` after: appending `const typecheckMutation: number = "not a number";` to `agent/runtime/agent/catalog.ts` fails the gate, exit 1, with `agent/catalog.ts(353,7): error TS2322: Type 'string' is not assignable to type 'number'.` then `FAIL [agent/runtime typecheck] agent/runtime typecheck reported problems`, and the run stops there, before the second package's steps; the same line in `agent/second/agent/tools.ts` fails at `agent/tools.ts(157,7)` with `FAIL [agent/second typecheck] agent/second typecheck reported problems`. With bun off `PATH` the gate is green and prints both `skipped: bun is not on PATH` lines; with `agent/runtime/node_modules` moved aside, green, with that package's `node_modules is absent` line and the second package's check and type-check both running. Modules restored, `git status` clean apart from this branch's own files.
+
+Limit, stated. A `node_modules` installed with production dependencies only carries no `./node_modules/.bin/tsc`, and that run fails the gate with `command not found` rather than skipping. That is deliberate: a package whose TypeScript is absent cannot be type-checked, and its offline check would still run, so skipping silently would hide exactly the coverage this task adds. CI's `bun install --frozen-lockfile` installs devDependencies, so the runner is unaffected, though no Actions run exists in a worktree and the runner is unproven here as it was for T9.19. `skipLibCheck: true` in both tsconfigs means a type error inside a dependency's declarations is not reported; that is the packages' own setting, and the gate reads it rather than overriding it.
+
+Findings: none new. T9.19's Low finding — that neither agent package is type-checked anywhere — is closed by this task.
 
 ---
 
