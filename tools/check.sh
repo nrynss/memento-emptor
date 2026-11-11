@@ -19,6 +19,14 @@ done
 
 bench/freeze_check.sh || fail "freeze" "frozen comparison inputs mismatch (bench/FROZEN.md section 1)"
 
+# The Go and Node pins live in six places: both images' FROM lines, CI's
+# setup-go and setup-node, go.mod, and deploy/README.md's table. An image
+# built on a toolchain CI does not use builds green in both places, so the
+# pins are compared here, before anything is compiled. tools/pincheck's own
+# table test proves the disagreement it catches; `go test` below runs it.
+echo "-- toolchain pins"
+go run ./tools/pincheck || fail "pins" "toolchain pins disagree (see above)"
+
 echo "-- gofmt"
 go_files=$(git ls-files '*.go')
 if [ -n "$go_files" ]; then

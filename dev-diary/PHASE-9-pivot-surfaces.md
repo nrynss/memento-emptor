@@ -340,11 +340,28 @@ requires:   [T9.3g, T9.3h]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/check.sh, .github/workflows/ci.yml
-status:     claimed:t93i-pin-check
+status:     in-review
 ```
 The image toolchain pins live in Dockerfiles and in a README table; no check compares them with `ci.yml`'s `setup-node` and `setup-go`, so the Node 22 drift could recur silently. Add a gate step that reads every Dockerfile's build stages and the CI versions and fails when a frontend build stage's Node major or a Go build stage's Go version disagrees with its pin.
 
 **Done when:** a table test proves the check fails on a mismatched Node or Go stage and passes on the current tree; the gate runs it; the gate passes.
+
+**Notes (worker).** `tools/pincheck` reads the six places the pins live — `deploy/Dockerfile` and `deploy/merchant/Dockerfile`'s `golang:` and `node:` `FROM` lines, `ci.yml`'s `go-version:` and `node-version:`, `go.mod`'s `go` directive, and `deploy/README.md`'s table rows — and fails on the first disagreement, naming the drifting file, the line, and both versions. It is standard library only, no npm package, no key, no network. `tools/check.sh` runs it as `go run ./tools/pincheck` before gofmt, with a comment saying why; `ci.yml` is unchanged because CI runs `check.sh` and the step rides inside it.
+
+Comparison follows the granularity each file carries. Node is compared by major and Go by major.minor, because the image tag and the table name no patch; the two files that do name one, `go.mod` and CI, are additionally held to each other exactly, so a patch drift inside the same minor fails too. The expected value is the one most files state, so a single drifted file is named and the agreeing ones are not blamed; a tie names every pin for that toolchain. Every source must state its pin — a Dockerfile missing its Go or Node stage, a CI key that vanished, a dropped table row — so the check cannot pass by reading less. `-root <dir>` points it at another tree.
+
+Proof: `go test -race ./tools/pincheck` runs `TestCheckTable`'s twelve cases on a fixture tree — Node 22 in either image, Node 22 in CI, Node 24 in the table, Go 1.26 in the merchant image, Go 1.26 in the table, a 1.27.0/1.27.1 patch drift between `go.mod` and CI, a Dockerfile missing its web stage, a lost `setup-node`, a lost table row, and an unpinned `golang:latest` — each asserted to fail naming that file and that version, plus the agreeing baseline; `TestCurrentTreeAgrees` reads this repository itself and passes. On a copy of the real files, `go run ./tools/pincheck -root <copy>` names `deploy/Dockerfile`'s node stage line 32 at 22 against `deploy/merchant/Dockerfile`'s 26, `deploy/merchant/Dockerfile`'s go stage line 7 at 1.26 against `deploy/Dockerfile`'s 1.27, `go.mod`'s 1.27.0 against CI's 1.27.1, and CI's 22 against the images' 26, exiting 1 each time; on the untouched tree it prints `go 1.27 and node 26 agree across 9 declarations`. The gate passes (`./tools/check.sh`, green end to end, the pin step included).
+
+Two findings, both Low, both outside this task's `owns`:
+
+- `deploy/README.md`'s toolchain section still says "no CI step reads these tags, so the table is the record and the named checks are the guard". The gate now reads them, so that limit is closed and the sentence is false. Owner: the T9.3i review, which may touch `deploy/README.md`; this task's brief did not grant it, so it is reported rather than edited. The asymmetry next to it (the Go tag floats the patch where `go.mod` and CI fix 1.27.1) is still true and still intended.
+- T9.3h's review filed a Low finding so T9.3i's brief would name the stale present-tense bullet in T9.3g's notes. The brief does not, and the bullet in the tree already reads in the past tense ("was still on `node:22-bookworm` ... Fixed by T9.3h"), so there is nothing left to fix; the finding is closed, and the orchestrator should not re-file it.
+
+Three things the next agent should not have to rediscover:
+
+- The comparison keys are deliberate, not incidental: Node's key is its major and Go's is its major.minor. Pinning a Node patch or a Go minor at a finer grain means changing `minParts`, and the exact `go.mod`-vs-CI rule already covers the patch where both files state one.
+- Each Dockerfile is required to carry both a `golang:` and a `node:` stage. A future image that is only one of the two fails the check by design rather than dropping out of it silently; the requirement loops in `dockerPins` are where that changes.
+- The failure path is provable without editing `deploy/`: copy the five files to a scratch tree and run `go run ./tools/pincheck -root <scratch>`. The `FROM` line and the README row are the only places a pin is written, so a copy is a faithful test of the real read.
 
 ---
 
