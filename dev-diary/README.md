@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 25 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.5x, T8.7b) |
-| P9 | 27 / 31 | In progress (T9.15, T9.17, T9.20, T9.23, T9.24) |
+| P9 | 28 / 32 | In progress (T9.15, T9.17, T9.20, T9.23, T9.24) |
 | P10 | 5 / 8 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.25: The exclusion lever (done)
+
+**What exists.** `search_catalog`'s description and its `exclude_skus` parameter name recall's evidence rows as the exclusion's source; step 2 allows one search per turn unless the first returns no products (a second keeps the same exclusions, never a third), reports an empty-with-exclusions answer rather than retrying without them, and forbids a memory SKU as the candidate. Five offline checks pin the text and the model-visible parameter description (189 checks); review tightened two of them (the second-search clause must keep the exclusions; the instruction extraction reads only the template body) and folded T9.23's superseded wording in place.
+
+**What surprised.** The model-visible parameter description is where the lever bites; a check reading only source text could be satisfied by a comment. The shelf may genuinely have no new candidate once the returns are excluded, so the re-record can honestly answer "no new candidate".
+
+**The next agent should not have to work out.** A redeploy plus one fresh step-2 turn (T9.23) is the remaining proof; if it reports an empty shelf, that is a shelf-population decision, not an instruction bug.
 
 ### T4.10: The ledger loads only what it shows (done)
 
