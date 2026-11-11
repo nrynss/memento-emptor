@@ -661,13 +661,21 @@ requires:   [T9.16]
 fixture-ok: yes
 size:       XS · mid
 owns:       deploy/README.md, tools/pincheck/
-status:     claimed:t918-deploy-pins
+status:     in-review
 ```
 `tools/pincheck` now compares Go, Node and bun, but `deploy/README.md`'s toolchain section still lists only Go and Node and still says what the gate reads. Add bun's pin and its sources, and correct the paragraph about what the check covers.
 
 The T9.16 review found the row that task adds would be a pin nothing compares: `readmePins` filters to Go and Node, so a Bun row moved to 2 leaves the gate green. Make the Bun row a required source, or record why it stays unread.
 
 **Done when:** the pin section lists all three toolchains with their sources and the check's coverage; the Bun row is read by the check (or its exclusion is recorded with its reason); the gate passes.
+
+**Notes (worker).** `deploy/README.md`'s toolchain table gains a Bun row: pin 1, pinned by `agent/frontend/Dockerfile`'s one stage and the builder plus runtime stages of `agent/runtime/`, `agent/second/` and `bench/pilot/agent/` (`oven/bun:1`, `oven/bun:1-slim`), checked by `ci.yml`'s `setup-bun` 1.3.14. The section's opening names the four toolchains the table records and says which source holds each: the contract (T0.2) for Go and Node, CI for bun. The paragraph after the table names what the check reads — both deploy images' `FROM` lines, the `oven/bun:` `FROM` line of every Dockerfile in the tree, CI's `go-version`, `node-version` and `bun-version`, `go.mod` and all three rows — and its coverage, 18 declarations, up one from 17. Both asymmetries are stated in the same sentence, Go's patch float and bun's major-only tags, and the "cannot pass by reading less" clause stays.
+
+`tools/pincheck` reads the row. `readmePins` filtered to Go and Node; it now filters and requires through `readmeKinds()` (`go`, `node`, `bun`), so the row is a source on the same terms as the rest and one the table has lost is a failure rather than one fewer pin. The T9.16 finding is closed by reading it, not by recording an exclusion. The row is compared by major, as the images and CI are, so the images' `oven/bun:1` and CI's 1.3.14 agree and a 1.x patch drift in the row alone would stay green; that is the same limit the Dockerfile tags carry, and the section states it rather than implying a patch is compared.
+
+Proof. Two table cases are added: `bun drifts in the readme table` (wants `bun: deploy/README.md` and `says 2`) and `the table loses its bun row` (wants `deploy/README.md: no bun row`); `go test ./tools/pincheck/` is green over 25 cases. Mutation-checked against the real tree, each reverted with `git checkout` and `git status` clean afterwards: the row moved to 2 fails with `bun: deploy/README.md's toolchain table bun row (line 30) says 2, but agent/frontend/Dockerfile's bun build stage (line 9) says 1`; the row deleted fails with `deploy/README.md: no bun row in the toolchain table, so the table states no bun pin`. `go run ./tools/pincheck` prints `go 1.27, node 26 and bun 1 agree across 18 declarations`. `./tools/check.sh` is green after `npm ci` in `web/` and `merchant/`; the frontend step takes its no-`node_modules` fallback, which T9.19's brief covers.
+
+Finding (Low), owner **T9.19**, whose `owns` is `tools/check.sh`: that file's pin comment still says "Bun's live in every Dockerfile's `oven/bun:` build stage and CI's setup-bun", which is now one source short — the table row is bun's third. The fix is that sentence plus the count it states for Go and Node, and it belongs to the task that is already editing that file's prose.
 
 ---
 
