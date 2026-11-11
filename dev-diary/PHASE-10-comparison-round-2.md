@@ -104,7 +104,7 @@ Review, second pass. Re-verified the worker's `4dddf19` from the committed files
 
 ### T10.4: All four arms ★
 ```yaml
-requires:   [T10.3, T9.5, T9.6]
+requires:   [T10.3, T10.6, T9.5, T9.6]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/round2/runs/
@@ -141,6 +141,20 @@ status:     not-started
 `bench/round2/reason.go` restates the layer's size ladder (unexported in `internal/api/server/content.go`), as round 1's driver does. A ladder change in the layer would drift the reference reasoner silently, and the freeze would keep the old order.
 
 **Done when:** the reference reasoner's ladder is checked against the layer's (an exported constant, a behaviour test through the served path, or a recorded reason), and a mismatch fails a test; the gate passes.
+
+---
+
+### T10.7: The reference reasoner reads a kept purchase
+```yaml
+requires:   [T10.3]
+fixture-ok: yes
+size:       S · mid
+owns:       bench/round2/
+status:     not-started
+```
+The P10 review found arm 2's hold is asserted, not derived: `decidePayPal` refuses any input carrying the shopper's brand without reading the records, and the premise test covers returns only. But a kept purchase is a reason-free positive fit signal the layer counts (usual size, pooled kept), and arm 2 can read it. Measured on the frozen records, `r2-corr-standing` has one kept M capture (hidden answer M) and `r2-crowd-plain` one kept S (hidden answer S), so FROZEN's "no shopper's answer is derivable from PayPal's records alone" and case 4's "Arm 2 holds no answer" are false for at least one shopper. Teach the reference reasoner to read a kept purchase on the candidate line and set the hold table accordingly, or replace the blanket claim with the measured fact; either way fix FROZEN's stale §11 sentence (T10.4's two repeats are already reconciled) and re-freeze. Do this before any run: no `runs/` or marker exists.
+
+**Done when:** the reasoner and hold table treat kept purchases honestly, the FROZEN claims match the measured records, §11's stale sentence is gone, the manifest is re-frozen and the gate passes.
 
 ---
 
