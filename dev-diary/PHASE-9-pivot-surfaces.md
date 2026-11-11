@@ -914,3 +914,123 @@ T9.22 changed the reference agent's instruction so recall answers before `search
 - [x] The reference agent never refuses on evidence and records standalone corrections (T9.4).
 - [x] A second agent honours a correction it never saw (T9.5).
 - [ ] The pivoted layer is live, and the demo runs end to end (T9.6, T9.7).
+
+---
+
+## Review (E2E, phase 9)
+
+Fresh eyes on the landed phase, on `task/p9-e2e-review` cut at `4b650f4`, with no paid turn and
+no live write. The gate runs green (`./tools/check.sh`, `npm ci` in `web/` and `merchant/`,
+`bun install --frozen-lockfile` in the three bun packages, so the frontend and both agent
+steps take their full branches). Spend **$0.00**: the only live calls were free layer reads
+(health, the merchant proxy's `product_fit` for six lines, two `recall_for_purchase` reads with
+the demo shopper token, and the guard audit). The three tasks still open (T9.15, T9.17,
+T9.20) were left alone; the findings below are what the landed phase and its records say that
+the tree does not.
+
+**What re-verified clean.**
+
+- **The population.** The committed `testdata/seed/population/population.json` is 69 rows /
+  66 settled, one row per purchase, every row `Seeded: true`, both identifiers 64-hex hashes
+  and no raw id in the encoded file; `TestPopulationFixtureMatchesTheGenerator` and
+  `TestPopulationIsDeterministic` pass, so a second generation is byte-identical (and a shifted
+  anchor is not). `TestPoolStatusesOverThePopulation` pins the six-line table and
+  `domain.DecidePool` gives exactly it: M 12/3/4 Earned small, L 0/4/0 Building large, slim
+  6/1/1 Building small, diluted 8/0/8 Building small, below-floor 1/1/0 Claimed, reversed
+  10/4/0 Out of true small. The exit criterion's "other lines are Building or Out of true"
+  reads past the sixth line, which is Claimed below the Building floor by T9.1's own table.
+- **The population the surfaces read.** Through the deployed merchant proxy, with no caller
+  credential, all six lines read the table's statuses and counts (demo oxford M: Earned small,
+  23 settled, 22 seeded, 1 live, 12 too-small, 3 too-large, 5 fits-well, 20 fit shoppers), so
+  the live pool is the T9.1 seed plus the recorded run's one feedback, not a copy. The
+  merchant's own line list names the same six brand/category/fit/size pairs.
+- **Counts only, no shopper.** `PoolView` has no identity field, `pool.test.ts` pins its key set
+  and scans the decoded pool for `shopper_id`, `payer`, `identity`, `custom_id` and `event_id`;
+  the merchant grid, rows and columns carry no shopper field, and neither the local
+  merchant build nor the deployed chunks served by the merchant service contain `shopper_`,
+  `custom_id` or `payer_id`. The live label names the reader's own shopper id, and the fixture
+  case picker names the case's shopper one at a time; neither carries another shopper's rows
+  into a live read.
+- **The live transport.** `http.ts` posts one tool per call to `/tools/<tool>` with the link
+  token as bearer, fails a non-2xx answer with the layer's own code, and never returns data
+  from a bodiless or non-JSON body; `ledger-live.test.ts` and `live-belief.test.ts` pin the
+  live label, the failure label with no rows, and a page that wears no live badge when
+  nothing answered. The opt-out toggle (`pooling.test.ts`: the choice line, the rows-removed
+  answer and the cross-shopper refusal) and the contest route (`contest-route.test.ts`: the
+  editor from a ledger row, the layer's answer beside the kept belief) pass in the same run.
+  The merchant app reads `product_fit` only (`checkProductFitRequest`
+  rejects any other field set), the edge proxies that one path and 404s the rest, and
+  `no-elastic.test.ts` holds both the sources and the two environment names.
+- **The agents.** The reference agent offers the eight layer tools plus its agent-local
+  `search_catalog`; the second offers the same eight. The catalog tool returns Channel3's
+  records unchanged and never reaches the edge. The retry rule is a separate step (reads may
+  be retried, writes are read back first, `set_pooling` is named safe to repeat) and is pinned
+  sentence by sentence in both offline checks, which the gate now runs with the typechecks.
+- **Exit criteria 1-5** hold on the evidence above and on T9.4/T9.5's recorded traces.
+  Criterion 6 is unchecked and stays unchecked: "the demo runs end to end" is not what the
+  record shows (step 0's shopper half is a 401, step 2's catalog call is unproven, no purchase
+  or dispute can be ingested).
+- **The deployed builds.** `ast agent list` reads `memento-agent` at `42b1f3e2` and
+  `memento-second` at `363ada53`, both Running; the second is T9.9's build and matches the
+  committed `agent/second`. The reference build is newer than the `40454bd3` T9.9 records
+  because T9.20 is redeploying it, so the T9.9 note is a snapshot, not a claim about the
+  current deployment. The guard reads 2 services, 1 GB disk and $14.25/mo against $16.00,
+  green.
+
+**Mutation-checked, each reverted with a clean `git status`.** A shopper id added to the
+decoded pool (`shopper_id: 'shopper_01'`) fails two web pool tests, including the identity
+scan and the key-set pin. `reasonWord` returning the raw category fails four why tests
+(the counted rows read `fit_too_small`). The merchant client adding `shopper_id` to a
+`product_fit` request is refused by `checkProductFitRequest` and fails its test. Clearing
+`row.Seeded` in the population generator fails the seeded-mark test on every row, the fixture
+check and the round-2 fixture check. Replacing the write rule with "retry once" fails the
+reference agent's offline check.
+
+**Findings.**
+
+- (Medium) **The live why view cannot show the pool.** On a linked page the belief page
+  sends `recall_for_purchase` with `{shopper_id}` alone, but the frozen request schema
+  requires `brand_id` and the pool read needs brand, category and fit handle, so the served
+  layer answers `pool: null` and `pool_lookup: unavailable`. Read live through the edge with
+  the demo shopper token: no brand returns `pool: null`, `unavailable`, basis correction;
+  naming `brand-x-001 / shirts / regular` returns the pool **Earned small, 23 settled,
+  22 seeded, 1 live**, precedence `pool` overridden by `correction`. The page therefore
+  renders "No pooled belief applies here." for the shopper whose demo line pool is Earned,
+  and T9.2's Done-when ("the pooled belief that applies to them as counts with its seeded
+  count") holds in fixture mode only. A belief cannot scope the read itself: its subject is a
+  brand and its evidence rows carry category and size but never a fit handle. The request is
+  also schema-invalid, and the layer answers it 200 because it serves the frozen request
+  schemas on `tools/list` without validating an incoming request against them; that is why
+  the shortfall is silent. **Owner: T4.11 (proposed; `web/src/routes/belief/`, with the
+  request-validation decision on `internal/api/server/`).** Fixing it needs a decision (a
+  line the page carries, or a recall that resolves a line from brand and category), so it is
+  a task, not a review edit.
+- (Medium) **product.md's demo step 5 has no live agent path, and its owner is closed.**
+  `recallBeliefs` serves fit beliefs only, so the seller-reliability belief (`blf_1a5e09`,
+  the not-arrived dispute) never reaches recall, and T9.9 keeps agent keys off the ledger
+  reads on purpose. No live agent turn can therefore mention the dispute that step 5 says the
+  agent mentions without treating it as settled; the record substitutes free reads. Gap 4 of
+  T9.7's list names T9.9, which is done and declined to widen the surface, so the gap is now
+  unowned. **Owner: T9.22 (proposed; `internal/api/server/` for a recall that carries the
+  seller belief, and the agents' surface for mentioning it).** Whether step 5 can instead be
+  satisfied by the reads is the orchestrator's call.
+- (Low) **The demo record's gap owners are stale after later lands.** README gaps 3, 4, 5, 7
+  and 8, and `RUN-6.md`'s whole gap list, name owners that are now done or no task:
+  T4.8 (gap 3), T9.9 (gaps 4 and 7), T8.5l (gap 5), T4.6 (gap 8's page half), and "the
+  deployed-app redeploy" / "the orchestrator/operator" / "a presentation task under `web/`
+  and `merchant/`, T4.8" (no task). Three of them are also fixed in the tree: gap 3 by T4.8's
+  transport, gap 5 by T8.5l (its own note says so), and gap 8's two symptoms are gone from
+  the current deployment (the served chunks carry none of the source-comment text, and T4.6
+  removed the duplicate standing sentence). Gap 3's stale lines are already owned by T9.20
+  through T4.8's note; the rest are not. **Owner: T9.20 (owns `demo/`, in review)** for the
+  README and `RUN-6.md` correction, once its own step-2 work lands; gap 4's substance is
+  T9.22's above.
+
+**Limits.** No paid turn was made, so the reference deployment's live tool list is unverified;
+its build id postdates T9.9's record and T9.20 is redeploying it. The record's sixteen-trace
+$0.634 total is not in a committed file: the five turn costs in `summary.json` match
+`RUN-6.md` to the cent and sum to $0.2377, and the rest is T9.7's review, not this one. The
+layer answered one 502 during the review and 200 after (a Render restart, no finding). GitHub
+Actions cannot run here, so the CI side of T9.13/T9.19 stays unproven, as their notes say. The
+phase doc's T9.3i `owns` line and the commit that created `tools/pincheck/` still disagree by
+one directory; T9.3i's own review records it and only the orchestrator writes that line.
