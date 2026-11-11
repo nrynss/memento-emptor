@@ -126,14 +126,15 @@ f52efeb5508b330a608d08cf0f933db933594b55fbdb9037de20f8075093c837  bench/round2/p
 92b1c25b99bdd67fdb8a0ae8905cecdce3fcf490576b65fd0f48d758f92cea37  bench/round2/paypal/r2-noisy-up/list-transactions-pending.json
 4d362ee7e6b8fe5522f5ea5c57670a90ee1cf2e1be23d299d540cd7b3ef98136  bench/round2/paypal/r2-noisy-up/list-transactions-succeeded.json
 f90e5f9743accf1213b71d6a152e528ccdddb3c19de3618f2bcbabc5b34dcac4  seed/round2.go
-2caca8df9f6adce56098f6480f2b8773529fae6e9dc16bbd4cda7789a4ca608b  bench/round2/cases.go
+20eeef1f433346af8170ff1fb60839e3d59a259b5013fd5b67d4c308c8a3f1d4  bench/round2/cases.go
 2decee7b36d67e7eefe84151a72bb0fd58afec9e7d558b7f23b326b043b703a5  bench/round2/doc.go
 33ad363b76718ea849bc1a5f15a800b9cff952f9a07b0877b68eb8195b4f43aa  bench/round2/facts.go
 31b79b0ef1234bead9402cbf0791d74aaeffd5c19c2ff222938cdd796fd60428  bench/round2/grade.go
 1b51fb0306353f499eabaecbe71816b3a02e9efa71ee6da01546406e3ed4822a  bench/round2/paypal.go
-4acf7f44a8af4e89656ddfa5cbb916c25b34a3931c05e39f22062eda6d833b90  bench/round2/prompt.go
-80b62c53ef5b25379e8a39f39179071de3de4a4ad7d4fb8ba97836854ebd1486  bench/round2/reason.go
-c71cf047aa2bbdb6998b309247ec0401985c59936f80446a32ce987860eabfa7  bench/round2/recall.go
+507be8782d82e39e65286e0b9185f97dfd118f8877fe6d9ecacae54ac814c5ee  bench/round2/prompt.go
+ec8c3606faeac40055b834a241faa07d095841004a37fbc9000fae750d020431  bench/round2/reason.go
+fabfedfe9f76da16009133bba06818d4d9230d8cf1d3f8907f9ea58b61831242  bench/round2/recall.go
+7c1f7c408e4bf48d2d068b5ae8bb93b8fbfa318df7a2f778f9275f63eaca518d  bench/round2/runs.go
 940bea8c758311e80b6a7071747eabef641f7ee29d95ce30a5b9a5fbfa30170d  bench/round2/arm2/extract.go
 fbbf17d5bf0e8f23f2076e961de5744d350f55deecc104b0afda0ee5fa4d43ac  bench/pilot/pilot.go
 2772f032e0b753981aa0f6696022ef1ef67b52af60d7a479e4cea3139d1b7c3d  bench/grader/grader.go
@@ -154,6 +155,7 @@ What each row is:
 | `bench/round2/prompt.go` | The prompt template: the base section every arm shares, the four memory blocks, and the project-recall rule. |
 | `bench/round2/recall.go` | The expected `recall_for_purchase` response per shopper, built from the frozen history and population. |
 | `bench/round2/paypal.go` | The arm-2 record generator, so the committed records can be rebuilt and compared. |
+| `bench/round2/runs.go` | The run-directory protocol: the marker T10.4 writes to open `runs/`, and the check that binds it to this freeze. |
 | `bench/round2/grade.go` | The round-2 run record and grader: four measures reuse round 1's rules, and the record adds the turn kind and the precedence step the memory served. |
 | `bench/round2/arm2/extract.go` | T10.1's extraction, unchanged. It is the only thing that turns the toolkit's records into arm 2's prompt input. |
 | `bench/pilot/pilot.go`, `bench/grader/grader.go`, `bench/harness/harness.go` | The reused frozen rules: the reply extraction (`ExtractSize`, `ExtractIDRefs`, the human override), the five round-1 measures, and the token counter and caps. Round 2 adds no second definition of any of them. |
@@ -166,9 +168,14 @@ sha256sum -c <(sed -n '/^```manifest$/,/^```$/p' bench/round2/FROZEN.md | grep '
 
 ## 2. Scale, fixed before any run
 
-- **Repeat count: three turns per shopper per arm**, as the task text sets. The
-  round-1 pilot's n=1 was a thin signal and three separates a stable answer
-  from a lucky one without overfitting eight constructed shoppers.
+- **Repeat count: two turns per shopper per arm.** Three was the task text's
+  plan, and the budget does not hold it: the P9 run mean is $0.0337 per turn,
+  so three repeats is 168 turns (96 first turns plus 72 correction turns) at
+  about **$5.66**, over T10.4's $5.00 cap before any overrun. Two repeats is
+  112 turns (64 first turns plus 48 correction turns) at about **$3.77**,
+  which leaves room for a discarded turn or two. Two still separates a stable
+  answer from a lucky one on eight constructed shoppers, and the pilot's n=1
+  is the thin signal this improves on.
 - **Shoppers per case: exactly two.** Eight shoppers in all, four cases. The
   pair in each case exists so a single idiosyncratic history cannot carry the
   case: each pair disagrees about what makes the answer hard (a brand with no
@@ -176,12 +183,11 @@ sha256sum -c <(sed -n '/^```manifest$/,/^```$/p' bench/round2/FROZEN.md | grep '
   first return; noise that buries fit versus noise in the other direction; a
   belief contradicted versus no belief to contradict). Fairness did not force a
   third, so none was added.
-- **Turns per arm:** 8 shoppers x 4 arms x 3 repeats = 96 first turns. Case 4
+- **Turns per arm:** 8 shoppers x 4 arms x 2 repeats = 64 first turns. Case 4
   adds the correction, next-session and other-agent turns: 2 shoppers x 4 arms
-  x 3 repeats x 3 turns = 72. **168 turns in all**, on the model the freeze
-  pins (`claude-sonnet-4-6`, the same string in every arm). At round 1's
-  per-turn rate this is well inside T10.4's $5.00 budget; T10.4 records the
-  actual spend.
+  x 2 repeats x 3 turns = 48. **112 turns in all**, on the model the freeze
+  pins (`claude-sonnet-4-6`, the same string in every arm). T10.4 records the
+  actual spend against the $5.00 cap.
 
 ## 3. The four cases, and why each separates the arms
 
@@ -205,7 +211,15 @@ every shopper and every arm and checks it against the frozen hold table in
 `cases.go`, on the first recommendation and again after the correction. Where
 the table says an input holds the answer, the reasoner must produce the hidden
 answer; where it says the input does not, the reasoner must not produce it, and
-must name the fact the input lacks. The table the reasoner satisfies:
+must name the fact the input lacks.
+
+The "Missing" column of the code table is not prose: each entry is one of the
+`Missing*` constants in `reason.go`, the exact text the reasoner returns, and
+`TestFairness` requires the two to match character for character. An entry is
+also required wherever the table says an input holds no answer, and forbidden
+where it says the input holds one, so the freeze cannot record an arm as
+unanswerable without saying why, and cannot quietly answer it later. The table
+the reasoner satisfies:
 
 | Shopper | Answer | Arm 1 | Arm 2 | Arm 3 | Arm 4 |
 |---|---|---|---|---|---|
@@ -295,19 +309,56 @@ against the layer. The test asserts exactly one purchase unit and one line item
 per order in arm 2's records, so a later shopper cannot quietly reintroduce the
 case the key does not support.
 
-## 8. No arm 3 or arm 4 run exists before this commit
+## 8. The run directory: empty at the freeze, opened by a marker
 
-Checked over the tree at this commit:
+No arm 3 or arm 4 run exists at this commit, and the tree enforces the order
+rather than trusting it.
 
-- `bench/round2/runs/` does not exist; a test asserts it, and the directory is
-  T10.4's to create.
-- No file under `bench/` names a round-2 arm 3 or arm 4 run.
-- The only round-2 code that renders a Memento prompt outside a test is the
-  prompt builder, and it renders the freeze's expected recall response, not a
-  served one. No model was called for this task: no key, no network, no spend.
+- **At the freeze:** `bench/round2/runs/` does not exist. `freeze_check.sh`
+  fails if the directory appears without the flag, and
+  `TestRunsBeginOnlyAfterTheFreeze` fails if it exists without the marker.
+- **T10.4's first action** is to open the directory with the marker:
 
-Reproduce: `ls bench/round2/runs` (must fail) and
-`go test ./bench/round2/ -run TestNoArmThreeOrFourRunExists` (must pass).
+  Concretely, T10.4 writes `bench/round2/runs/FREEZE.json` before its first
+  turn, with `round2.BeginRuns("bench/round2/runs", freezeCommit, note)` in its
+  setup code, where `freezeCommit` is the full commit id from
+  `git log -1 --format=%H -- bench/round2/FROZEN.md`. The same JSON written by
+  hand works; the marker is:
+
+  ```json
+  {
+    "freeze_commit": "<the full 40-character commit id that landed FROZEN.md>",
+    "frozen_manifest_sha256": "<sha256 of bench/round2/FROZEN.md>",
+    "note": "<who opened the runs and for which task>"
+  }
+  ```
+
+  `BeginRuns` fills both values; `bench/round2/runs.go` is the one place that
+  writes and reads it. `sha256sum bench/round2/FROZEN.md` prints the hash for a
+  hand-written marker.
+- **The marker binds the directory to this freeze, not to a later one.**
+  `ReadRunsMarker` refuses a marker whose manifest hash differs from the file
+  in this tree, so editing the freeze without opening a new run directory fails
+  the test rather than silently measuring against a freeze that no longer
+  exists. The commit id is checked for shape (forty lowercase hex characters)
+  rather than against git history, because CI checks out a shallow clone and a
+  history-dependent test would fail there; the manifest hash is the binding
+  that holds everywhere.
+- **The gate then allows the directory:** `tools/check.sh` passes
+  `--allow-runs` to `freeze_check.sh` when, and only when, the marker exists.
+  With the marker, hashes are still verified in full and the runs refusal is
+  skipped, so T10.4 can commit runs with the gate green. Without it, the
+  directory is a freeze break, which is what keeps a run from landing before
+  the freeze.
+
+Reproduce the pre-freeze state and both modes:
+
+```sh
+ls bench/round2/runs                                  # must fail at this commit
+go test ./bench/round2/ -run TestRunsBeginOnlyAfterTheFreeze
+bench/round2/freeze_check.sh                          # refuses a runs directory
+bench/round2/freeze_check.sh --allow-runs             # verifies hashes, allows it
+```
 
 ## 9. What the arms are given, and the one projection rule
 
@@ -330,6 +381,19 @@ The recall request each Memento arm sends is frozen too (`Target` in
 size. The pool read needs all four fields; a request missing the category or the
 fit handle answers "unavailable", which would silently remove the pool from
 cases 1 and 2, so a test refuses an empty one.
+
+**A cell's turns run in two phases.** Case 4's first turn happens before the
+shopper corrects, so the layer serves a response with no `overriding_correction`
+and nothing contradicted; every later turn — the correction turn, the next
+session and the other agent — happens after it, with the correction in force and
+the belief contradicted beside it. `ExpectedRecall` takes the phase and
+`TurnPhase` maps each turn kind to it, so a first turn can never be rendered from
+a post-correction memory and answer before the shopper spoke.
+`TestFirstTurnPrecedesTheCorrection` asserts the first-turn prompt carries no
+correction text, the later-turn prompt does, and a shopper with no correction
+gets byte-identical memory in both phases. T10.4 records the layer's live
+response per phase, and `recall_for_purchase` on the first turn must be called
+before `record_correction`.
 
 ## 10. Handoffs for T10.4 and the orchestrator
 
@@ -363,8 +427,14 @@ cases 1 and 2, so a test refuses an empty one.
 ## 11. Deviations
 
 - The freeze check is a new script (`bench/round2/freeze_check.sh`) inside this
-  task's owns, wired into `tools/check.sh` with one line. It pins 115 rows and
+  task's owns, wired into `tools/check.sh`. It pins 116 rows and
   fails on a tampered, missing or added row, exactly as round 1's check does.
+- The gate's round-2 call is conditional: it adds `--allow-runs` only when the
+  run marker exists (section 8). That is the one place this round's wiring
+  differs from round 1's, which has no run directory to open.
+- The repeat count is two, not the task text's three, because the budget does
+  not hold three (section 2). T10.4's task text still says three; the freeze
+  wins until the orchestrator reconciles it.
 - No sandbox call was made for this task. The PayPal records are generated from
   the frozen histories in the shape T10.1 recorded; T10.1's recordings remain
   the evidence for that shape.

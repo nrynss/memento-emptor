@@ -9,16 +9,56 @@ import (
 	"github.com/nrynss/memento-emptor/seed"
 )
 
+// RecallPhase names which side of a correction a recall response belongs
+// to. A shopper's first turn happens before the correction is recorded, so
+// the layer serves no correction and nothing is contradicted; every later
+// turn happens after it, so the correction is in force. For a shopper with
+// no correction the two phases are byte-identical.
+type RecallPhase string
+
+// The two phases of a cell.
+const (
+	// PhaseBeforeCorrection is the response the layer serves on the first
+	// recommendation, before record_correction.
+	PhaseBeforeCorrection RecallPhase = "before-correction"
+	// PhaseAfterCorrection is the response it serves once the correction
+	// is recorded.
+	PhaseAfterCorrection RecallPhase = "after-correction"
+)
+
+// Phases lists the two phases in the order a cell runs them.
+func Phases() []RecallPhase {
+	return []RecallPhase{PhaseBeforeCorrection, PhaseAfterCorrection}
+}
+
+// TurnPhase names the phase one turn kind runs in: the first turn precedes
+// a correction, and every correction, next-session and other-agent turn
+// follows it.
+func TurnPhase(turn TurnKind) RecallPhase {
+	if turn == TurnFirst {
+		return PhaseBeforeCorrection
+	}
+	return PhaseAfterCorrection
+}
+
 // ExpectedRecall builds the recall_for_purchase response the freeze
-// expects the layer to serve for one shopper, in the contract's shape. It
-// is the memory the Memento arms are meant to see, built from the frozen
-// history and population and never from the hidden answer, so the fairness
-// check can run the reference reasoner over it before any live run exists.
+// expects the layer to serve for one shopper in one phase, in the
+// contract's shape. It is the memory the Memento arms are meant to see,
+// built from the frozen history and population and never from the hidden
+// answer, so the fairness check can run the reference reasoner over it
+// before any live run exists.
 //
-// T10.4 records the layer's real response for each cell. A difference
-// between this expectation and the served response is reported, not
-// repaired: the freeze states what the memory should hold, and the layer's
-// answer is the measurement.
+// The phase matters for case 4: before the correction the response carries
+// no overriding correction and nothing contradicted, because the layer has
+// not been told yet; after it the correction is in force, the belief stands
+// contradicted beside it and the correction's step decides. Rendering the
+// first turn from the post-correction response would answer a turn before
+// the shopper corrected, which is the opposite of what the case measures.
+//
+// T10.4 records the layer's real response for each cell and phase. A
+// difference between this expectation and the served response is reported,
+// not repaired: the freeze states what the memory should hold, and the
+// layer's answer is the measurement.
 //
 // The response carries the contract's fields — beliefs with their evidence,
 // precedence and status, the pool, any overriding correction, the guidance
@@ -26,7 +66,10 @@ import (
 // count and the trace id. Belief ids and evidence ids are minted
 // deterministically from the shopper id and row order; the live layer mints
 // its own, so no run may compare ids.
-func ExpectedRecall(shopper seed.Round2Shopper, population seed.Population) ([]byte, error) {
+func ExpectedRecall(shopper seed.Round2Shopper, population seed.Population, phase RecallPhase) ([]byte, error) {
+	if phase != PhaseBeforeCorrection && phase != PhaseAfterCorrection {
+		return nil, fmt.Errorf("%w: recall phase %q", ErrUnknownArm, phase)
+	}
 	beliefs, err := expectedBeliefs(shopper)
 	if err != nil {
 		return nil, err
@@ -35,7 +78,10 @@ func ExpectedRecall(shopper seed.Round2Shopper, population seed.Population) ([]b
 	if err != nil {
 		return nil, err
 	}
-	correction := expectedCorrection(shopper)
+	var correction any
+	if phase == PhaseAfterCorrection {
+		correction = expectedCorrection(shopper)
+	}
 	winner := expectedWinner(beliefs, pool, correction)
 	applyPrecedence(beliefs, pool, winner, correction)
 	response := map[string]any{

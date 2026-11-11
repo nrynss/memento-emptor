@@ -71,11 +71,12 @@ func MemorySection(arm Arm, fetch MemoryFetch) (string, error) {
 	}
 }
 
-// PromptFor builds the full prompt for one shopper through one arm: the
-// shared base plus the arm's memory block. The memory is fetched by
-// FetchMemory.
-func PromptFor(shopper seed.Round2Shopper, arm Arm, population seed.Population) (string, MemoryFetch, error) {
-	fetch, err := FetchMemory(shopper, arm, population)
+// PromptFor builds the full prompt for one shopper through one arm in one
+// phase: the shared base plus the arm's memory block. The memory is fetched
+// by FetchMemory for that phase, so a first turn never carries a correction
+// that has not been made yet.
+func PromptFor(shopper seed.Round2Shopper, arm Arm, population seed.Population, phase RecallPhase) (string, MemoryFetch, error) {
+	fetch, err := FetchMemory(shopper, arm, population, phase)
 	if err != nil {
 		return "", MemoryFetch{}, err
 	}
@@ -88,9 +89,10 @@ func PromptFor(shopper seed.Round2Shopper, arm Arm, population seed.Population) 
 
 // FetchMemory obtains one arm's memory from the frozen inputs: nothing for
 // arm 1, the toolkit extraction for arm 2, and the expected recall
-// response for arms 3 and 4. The live driver replaces the last one with
-// the layer's own answer; the prompt rendering is the same either way.
-func FetchMemory(shopper seed.Round2Shopper, arm Arm, population seed.Population) (MemoryFetch, error) {
+// response for arms 3 and 4 in the turn's phase. The live driver replaces
+// the last one with the layer's own answer; the prompt rendering is the
+// same either way.
+func FetchMemory(shopper seed.Round2Shopper, arm Arm, population seed.Population, phase RecallPhase) (MemoryFetch, error) {
 	switch arm {
 	case ArmNoMemory:
 		return MemoryFetch{Tool: arm.memoryTool()}, nil
@@ -101,7 +103,7 @@ func FetchMemory(shopper seed.Round2Shopper, arm Arm, population seed.Population
 		}
 		return MemoryFetch{Tool: arm.memoryTool(), Response: input}, nil
 	case ArmMementoShopperOnly, ArmMementoFull:
-		recall, err := ExpectedRecall(shopper, population)
+		recall, err := ExpectedRecall(shopper, population, phase)
 		if err != nil {
 			return MemoryFetch{}, err
 		}

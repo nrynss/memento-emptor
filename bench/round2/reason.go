@@ -28,6 +28,30 @@ const (
 	RungNone Rung = "none"
 )
 
+// The frozen missing-fact texts. The reference reasoner returns one of
+// these when an arm's input holds no answer, and the hold table in cases.go
+// names the same string, so a change to either fails TestFairness rather
+// than drifting apart. The freeze quotes them in FROZEN.md as the reason
+// each arm is not expected to answer.
+const (
+	// MissingNoMemory is arm 1's reason: it carries nothing.
+	MissingNoMemory = "no memory at all"
+	// MissingNoBrandHistory is arm 2's reason on a brand the shopper has
+	// never bought: the toolkit holds no purchase on that line.
+	MissingNoBrandHistory = "no history with the candidate brand at all: the toolkit holds no purchase on that line"
+	// MissingNoCause is arm 2's reason on every other shopper: the returns
+	// at one size mix fit with causes the toolkit never returns.
+	MissingNoCause = "no refund reason: the returns at one size mix fit with damage, non-arrival, changed mind and no reason at all"
+	// MissingNoRecord is arm 2's reason when the toolkit holds nothing.
+	MissingNoRecord = "no history at all"
+	// MissingStatementOnly is the shopper-only arm's reason on a brand the
+	// shopper has never bought: the statement is memory, and it answers the
+	// usual size rather than the right one.
+	MissingStatementOnly = "only the shopper's general statement, which is their usual size and not the answer; no history with the candidate brand and no pool in this arm"
+	// MissingNothing is the reason when no step has anything to say.
+	MissingNothing = "no fit evidence, no pool and no statement: the input says nothing about the size"
+)
+
 // Decision is what a perfect reasoner answers from one arm's input, and
 // what it cannot answer without.
 type Decision struct {
@@ -205,7 +229,7 @@ func decide(shopper seed.Round2Shopper, arm Arm, population seed.Population, cor
 	}
 	switch arm {
 	case ArmNoMemory:
-		return Decision{Hold: false, Rung: RungNone, Missing: "no memory at all"}, nil
+		return Decision{Hold: false, Rung: RungNone, Missing: MissingNoMemory}, nil
 	case ArmPayPalHistory:
 		return decidePayPal(shopper)
 	case ArmMementoShopperOnly, ArmMementoFull:
@@ -236,7 +260,7 @@ func decide(shopper seed.Round2Shopper, arm Arm, population seed.Population, cor
 	return Decision{
 		Hold:    false,
 		Rung:    RungNone,
-		Missing: "no fit evidence, no pool and no statement: the input says nothing about the size",
+		Missing: MissingNothing,
 	}, nil
 }
 
@@ -266,19 +290,19 @@ func decidePayPal(shopper seed.Round2Shopper) (Decision, error) {
 		return Decision{}, fmt.Errorf("round2: decode arm 2 input for %q: %w", shopper.ShopperID, err)
 	}
 	if len(records) == 0 {
-		return Decision{Hold: false, Rung: RungNone, Missing: "no history at all"}, nil
+		return Decision{Hold: false, Rung: RungNone, Missing: MissingNoRecord}, nil
 	}
 	if !strings.Contains(string(input), shopper.Candidate.BrandName) {
 		return Decision{
 			Hold:    false,
 			Rung:    RungNone,
-			Missing: "no history with the candidate brand at all: the toolkit holds no purchase on that line",
+			Missing: MissingNoBrandHistory,
 		}, nil
 	}
 	return Decision{
 		Hold:    false,
 		Rung:    RungNone,
-		Missing: "no refund reason: the returns at one size mix fit with damage, non-arrival, changed mind and no reason at all",
+		Missing: MissingNoCause,
 	}, nil
 }
 

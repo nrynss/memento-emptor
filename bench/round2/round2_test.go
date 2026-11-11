@@ -3,7 +3,9 @@ package round2
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -160,20 +162,27 @@ func TestFairness(t *testing.T) {
 					t.Errorf("%s arm %d: input is declared to hold the answer but the reasoner decides %q (hold %v), hidden answer is %q",
 						shopper.ShopperID, int(arm), first.Size, first.Hold, answer.RightSize)
 				}
+				if declared := expectation.Missing[arm]; declared != "" {
+					t.Errorf("%s arm %d: the table holds the answer but names a missing fact %q",
+						shopper.ShopperID, int(arm), declared)
+				}
 				continue
 			}
 			// An input may hold a weaker basis than the answer: the
 			// shopper-only arm answers a new shopper's usual size from their
 			// statement, and the case exists because that is not the right
 			// size. The table still says the input does not hold the answer,
-			// so a decided size must differ from it.
+			// so a decided size must differ from it, and the table must say
+			// why that size is not the answer.
 			if first.Hold && first.Size == answer.RightSize {
 				t.Errorf("%s arm %d: input decides the hidden answer %q, and the frozen table says it does not hold it",
 					shopper.ShopperID, int(arm), answer.RightSize)
 			}
-			if !first.Hold && strings.TrimSpace(first.Missing) == "" {
-				t.Errorf("%s arm %d: input holds nothing but the reasoner names no missing fact",
-					shopper.ShopperID, int(arm))
+			if declared := strings.TrimSpace(expectation.Missing[arm]); declared == "" {
+				t.Errorf("%s arm %d: the table says the input holds no answer but names no reason", shopper.ShopperID, int(arm))
+			} else if !first.Hold && first.Missing != declared {
+				t.Errorf("%s arm %d: the reasoner names the missing fact %q, the frozen table says %q",
+					shopper.ShopperID, int(arm), first.Missing, declared)
 			}
 		}
 		if shopper.Correction == nil {
@@ -198,15 +207,21 @@ func TestFairness(t *testing.T) {
 					t.Errorf("%s arm %d after correction: reasoner decides %q (hold %v), hidden answer is %q",
 						shopper.ShopperID, int(arm), after.Size, after.Hold, answer.RightSizeAfterCorrection)
 				}
+				if declared := expectation.Missing[arm]; declared != "" {
+					t.Errorf("%s arm %d after correction: the table holds the answer but names a missing fact %q",
+						shopper.ShopperID, int(arm), declared)
+				}
 				continue
 			}
 			if after.Hold && after.Size == answer.RightSizeAfterCorrection {
 				t.Errorf("%s arm %d: after the correction the input decides the hidden answer %q, and the frozen table says it does not hold it",
 					shopper.ShopperID, int(arm), answer.RightSizeAfterCorrection)
 			}
-			if !after.Hold && strings.TrimSpace(after.Missing) == "" {
-				t.Errorf("%s arm %d: after the correction the input holds nothing but names no missing fact",
-					shopper.ShopperID, int(arm))
+			if declared := strings.TrimSpace(expectation.Missing[arm]); declared == "" {
+				t.Errorf("%s arm %d after correction: the table says the input holds no answer but names no reason", shopper.ShopperID, int(arm))
+			} else if !after.Hold && after.Missing != declared {
+				t.Errorf("%s arm %d after correction: the reasoner names the missing fact %q, the frozen table says %q",
+					shopper.ShopperID, int(arm), after.Missing, declared)
 			}
 		}
 	}
@@ -327,59 +342,68 @@ func TestTheCasesSeparateTheArms(t *testing.T) {
 }
 
 // TestExpectedRecallIsWhatTheMementoArmsSee pins the recall fixture's
-// shape and the projection: the pool is present for arm 4 and null for arm
-// 3, the guidance block is dropped for both, and the correction reaches
-// both Memento arms.
+// shape and the projection in both phases: the pool is present for arm 4
+// and null for arm 3, the guidance block is dropped for both, and the
+// correction reaches both Memento arms only in the phase after it.
 func TestExpectedRecallIsWhatTheMementoArmsSee(t *testing.T) {
 	frozen := loadFixture(t)
 	for _, shopper := range frozen.shoppers {
-		raw, err := ExpectedRecall(shopper, frozen.population)
-		if err != nil {
-			t.Fatalf("%s: expected recall: %v", shopper.ShopperID, err)
-		}
-		var response map[string]any
-		if err := json.Unmarshal(raw, &response); err != nil {
-			t.Fatalf("%s: decode expected recall: %v", shopper.ShopperID, err)
-		}
-		for _, key := range []string{"shopper_id", "beliefs", "pool", "pool_lookup", "overriding_correction", "guidance", "pending_count"} {
-			if _, ok := response[key]; !ok {
-				t.Errorf("%s: expected recall has no %q", shopper.ShopperID, key)
+		for _, phase := range Phases() {
+			raw, err := ExpectedRecall(shopper, frozen.population, phase)
+			if err != nil {
+				t.Fatalf("%s %s: expected recall: %v", shopper.ShopperID, phase, err)
 			}
-		}
-		if response["shopper_id"] != shopper.ShopperID {
-			t.Errorf("%s: expected recall is for %v", shopper.ShopperID, response["shopper_id"])
-		}
-		full, err := ProjectRecall(raw, ArmMementoFull)
-		if err != nil {
-			t.Fatalf("%s: project arm 4: %v", shopper.ShopperID, err)
-		}
-		shopperOnly, err := ProjectRecall(raw, ArmMementoShopperOnly)
-		if err != nil {
-			t.Fatalf("%s: project arm 3: %v", shopper.ShopperID, err)
-		}
-		for _, projected := range [][]byte{full, shopperOnly} {
-			if strings.Contains(string(projected), "\"guidance\"") {
-				t.Errorf("%s: the projection kept the guidance block", shopper.ShopperID)
+			var response map[string]any
+			if err := json.Unmarshal(raw, &response); err != nil {
+				t.Fatalf("%s %s: decode expected recall: %v", shopper.ShopperID, phase, err)
 			}
-		}
-		var fullView, shopperView map[string]any
-		if err := json.Unmarshal(full, &fullView); err != nil {
-			t.Fatalf("%s: decode arm 4 memory: %v", shopper.ShopperID, err)
-		}
-		if err := json.Unmarshal(shopperOnly, &shopperView); err != nil {
-			t.Fatalf("%s: decode arm 3 memory: %v", shopper.ShopperID, err)
-		}
-		if shopperView["pool"] != nil {
-			t.Errorf("%s: arm 3's memory carries a pool", shopper.ShopperID)
-		}
-		if shopper.CaseID == seed.Round2CaseNewToBrand || shopper.CaseID == seed.Round2CaseUnlikeCrowd {
-			if fullView["pool"] == nil {
-				t.Errorf("%s: arm 4's memory carries no pool, and the case needs one", shopper.ShopperID)
+			for _, key := range []string{"shopper_id", "beliefs", "pool", "pool_lookup", "overriding_correction", "guidance", "pending_count"} {
+				if _, ok := response[key]; !ok {
+					t.Errorf("%s %s: expected recall has no %q", shopper.ShopperID, phase, key)
+				}
 			}
-		}
-		if shopper.Correction != nil {
-			if !strings.Contains(string(shopperOnly), shopper.Correction.WantSize) {
-				t.Errorf("%s: arm 3's memory does not carry the correction", shopper.ShopperID)
+			if response["shopper_id"] != shopper.ShopperID {
+				t.Errorf("%s %s: expected recall is for %v", shopper.ShopperID, phase, response["shopper_id"])
+			}
+			full, err := ProjectRecall(raw, ArmMementoFull)
+			if err != nil {
+				t.Fatalf("%s %s: project arm 4: %v", shopper.ShopperID, phase, err)
+			}
+			shopperOnly, err := ProjectRecall(raw, ArmMementoShopperOnly)
+			if err != nil {
+				t.Fatalf("%s %s: project arm 3: %v", shopper.ShopperID, phase, err)
+			}
+			for _, projected := range [][]byte{full, shopperOnly} {
+				if strings.Contains(string(projected), "\"guidance\"") {
+					t.Errorf("%s %s: the projection kept the guidance block", shopper.ShopperID, phase)
+				}
+			}
+			var fullView, shopperView map[string]any
+			if err := json.Unmarshal(full, &fullView); err != nil {
+				t.Fatalf("%s %s: decode arm 4 memory: %v", shopper.ShopperID, phase, err)
+			}
+			if err := json.Unmarshal(shopperOnly, &shopperView); err != nil {
+				t.Fatalf("%s %s: decode arm 3 memory: %v", shopper.ShopperID, phase, err)
+			}
+			if shopperView["pool"] != nil {
+				t.Errorf("%s %s: arm 3's memory carries a pool", shopper.ShopperID, phase)
+			}
+			if shopper.CaseID == seed.Round2CaseNewToBrand || shopper.CaseID == seed.Round2CaseUnlikeCrowd {
+				if fullView["pool"] == nil {
+					t.Errorf("%s %s: arm 4's memory carries no pool, and the case needs one", shopper.ShopperID, phase)
+				}
+			}
+			if shopper.Correction == nil {
+				continue
+			}
+			wantCorrection := phase == PhaseAfterCorrection
+			if got := strings.Contains(string(shopperOnly), shopper.Correction.Text); got != wantCorrection {
+				t.Errorf("%s %s: arm 3's memory carries the correction = %v, want %v",
+					shopper.ShopperID, phase, got, wantCorrection)
+			}
+			if got := strings.Contains(string(full), shopper.Correction.Text); got != wantCorrection {
+				t.Errorf("%s %s: arm 4's memory carries the correction = %v, want %v",
+					shopper.ShopperID, phase, got, wantCorrection)
 			}
 		}
 	}
@@ -395,7 +419,7 @@ func TestPromptsDifferOnlyInMemory(t *testing.T) {
 		prompts := map[Arm]string{}
 		memories := map[Arm]string{}
 		for _, arm := range Arms() {
-			prompt, fetch, err := PromptFor(shopper, arm, frozen.population)
+			prompt, fetch, err := PromptFor(shopper, arm, frozen.population, PhaseBeforeCorrection)
 			if err != nil {
 				t.Fatalf("%s arm %d: prompt: %v", shopper.ShopperID, int(arm), err)
 			}
@@ -530,7 +554,7 @@ func TestArmTwoCannotReadTheAnswers(t *testing.T) {
 	for _, shopper := range frozen.shoppers {
 		answer := frozen.answers[shopper.ShopperID]
 		for _, arm := range Arms() {
-			prompt, _, err := PromptFor(shopper, arm, frozen.population)
+			prompt, _, err := PromptFor(shopper, arm, frozen.population, PhaseBeforeCorrection)
 			if err != nil {
 				t.Fatalf("%s arm %d: %v", shopper.ShopperID, int(arm), err)
 			}
@@ -544,19 +568,124 @@ func TestArmTwoCannotReadTheAnswers(t *testing.T) {
 	}
 }
 
-// TestNoArmThreeOrFourRunExists pins the freeze's order: no arm 3 or arm 4
-// run may exist before this commit. The run directory is T10.4's.
-func TestNoArmThreeOrFourRunExists(t *testing.T) {
+// TestRunsBeginOnlyAfterTheFreeze pins the run-directory protocol. A run
+// directory that does not exist is the pre-freeze state and passes. Once it
+// exists, its marker must open this freeze: the marker names the commit
+// that landed the freeze and pins the manifest by hash, and the hash must
+// match the file in this tree. A run directory without a marker, or with a
+// marker from an earlier freeze, fails here — and the freeze check refuses
+// the directory too unless the gate passes --allow-runs, which it does only
+// when the marker exists.
+func TestRunsBeginOnlyAfterTheFreeze(t *testing.T) {
 	dir := fixturePath("runs")
-	entries, err := os.ReadDir(dir)
-	if err != nil {
+	if _, err := os.Stat(dir); err != nil {
 		if os.IsNotExist(err) {
 			return
 		}
 		t.Fatalf("read runs: %v", err)
 	}
-	for _, entry := range entries {
-		t.Errorf("a run file exists before the freeze: %s", entry.Name())
+	marker, err := ReadRunsMarker(dir)
+	if err != nil {
+		t.Fatalf("%v: write bench/round2/runs/%s with round2.BeginRuns before the first turn (FROZEN.md section 8)", err, RunsMarkerFile)
+	}
+	if !commitPattern.MatchString(marker.FreezeCommit) {
+		t.Errorf("the runs marker names freeze commit %q, want a full commit id", marker.FreezeCommit)
+	}
+}
+
+// TestRunsMarkerBindsTheFreeze proves the marker protocol's own code in a
+// temporary directory: BeginRuns writes a marker that opens this freeze, a
+// short commit id is refused, and a marker written against another manifest
+// no longer opens it.
+func TestRunsMarkerBindsTheFreeze(t *testing.T) {
+	dir := t.TempDir()
+	const commit = "0123456789abcdef0123456789abcdef01234567"
+	if _, err := BeginRuns(dir, "not-a-commit", "test"); !errors.Is(err, ErrNoRunsMarker) {
+		t.Errorf("a short commit id was accepted: %v", err)
+	}
+	marker, err := BeginRuns(dir, commit, "test marker")
+	if err != nil {
+		t.Fatalf("open runs: %v", err)
+	}
+	manifest, err := FrozenManifestSHA256()
+	if err != nil {
+		t.Fatalf("freeze manifest hash: %v", err)
+	}
+	if marker.FreezeCommit != commit || marker.FrozenManifestSHA256 != manifest {
+		t.Errorf("marker = %+v, want commit %s and manifest %s", marker, commit, manifest)
+	}
+	if _, err := ReadRunsMarker(dir); err != nil {
+		t.Errorf("a marker just written does not open the freeze: %v", err)
+	}
+	// A marker from an earlier freeze must not open this one.
+	stale := RunsMarker{FreezeCommit: commit, FrozenManifestSHA256: "00" + manifest[2:]}
+	raw, err := json.MarshalIndent(stale, "", "  ")
+	if err != nil {
+		t.Fatalf("encode stale marker: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, RunsMarkerFile), raw, 0o644); err != nil {
+		t.Fatalf("write stale marker: %v", err)
+	}
+	if _, err := ReadRunsMarker(dir); !errors.Is(err, ErrNoRunsMarker) {
+		t.Errorf("a marker from another freeze opened this one: %v", err)
+	}
+	if err := os.Remove(filepath.Join(dir, RunsMarkerFile)); err != nil {
+		t.Fatalf("remove marker: %v", err)
+	}
+	if _, err := ReadRunsMarker(dir); !errors.Is(err, ErrNoRunsMarker) {
+		t.Errorf("an empty run directory opened the freeze: %v", err)
+	}
+}
+
+// TestFirstTurnPrecedesTheCorrection pins the phase rule. The first turn's
+// Memento prompt carries no correction, because the layer has not been told
+// yet; every later turn carries it. A first turn rendered from the
+// post-correction response would answer after the shopper corrected, which
+// is the opposite of what case 4 measures.
+func TestFirstTurnPrecedesTheCorrection(t *testing.T) {
+	frozen := loadFixture(t)
+	corrected := 0
+	for _, shopper := range frozen.shoppers {
+		if TurnPhase(TurnFirst) != PhaseBeforeCorrection {
+			t.Fatalf("the first turn runs in phase %q, want %q", TurnPhase(TurnFirst), PhaseBeforeCorrection)
+		}
+		for _, turn := range []TurnKind{TurnCorrection, TurnNextSession, TurnOtherAgent} {
+			if TurnPhase(turn) != PhaseAfterCorrection {
+				t.Fatalf("%q runs in phase %q, want %q", turn, TurnPhase(turn), PhaseAfterCorrection)
+			}
+		}
+		for _, arm := range []Arm{ArmMementoShopperOnly, ArmMementoFull} {
+			before, beforeFetch, err := PromptFor(shopper, arm, frozen.population, TurnPhase(TurnFirst))
+			if err != nil {
+				t.Fatalf("%s arm %d: first prompt: %v", shopper.ShopperID, int(arm), err)
+			}
+			after, afterFetch, err := PromptFor(shopper, arm, frozen.population, TurnPhase(TurnOtherAgent))
+			if err != nil {
+				t.Fatalf("%s arm %d: later prompt: %v", shopper.ShopperID, int(arm), err)
+			}
+			if shopper.Correction == nil {
+				if before != after || !bytes.Equal(beforeFetch.Response, afterFetch.Response) {
+					t.Errorf("%s arm %d: the phases differ for a shopper with no correction", shopper.ShopperID, int(arm))
+				}
+				continue
+			}
+			if strings.Contains(before, shopper.Correction.Text) {
+				t.Errorf("%s arm %d: the first-turn prompt carries the correction text", shopper.ShopperID, int(arm))
+			}
+			if strings.Contains(before, `"overriding_correction": {`) {
+				t.Errorf("%s arm %d: the first-turn memory carries an overriding correction", shopper.ShopperID, int(arm))
+			}
+			if !strings.Contains(after, shopper.Correction.Text) {
+				t.Errorf("%s arm %d: the later-turn prompt carries no correction text", shopper.ShopperID, int(arm))
+			}
+		}
+		if shopper.Correction == nil {
+			continue
+		}
+		corrected++
+	}
+	if corrected != 2 {
+		t.Errorf("%d shoppers have a correction, want 2", corrected)
 	}
 }
 
@@ -610,48 +739,50 @@ func TestOwnEvidenceCanBeServed(t *testing.T) {
 func TestExpectedRecallDecodesAsTheContract(t *testing.T) {
 	frozen := loadFixture(t)
 	for _, shopper := range frozen.shoppers {
-		raw, err := ExpectedRecall(shopper, frozen.population)
-		if err != nil {
-			t.Fatalf("%s: expected recall: %v", shopper.ShopperID, err)
-		}
-		decoder := json.NewDecoder(bytes.NewReader(raw))
-		decoder.DisallowUnknownFields()
-		var response contract.RecallResponse
-		if err := decoder.Decode(&response); err != nil {
-			t.Errorf("%s: expected recall does not decode as recall_for_purchase: %v", shopper.ShopperID, err)
-			continue
-		}
-		if response.ShopperID != shopper.ShopperID {
-			t.Errorf("%s: response names %q", shopper.ShopperID, response.ShopperID)
-		}
-		if response.PoolLookup != contract.PoolConsulted {
-			t.Errorf("%s: pool_lookup is %q, want consulted", shopper.ShopperID, response.PoolLookup)
-		}
-		if response.Guidance.Text == "" {
-			t.Errorf("%s: the expected response carries no guidance block to project away", shopper.ShopperID)
-		}
-		if response.PendingCount != PendingCount(shopper) {
-			t.Errorf("%s: pending count is %d, history has %d", shopper.ShopperID, response.PendingCount, PendingCount(shopper))
-		}
-		for _, belief := range response.Beliefs {
-			if belief.BeliefID == "" || belief.Value == "" || belief.Status == "" {
-				t.Errorf("%s: a belief is unnamed, unvalued or unlabelled: %+v", shopper.ShopperID, belief)
+		for _, phase := range Phases() {
+			raw, err := ExpectedRecall(shopper, frozen.population, phase)
+			if err != nil {
+				t.Fatalf("%s %s: expected recall: %v", shopper.ShopperID, phase, err)
 			}
-			for _, evidence := range belief.Evidence {
-				if evidence.EvidenceID == "" || evidence.Item.Size == "" || evidence.WriteOp == "" {
-					t.Errorf("%s: an evidence row is incomplete: %+v", shopper.ShopperID, evidence)
+			decoder := json.NewDecoder(bytes.NewReader(raw))
+			decoder.DisallowUnknownFields()
+			var response contract.RecallResponse
+			if err := decoder.Decode(&response); err != nil {
+				t.Errorf("%s: expected recall does not decode as recall_for_purchase: %v", shopper.ShopperID, err)
+				continue
+			}
+			if response.ShopperID != shopper.ShopperID {
+				t.Errorf("%s: response names %q", shopper.ShopperID, response.ShopperID)
+			}
+			if response.PoolLookup != contract.PoolConsulted {
+				t.Errorf("%s: pool_lookup is %q, want consulted", shopper.ShopperID, response.PoolLookup)
+			}
+			if response.Guidance.Text == "" {
+				t.Errorf("%s: the expected response carries no guidance block to project away", shopper.ShopperID)
+			}
+			if response.PendingCount != PendingCount(shopper) {
+				t.Errorf("%s: pending count is %d, history has %d", shopper.ShopperID, response.PendingCount, PendingCount(shopper))
+			}
+			for _, belief := range response.Beliefs {
+				if belief.BeliefID == "" || belief.Value == "" || belief.Status == "" {
+					t.Errorf("%s: a belief is unnamed, unvalued or unlabelled: %+v", shopper.ShopperID, belief)
+				}
+				for _, evidence := range belief.Evidence {
+					if evidence.EvidenceID == "" || evidence.Item.Size == "" || evidence.WriteOp == "" {
+						t.Errorf("%s: an evidence row is incomplete: %+v", shopper.ShopperID, evidence)
+					}
 				}
 			}
-		}
-		if response.Pool != nil {
-			counts := response.Pool.Counts
-			sum := counts.Returns.TooSmall + counts.Returns.TooLarge + counts.Feedback.FitsWell +
-				counts.Reasons.DamagedOrDefective + counts.Reasons.NotArrived + counts.Reasons.ChangedMind + counts.Kept
-			if counts.Settled != sum {
-				t.Errorf("%s: pool settled count %d is not the sum %d", shopper.ShopperID, counts.Settled, sum)
-			}
-			if response.Pool.Status == domain.StatusClaimed {
-				t.Errorf("%s: a Claimed pool must be null so the pool step says nothing", shopper.ShopperID)
+			if response.Pool != nil {
+				counts := response.Pool.Counts
+				sum := counts.Returns.TooSmall + counts.Returns.TooLarge + counts.Feedback.FitsWell +
+					counts.Reasons.DamagedOrDefective + counts.Reasons.NotArrived + counts.Reasons.ChangedMind + counts.Kept
+				if counts.Settled != sum {
+					t.Errorf("%s: pool settled count %d is not the sum %d", shopper.ShopperID, counts.Settled, sum)
+				}
+				if response.Pool.Status == domain.StatusClaimed {
+					t.Errorf("%s: a Claimed pool must be null so the pool step says nothing", shopper.ShopperID)
+				}
 			}
 		}
 	}

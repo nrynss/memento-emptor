@@ -152,7 +152,11 @@ type HoldExpectation struct {
 	// correction. It is empty for shoppers with no correction.
 	After map[Arm]bool
 	// Missing names, per arm, the fact the input lacks when it holds no
-	// answer. It is empty where the input holds the answer.
+	// answer. It is the reference reasoner's own text (the Missing*
+	// constants in reason.go), and TestFairness requires the two to match,
+	// so the freeze's stated reason and the code cannot drift apart. It is
+	// empty where the input holds the answer, and non-empty where the input
+	// decides a weaker size that is not the answer.
 	Missing map[Arm]string
 }
 
@@ -168,9 +172,9 @@ func Expectations() []HoldExpectation {
 				ArmMementoFull:        true,
 			},
 			Missing: map[Arm]string{
-				ArmNoMemory:           "no memory at all",
-				ArmPayPalHistory:      "no history with the candidate brand at all, and no refund reason anywhere",
-				ArmMementoShopperOnly: "only the shopper's general statement, which is their usual size and not the answer; no history with the candidate brand and no pool in this arm",
+				ArmNoMemory:           MissingNoMemory,
+				ArmPayPalHistory:      MissingNoBrandHistory,
+				ArmMementoShopperOnly: MissingStatementOnly,
 				ArmMementoFull:        "",
 			},
 		}
@@ -183,6 +187,10 @@ func Expectations() []HoldExpectation {
 				ArmPayPalHistory:      false,
 				ArmMementoShopperOnly: true,
 				ArmMementoFull:        true,
+			},
+			Missing: map[Arm]string{
+				ArmNoMemory:      MissingNoMemory,
+				ArmPayPalHistory: MissingNoCause,
 			},
 		}
 	}

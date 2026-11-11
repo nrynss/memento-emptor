@@ -18,7 +18,17 @@ for tool in go node npm; do
 done
 
 bench/freeze_check.sh || fail "freeze" "frozen comparison inputs mismatch (bench/FROZEN.md section 1)"
-bench/round2/freeze_check.sh || fail "freeze round 2" "frozen round 2 inputs mismatch (bench/round2/FROZEN.md section 1)"
+
+# Round 2: a runs directory is allowed only once T10.4 has opened it with the
+# marker bench/round2/runs/FREEZE.json (bench/round2/FROZEN.md section 8).
+# The marker's binding to this freeze is enforced by the Go test the gate
+# runs below; here the point is that the directory itself is not a freeze
+# break once it has been opened deliberately.
+round2_freeze_flag=""
+if [ -f bench/round2/runs/FREEZE.json ]; then
+	round2_freeze_flag="--allow-runs"
+fi
+bench/round2/freeze_check.sh $round2_freeze_flag || fail "freeze round 2" "frozen round 2 inputs mismatch (bench/round2/FROZEN.md section 1)"
 
 # The Go and Node pins live in six places: both images' FROM lines, CI's
 # setup-go and setup-node, go.mod, and deploy/README.md's table. An image
