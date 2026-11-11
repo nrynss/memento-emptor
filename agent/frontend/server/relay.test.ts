@@ -1,15 +1,19 @@
 /**
- * Guards for the shopper page's two relay rules (T9.12):
- *  - the request shape validateMessages accepts, and
- *  - the anonymous turn budget: 30 model turns per container lifetime,
- *    then an honest refusal, with validation failures costing nothing.
+ * Guards for the shopper page's relay (T9.12, T9.14):
+ *  - the request shape validateMessages accepts,
+ *  - the anonymous turn budget: 30 model turns per container lifetime, then
+ *    an honest refusal, with validation failures costing nothing, and
+ *  - the status mapping every /api/chat answer goes through: 400 for a body
+ *    the relay refuses, 429 for a spent budget, 502 for a failed model turn.
  *
- * Runs on node alone (`node --test server/relay.test.ts`), so the gate can
- * run it without bun, a gateway credential or a model call; relay.ts has no
- * imports for the same reason.
+ * Runs on node alone (`node --test server/relay.test.ts`) and on bun
+ * (`bun test server/relay.test.ts`), so the gate can run it without a gateway
+ * credential, a model call or a listening port; relay.ts and status.ts import
+ * nothing for the same reason.
  */
 
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import {
   createTurnBudget,
@@ -20,6 +24,16 @@ import {
   TURNS_EXHAUSTED_ERROR,
   validateMessages,
 } from "./relay.ts";
+import {
+  MALFORMED_JSON_ERROR,
+  malformedJsonReply,
+  refusalReply,
+  RELAY_FAILURE_ERROR,
+  relayFailureReply,
+  STATUS_EXHAUSTED,
+  STATUS_INVALID,
+  STATUS_RELAY_FAILURE,
+} from "./status.ts";
 
 function userTurn(text: string) {
   return { role: "user", content: text };
@@ -210,5 +224,83 @@ describe("the 30-turn cap", () => {
     const second = createTurnBudget();
     assert.equal(second.remaining(), MAX_TURNS);
     assert.equal(second.take(), true);
+  });
+});
+
+describe("the /api/chat status mapping", () => {
+  // index.ts cannot be imported here: it starts Bun.serve on the injected
+  // PORT and registers serve(). Reading it as text is the one way to pin that
+  // it takes every status from status.ts instead of writing its own.
+  const indexSource = readFileSync(new URL("./index.ts", import.meta.url), "utf8");
+
+  it("answers 400 for a body that is not JSON", () => {
+    const reply = malformedJsonReply();
+    assert.equal(reply.status, 400);
+    assert.deepEqual(reply.body, { error: "body must be JSON" });
+    assert.equal(MALFORMED_JSON_ERROR, "body must be JSON", "the page shows this text");
+  });
+
+  it("answers 400 for a body the relay refuses, in the relay's words", () => {
+    const reply = refusalReply({ kind: "invalid", error: "the last message must be from the user" });
+    assert.equal(reply.status, 400);
+    assert.deepEqual(reply.body, { error: "the last message must be from the user" });
+    assert.deepEqual(Object.keys(reply.body), ["error"], "a refusal carries no turn id");
+  });
+
+  it("answers 429 for a spent budget, in the cap's words", () => {
+    const reply = refusalReply({ kind: "exhausted", error: TURNS_EXHAUSTED_ERROR });
+    assert.equal(reply.status, 429);
+    assert.deepEqual(reply.body, { error: TURNS_EXHAUSTED_ERROR });
+    assert.deepEqual(Object.keys(reply.body), ["error"], "a refusal carries no turn id");
+  });
+
+  it("answers 502 for a failed model turn, with the turn id and nothing else", () => {
+    const reply = relayFailureReply("turn_a1b2c3d4");
+    assert.equal(reply.status, 502);
+    assert.equal(RELAY_FAILURE_ERROR, "model turn failed; try one short message again");
+    assert.deepEqual(reply.body, {
+      error: "model turn failed; try one short message again",
+      turn_id: "turn_a1b2c3d4",
+    });
+    assert.deepEqual(Object.keys(reply.body).sort(), ["error", "turn_id"]);
+  });
+
+  it("pins each status and keeps the three apart", () => {
+    assert.equal(STATUS_INVALID, 400);
+    assert.equal(STATUS_EXHAUSTED, 429);
+    assert.equal(STATUS_RELAY_FAILURE, 502);
+    assert.equal(new Set([STATUS_INVALID, STATUS_EXHAUSTED, STATUS_RELAY_FAILURE]).size, 3);
+  });
+
+  it("maps the relay's own decisions: invalid is 400, exhausted is 429", () => {
+    const budget = createTurnBudget(1);
+    assert.equal(decideChatTurn({ messages: [userTurn("one")] }, budget).kind, "turn");
+
+    const malformed = decideChatTurn({ messages: [] }, budget);
+    if (malformed.kind === "turn") assert.fail("an empty request must be refused");
+    const malformedReply = refusalReply(malformed);
+    assert.equal(malformedReply.status, 400);
+    assert.match(malformedReply.body.error, /at most 20 turns/);
+
+    const spent = decideChatTurn({ messages: [userTurn("two")] }, budget);
+    if (spent.kind === "turn") assert.fail("a spent budget must be refused");
+    const spentReply = refusalReply(spent);
+    assert.equal(spentReply.status, 429);
+    assert.equal(spentReply.body.error, TURNS_EXHAUSTED_ERROR);
+  });
+
+  it("routes every index.ts answer through this mapping", () => {
+    // A literal 4xx or 5xx beside json() is index.ts writing its own status,
+    // which is how an exhausted budget could start answering 500 while the
+    // cases above stay green. 200 is the accepted turn (and /health).
+    const literals = [...indexSource.matchAll(/\bjson\(\s*(\d{3})/g)].map((match) => match[1]);
+    assert.deepEqual(
+      literals.filter((status) => status !== "200"),
+      [],
+      "index.ts answers a refusal with a literal status; take it from status.ts",
+    );
+    for (const name of ["malformedJsonReply", "refusalReply", "relayFailureReply"]) {
+      assert.match(indexSource, new RegExp(`\\b${name}\\(`), `${name} must shape index.ts's answer`);
+    }
   });
 });

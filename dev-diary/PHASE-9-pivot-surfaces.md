@@ -580,11 +580,29 @@ requires:   [T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       agent/frontend/
-status:     claimed:t914-relay-status
+status:     in-review
 ```
 `agent/frontend/server/index.ts` maps kinds to statuses (400 for an invalid body, 429 for an exhausted budget, 502 for a relay failure), and no test pins that mapping: a future edit could answer 500 for an exhausted budget with the gate green. The file starts `Bun.serve` and cannot be imported under `node --test`, so the test needs the bun runner T9.13 adds to CI.
 
 **Done when:** a test runs the mapping under bun and fails if any kind answers a different status; the gate runs it where bun exists; the gate passes.
+
+**Notes (worker).** `agent/frontend/server/status.ts` holds the mapping and imports nothing, the way `relay.ts` does: `STATUS_INVALID` (400), `STATUS_EXHAUSTED` (429) and `STATUS_RELAY_FAILURE` (502), with `malformedJsonReply()`, `refusalReply(kind)` and `relayFailureReply(turnId)` returning the status and body `index.ts` serialises. `index.ts` builds all four `/api/chat` answers through them — the unparseable body is the fourth, and it moved out of the handler for the same reason — so `json(200, …)` is the only status literal left in that file.
+
+`server/relay.test.ts` gains a `the /api/chat status mapping` block of seven cases (22 in the file now): 400 for a body that is not JSON; 400 for a body the relay refuses, echoing the validator's own text; 429 for a spent budget with `TURNS_EXHAUSTED_ERROR`; 502 with `{error, turn_id}` and no other key; the three statuses pinned as 400/429/502 and distinct; the mapping driven by `decideChatTurn`'s own decisions, so the join between the two modules is exercised rather than the constants alone; and a source guard over `index.ts`. That guard reads the file as text (the module starts `Bun.serve` on the injected `PORT`, so importing it is not an option), fails if any `json(` call in it carries a literal status other than 200, and requires each of the three constructors to be called.
+
+Why the cases sit in `relay.test.ts` rather than a new `status.test.ts`: the gate's frontend test step names that file and only that file (`tools/check.sh` is T9.19's), and extracting the mapping made it import-free, so it no longer needs bun to be testable. Keeping the cases in the file the gate already runs means the mapping is guarded on every gate run, CI included, with no gate edit; the same file is green under bun as well.
+
+Proof. Mutation-checked, each reverted and `git diff` read back: `STATUS_EXHAUSTED = 500` fails three cases (the 429 body text, the pinned statuses, the relay-decision case), and the gate's own command `node --test agent/frontend/server/relay.test.ts` goes red the same way; inlining `json(502, failure.body)` in `index.ts` fails the source guard with `index.ts answers a refusal with a literal status; take it from status.ts`. `bun test server/relay.test.ts` is green (22 pass, bun 1.3.14), `bun run typecheck` is green over `server/` after `bun install --frozen-lockfile` (282 packages, `bun.lock` untouched), and `node --test agent/frontend/server/relay.test.ts` is green with bun off `PATH`, so the mapping runs where bun is absent too. `./tools/check.sh` is green and its frontend step takes the `bun run typecheck` branch. `npm ci` in `web/` and `merchant/` supplied the rest. No live call, no key, no spend.
+
+Limit, stated: the task asked that the test run under bun because the mapping lived behind `Bun.serve`; extraction removed that reason, so the gate runs the cases on the node it already requires, everywhere, and bun runs the same file when it is there. That is stronger than "where bun exists" on the gate side and weaker nowhere: no runner the gate has is left out.
+
+Finding (Low), owner **T9.19** (`owns: tools/check.sh`): the gate's fallback typecheck — the branch a workstation without bun or `agent/frontend/node_modules` takes — still names `server/relay.ts` alone, so `server/status.ts` is untypechecked on that branch even though the tests above cover it. The line becomes `… --moduleResolution Bundler server/relay.ts server/status.ts`. CI takes the full-package branch and is unaffected. If the orchestrator also wants bun to be the gate's runner for this file rather than node, the addition inside that same bun branch is `(cd agent/frontend && bun test server/relay.test.ts)`.
+
+Three things the next agent should not have to rediscover:
+
+- `status.ts` must stay import-free. The gate's node step resolves `./status.ts` only because the import carries the extension; `./status.js` is bun's and `tsc`'s spelling, not node's, so importing through it would break the gate's test step the way `relay.ts`'s own note warns.
+- The source guard treats 200 as the only literal `index.ts` may answer with. A future endpoint that answers another success status in that file needs the guard widened on purpose; that is the intended friction, not an oversight.
+- `refusalReply` takes its text from the decision, so the cap's wording stays single-sourced in `relay.ts`'s `TURNS_EXHAUSTED_ERROR`, and the 400/429 choice is the only thing this module decides.
 
 ---
 

@@ -18,6 +18,10 @@
  * (relay.test.ts); this file owns only the HTTP plumbing above them. State
  * beyond the cap message is memory-only; the production filesystem is
  * read-only, so nothing here writes to disk.
+ *
+ * Every /api/chat answer's status and body come from status.ts (400 invalid,
+ * 429 exhausted, 502 relay failure), which relay.test.ts pins; a literal
+ * status in this file is the drift that test refuses.
  */
 
 import { Agent } from "@mastra/core/agent";
@@ -28,6 +32,7 @@ import { serve } from "@astropods/adapter-mastra";
 import { createOpenAI } from "@ai-sdk/openai";
 import { DEMO_DEFAULTS, tools } from "./tools.js";
 import { createTurnBudget, decideChatTurn, MAX_TURNS } from "./relay.js";
+import { malformedJsonReply, refusalReply, relayFailureReply } from "./status.js";
 
 const AGENT_NAME = "memento-shopper";
 
@@ -125,14 +130,13 @@ const server = Bun.serve({
         try {
           body = await req.json();
         } catch {
-          return json(400, { error: "body must be JSON" });
+          const refusal = malformedJsonReply();
+          return json(refusal.status, refusal.body);
         }
         const decision = decideChatTurn(body, turnBudget);
-        if (decision.kind === "invalid") {
-          return json(400, { error: decision.error });
-        }
-        if (decision.kind === "exhausted") {
-          return json(429, { error: decision.error });
+        if (decision.kind === "invalid" || decision.kind === "exhausted") {
+          const refusal = refusalReply(decision);
+          return json(refusal.status, refusal.body);
         }
         const turnId = `turn_${crypto.randomUUID().slice(0, 8)}`;
         try {
@@ -140,7 +144,8 @@ const server = Bun.serve({
           return json(200, { reply: result.text, turn_id: turnId });
         } catch (err) {
           console.error(`chat turn ${turnId} failed:`, err instanceof Error ? err.message : err);
-          return json(502, { error: "model turn failed; try one short message again", turn_id: turnId });
+          const failure = relayFailureReply(turnId);
+          return json(failure.status, failure.body);
         }
       },
     },
