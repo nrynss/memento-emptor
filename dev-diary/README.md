@@ -76,7 +76,7 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 
 | Track | Phase | Network required? | First task | Notes |
 |---|---|---|---|---|
-| **A: The layer** | P2 | 17 / 18 | In progress (T2.3c) |
+| **A: The layer** | P2 | 18 / 18 | Done |
 | **B: Reference agent** | P3 | 8 / 8 | Done |
 | **C: Ledger** | P4 | 10 / 11 | In progress (T4.11) |
 | **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
@@ -161,7 +161,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 13 / 13 | Done |
 | P1 | 8 / 8 | Done |
-| P2 | 17 / 18 | In progress (T2.3c) |
+| P2 | 18 / 18 | Done |
 | P3 | 8 / 8 | Done |
 | P4 | 10 / 11 | In progress (T4.11) |
 | P5 | 10 / 11 | In progress (T5.8b) |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T2.3c: Evidence survives a restart (done)
+
+**What exists.** Each shopper's evidence partition is journalled at `<StandingDir>/<shopper>.evidence.json`, beside the corrections journal: documents under their doc ids, rows with ids, reasons, links, write ops, feedback markers and doc ids, open questions, mint counters, belief citations with their last change, timelines and last brand context. It is written at the existing mutation points and read when the partition is created, before `LoadSeed`. A restored row is reused once (same id, same doc id, same marker) and still reaches the graph the way the boot replay does, restored citations merge after the beliefs are rebuilt, and a second boot leaves the file byte-identical. An empty `StandingDir` keeps the old in-memory shape. The deploy already sets `-standing-dir` on the mounted disk, so the hosted layer gets this with its next push.
+
+**What surprised.** The review found `record_reason`'s unattached-answer branch saved nothing, so a restart dropped the shopper's answer and reopened the question; it now persists. Belief records still come only from the boot seed: a live-created belief keeps its rows in the ledger but not its own record. A pre-restart event redelivered after a restart is ingested again (the dedupe guard was written and reverted because it blocked the pivot replay), and a reasonless redelivered refund stays audit-only while a dispute shows.
+
+**The next agent should not have to work out.** The two journals are saved sequentially, so a crash between them can leave evidence ahead of the corrections snapshot — recorded as a crash-window limit. Only evidence is journalled; restoring belief records needs its own task. The store's doc ids continue from the restored maximum, so a mint cannot collide.
 
 ### T8.5o: Feedback tells the truth about seller verdicts and repeats (done)
 
