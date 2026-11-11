@@ -74,7 +74,7 @@ the recording that proves it.
 ## The second write path: ingest to the fit index
 
 The pooled product-fit belief is an aggregation over structured rows in
-the evidence store, not a belief in the graph. One purchase is one row.
+the fit index (Elastic), not a belief in the graph. One purchase is one row.
 
 - **One document per purchase.** The document id is
   `sha256("txn|" + transaction id)`, so the same purchase updates in
@@ -144,7 +144,7 @@ payer id: `shopper-` plus 64 hex characters, 72 bytes, inside the graph's
 1–128 byte addressed-name rule. Sessions are the isolation boundary: one
 shopper's beliefs, corrections and contradictions never reach another's
 recall. A pooled session would put every shopper's evidence into one
-recall surface, which is why the pool lives in the evidence store
+recall surface, which is why the pool lives in the fit index
 instead. (`research/lambo-multi.md` checks 1, 2, 5; `product.md` "Lambo
 holds the shopper; Elastic holds the pool")
 
@@ -168,7 +168,7 @@ errors and no lost write. (`research/lambo-multi.md` checks 1 and 3)
 
 The seller gets a separate, read-only service. It reaches the layer's
 `product_fit` and nothing else: its key is good only for that tool, it
-holds no evidence-store key, and no shopper row can reach it. It shows
+holds no index key, and no shopper row can reach it. It shows
 one row per product line and size with the pooled status, the settled
 denominator, returns by reason and direction, feedback by verdict, the
 distinct-shopper counts and the seeded count. A row opens the counts
@@ -179,18 +179,23 @@ are the second audience", `docs/interface.md` "product_fit")
 
 | Store | Holds | Never holds |
 |---|---|---|
-| **Evidence graph** | Short, keyed beliefs and evidence stubs; contradiction flags; supersession; provenance; per-agent attribution. One session per shopper isolates them on a shared store file. | Prose. The graph holds stubs; the documents live in the evidence store. Pooled beliefs: a pooled session would break shopper isolation. |
-| **Evidence store** | Raw evidence documents with their vectors; hybrid text-plus-vector search over past purchases. Not the graph's recall tier: the deploy leaves `[recall]` unset, so the hub recalls from its own store's exact scan (T8.1c). Also the fit index: one structured row per purchase, aggregated into the pooled product-fit belief and read by the merchant app. | Beliefs. Search finds evidence; promotion decides belief. The fit index holds no shopper identity, no row detail and no prose. |
+| **Evidence graph** | Short, keyed beliefs and evidence stubs; contradiction flags; supersession; provenance; per-agent attribution. One session per shopper isolates them on a shared store file. | Prose. The graph holds stubs; the documents live in the layer's evidence store. Pooled beliefs: a pooled session would break shopper isolation. |
+| **Evidence store (the layer)** | Each shopper's raw evidence texts, held in the layer process: messages, classified reasons and catalog text, with the lexical search seam beside them. A restart loses them until events replay, and the ledger's evidence panel is empty until then (T2.3c). | Beliefs, and the pooled counts. Search finds evidence; promotion decides belief. |
+| **Fit index (Elastic)** | One structured row per purchase, aggregated into the pooled product-fit belief and read by the merchant app. Not the graph's recall tier: the deploy leaves `[recall]` unset, so the hub recalls from its own store's exact scan (T8.1c). | Beliefs, shopper identity, row detail, prose. The raw evidence documents are not written here either: their hybrid text-plus-vector search is a design direction, not the served shape (T2.3c). |
 | **App's own store** | Durable order state (proposed → approved → captured, or failed and refunded) with one open order per shopper and need; webhook event ids for idempotency; seeded marks; ledger reads. | Money movement. Orders and captures are issued from the reference agent, never from the layer. |
 
-The evidence store keeps the existing hosted deployment; no index is
-self-hosted. The hub does not use its recall tier: `start.sh` writes no
-`[recall]` section, so the vector leg of recall is the store's exact
-scan and the deployment holds the layer's `fit-rows` pool rather than a
-graph index. The served reads never ask the graph for a vector search,
-and its one real vector use, a hybrid derive, is answered exactly in
-process; the tier would add metered Elastic ingest and a lagging
-approximate mirror for scale this demo does not have.
+The hosted deployment holds the pool's fit index; no index is
+self-hosted. The layer keeps each shopper's raw evidence in its own
+process instead of in Elastic: the documents are texts, no vectors, and
+nothing writes evidence documents to the deployment, so the hybrid
+text-plus-vector search measured there is a design direction, not the
+served shape (T2.3c). The hub does not use its recall tier: `start.sh`
+writes no `[recall]` section, so the vector leg of recall is the store's
+exact scan and the deployment holds the layer's `fit-rows` pool rather
+than a graph index. The served reads never ask the graph for a vector
+search, and its one real vector use, a hybrid derive, is answered
+exactly in process; the tier would add metered Elastic ingest and a
+lagging approximate mirror for scale this demo does not have.
 (`deploy/README.md`, "The hub's recall tier: store-only, by decision")
 Hybrid search needs the `retriever: { rrf: ... }` shape on this
 deployment; the graph re-scores neighbours itself, so that syntax
@@ -199,6 +204,14 @@ change and would need a 20 s timeout against this deployment's cold
 handshake; the failure mode without it is a dropped error source,
 recorded for the graph's maintainers. (`research/elastic.md`,
 `research/lambo.md` check 6)
+
+The ledger's evidence panel is read from that process record, so a
+layer restart leaves it empty until new events arrive. Recall still
+answers, and never refuses, from the pool and the corrections the
+standing file restored, with the belief-backed steps returning as
+events replay. T2.3c decides whether raw evidence persists — an Elastic
+evidence index with its mapping and contract, or a disk-backed store —
+or whether that loss is recorded and shown plainly in the ledger.
 
 ## Configuration
 
@@ -214,7 +227,7 @@ seeded population replays byte for byte; live rows use the keyring salt.
 The embedder sits behind the `EmbedderContract` interface in
 `internal/domain`: a kind name plus validation, no model name, no
 dimensions, no endpoint, no key. The direction is native embeddings
-served by the evidence store itself. Three filed graph issues
+served by the hosted deployment itself. Three filed graph issues
 (connect timeout, missing calibration row, dropped timeout source)
 closed in graph 0.10.1; adopting the native contract still needs
 calibration confirmation on the demo shopper plus console billing, then
@@ -233,7 +246,7 @@ floor measurement. (`research/lambo.md`, `research/jev.md`)
 |---|---|---|
 | **Payment evidence source** | Outcomes with reason codes, line items, webhooks; the approved purchase | Nothing happens and nothing is evidenced |
 | **Evidence graph** | Short, keyed, evidence-gated beliefs; contradiction flags; provenance | The agent can store facts but cannot tell an earned belief from a claim |
-| **Evidence store** | Raw evidence and vector search; the fit index behind the pooled belief and the merchant app. Not the graph's recall tier: the hub runs store-only (T8.1c) | Prose ends up in the graph, and nothing learns across shoppers |
+| **Evidence store** | The pool's fit index on the hosted deployment: one structured row per purchase behind the pooled belief and the merchant app. Not the graph's recall tier: the hub runs store-only (T8.1c). Not the raw evidence store either: the layer keeps that in process (T2.3c) | Prose ends up in the graph, and nothing learns across shoppers |
 | **Reason classifier** | Return text to category with calibrated confidence | Every refund is a guess about its cause |
 | **Catalog and agent host** | Candidate products; the reference agent as a service with approval, correction forms, feedback tied to traces, and evals | There is nothing to recommend and no independent proof the agent checked memory first |
 
