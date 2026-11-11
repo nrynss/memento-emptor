@@ -119,7 +119,7 @@ requires:   [T4.1, T9.6]
 fixture-ok: yes
 size:       M · mid
 owns:       web/src/lib/api/, web/src/routes/ledger/, web/src/lib/why/, web/src/routes/belief/
-status:     not-started
+status:     claimed:t48-live-ledger
 ```
 The T9.7 run found the deployed ledger page is a fixture replay: its live numbers exist only as API reads, and the screen is labelled as a replay. Add an HTTP transport behind `LedgerClient` (same-origin or the edge, with the shopper link token), keep the fixture transport for tests, and fall back loudly rather than silently showing a replay as live.
 

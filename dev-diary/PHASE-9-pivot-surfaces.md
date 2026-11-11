@@ -498,7 +498,7 @@ requires:   [T9.7, T9.9]
 fixture-ok: yes
 size:       XS · mid
 owns:       demo/drive.py, demo/run.py, agent/second/drive.py
-status:     not-started
+status:     claimed:t911-org-scrub
 ```
 The P3 review found the Astropods org id committed in `demo/drive.py` and `agent/second/drive.py` as a `secret-tool` attribute. It is an identifier, not a credential, but the diary's own rule excludes account detail and the scrub rule lists user ids as placeholders. Replace it with a placeholder and read the org from the environment or the CLI's own config.
 
