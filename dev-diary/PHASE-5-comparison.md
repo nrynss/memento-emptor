@@ -190,7 +190,7 @@ requires:   [T5.8]
 fixture-ok: no
 size:       XS · mid
 owns:       bench/runs/, bench/README.md
-status:     in-review
+status:     done
 ```
 The P5 review found T5.8's note says both multi-brand Candidate beliefs refuse, but the run files show `"beliefs": []` with "No recommendation yet: too little evidence", and `recallBeliefs` serves Candidate standing, so a Candidate belief would have appeared; the split shopper has enough fit returns for Candidate. The cause is unrecoverable from the committed files because the t58 runs carry no settle note. Re-run the two cells with the settle note and a pre/post recall, and record what the belief actually was.
 

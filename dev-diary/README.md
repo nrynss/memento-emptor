@@ -79,7 +79,7 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 | **A: The layer** | P2 | 18 / 18 | Done |
 | **B: Reference agent** | P3 | 8 / 8 | Done |
 | **C: Ledger** | P4 | 11 / 11 | Done |
-| **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
+| **D: Comparison** | P5 | 11 / 11 | Done |
 | **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
 | **F: Pivot surfaces** | P9 | 32 / 32 | Done |
 | **G: Round 2** | P10 | 8 / 8 | Done |
@@ -164,7 +164,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P2 | 18 / 18 | Done |
 | P3 | 8 / 8 | Done |
 | P4 | 11 / 11 | Done |
-| P5 | 10 / 11 | In progress (T5.8b) |
+| P5 | 11 / 11 | Done |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T5.8b: The two multi-brand cells are re-run and explained (done)
+
+**What exists.** `bench/runs/t58b/` holds the two re-run cells in the frozen run schema with the settle note and a pre/post recall probe (belief id, value, status, standing, evidence count, both full responses), plus `scores.json`; the t58 driver owns `-run-prefix` and `-recall-probe`, and tests pin the probe record and the unchanged default shape. The split cell's frozen extractor read M from the returned-item sentence, so the frozen human override records S with its reason; the steady cell needed none. Spend $0.008697 within the $0.40 budget. `bench/README.md` now records the two layer changes the round-1 records predate.
+
+**What surprised.** The review's premise was wrong: the t58 run files already carried the settle note and the belief's standing. The cause was still recoverable — at `a5b57eb` `recallBeliefs` served Venerable standing only, and the two beliefs were Candidate and None; `2917e98` opened the gate and `13373a8` removed standing as a filter. The review also fixed the driver's cumulative-spend guard, which counted the t58b batch but not the T5.8 batch.
+
+**The next agent should not have to work out.** T5.8/T5.9 predate two layer changes, so their served-belief difference from current main is expected, not a defect; a re-run also changes the prompt's memory block, so it needs a fresh freeze decision, not a substitution. Round 1's committed counts stand; the re-run is a different measurement.
 
 ### T9.24: Demo step 5 is a read-only demonstration (done)
 
