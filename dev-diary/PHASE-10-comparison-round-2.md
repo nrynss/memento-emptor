@@ -68,7 +68,7 @@ requires:   [T9.1, T10.1, T8.5]
 fixture-ok: yes
 size:       M · frontier
 owns:       bench/round2/ (except arm2/ and runs/), seed/round2.go, seed/round2_test.go
-status:     not-started
+status:     claimed:t103-freeze
 ```
 The four cases in product.md, at least two shoppers each, with hidden answers kept apart as in T1.3:
 
