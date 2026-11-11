@@ -465,11 +465,25 @@ requires:   [T3.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/frontend/, tools/check.sh
-status:     claimed:t912-frontend-guard
+status:     in-review
 ```
 The P3 review found T3.8's live result has no committed transcript, nothing tests `validateMessages` or the 30-turn cap, and no gate step type-checks `agent/frontend/` (the gate checks `web/` and `merchant/` only), so a future edit there is unguarded. Add the transcript (redacted), tests for message validation and the cap, and a frontend typecheck step to the gate.
 
 **Done when:** the transcript is committed with no key or account detail; both behaviours have tests that fail when broken; the gate type-checks `agent/frontend/`; the gate passes.
+
+**Notes (worker).** The relay's two guards moved out of `server/index.ts` into `server/relay.ts`, which imports nothing: `validateMessages` (1..20 messages, `user`|`assistant`, 1..1000 characters of trimmed text, ending on the shopper's turn), `createTurnBudget`/`MAX_TURNS` (30), and `decideChatTurn`, which fixes the order — a malformed body is refused before the budget is touched, a spent budget is refused before any model call, and only an accepted turn consumes one. `server/index.ts` keeps the HTTP plumbing and its 400/429/502 bodies unchanged. `server/relay.test.ts` is 14 `node:test` cases over those three, so it needs no bun, no install, no gateway and no model call: the shape refusals (each with its message), trimming, the 20-message boundary, assistant turns wrapped as text parts, exactly 30 turns allowed and the 31st refused with `TURNS_EXHAUSTED_ERROR`, refusals never incrementing, and budgets independent per container.
+
+The transcript is `agent/frontend/testdata/t38-public-page.txt`. The run's raw output is **not recoverable** — its drive script stayed outside the repo, as T3.7's did, so there was no capture to redact. The file says so on its face and reassembles what the tree still carries instead: the anonymous 200 on the frontend host, `/health` 200 and the unknown-path 404 from the container, the chat host's 302 to the platform SSO, the four turn costs ($0.0174 proxy, $0.0169 ask, $0.0277 correction, $0.0181 yes), the proof turn `a89f4f49` as the page prints it, billing $1.39 → $1.52 (+$0.13), and the standing configuration. Every line carries its provenance (a T3.8 note, the page's own text, this package's spec, or `server/relay.ts` as it reads). Placeholders for every host; no key, no account id, no IP.
+
+`tools/check.sh` gains two steps after the two Svelte frontends. First, `node --test agent/frontend/server/relay.test.ts`, always, on the node the gate already requires. Second, a typecheck: `bun run typecheck` (tsc --noEmit over `server/`) where `bun` and `agent/frontend/node_modules` both exist, and otherwise `web/node_modules/.bin/tsc --noEmit --strict` over `server/relay.ts` with the limit printed on the `--` line. The fallback is the closest equivalent that adds no dependency: the package tracks `bun.lock` only, so `npm ci` cannot provide its types, and the TypeScript it borrows is the one `web/` already installs (the gate fails earlier if that install is missing). **Limit, stated:** CI takes the fallback branch, because the `ubuntu-latest` image ships no `bun` and `ci.yml` installs neither bun nor this package's modules; the full-package typecheck therefore runs only on a workstation that has run `bun install` in `agent/frontend/`.
+
+Proof. Mutation-checked: removing the last-message-must-be-the-shopper check fails 2 tests; letting the budget take one turn too many (`used > max`) fails 4; taking a turn before validating fails 3. Each reverted, `diff` clean. The fallback typecheck is not vacuous: a `let used: string` in `relay.ts` exits 2 with four TS errors. `./tools/check.sh` is green twice — with bun and the package's modules present (so `bun run typecheck` runs), and with bun off `PATH` and `node_modules` moved aside (so the fallback branch runs and prints its limit). No live call, no spend.
+
+Three things the next agent should not have to rediscover:
+
+- `node`'s ESM resolver does not map `./relay.js` to `relay.ts`, so the test imports `./relay.ts` and `tsconfig.json` gains `allowImportingTsExtensions` (legal because the typecheck script is `--noEmit`). The server files keep the `./x.js` style that bun and `tsc` resolve.
+- Keep `server/relay.ts` import-free. The moment it imports anything, `node --test` needs that dependency installed and the fallback typecheck loses its subject; the guards would then only run where bun and this package's modules exist, which CI is not.
+- Finding (Low), owner: a gate task owning `.github/workflows/ci.yml` (proposed, to be numbered by the orchestrator). CI should `setup-bun` and run `bun install --frozen-lockfile` in `agent/frontend/` so the full-package typecheck, not just `relay.ts`, is guarded on every push; `ci.yml` is outside this task's `owns`, so the limit stands until that task lands. The task's other files need no change.
 
 ---
 

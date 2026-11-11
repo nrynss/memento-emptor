@@ -88,4 +88,29 @@ check_frontend() {
 check_frontend web
 check_frontend merchant
 
+# --- agent/frontend: the public shopper page (T9.12) ---
+# The relay's request validation and its 30-turn anonymous spend cap live in
+# agent/frontend/server/relay.ts, which imports nothing, so its tests run on
+# the node this gate already requires: no bun, no package install, no
+# gateway, no model call.
+echo "-- agent/frontend relay tests"
+run_frontend "agent/frontend relay tests" node --test agent/frontend/server/relay.test.ts
+
+# The package's own check is `bun run typecheck` (tsc --noEmit over server/),
+# and it needs bun plus agent/frontend/node_modules, which only `bun install`
+# provides: the package tracks bun.lock, not package-lock.json, so `npm ci`
+# cannot stand in for it, and CI installs neither. Where both are present the
+# whole package is checked. Where they are not, the gate type-checks the
+# module the tests above cover with the TypeScript it already installed for
+# web/ (that install is required by check_frontend above), and prints the
+# limit instead of passing the package silently.
+if command -v bun >/dev/null 2>&1 && [ -d agent/frontend/node_modules ]; then
+	echo "-- agent/frontend typecheck (bun run typecheck)"
+	(cd agent/frontend && bun run typecheck) || fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server"
+else
+	echo "-- agent/frontend typecheck (bun or agent/frontend/node_modules absent: server/relay.ts only)"
+	(cd agent/frontend && ../../web/node_modules/.bin/tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler server/relay.ts) ||
+		fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server/relay.ts"
+fi
+
 echo "OK all checks passed"

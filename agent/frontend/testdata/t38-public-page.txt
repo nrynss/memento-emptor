@@ -1,0 +1,107 @@
+# T3.8 public shopper page, redacted transcript.
+#
+# Provenance: the run's raw console output was never committed — its drive
+# script stayed outside the repo, as T3.7's did — so there is no capture to
+# redact. Nothing below was re-run for this file. It reassembles what the
+# tree still carries, and every line says which: a "note" line quotes
+# T3.8's committed notes (dev-diary/PHASE-3-agent.md); a "page" line is the
+# served artifact's own committed text (public/index.html) or this
+# package's spec (astropods.yml); a "code" line is what server/index.ts
+# does, read from the tree.
+#
+# Placeholders: <frontend-host>, <chat-host>, <deployment-id>, <build-page>,
+# <trace-id>, <conv-id>, <client-id>, <sso-state>, <user-id>. Spend amounts
+# kept, as in testdata/astropods/15-public-probe.txt. No key and no account
+# detail: the drive script held the CLI login token in process memory and
+# never printed it.
+
+## Deployment (probe-gw only; memento-agent untouched throughout)
+
+note: the page is served from probe-gw, not memento-agent. That deployment
+      has no frontend host (messaging only) and its access is not public, so
+      it cannot serve judges. No access switch was flipped by this task:
+      Public is the user's console control, and the CLI offers none.
+note: F3 shape — the shopper frontend is a separate deployment with its own
+      spec in agent/frontend/ (astropods.yml, Dockerfile, server/, public/),
+      pushed and redeployed on probe-gw; agent/runtime/ was read, never
+      edited, and memento-agent still runs its original build.
+page: agent.interfaces = {frontend: true, messaging: true}; one container
+      serves the page and /health on the injected PORT (80 in production)
+      and registers messaging through serve().
+page: Dockerfile stays ROOT with EXPOSE 80 (the T3.7 proven shape). The
+      change that would be needed if the page ever moves onto the reference
+      agent is recorded in T3.8's notes, not made here.
+
+## Anonymous page check (fresh session, browser UA, no cookies, no key)
+
+     https://<frontend-host>/          -> 200, no redirect, the shopper page
+     https://<frontend-host>/health    -> 200, from the container
+     https://<frontend-host>/<unknown> -> 404, from the container
+     https://<chat-host>/              -> 302 to the platform SSO
+# note: "Anonymous evidence (fresh session, browser UA): GET / on the
+# frontend host 200 with no redirect serving the shopper page (proof trace
+# baked in); /health 200 from the container; unknown path 404 from the
+# container; chat host still 302 to the platform SSO."
+# page: the served page is public/index.html — <title>Memento Emptor —
+# shopper page</title>, h1 "Memento Emptor — shopper page", the flow list
+# (recall, recommend, correct, approve) and the "Try it" prompts.
+# The 404 is the container's own fallback (code: fetch -> "not found"), so
+# no SSO appears on any path of the frontend host.
+
+## The four model turns (all under the per-turn guard)
+
+     1. messaging proxy, shopping turn      $0.0174
+        [tool] recall_for_purchase between the two generations; recommends
+        M per corr_3b7e52 citing blf_8f2c41 with its 3 seeded returns; asks
+        the pending refund question.
+     2. page path, ask                      $0.0169
+        recall first.
+     3. page path, correction               $0.0277
+        [tool] recall_for_purchase + record_correction spans; the next
+        recommendation follows the correction, L per corr_page01.
+     4. page path, yes                      $0.0181
+        the honest not-wired statement.
+     plus one extra yes-shape check.
+# note: "F2 composition is proven: one container serves the page + /health
+# ... AND registers messaging through serve() — page turns and proxy turns
+# land in the same deployment trace list with tool spans."
+# The ids are the recorded demo fixture's, the same ones the reference agent
+# replays (server/demo-state.ts); they are not credentials.
+
+## Proof turn
+
+page: "Verified proof turn a89f4f49 ($0.0174): recall_for_purchase between
+      the two generations, recommends M per corr_3b7e52 citing blf_8f2c41
+      with its three seeded returns, and asks the pending refund question.
+      Look the turn up in the deployment trace list."
+# The same turn is turn 1 above. The turn id is what the page prints beside
+# a reply (server/index.ts: turn_id on the 200), and the deployment's trace
+# list is where its spans were read.
+
+## Spend
+
+     before: billing $1.39
+     after:  billing $1.52
+     delta:  +$0.13 for this task, inside the guard
+# note: "Task spend +$0.13 (billing $1.39 → $1.52), inside the $0.50
+# guard." The task brief named a $0.25 budget; the notes record a $0.50
+# guard, and $0.13 sits inside both. Billing was re-checked after each
+# server-side step.
+
+## Standing configuration on the deployment
+
+note: the agent answers from the recorded demo fixture (same ids and words
+      the reference agent replays, seeded marks shown); live corrections
+      persist in container memory only and reset on redeploy (the demo
+      reset); at most 30 model turns per container lifetime, then an honest
+      429; approval is an explicit yes with no purchase tool on this page.
+code: those last two are server/relay.ts's turn budget (MAX_TURNS) and the
+      page's tool list; relay.test.ts now holds them, so an edit that drops
+      the cap or loosens the request shape fails the gate.
+
+## What this file is not
+
+It is not a capture. The one thing it cannot supply is the byte-exact CLI
+output of the run; what it supplies is the result, in the shape T3.7's
+probe records its own: which hosts answered what, what each turn cost, the
+proof turn's id, and the configuration the deployment was left in.

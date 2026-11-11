@@ -13,8 +13,11 @@
  *
  * Anonymous spend guard: model turns are capped per container lifetime
  * (MAX_TURNS). Validation failures cost nothing and never increment the
- * counter. State beyond the cap message is memory-only; the production
- * filesystem is read-only, so nothing here writes to disk.
+ * counter. Both guards, the body validator and the turn budget, live in
+ * relay.ts so they are tested without a gateway or a listening port
+ * (relay.test.ts); this file owns only the HTTP plumbing above them. State
+ * beyond the cap message is memory-only; the production filesystem is
+ * read-only, so nothing here writes to disk.
  */
 
 import { Agent } from "@mastra/core/agent";
@@ -24,13 +27,11 @@ import { OtelExporter } from "@mastra/otel-exporter";
 import { serve } from "@astropods/adapter-mastra";
 import { createOpenAI } from "@ai-sdk/openai";
 import { DEMO_DEFAULTS, tools } from "./tools.js";
+import { createTurnBudget, decideChatTurn, MAX_TURNS } from "./relay.js";
 
 const AGENT_NAME = "memento-shopper";
 
-/** Demo turn budget per container lifetime; bounds anonymous model spend. */
-const MAX_TURNS = 30;
-
-let turnsServed = 0;
+const turnBudget = createTurnBudget(MAX_TURNS);
 
 const gateway = createOpenAI({
   apiKey: process.env.ASTRO_GATEWAY_API_KEY,
@@ -103,52 +104,6 @@ new Mastra({
   observability,
 });
 
-interface ChatMessage {
-  role: string;
-  content: unknown;
-}
-
-/**
- * Message shapes accepted by agent.generate(): plain-text user turns and
- * text-part assistant turns (AI SDK v5 model messages).
- */
-type RelayMessage =
-  | { role: "user"; content: string }
-  | { role: "assistant"; content: [{ type: "text"; text: string }] };
-
-function validateMessages(body: unknown): { ok: true; messages: RelayMessage[] } | { ok: false; error: string } {
-  if (typeof body !== "object" || body === null || !("messages" in body)) {
-    return { ok: false, error: "body must be {messages: [{role, content}]}" };
-  }
-  const { messages } = body as { messages: unknown };
-  if (!Array.isArray(messages) || messages.length === 0 || messages.length > 20) {
-    return { ok: false, error: "messages must be a non-empty array of at most 20 turns" };
-  }
-  const clean: RelayMessage[] = [];
-  for (const m of messages) {
-    if (typeof m !== "object" || m === null) {
-      return { ok: false, error: "each message must be {role, content}" };
-    }
-    const { role, content } = m as ChatMessage;
-    if ((role !== "user" && role !== "assistant") || typeof content !== "string") {
-      return { ok: false, error: "role must be user|assistant and content a string" };
-    }
-    const text = content.trim();
-    if (text.length === 0 || text.length > 1000) {
-      return { ok: false, error: "content must be 1..1000 characters" };
-    }
-    clean.push(
-      role === "user"
-        ? { role, content: text }
-        : { role, content: [{ type: "text", text }] },
-    );
-  }
-  if (clean[clean.length - 1].role !== "user") {
-    return { ok: false, error: "the last message must be from the user" };
-  }
-  return { ok: true, messages: clean };
-}
-
 const pageFile = Bun.file(new URL("../public/index.html", import.meta.url));
 
 function json(status: number, value: unknown): Response {
@@ -172,19 +127,16 @@ const server = Bun.serve({
         } catch {
           return json(400, { error: "body must be JSON" });
         }
-        const parsed = validateMessages(body);
-        if (!parsed.ok) {
-          return json(400, { error: parsed.error });
+        const decision = decideChatTurn(body, turnBudget);
+        if (decision.kind === "invalid") {
+          return json(400, { error: decision.error });
         }
-        if (turnsServed >= MAX_TURNS) {
-          return json(429, {
-            error: "demo turn budget exhausted on this deployment; the page owner resets it on redeploy",
-          });
+        if (decision.kind === "exhausted") {
+          return json(429, { error: decision.error });
         }
-        turnsServed += 1;
         const turnId = `turn_${crypto.randomUUID().slice(0, 8)}`;
         try {
-          const result = await agent.generate(parsed.messages);
+          const result = await agent.generate(decision.messages);
           return json(200, { reply: result.text, turn_id: turnId });
         } catch (err) {
           console.error(`chat turn ${turnId} failed:`, err instanceof Error ? err.message : err);
