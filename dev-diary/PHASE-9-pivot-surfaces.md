@@ -578,7 +578,7 @@ requires:   [T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       agent/frontend/
-status:     not-started
+status:     claimed:t914-relay-status
 ```
 `agent/frontend/server/index.ts` maps kinds to statuses (400 for an invalid body, 429 for an exhausted budget, 502 for a relay failure), and no test pins that mapping: a future edit could answer 500 for an exhausted budget with the gate green. The file starts `Bun.serve` and cannot be imported under `node --test`, so the test needs the bun runner T9.13 adds to CI.
 
@@ -645,7 +645,7 @@ requires:   [T9.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/runtime/
-status:     not-started
+status:     claimed:t917-catalog
 ```
 The T9.7 run found product.md's demo step 2 has no live path: the reference agent exposes no product-search tool, so the Channel3 candidate never appears in a turn and the SKU exists only in step 4's capture. Add a catalog search tool (backed by `agent/catalog`, which already replays the Channel3 recordings) to the reference agent, bind it to the live layer's edge as the other tools are, and prove one live turn that names a real candidate line and SKU before recall.
 
