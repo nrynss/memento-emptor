@@ -266,6 +266,33 @@ func TestGuidanceForPoolCannotReadMissingDirection(t *testing.T) {
 	}
 }
 
+// TestProductFitServesDirectionlessBuildingPool proves the merchant read
+// still answers for a Building pool that names no direction: the label and
+// the counts are the merchant's answer, and only recall's precedence step
+// requires a direction. The direction is null because none leads, and the
+// precedence step is null because product_fit never carries one.
+func TestProductFitServesDirectionlessBuildingPool(t *testing.T) {
+	svc, _ := pivotHarness(t, &fakePoolIndex{result: fitsWellPool()}, &fakeFitIndex{}, "")
+	fit, err := svc.ProductFit(context.Background(), contract.ProductFitRequest{
+		BrandID: "brand-x-001", Category: "shirts", FitHandle: "regular", Size: "M",
+	})
+	if err != nil {
+		t.Fatalf("product fit: %v", err)
+	}
+	if fit.Pool.Status != domain.StatusBuilding {
+		t.Fatalf("pool status %q, want Building", fit.Pool.Status)
+	}
+	if fit.Pool.Direction != nil {
+		t.Fatalf("pool direction %q, want null", *fit.Pool.Direction)
+	}
+	if fit.Pool.Counts.Settled != 4 || fit.Pool.Counts.Feedback.FitsWell != 4 {
+		t.Fatalf("pool counts %+v, want four settled fits-well rows", fit.Pool.Counts)
+	}
+	if fit.Pool.Precedence != nil {
+		t.Fatalf("pool precedence %+v, want none from product_fit", fit.Pool.Precedence)
+	}
+}
+
 // statementOnlyHarness builds a service whose one seeded belief is a
 // general statement, with a pool index wired. The statement has no
 // evidence, which is what makes it the statement step.

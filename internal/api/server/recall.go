@@ -36,13 +36,14 @@ var ErrPoolUnavailable = errors.New("server: pool index unavailable")
 // rides with a consulted lookup; an absent pool rides with whatever the
 // lookup says —
 // unavailable when the pool is unwired, the request names no full line, or
-// the index could not be reached, consulted when the wired pool answered
-// empty (Claimed) — so a full-line recall on an empty line serves the
-// consulted lookup instead of failing. The pool and the lookup are always
-// present: an absent pool is null, never a missing key. Every handler
-// builds recall through here, so no code path can return the belief without
-// the correction beside it, or a pool without saying whether it was
-// consulted.
+// the index could not be reached, consulted when the wired pool named no
+// direction (Claimed, or Building with the directions level or only
+// fits-well outcomes) — so a full-line recall on a pool with nothing to
+// say serves the consulted lookup instead of failing. The pool and the
+// lookup are always present: an absent pool is null, never a missing key.
+// Every handler builds recall through here, so no code path can return the
+// belief without the correction beside it, or a pool without saying whether
+// it was consulted.
 func assembleRecall(shopper string, beliefs []contract.BeliefView, poolView *contract.PoolView, lookup contract.PoolLookup, overriding *contract.CorrectionView, guidance contract.GuidanceView, pending int, trace *string) (contract.RecallResponse, error) {
 	inline := map[string]bool{}
 	for _, belief := range beliefs {

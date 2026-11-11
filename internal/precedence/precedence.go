@@ -15,8 +15,11 @@ type Presence struct {
 	Correction bool
 	// OwnEvidence is true while the shopper's own fit evidence is served.
 	OwnEvidence bool
-	// Pool is true while the consulted pool has something to say: a
-	// Building, Earned or Out of true label. A Claimed pool says nothing.
+	// Pool is true while the consulted pool names a direction: a Building
+	// pool with a leading direction, an Earned pool, or an Out of true
+	// pool. A Claimed pool says nothing, and a Building pool that names no
+	// direction (the two directions level, or every fit outcome
+	// fits-well) is consulted but takes no step.
 	Pool bool
 	// Statement is true while a general statement is served.
 	Statement bool
