@@ -1093,7 +1093,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, internal/ingest/, product.md
-status:     not-started
+status:     claimed:t85x-limits
 ```
 The P8 review found two pool-row transitions product.md names have no served producer: no served path emits `OutcomeKept` (`Writer.Kept` runs only from the seed and tests), so a live purchase never settles as kept past the window; and `Writer.Contested` has no caller outside tests while `record_reason` cannot re-answer a closed question, so a contested reason never changes a row. Implement the served paths or record the limitations in product.md with their reasons.
 
