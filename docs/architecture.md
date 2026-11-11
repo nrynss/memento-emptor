@@ -271,10 +271,11 @@ rebuilds the beliefs, so a belief the seed does not carry — one a live
 answer created — keeps its rows in the ledger but not its own record,
 and recall does not serve it again until its writes replay. The same
 missing belief records are why a restart re-issues the seeded graph
-writes: the boot replay repeats the frozen story's five `record_action`
-writes. A repeat reinforces the existing edge and opens an interaction,
-adding no dependent and leaving blast radius unchanged; the interaction
-and reinforcement counters accumulate. The ingest service's event table
+writes: the boot replay repeats the frozen story's five evidence
+`record_action` writes and the correction's declaration. A repeat
+reinforces the existing edge and opens an interaction, adding no
+dependent and leaving blast radius unchanged; the interaction and
+reinforcement counters accumulate. The ingest service's event table
 is not journalled either, so a delivery redelivered after a restart is
 ingested again and the partition holds a second row: a redelivered
 refund stays audit-only until it is answered again, while a dispute

@@ -338,11 +338,12 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 			return fmt.Errorf("server: load seed: %w %q", ErrUnknownBelief, corr.view.ContradictsBeliefID)
 		}
 		// The replay writes even a correction the journal already restored.
-		// Lambo reinforces a repeated action in place: the same node, no
-		// nodes or edges inserted, no new dependent; the reinforcement
-		// count and the interaction are what accumulate. Skipping would
-		// drop the edge if the graph were ever rebuilt under a surviving
-		// journal.
+		// Lambo reinforces a repeated action in place: it resolves the same
+		// action node and reinforces the existing edge, adding no concept
+		// and no dependent; one interaction per call (with its temporal
+		// edge) and the edge's reinforcement count are what accumulate.
+		// Skipping would drop the edge if the graph were ever rebuilt
+		// under a surviving journal.
 		if err := memory.RecordCorrection(ctx, s.graph, corr.view.Text, belief.content, corr.at); err != nil {
 			return fmt.Errorf("server: load seed: record correction: %w", err)
 		}
