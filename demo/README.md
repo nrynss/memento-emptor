@@ -26,7 +26,7 @@ trace ids.
 |---|---|---|---|
 | **0. Day one, from the pool** | live (pool read) | `product_fit` for brand-x-001 / shirts / regular, size M reads **Earned, small**: 22 settled, 22 seeded, 12 too-small returns against 3 too-large and 4 fits-well, 19 fit shoppers. The empty-shopper recall is **blocked**: the agent key binds `shopper_01` only, so `shopper_02` answers `401 unauthenticated`. Recorded, not faked. | [`00-pool-and-new-shopper.json`](evidence/run-6/00-pool-and-new-shopper.json) |
 | **1. Three returns** | live read of seeded rows | Live recall and `explain_belief` for `blf_8f2c41`: three seeded refunds of the M oxford, every reason `fit_too_small` ("too tight in the shoulders", "too tight across the chest", "sleeves too short in M"), standing **Venerable**; its status is **Out of true** because a correction was already in force before the run (see **reset**). | [`01-three-returns-and-belief.json`](evidence/run-6/01-three-returns-and-belief.json), [`02-belief-explained.json`](evidence/run-6/02-belief-explained.json) |
-| **2. The belief they earn** | live read; no Channel3 call | The belief's value is "runs small, take size L" and the pool agrees (also L). In this run no live Channel3 candidate call exists in the reference agent, so the candidate SKU (`PSW8GeK`) appears only in the captured purchase in step 4 (see **gaps**). A later live catalog turn is recorded below. | same as step 1 |
+| **2. The belief they earn** | live read; no Channel3 call | The belief's value is "runs small, take size L" and the pool agrees (also L). In this run no live Channel3 candidate call exists in the reference agent, so the candidate SKU (`PSW8GeK`) appears only in the captured purchase in step 4 (see **gaps**). Two later live catalog turns are recorded below. | same as step 1 |
 | **3. The correction, through the reference agent** | live (three agent turns) | Two turns in one conversation. Trace `ded28ebc` (ask) recalls first; trace `c94448ee` recalls then calls `record_correction` and the layer mints `corr_000004`; trace `82d6512f` recalls and recommends M under it. The belief stays, **Out of true**, with its three rows. | [`03-correction-through-the-agent.json`](evidence/run-6/03-correction-through-the-agent.json) |
 | **4. The purchase and feedback** | existing capture + live turn | The purchase is the capture `ev_51c2d8`, custom id `memento-shopper01-06`, SKU `PSW8GeK`, size M, recorded in an earlier sandbox cycle; a new purchase cannot be ingested (see **gaps**). Trace `11d83a4f` calls `record_feedback`; the fit row settles live and the pool moves 22 → 23 settled, 0 → 1 live, fits-well 4 → 5. | [`04-purchase-and-feedback.json`](evidence/run-6/04-purchase-and-feedback.json) |
 | **5. The dispute that leaves sizing alone** | live read of an existing row | Live reads: seller belief `blf_1a5e09` is **Claimed** with exactly one row, the not-arrived dispute `PP-D-51713` recorded in an earlier sandbox cycle; the sizing belief still holds exactly its three fit rows and no dispute row, and recall still decides on the correction, not on the dispute. | [`05-dispute-leaves-sizing-alone.json`](evidence/run-6/05-dispute-leaves-sizing-alone.json) |
@@ -43,7 +43,7 @@ platform's conversation create stopped step 7; `demo/run.py --resume`
 re-read the free layer state and drove that one turn, so the paid turns are
 the ones the record cites. The summary in the evidence says so.
 
-## Step 2's catalog turn, live
+## Step 2's catalog turns, live
 
 The step-2 path was taken on its own after T9.17 gave the reference agent a
 catalog search: one fresh conversation, the product request and no correction
@@ -79,7 +79,45 @@ many words. A fresh conversation has no SKU in it before the tools run, so
 the search cannot have been handed the returned ones to exclude: the tool's
 `exclude_skus` description offers that exclusion, and the agent's step-2
 instruction never asks for it, nor that the search follow recall's answer.
-Owner: T9.17 (the agent's instruction).
+
+### The re-recorded turn, after the sequencing fix
+
+T9.22 changed the reference agent's step-2 instruction so recall answers
+before the catalog search, with the returned SKUs passed as `exclude_skus`.
+The turn below is the first one on the redeployed agent, sent the same way:
+one fresh conversation, the product request and no correction.
+
+- Trace `ae5d5e49`: `recall_for_purchase` (14:44:00.420–14:44:00.799), then
+  **three** `search_catalog` calls (14:44:03.383–04.229, 05.755–06.829,
+  08.848–09.909), then the answer generation at 14:44:09.918. Recall answered
+  2.6 s before the first search started, so the search followed recall's
+  answer rather than running beside it. The ordering clause holds.
+- The reply says it searched with the SKUs excluded, got no results, "let me
+  try without the exclusion filter", and then names `PSW8GeK` — the kept
+  purchase already in the recall rows — as its recommendation. It is not one
+  of the three seeded returns (`tbnrl46`), but it is not a new candidate
+  either: the reply itself says the shirt "is already in your evidence rows",
+  and `product.md`'s step 2 wants a shirt the shopper has not bought. The
+  instruction's naming clause ("never a SKU recall's own rows carry") was not
+  obeyed: the model dropped the exclusion and named an excluded SKU.
+- Channel3: three tool calls, **three credits** — one search per call is the
+  tool's contract, so three calls is three searches. That is two over this
+  turn's one-credit budget.
+- Spend: trace `ae5d5e49` cost **$0.1112**, over the $0.10 budget by $0.011;
+  usage spend $6.00 → $6.12 and credit $4.00 → $3.88.
+- Evidence:
+  [`03-catalog-candidate-rerecorded.json`](evidence/step2-catalog/03-catalog-candidate-rerecorded.json).
+
+The limit, recorded rather than smoothed over: the trace and the deployment's
+logs carry tool span names and times, not the arguments or answers, so which
+SKUs were passed as `exclude_skus` and what each search returned cannot be
+read from here. What the evidence does record is the ordering, all three
+spans, the reply as it came, and the demo's own cut check: in the recording
+the named SKU is brand `SMwk`, `dress-shirts`, `top-fit` `Regular`, so the cut
+admits it — the check is the demo's reading of the recording, because the
+live search's answer is not in the trace — and it is one the shopper's memory
+already carries. The sequencing half of T9.22 is proved; the naming half is
+not, so T9.22 reopens for the tool-description lever its note names.
 
 ## Reset
 
@@ -132,6 +170,11 @@ nothing. Budget was $1.00; the task fits inside it.
 T9.20's step-2 catalog turn is recorded separately: trace `c2a3bf4d` cost
 **$0.0553** (usage spend $5.86 → $5.92; credit $4.14 → $4.08) and its search
 cost **one Channel3 credit**. The turn is the only live call that task made.
+
+T9.23's re-recorded step-2 turn is trace `ae5d5e49`: **$0.1112** (usage spend
+$6.00 → $6.12; credit $4.00 → $3.88) and **three Channel3 credits**, two over
+its one-credit budget and $0.011 over its $0.10 agent budget. It is one turn
+and one conversation; the trace reads and the conversation create are free.
 
 ## What is not live, and who owns it
 
@@ -196,15 +239,17 @@ T9.23's re-record. Gaps 1, 2, 4 and 10 remain open with the owners below.
    `restoreStanding` appends the journal's ids to the correction order and
    `LoadSeed` adds the seeded one again, and a reused id is appended a second
    time; the read does not de-duplicate. Closed by T8.5m (one row per id).
-10. **Step 2 named the returned SKU.** The catalog search is live since
-    T9.20 (the turn above), but the reply named `tbnrl46`, the SKU the
-    seeded returns carry, so the demo line's new-candidate step is not met by
-    that reply. The trace does not record the tool's arguments, but its spans
-    and the reply show recall and the search launched together, before recall
-    answered, so the search was never given the returned SKUs to exclude.
-    T9.22 changed the instruction to wait for recall and exclude the returned
-    SKUs; T9.23 owns the redeploy and the re-record, and T9.17 stays in review
-    until that turn names a new candidate.
+10. **Step 2 named a SKU the shopper's memory carries.** The catalog search is
+    live since T9.20 (the first turn above), but the reply named `tbnrl46`,
+    the SKU the seeded returns carry, because recall and the search were
+    launched together. T9.22 changed the instruction to wait for recall and
+    exclude the returned SKUs; T9.23's re-recorded turn shows the wait working
+    (`search_catalog` starts after `recall_for_purchase` ends) but the model
+    dropping the exclusion after an empty answer and naming `PSW8GeK`, the
+    kept purchase already in the recall rows. So the step-2 new-candidate
+    clause is still unmet: the remaining lever is the tool description's
+    `exclude_skus` wording, which T9.22's note names as its fix. Owners:
+    T9.22 (reopened) for the naming half, T9.23 for the record.
 
 ## The pre-pivot record
 

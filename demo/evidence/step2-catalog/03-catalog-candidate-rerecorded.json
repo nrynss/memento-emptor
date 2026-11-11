@@ -1,0 +1,86 @@
+{
+  "candidate": {
+    "in_cut": true,
+    "line": "Button Down Oxford Shirt",
+    "line_named": true,
+    "named_before_size": true,
+    "note": "the named SKU is one the shopper's memory already carries; it matches the cut, but it is not a new candidate",
+    "returned_sku": true,
+    "size": "M",
+    "size_source": "recall: the catalog carries no size for this line (variants is null)",
+    "sku": "PSW8GeK"
+  },
+  "catalog": {
+    "answer_generation_start": "2026-11-11T14:44:09.918Z",
+    "calls": [
+      {
+        "end": "2026-11-11T14:44:04.229Z",
+        "start": "2026-11-11T14:44:03.383Z"
+      },
+      {
+        "end": "2026-11-11T14:44:06.829Z",
+        "start": "2026-11-11T14:44:05.755Z"
+      },
+      {
+        "end": "2026-11-11T14:44:09.909Z",
+        "start": "2026-11-11T14:44:08.848Z"
+      }
+    ],
+    "match_basis": "the demo's reading of the recording: brand SMwk, category dress-shirts, top-fit Regular",
+    "named_skus": [
+      "PSW8GeK"
+    ],
+    "off_cut_named": [],
+    "search_after_recall": true,
+    "search_end": "2026-11-11T14:44:09.909Z",
+    "search_start": "2026-11-11T14:44:08.848Z",
+    "searched": true,
+    "searched_before_answer": true,
+    "tool": "search_catalog"
+  },
+  "channel3": {
+    "credits": 3,
+    "note": "one search per tool call costs one credit; product detail calls are free",
+    "searches": 3
+  },
+  "recall": {
+    "answered_before_search": true,
+    "called": true,
+    "end": "2026-11-11T14:44:00.799Z",
+    "start": "2026-11-11T14:44:00.420Z",
+    "started_before_search": true
+  },
+  "turn": {
+    "cost": 0.111171,
+    "deployment": "MEMENTO-REF",
+    "input": "I need a Brand X oxford shirt in the regular fit. Which one would you recommend?",
+    "label": "catalog",
+    "latency_ms": 19808,
+    "reply": "Now I have the guidance. The basis is **correction** (corr_000004), which overrides the belief (blf_8f2c41). I need to search the catalog for a candidate, excluding SKUs already in the evidence rows.The catalog search returned no results with SKUs excluded \u2014 let me try without the exclusion filter to see what's available.The only catalog result is SKU **PSW8GeK** \u2014 which is already in your evidence rows (a kept purchase where M fit well). The catalog has no other Regular-fit Brand X oxford at this time, so I'll name that shirt.\n\n---\n\n**Recommendation: Brand X \"Button Down Oxford Shirt\" \u2014 size M**\n*(SKU: PSW8GeK \u2014 same shirt you kept in November and noted fits well)*\n\n**Why M?** Guidance basis: **Correction** (corr_000004) \u2014 *Out of true*, precedence over belief blf_8f2c41.\n\nYour own correction recorded 11 Nov 2026 reads:\n> *\"Use M for me on Brand X oxfords from now on - I've gone down a size since October.\"*\n\nThat correction overrides the earlier belief (blf_8f2c41, **Venerable / Out of true**), which had 3 returns of M for being too small (shoulders, chest, sleeves), and the pool direction of small (settled 23 shoppers; seeded split: 12 too-small returns, 3 too-large, 5 fits-well feedbacks \u2014 pool was **Earned** but is overridden by your correction). Supporting the correction, belief blf_2b9d60 (**Building**) records that M fit well across the shoulders on your most recent keep (8 Nov 2026).\n\n**Offer:** [us.sunspel.com \u2014 $195](https://buy.trychannel3.com/PSW8GeK-m1d3-8aUHo5) *(variants is null \u2014 size is selected at checkout)*\n\nShall I go ahead? Reply **yes** to confirm.",
+    "step": "02",
+    "timestamp": "2026-11-11T14:44:08.000Z",
+    "tools": [
+      {
+        "end": "2026-11-11T14:44:00.799Z",
+        "name": "recall_for_purchase",
+        "start": "2026-11-11T14:44:00.420Z"
+      },
+      {
+        "end": "2026-11-11T14:44:04.229Z",
+        "name": "search_catalog",
+        "start": "2026-11-11T14:44:03.383Z"
+      },
+      {
+        "end": "2026-11-11T14:44:06.829Z",
+        "name": "search_catalog",
+        "start": "2026-11-11T14:44:05.755Z"
+      },
+      {
+        "end": "2026-11-11T14:44:09.909Z",
+        "name": "search_catalog",
+        "start": "2026-11-11T14:44:08.848Z"
+      }
+    ],
+    "trace_id_short": "ae5d5e49"
+  }
+}

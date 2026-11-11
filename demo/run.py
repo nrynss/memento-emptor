@@ -25,11 +25,13 @@ Environment:
 Usage:
   bash demo/reset.sh <run-number>
   bash demo/run.sh
-  python3 demo/run.py --step2-trace <trace-id>
+  python3 demo/run.py --step2-trace <trace-id> [<evidence-file>]
 
 --step2-trace records step 2 from a turn sent through demo/drive.py, reading
 the platform's trace: it makes no live call of its own and writes the same
-evidence a full run's step 2 writes.
+evidence a full run's step 2 writes. The optional evidence-file names the file
+it writes (default 02-catalog-candidate.json), so a later turn can be recorded
+beside an earlier one without overwriting it.
 """
 
 import calendar
@@ -67,6 +69,12 @@ STEP2_ASK = ("I need a Brand X oxford shirt in the regular fit. "
 # line, so this is the answer a step-2 search works from.
 CATALOG_RECORDING = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  "..", "testdata", "channel3", "search-oxford-shirts.json")
+# The cut the demo asks for, in Channel3's own vocabulary. The layer's line
+# identity and Channel3's differ (brand-x-001 / shirts / regular is Channel3's
+# SMwk / dress-shirts / top-fit Regular), and that mapping is demo identity,
+# carried here rather than derived from the layer.
+CATALOG_CUT = {"brand": "SMwk", "category": "dress-shirts",
+               "fit": "top-fit", "fit_value": "Regular"}
 # The SKUs the shopper's memory already carries for the demo line: the three
 # seeded returns (tbnrl46) and the captured purchase (PSW8GeK). A candidate
 # is a different SKU; a turn that names one of these named the returned item.
@@ -146,13 +154,23 @@ def normalise_gaps(catalog):
             })
     else:
         candidate = catalog.get("candidate") or {}
+        recall = catalog.get("recall") or {}
         if (candidate.get("returned_sku")
                 and not recorded("returned item rather than a new one")):
             out.append({
                 "step": "2",
                 "text": ("the step-2 turn searched the catalog but named "
-                         f"{candidate.get('sku')}, the SKU the seeded returns carry, so the "
-                         "candidate is a returned item rather than a new one. Owner: T9.17."),
+                         f"{candidate.get('sku')}, a SKU the shopper's memory already carries, "
+                         "so the candidate is a returned item rather than a new one. "
+                         "Owner: T9.22."),
+            })
+        if (recall.get("called") and not recall.get("answered_before_search")
+                and not recorded("before recall answered")):
+            out.append({
+                "step": "2",
+                "text": ("the step-2 turn issued search_catalog before recall answered, so the "
+                         "search was never given the returned SKUs to exclude. "
+                         "Owner: T9.22."),
             })
     GAPS[:] = out
 
@@ -375,11 +393,36 @@ def reply_text(detail):
 
 
 def catalog_products():
-    """The demo cut's products, from the recording the agent's catalog tool replays."""
+    """The demo cut's recording, every product it holds, by id."""
     with open(CATALOG_RECORDING) as f:
         recorded = json.load(f)
     return {product["id"]: product for product in recorded.get("products", [])
             if isinstance(product, dict) and isinstance(product.get("id"), str)}
+
+
+def cut_products():
+    """The recording's products that match the cut the step-2 ask names.
+
+    The trace carries tool span names and times, not the tool's answer, so
+    this is the demo's reading of the recording rather than a copy of what
+    the search returned. It keeps the check from accepting a product the
+    cut excludes.
+    """
+    out = {}
+    for sku, product in catalog_products().items():
+        brands = {b.get("id") for b in product.get("brands") or [] if isinstance(b, dict)}
+        category = (product.get("category") or {}).get("slug")
+        attrs = product.get("structured_attributes")
+        if isinstance(attrs, list):
+            attrs = {a.get("name"): a.get("value") for a in attrs if isinstance(a, dict)}
+        fit = (attrs or {}).get(CATALOG_CUT["fit"]) or []
+        if isinstance(fit, str):
+            fit = [fit]
+        if (CATALOG_CUT["brand"] in brands
+                and category == CATALOG_CUT["category"]
+                and CATALOG_CUT["fit_value"] in fit):
+            out[sku] = product
+    return out
 
 
 def answer_generation(detail):
@@ -397,6 +440,7 @@ SIZE_WORDS = "XXS|XS|S|M|L|XL|XXL"
 def recommended_size(reply):
     """The size the reply recommends and where it names it, from the reply alone."""
     for pattern in (rf"\bsize:\s*\**({SIZE_WORDS})\b",
+                    rf"\bsize\s+\**({SIZE_WORDS})\b",
                     rf"\b(?:recommend|recommended|take|go with)\b[^.\n]{{0,40}}\b({SIZE_WORDS})\b"):
         found = re.search(pattern, reply, re.IGNORECASE)
         if found:
@@ -405,20 +449,26 @@ def recommended_size(reply):
 
 
 def catalog_use(detail, record):
-    """Step 2's catalog evidence: the search, its order, and the named candidate.
+    """Step 2's catalog evidence: recall's answer, the search, and the candidate.
 
     The trace carries tool span names and times, not their arguments or
     answers, so the named line and SKU are read from the reply and checked
     against the recording the tool replays. The size comes from recall: the
-    catalog carries no size for the oxford line (variants is null).
+    catalog carries no size for the oxford line (variants is null). A search
+    that starts before recall answers is recorded as it came rather than
+    dropped, because that ordering is what step 2 is asked to prove.
     """
-    catalog = next((s for s in record["tools"] if s["name"] == "search_catalog"), None)
-    if catalog is None:
+    recall = next((s for s in record["tools"] if s["name"] == "recall_for_purchase"), None)
+    searches = sorted((s for s in record["tools"] if s["name"] == "search_catalog"),
+                      key=lambda s: s["start"] or "")
+    if not searches:
         raise RuntimeError("step 2: the turn did not search the catalog")
+    catalog = searches[-1]
     answer_at = answer_generation(detail)
     if not catalog.get("end") or not answer_at or catalog["end"] > answer_at:
         raise RuntimeError("step 2: the catalog search did not finish before the answer")
     named = []
+    cut = cut_products()
     for sku, product in catalog_products().items():
         at = re.search(r"\b" + re.escape(sku) + r"\b", record["reply"])
         if not at:
@@ -431,26 +481,50 @@ def catalog_use(detail, record):
             "sku_at": at.start(),
             "line_at": line.start() if line else None,
             "line_named": line is not None,
+            "in_cut": sku in cut,
             "returned_sku": sku in RETURNED_SKUS,
         })
     if not named:
         raise RuntimeError("step 2: the reply names no catalog SKU")
-    candidate = min(named, key=lambda n: min([p for p in (n["line_at"], n["sku_at"])
-                                              if p is not None]))
+    in_cut = [n for n in named if n["in_cut"]]
+    if not in_cut:
+        raise RuntimeError("step 2: the reply names no SKU the demo cut matches")
+    named.sort(key=lambda n: n["sku_at"])
+    candidate = min(in_cut, key=lambda n: min([p for p in (n["line_at"], n["sku_at"])
+                                               if p is not None]))
     if not candidate["line_named"]:
         raise RuntimeError(f"step 2: the reply names SKU {candidate['sku']} but not its line")
     size, size_at = recommended_size(record["reply"])
     if size is None:
         raise RuntimeError("step 2: the reply names no recommended size")
     candidate_at = min(p for p in (candidate["line_at"], candidate["sku_at"]) if p is not None)
+    # Whether recall answered before the search was issued is the sequencing
+    # T9.22's instruction asks for: the search must start after recall ends.
+    recall_block = {
+        "called": recall is not None,
+        "start": recall.get("start") if recall else None,
+        "end": recall.get("end") if recall else None,
+        "started_before_search": bool(recall and recall.get("start") and catalog.get("start")
+                                      and recall["start"] <= catalog["start"]),
+        "answered_before_search": bool(recall and recall.get("end") and catalog.get("start")
+                                       and recall["end"] <= catalog["start"]),
+    }
     return {
+        "recall": recall_block,
         "catalog": {
             "searched": True,
             "tool": "search_catalog",
+            "calls": [{"start": s["start"], "end": s["end"]} for s in searches],
             "search_start": catalog.get("start"),
             "search_end": catalog.get("end"),
             "answer_generation_start": answer_at,
             "searched_before_answer": True,
+            "search_after_recall": recall_block["answered_before_search"],
+            "named_skus": [n["sku"] for n in named],
+            "off_cut_named": [n["sku"] for n in named if not n["in_cut"]],
+            "match_basis": ("the demo's reading of the recording: brand "
+                            f"{CATALOG_CUT['brand']}, category {CATALOG_CUT['category']}, "
+                            f"{CATALOG_CUT['fit']} {CATALOG_CUT['fit_value']}"),
         },
         "candidate": {
             "line": candidate["line"],
@@ -460,12 +534,16 @@ def catalog_use(detail, record):
                             "(variants is null)"),
             "line_named": candidate["line_named"],
             "named_before_size": candidate_at < size_at,
+            "in_cut": candidate["in_cut"],
             "returned_sku": candidate["returned_sku"],
-            "note": ("the named SKU is the one the seeded returns carry; it matches the cut, "
-                     "but it is not a new candidate") if candidate["returned_sku"] else "",
+            "note": ("the named SKU is one the shopper's memory already carries; it matches "
+                     "the cut, but it is not a new candidate") if candidate["returned_sku"]
+                    else ("the named SKU is in the demo cut and none of the shopper's returned "
+                          "rows carries it"),
         },
-        "channel3": {"searches": 1, "credits": 1,
-                     "note": "one search costs one credit; product detail calls are free"},
+        "channel3": {"searches": len(searches), "credits": len(searches),
+                     "note": ("one search per tool call costs one credit; product detail calls "
+                              "are free")},
     }
 
 
@@ -650,10 +728,8 @@ def step12():
 
 
 def step2(ref_conv):
-    """Ask for a product so the turn searches the catalog before it recommends."""
+    """Ask for a product so the turn recalls, then searches the catalog, before it recommends."""
     record = turn("02", "catalog", REF_DEPLOYMENT, ref_conv, STEP2_ASK)
-    if not record["tools"] or record["tools"][0]["name"] != "recall_for_purchase":
-        raise RuntimeError("step 2: the turn did not recall first")
     state = {"turn": record}
     state.update(catalog_use(trace_detail(REF_DEPLOYMENT, record["trace_id"]), record))
     evidence("02-catalog-candidate.json", state)
@@ -678,14 +754,12 @@ def step2_trace(trace_id):
                   for s in tool_spans(detail)],
         "reply": reply_text(detail),
     }
-    if not record["tools"] or record["tools"][0]["name"] != "recall_for_purchase":
-        raise RuntimeError("step 2: the turn did not recall first")
     state = {"turn": record}
     state.update(catalog_use(detail, record))
     return state
 
 
-def step2_main(trace_id):
+def step2_main(trace_id, name="02-catalog-candidate.json"):
     """Write step 2's evidence for a trace, with no live call of its own."""
     global RAWDIR, EVIDENCE
     RAWDIR = os.path.join(OUT, "step2-catalog")
@@ -693,11 +767,13 @@ def step2_main(trace_id):
     os.makedirs(RAWDIR, exist_ok=True)
     os.makedirs(EVIDENCE, exist_ok=True)
     state = step2_trace(trace_id)
-    save("02-catalog-candidate.json", state)
-    evidence("02-catalog-candidate.json", state)
+    save(name, state)
+    evidence(name, state)
     candidate = state["candidate"]
     say("step 2: catalog evidence for trace", trace_id[:8], "-",
-        candidate["line"], candidate["sku"], "size", candidate["size"])
+        candidate["line"], candidate["sku"], "size", candidate["size"],
+        "| recall first:", state["recall"]["answered_before_search"],
+        "| returned SKU:", candidate["returned_sku"])
 
 
 def pre_belief_view(pre):
@@ -1166,7 +1242,8 @@ if __name__ == "__main__":
     if "--step2-trace" in sys.argv:
         at = sys.argv.index("--step2-trace")
         if at + 1 >= len(sys.argv):
-            raise SystemExit("usage: demo/run.py --step2-trace <trace-id>")
-        step2_main(sys.argv[at + 1])
+            raise SystemExit("usage: demo/run.py --step2-trace <trace-id> [<evidence-file>]")
+        name = sys.argv[at + 2] if at + 2 < len(sys.argv) else "02-catalog-candidate.json"
+        step2_main(sys.argv[at + 1], name)
     else:
         main()
