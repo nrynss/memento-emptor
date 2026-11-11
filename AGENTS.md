@@ -81,7 +81,7 @@ secret-tool lookup service channel3 account memento-emptor
 # OpenRouter, which is how Jev is called.
 secret-tool lookup service openrouter account memento-emptor
 
-# Elastic deployment, also Lambo's recall tier.
+# Elastic deployment: the pool's index. The hub runs store-only (T8.1c).
 secret-tool lookup service elastic account memento-emptor kind api-key
 secret-tool lookup service elastic account memento-emptor kind url
 

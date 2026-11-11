@@ -296,6 +296,20 @@ The demo image builds `web/` on Node 22 while T0.2's contract and CI pin Node 26
 
 ---
 
+### T9.3h: Align the merchant image's Node pin
+```yaml
+requires:   [T9.3d]
+fixture-ok: no
+size:       XS · mid
+owns:       deploy/merchant/Dockerfile, deploy/README.md
+status:     not-started
+```
+T9.3g aligned the demo image's frontend build to the pinned Node 26, but `deploy/merchant/Dockerfile` still builds `merchant/` on `node:22-bookworm`. It is a separate image, so the pin drifted independently; align it the same way, prove the merchant image builds and serves `/` and `/healthz`, and record the pin beside the others.
+
+**Done when:** the merchant image's build stage uses Node 26; the image builds and serves `/` and `/healthz`; the pin table covers it; the gate passes.
+
+---
+
 ### T9.7: The demo, after the pivot ★
 ```yaml
 requires:   [T9.2, T9.3d, T9.5, T9.6]
