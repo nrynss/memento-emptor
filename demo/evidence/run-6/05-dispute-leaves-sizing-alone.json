@@ -1,0 +1,33 @@
+{
+  "dispute_rows_in_sizing": [],
+  "recall_guidance": {
+    "basis": "correction",
+    "belief_id": "blf_8f2c41",
+    "correction_id": "corr_000004",
+    "text": "Take size M for Brand X"
+  },
+  "recall_pool_status": "Earned",
+  "seller_belief": {
+    "belief_id": "blf_1a5e09",
+    "evidence_count": 1,
+    "rows": [
+      {
+        "counts_toward": "seller_reliability",
+        "outcome": "dispute",
+        "reason": {
+          "category": "not_arrived",
+          "confidence": 1,
+          "text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED"
+        }
+      }
+    ],
+    "standing": "None",
+    "status": "Claimed",
+    "value": "ships reliably for this shopper"
+  },
+  "sizing_belief_evidence": [
+    "ev_6d1a09",
+    "ev_6d1a10",
+    "ev_6d1a11"
+  ]
+}

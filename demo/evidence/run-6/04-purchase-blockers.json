@@ -1,0 +1,26 @@
+{
+  "new_purchase": {
+    "paypal_app": {
+      "any_points_at_the_layer": false,
+      "event_types_subscribed": [
+        "CUSTOMER.DISPUTE.CREATED",
+        "PAYMENT.CAPTURE.COMPLETED",
+        "PAYMENT.CAPTURE.REFUNDED"
+      ],
+      "subscriptions": 1
+    },
+    "unsigned_delivery_probe": {
+      "answer": {
+        "error": {
+          "code": "invalid_request",
+          "message": "server: ingest delivery: ingest: delivery failed verification: payments: delivery is missing its signed fields: missing transmission header"
+        }
+      },
+      "request": "POST /webhooks/paypal, an unsigned body naming shopper_01",
+      "status": 400,
+      "what_it_shows": "the public webhook route refuses a delivery without PayPal's signed headers; a real delivery would pass this gate and then find no event in the served layer's recording source"
+    },
+    "why_it_cannot_be_recorded_now": "The served layer's ingest reads a verified event from the recording demo source (cmd/memento runPivoted passes fakes.NewRecordingPaymentSource as Payments); a genuine PayPal event id has no recording there, and the PayPal app's webhook subscription does not point at the layer."
+  },
+  "the_feedback_that_was_recorded": "the live capture ev_51c2d8 (custom id memento-shopper01-06) and trace 11d83a4f's record_feedback; see 04-purchase-and-feedback.json"
+}

@@ -1,0 +1,153 @@
+{
+  "duplicate_evidence_ids": [],
+  "evidence_rows": [
+    {
+      "belief_ids": [
+        "blf_2b9d60"
+      ],
+      "evidence_id": "ev_51c2d8",
+      "kind": "capture",
+      "reason": {
+        "category": "none",
+        "confidence": 1,
+        "text": "fits well across the shoulders and in the sleeves"
+      },
+      "seeded": false
+    },
+    {
+      "belief_ids": [
+        "blf_1a5e09"
+      ],
+      "evidence_id": "ev_9d4c22",
+      "kind": "dispute",
+      "reason": {
+        "category": "not_arrived",
+        "confidence": 1,
+        "text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED"
+      },
+      "seeded": false
+    },
+    {
+      "belief_ids": [
+        "blf_8f2c41"
+      ],
+      "evidence_id": "ev_6d1a11",
+      "kind": "refund",
+      "reason": {
+        "category": "fit_too_small",
+        "confidence": 1,
+        "text": "sleeves too short in M"
+      },
+      "seeded": true
+    },
+    {
+      "belief_ids": [
+        "blf_8f2c41"
+      ],
+      "evidence_id": "ev_6d1a10",
+      "kind": "refund",
+      "reason": {
+        "category": "fit_too_small",
+        "confidence": 1,
+        "text": "too tight across the chest"
+      },
+      "seeded": true
+    },
+    {
+      "belief_ids": [
+        "blf_8f2c41"
+      ],
+      "evidence_id": "ev_6d1a09",
+      "kind": "refund",
+      "reason": {
+        "category": "fit_too_small",
+        "confidence": 1,
+        "text": "too tight in the shoulders"
+      },
+      "seeded": true
+    }
+  ],
+  "ledger_rows": [
+    {
+      "belief_id": "blf_8f2c41",
+      "contradicted": true,
+      "evidence_count": 3,
+      "kind": "fit",
+      "seeded": true,
+      "standing": "Venerable",
+      "status": "Out of true",
+      "value": "runs small, take size L"
+    },
+    {
+      "belief_id": "blf_2b9d60",
+      "contradicted": false,
+      "evidence_count": 3,
+      "kind": "fit",
+      "seeded": false,
+      "standing": "Candidate",
+      "status": "Building",
+      "value": "size M fits this shopper now"
+    },
+    {
+      "belief_id": "blf_1a5e09",
+      "contradicted": false,
+      "evidence_count": 1,
+      "kind": "seller_reliability",
+      "seeded": false,
+      "standing": "None",
+      "status": "Claimed",
+      "value": "ships reliably for this shopper"
+    },
+    {
+      "belief_id": "blf_77c310",
+      "contradicted": false,
+      "evidence_count": 0,
+      "kind": "fit",
+      "seeded": true,
+      "standing": "None",
+      "status": "Claimed",
+      "value": "shopper says they are usually size M"
+    }
+  ],
+  "raw_evidence_rows": 5,
+  "recall_decision": {
+    "basis": "correction",
+    "belief_precedence": [
+      {
+        "belief_id": "blf_2b9d60",
+        "precedence": {
+          "overridden": true,
+          "overridden_by": "correction",
+          "step": "own_evidence"
+        }
+      },
+      {
+        "belief_id": "blf_8f2c41",
+        "precedence": {
+          "overridden": true,
+          "overridden_by": "correction",
+          "step": "own_evidence"
+        }
+      },
+      {
+        "belief_id": "blf_77c310",
+        "precedence": {
+          "overridden": true,
+          "overridden_by": "correction",
+          "step": "statement"
+        }
+      }
+    ],
+    "correction": "corr_000004",
+    "guidance": "Take size M for Brand X",
+    "pool_precedence": {
+      "overridden": true,
+      "overridden_by": "correction",
+      "step": "pool"
+    }
+  },
+  "screens": [
+    "06-ledger-belief.png",
+    "06-ledger-table.png"
+  ]
+}

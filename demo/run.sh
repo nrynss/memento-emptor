@@ -1,53 +1,44 @@
 #!/usr/bin/env bash
-# T3.6 run: product.md's six demo steps, end to end, live on the real stack.
+# T9.7 run: product.md's pivot demo, steps 0 to 7, against the hosted services.
 #
-# Start from reset: bash demo/reset.sh <run-number>
-# Then: bash demo/run.sh
+# Start from a reset:  bash demo/reset.sh <run-number>
+# Then:                bash demo/run.sh
 #
-# Legs (stops on the first failure; every spend leg has a guard):
-#   1. Live PayPal read-back of the three T1.3b fit cycles (free).
-#   2. Layer story on live Lambo + live Jev (4 classifications, ~$0.0001,
-#      10x-per-call guard, pinned build) with recording payments whose
-#      shapes T2.1b proved identical to the sandbox reads.
-#   3. Channel3 live detail + frozen match (free; detail calls cost no
-#      credits, no searches are used).
-#   4. Three deployed-agent turns via the messaging proxy (~$0.03-0.04
-#      each, $0.10 per-turn guard, billing re-checked around each turn).
-#   5. One new sandbox purchase through agent/orders (sandbox only, free)
-#      with a real explicit-yes plus the scripted shopper approval, then
-#      the verified capture joins the layer and fits-well feedback ties
-#      to it.
-#   6. Live dispute read-back (free) + seller-only proof + the ledger and
-#      trace span checks.
+# Every leg reads or writes a live service, except the deployed ledger page,
+# which still replays the frozen story from fixtures (recorded as such). The
+# driver walks the steps, writes raw answers and full trace ids to demo/out/
+# (git-ignored), and writes the redacted evidence the run record cites to
+# demo/evidence/run-<n>/.
 #
-# Real ids stay in demo/out/ (git-ignored). Committed records use the
-# placeholders from the T0.4 table plus RUN-scoped CUSTOM/ORD/CAP/EVT and
-# CONV/TRACE ids.
+# Agent turns are the only spend: the driver checks the spend baseline the
+# reset wrote and records the delta. A layer read costs nothing.
+#
+# MEMENTO_SECOND_DEPLOYMENT must be set to the second agent's deployment id;
+# the id never lives in this repository.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
 OUT="${OUT:-demo/out}"
 export OUT
-if [ ! -f "$OUT/SESSION" ]; then
+if [ ! -f "$OUT/RUN" ]; then
 	echo "run demo/reset.sh <run-number> first" >&2
 	exit 2
 fi
 
-: "${PAYPAL_CLIENT_ID:?source tools/env.sh first}"
-: "${PAYPAL_CLIENT_SECRET:?source tools/env.sh first}"
-: "${OPENROUTER_API_KEY:?source tools/env.sh first}"
-: "${ELASTIC_URL:?source tools/env.sh first}"
-: "${LAMBO_ES_API_KEY:?source tools/env.sh first}"
-: "${CHANNEL3_API_KEY:?source tools/env.sh first}"
+if [ -z "${MEMENTO_SECOND_DEPLOYMENT:-}" ]; then
+	echo "set MEMENTO_SECOND_DEPLOYMENT to the second agent's deployment id" >&2
+	exit 2
+fi
 
-export SHOPPER_EMAIL="$(secret-tool lookup service paypal-sandbox account memento-emptor kind shopper-email)"
-export SHOPPER_PASSWORD="$(secret-tool lookup service paypal-sandbox account memento-emptor kind shopper-password)"
+if ! command -v secret-tool >/dev/null 2>&1; then
+	echo "secret-tool is not on PATH; the keys come from the system keyring" >&2
+	exit 2
+fi
 
-LAMBO_BIN="${LAMBO_BIN:-$HOME/work/lambo/target/release/lambo}"
-export LAMBO_BIN
+source tools/env.sh >/dev/null 2>&1 || true
 export PATH="$HOME/.ast/bin:$PATH"
 
-go run ./demo/driver
+python3 demo/run.py
 
-echo "done: T3.6 run complete; transcripts under $OUT (git-ignored)"
+echo "done: run $(cat "$OUT/RUN"); evidence in demo/evidence/run-$(cat "$OUT/RUN")/"

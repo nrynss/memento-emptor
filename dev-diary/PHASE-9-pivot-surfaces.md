@@ -439,11 +439,28 @@ requires:   [T9.2, T9.3d, T9.5, T9.6, T9.8]
 fixture-ok: no
 size:       M · frontier
 owns:       demo/
-status:     claimed:t97-demo
+status:     in-review
 ```
 product.md's demo from step 0 to step 7, live, on the hosted service: the new shopper sized from the pool on day one; the three returns; the correction; the purchase and feedback; the dispute that leaves sizing alone; the ledger; the second agent honouring the correction; the merchant app's "why". The words about pooling follow the consent decision (T7.3). Budget: under $1.00. Rehearse step 0 first and check its cost.
 
 **Done when:** a recorded run covers every step, with each step's trace or screen linked in the handoff log. `demo/reset.sh` restores the starting state. Spend is recorded.
+
+**Notes (in-review).** `demo/` is refreshed for the pivot: `reset.sh` restores the demo line to 22 settled / 22 seeded / 0 live (it opts the shopper out of pooling to remove an earlier run's live fit rows and back in, then asserts the seeded belief and the spend baseline); `run.sh` + `run.py` walk steps 0-7 against the hosted edge, both agent deployments and both apps; `README.md` maps each step to its artifact; `RUN-6.md` is the recorded run with its evidence under `demo/evidence/run-6/`. Raw answers and full trace ids stay in `out/` (git-ignored); the committed evidence is redacted (short trace ids, no key, no account id).
+
+Live, in one pass (step 7 resumed once after a transient platform 401): step 0 pool **Earned small**, 22 settled (22 seeded, 0 live), 12 too-small / 3 too-large / 4 fits-well, 2 kept, 19 fit shoppers; step 1 the three seeded returns (`ev_6d1a09/10/11`, all `fit_too_small`), belief `blf_8f2c41` "runs small, take size L", Venerable; step 3 traces `ded28ebc`/`c94448ee`/`82d6512f`, the agent recalls, records `corr_000004` and then recommends M under it while the belief stays Out of true; step 4 the live capture `ev_51c2d8` (`memento-shopper01-06`, SKU `PSW8GeK`, M) and trace `11d83a4f` records `fits_well`, settling the fit row (22 → 23 settled, 0 → 1 live); step 5 the seller belief `blf_1a5e09` Claimed with one not-arrived dispute row and the sizing belief untouched; step 6 live ledger reads plus screens of the deployed ledger page (`demo/evidence/run-6/06-ledger-belief.png`, `06-ledger-table.png`); step 7 trace `9d4893e7` (second agent, fresh conversation) recalls first and recommends M citing `corr_000004` and the 23/22/1 pool, and the merchant proxy reads Earned small 23 settled (22 seeded, 1 live) in `07-merchant.png`.
+
+Spend **$0.69** of the $1.00 budget (billing usage $4.95 → $5.64; credit $5.05 → $4.36). The recorded run's five turns are $0.2377 (`ded28ebc` $0.0337, `c94448ee` $0.0759, `82d6512f` $0.0658, `11d83a4f` $0.0239, `9d4893e7` $0.0385); the rest is the rehearsal plus three failed attempts before the recorded pass and two step-7 turns superseded while the record was fixed.
+
+Six things the next agent should not have to rediscover:
+
+- **Step 0's empty shopper is blocked, not faked.** The only agent key binds `shopper_01`, so `shopper_02` answers 401 before the pool is reached. The pool read is live; a day-one turn needs the operator to widen `MEMENTO_AGENT_KEYS`'s binding (or mint a second agent key). Every run records this as a gap.
+- **No live purchase or dispute can be ingested.** The PayPal app's only webhook subscription points at an external test receiver, and the served layer's `cmd/memento` passes `fakes.NewRecordingPaymentSource` as its event source, so a verified delivery would have no event to read (the unsigned-delivery probe and the subscription facts are in `demo/evidence/run-6/04-purchase-blockers.json`). Step 4 uses the live capture already in memory and writes the fit row through `record_feedback`; a new purchase needs a layer/deploy task (proposed T9.10).
+- **The deployed ledger page is a fixture replay** (60 settled / 48 seeded in the screen) with no live transport. Step 6's live numbers are the API reads; a `web/` task (proposed T9.11) wires the transport.
+- **`record_feedback` is not idempotent per purchase in the shopper's belief**: each call appends the same evidence again, and the run's repeated feedback left `ev_51c2d8` three times on `blf_2b9d60`, lifting it Claimed → Building. The pool row is idempotent. Layer task (proposed T9.10).
+- **A restart can reuse a correction id**: `restoreStanding` restores the journal's correction ids but not the mint sequence, so the next `record_correction` minted `corr_000001` over the restored one during an early attempt. The run's own `corr_000004` is unaffected. Layer task (proposed T9.10).
+- **Recall-first is not every turn**: the reference agent skipped `recall_for_purchase` on the recorded feedback turn and on one correction attempt (it recalled on the ask and next-recommendation turns). T9.9 owns the prompt/retry discipline. Also, the seller belief never reaches recall and agent keys are refused on ledger reads, so no agent turn can mention the dispute (T9.9's surface alignment or a recall extension), and both apps render their own source comments as visible text while the belief page repeats an overridden step (proposed T9.11).
+
+The pre-pivot T3.6 record (`RUN-1.md`, `RUN-2.md`, `drive.py`, `driver/`) is kept as history and is not used by the pivot run.
 
 ---
 

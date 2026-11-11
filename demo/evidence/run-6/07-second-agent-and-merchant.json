@@ -1,0 +1,58 @@
+{
+  "correction": {
+    "contradicts_belief_id": "blf_8f2c41",
+    "correction_id": "corr_000004",
+    "recorded_at": "2026-11-11T11:40:20Z",
+    "text": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction."
+  },
+  "merchant_product_fit": {
+    "direction": "small",
+    "feedback": {
+      "fits_well": 5,
+      "too_large": 0,
+      "too_small": 0
+    },
+    "kept": 2,
+    "line": {
+      "brand_id": "brand-x-001",
+      "category": "shirts",
+      "fit_handle": "regular"
+    },
+    "live": 1,
+    "recent": 11,
+    "returns": {
+      "too_large": 3,
+      "too_small": 12
+    },
+    "seeded": 22,
+    "settled": 23,
+    "shoppers": {
+      "fit": 20,
+      "too_large": 3,
+      "too_small": 12
+    },
+    "size": "M",
+    "status": "Earned"
+  },
+  "screens": [
+    "07-merchant.png"
+  ],
+  "turn": {
+    "cost": 0.038493,
+    "deployment": "MEMENTO-SECOND",
+    "input": "I need a Brand X oxford shirt. What size should I take?",
+    "label": "second-agent",
+    "latency_ms": 10344,
+    "reply": "Let me check the layer for your fit history and the pooled data right away.Here's the full picture \u2014 your correction is in charge here.\n\n---\n\n## Recommendation: **Size M** \u2014 *Out of true* (correction overrules prior record)\n\n**Winning rung: Correction** (`corr_000004`, overriding belief `blf_8f2c41`)\n\nYour own note on file reads:\n> *\"Use M for me on Brand X oxfords from now on \u2014 I've gone down a size since October.\"*\n\nThat correction takes precedence over everything else, so **M is the call**.\n\n---\n\n### What was overruled (and why it's still visible)\n\n| Rung | Belief | Standing | Verdict | Overruled? |\n|---|---|---|---|---|\n| **Correction** (winner) | `corr_000004` | \u2014 | Take M | \u2705 Wins |\n| Own fit record | `blf_8f2c41` | Venerable | Runs small \u2192 take L | \u2b1b Overridden |\n| Recent fit evidence | `blf_2b9d60` | Building | M fits well (Nov 2026) | \u2b1b Overridden |\n| Broad statement | `blf_77c310` | Claimed | Shopper says usually M | \u2b1b Overridden |\n\nThe older **Venerable** record (`blf_8f2c41`, **Earned** in the pool) showed 3 returns of M in Oct 2026 \u2014 too tight in the shoulders, chest, and sleeves. Those were seeded rows. Your correction explicitly says you've gone down a size since then, which is what flipped the guidance.\n\n---\n\n### Pool context (shown but overridden)\nPool for Brand X oxford shirt, size M \u2014 **Earned** status, direction: **runs small**\n- 23 settled outcomes across 20 shoppers (seeded: 22 / live: 1)\n- Returns: 12 too-small, 3 too-large | Kept: 2 | Fits-well feedback: 5\n- Recent (live): 11 settled, 8 too-small returns, 2 fits-well feedbacks\n\nThe pool also nudges toward L \u2014 but your correction overrides it.\n\n---\n\n**Go with M.** Would you like to go ahead and purchase it?",
+    "step": "07",
+    "timestamp": "2026-11-11T11:49:15.000Z",
+    "tools": [
+      {
+        "end": "2026-11-11T11:49:09.623Z",
+        "name": "recall_for_purchase",
+        "start": "2026-11-11T11:49:09.451Z"
+      }
+    ],
+    "trace_id_short": "9d4893e7"
+  }
+}

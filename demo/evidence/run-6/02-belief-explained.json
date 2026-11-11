@@ -1,0 +1,239 @@
+{
+  "belief": {
+    "belief_id": "blf_8f2c41",
+    "contradicted": true,
+    "contradicted_by": {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "recorded_at": "2026-11-11T11:40:20Z",
+      "takes_precedence": true,
+      "text": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction."
+    },
+    "evidence": [
+      {
+        "counts_toward": "fit",
+        "evidence_id": "ev_6d1a09",
+        "item": {
+          "brand_id": "brand-x-001",
+          "brand_name": "Brand X",
+          "category": "shirts",
+          "line_name": "oxford shirt",
+          "size": "M",
+          "sku": "tbnrl46"
+        },
+        "link": {
+          "capture_id": "CAP-7XK-01",
+          "custom_id": "memento-shopper01-01",
+          "event_id": "WH-2EV-01",
+          "order_id": "ORD-7XK-01",
+          "refund_id": "RFD-7XK-01"
+        },
+        "occurred_at": "2026-10-14T10:00:00Z",
+        "outcome": {
+          "amount_minor": 19500,
+          "currency": "USD",
+          "kind": "refund",
+          "status": "COMPLETED"
+        },
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "too tight in the shoulders"
+        },
+        "seeded": true,
+        "write_op": "record_action"
+      },
+      {
+        "counts_toward": "fit",
+        "evidence_id": "ev_6d1a10",
+        "item": {
+          "brand_id": "brand-x-001",
+          "brand_name": "Brand X",
+          "category": "shirts",
+          "line_name": "oxford shirt",
+          "size": "M",
+          "sku": "tbnrl46"
+        },
+        "link": {
+          "capture_id": "CAP-7XK-02",
+          "custom_id": "memento-shopper01-02",
+          "event_id": "WH-2EV-02",
+          "order_id": "ORD-7XK-02",
+          "refund_id": "RFD-7XK-02"
+        },
+        "occurred_at": "2026-10-20T10:00:00Z",
+        "outcome": {
+          "amount_minor": 19500,
+          "currency": "USD",
+          "kind": "refund",
+          "status": "COMPLETED"
+        },
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "too tight across the chest"
+        },
+        "seeded": true,
+        "write_op": "record_action"
+      },
+      {
+        "counts_toward": "fit",
+        "evidence_id": "ev_6d1a11",
+        "item": {
+          "brand_id": "brand-x-001",
+          "brand_name": "Brand X",
+          "category": "shirts",
+          "line_name": "oxford shirt",
+          "size": "M",
+          "sku": "tbnrl46"
+        },
+        "link": {
+          "capture_id": "CAP-7XK-03",
+          "custom_id": "memento-shopper01-03",
+          "event_id": "WH-2EV-03",
+          "order_id": "ORD-7XK-03",
+          "refund_id": "RFD-7XK-03"
+        },
+        "occurred_at": "2026-10-26T10:00:00Z",
+        "outcome": {
+          "amount_minor": 19500,
+          "currency": "USD",
+          "kind": "refund",
+          "status": "COMPLETED"
+        },
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "sleeves too short in M"
+        },
+        "seeded": true,
+        "write_op": "record_action"
+      }
+    ],
+    "kind": "fit",
+    "precedence": null,
+    "seeded": true,
+    "standing": "Venerable",
+    "status": "Out of true",
+    "subject": {
+      "id": "brand-x-001",
+      "kind": "brand",
+      "name": "Brand X"
+    },
+    "updated_at": "2026-11-11T11:40:20Z",
+    "value": "runs small, take size L"
+  },
+  "corrections": [
+    {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "recorded_at": "2026-11-11T11:40:20Z",
+      "takes_precedence": true,
+      "text": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction."
+    },
+    {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000003",
+      "recorded_at": "2026-11-11T11:34:39Z",
+      "takes_precedence": true,
+      "text": "I've dropped a size since October. For Brand X oxfords, I take M now - please record that as my correction."
+    },
+    {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000002",
+      "recorded_at": "2026-11-11T11:32:11Z",
+      "takes_precedence": true,
+      "text": "I've dropped a size since October. For Brand X oxfords, take M for me, and record that as my correction."
+    },
+    {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000001",
+      "recorded_at": "2026-11-11T11:29:21Z",
+      "takes_precedence": true,
+      "text": "I've lost weight - for Brand X oxfords, use M for me"
+    },
+    {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_3b7e52",
+      "recorded_at": "2026-11-05T14:02:11Z",
+      "takes_precedence": true,
+      "text": "I've lost weight, use M"
+    },
+    {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000001",
+      "recorded_at": "2026-11-11T11:29:21Z",
+      "takes_precedence": true,
+      "text": "I've lost weight - for Brand X oxfords, use M for me"
+    },
+    {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_3b7e52",
+      "recorded_at": "2026-11-05T14:02:11Z",
+      "takes_precedence": true,
+      "text": "I've lost weight, use M"
+    }
+  ],
+  "timeline": [
+    {
+      "at": "2026-10-14T10:00:00Z",
+      "kind": "evidence",
+      "ref_id": "ev_6d1a09",
+      "summary": "Fit return 1: oxford shirt size M refunded; too tight in the shoulders."
+    },
+    {
+      "at": "2026-10-20T10:00:00Z",
+      "kind": "evidence",
+      "ref_id": "ev_6d1a10",
+      "summary": "Fit return 2: oxford shirt size M refunded; too tight across the chest."
+    },
+    {
+      "at": "2026-10-26T10:00:00Z",
+      "kind": "evidence",
+      "ref_id": "ev_6d1a11",
+      "summary": "Fit return 3: oxford shirt size M refunded; sleeves too short in M."
+    },
+    {
+      "at": "2026-10-26T10:00:05Z",
+      "kind": "status",
+      "ref_id": "blf_8f2c41",
+      "summary": "Belief reached Earned: three documented fit returns over twelve days."
+    },
+    {
+      "at": "2026-11-05T14:02:11Z",
+      "kind": "correction",
+      "ref_id": "corr_3b7e52",
+      "summary": "Shopper correction: lost weight, take size M for Brand X."
+    },
+    {
+      "at": "2026-11-08T20:10:00Z",
+      "kind": "feedback",
+      "ref_id": "fb_51c2d8",
+      "summary": "Fit feedback: oxford shirt size M fits well."
+    },
+    {
+      "at": "2026-11-11T11:29:21Z",
+      "kind": "correction",
+      "ref_id": "corr_000001",
+      "summary": "Shopper correction: I've lost weight - for Brand X oxfords, use M for me."
+    },
+    {
+      "at": "2026-11-11T11:32:11Z",
+      "kind": "correction",
+      "ref_id": "corr_000002",
+      "summary": "Shopper correction: I've dropped a size since October. For Brand X oxfords, take M for me, and record that as my correction.."
+    },
+    {
+      "at": "2026-11-11T11:34:39Z",
+      "kind": "correction",
+      "ref_id": "corr_000003",
+      "summary": "Shopper correction: I've dropped a size since October. For Brand X oxfords, I take M now - please record that as my correction.."
+    },
+    {
+      "at": "2026-11-11T11:40:20Z",
+      "kind": "correction",
+      "ref_id": "corr_000004",
+      "summary": "Shopper correction: Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction.."
+    }
+  ]
+}

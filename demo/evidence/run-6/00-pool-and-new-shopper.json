@@ -1,0 +1,47 @@
+{
+  "new_shopper_recall": {
+    "answer": {
+      "error": {
+        "code": "unauthenticated",
+        "message": "unauthorized"
+      }
+    },
+    "request": {
+      "brand_id": "brand-x-001",
+      "category": "shirts",
+      "fit_handle": "regular",
+      "size_considered": "M"
+    },
+    "shopper_id": "shopper_02",
+    "status": 401
+  },
+  "product_fit": {
+    "direction": "small",
+    "feedback": {
+      "fits_well": 4,
+      "too_large": 0,
+      "too_small": 0
+    },
+    "kept": 2,
+    "line": {
+      "brand_id": "brand-x-001",
+      "category": "shirts",
+      "fit_handle": "regular"
+    },
+    "live": 0,
+    "recent": 10,
+    "returns": {
+      "too_large": 3,
+      "too_small": 12
+    },
+    "seeded": 22,
+    "settled": 22,
+    "shoppers": {
+      "fit": 19,
+      "too_large": 3,
+      "too_small": 12
+    },
+    "size": "M",
+    "status": "Earned"
+  }
+}

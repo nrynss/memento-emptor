@@ -1,3 +1,4 @@
 out/
 SESSION
 RUN-*.tmp
+__pycache__/

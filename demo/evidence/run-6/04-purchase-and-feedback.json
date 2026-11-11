@@ -1,0 +1,230 @@
+{
+  "fit_belief": {
+    "belief": {
+      "belief_id": "blf_2b9d60",
+      "contradicted": false,
+      "contradicted_by": null,
+      "evidence": [
+        {
+          "counts_toward": "fit",
+          "evidence_id": "ev_51c2d8",
+          "item": {
+            "brand_id": "brand-x-001",
+            "brand_name": "Brand X",
+            "category": "shirts",
+            "line_name": "oxford shirt",
+            "size": "M",
+            "sku": "PSW8GeK"
+          },
+          "link": {
+            "capture_id": "CAP-7XK-06",
+            "custom_id": "memento-shopper01-06",
+            "event_id": "WH-2EV-06",
+            "order_id": "ORD-7XK-06"
+          },
+          "occurred_at": "2026-11-08T20:10:00Z",
+          "outcome": {
+            "amount_minor": 19500,
+            "currency": "USD",
+            "kind": "capture",
+            "status": "COMPLETED"
+          },
+          "reason": {
+            "category": "none",
+            "confidence": 1,
+            "text": "fits well across the shoulders and in the sleeves"
+          },
+          "seeded": false,
+          "write_op": "record_action"
+        },
+        {
+          "counts_toward": "fit",
+          "evidence_id": "ev_51c2d8",
+          "item": {
+            "brand_id": "brand-x-001",
+            "brand_name": "Brand X",
+            "category": "shirts",
+            "line_name": "oxford shirt",
+            "size": "M",
+            "sku": "PSW8GeK"
+          },
+          "link": {
+            "capture_id": "CAP-7XK-06",
+            "custom_id": "memento-shopper01-06",
+            "event_id": "WH-2EV-06",
+            "order_id": "ORD-7XK-06"
+          },
+          "occurred_at": "2026-11-08T20:10:00Z",
+          "outcome": {
+            "amount_minor": 19500,
+            "currency": "USD",
+            "kind": "capture",
+            "status": "COMPLETED"
+          },
+          "reason": {
+            "category": "none",
+            "confidence": 1,
+            "text": "fits well across the shoulders and in the sleeves"
+          },
+          "seeded": false,
+          "write_op": "record_action"
+        },
+        {
+          "counts_toward": "fit",
+          "evidence_id": "ev_51c2d8",
+          "item": {
+            "brand_id": "brand-x-001",
+            "brand_name": "Brand X",
+            "category": "shirts",
+            "line_name": "oxford shirt",
+            "size": "M",
+            "sku": "PSW8GeK"
+          },
+          "link": {
+            "capture_id": "CAP-7XK-06",
+            "custom_id": "memento-shopper01-06",
+            "event_id": "WH-2EV-06",
+            "order_id": "ORD-7XK-06"
+          },
+          "occurred_at": "2026-11-08T20:10:00Z",
+          "outcome": {
+            "amount_minor": 19500,
+            "currency": "USD",
+            "kind": "capture",
+            "status": "COMPLETED"
+          },
+          "reason": {
+            "category": "none",
+            "confidence": 1,
+            "text": "fits well across the shoulders and in the sleeves"
+          },
+          "seeded": false,
+          "write_op": "record_action"
+        }
+      ],
+      "kind": "fit",
+      "precedence": null,
+      "seeded": false,
+      "standing": "Candidate",
+      "status": "Building",
+      "subject": {
+        "id": "brand-x-001",
+        "kind": "brand",
+        "name": "Brand X"
+      },
+      "updated_at": "2026-11-11T11:41:49Z",
+      "value": "size M fits this shopper now"
+    },
+    "corrections": [],
+    "timeline": [
+      {
+        "at": "2026-11-11T11:35:33Z",
+        "kind": "feedback",
+        "ref_id": "fb_000001",
+        "summary": "Feedback on oxford shirt size M: fits well across the shoulders and in the sleeves."
+      },
+      {
+        "at": "2026-11-11T11:41:49Z",
+        "kind": "feedback",
+        "ref_id": "fb_000002",
+        "summary": "Feedback on oxford shirt size M: fits well across the shoulders and in the sleeves."
+      }
+    ]
+  },
+  "product_fit_after": {
+    "direction": "small",
+    "feedback": {
+      "fits_well": 5,
+      "too_large": 0,
+      "too_small": 0
+    },
+    "kept": 2,
+    "line": {
+      "brand_id": "brand-x-001",
+      "category": "shirts",
+      "fit_handle": "regular"
+    },
+    "live": 1,
+    "recent": 11,
+    "returns": {
+      "too_large": 3,
+      "too_small": 12
+    },
+    "seeded": 22,
+    "settled": 23,
+    "shoppers": {
+      "fit": 20,
+      "too_large": 3,
+      "too_small": 12
+    },
+    "size": "M",
+    "status": "Earned"
+  },
+  "product_fit_before": {
+    "direction": "small",
+    "feedback": {
+      "fits_well": 4,
+      "too_large": 0,
+      "too_small": 0
+    },
+    "kept": 2,
+    "line": {
+      "brand_id": "brand-x-001",
+      "category": "shirts",
+      "fit_handle": "regular"
+    },
+    "live": 0,
+    "recent": 10,
+    "returns": {
+      "too_large": 3,
+      "too_small": 12
+    },
+    "seeded": 22,
+    "settled": 22,
+    "shoppers": {
+      "fit": 19,
+      "too_large": 3,
+      "too_small": 12
+    },
+    "size": "M",
+    "status": "Earned"
+  },
+  "purchase": {
+    "custom_id": "memento-shopper01-06",
+    "evidence_id": "ev_51c2d8",
+    "item": {
+      "brand_id": "brand-x-001",
+      "brand_name": "Brand X",
+      "category": "shirts",
+      "line_name": "oxford shirt",
+      "size": "M",
+      "sku": "PSW8GeK"
+    },
+    "occurred_at": "2026-11-08T20:10:00Z",
+    "outcome": {
+      "amount_minor": 19500,
+      "currency": "USD",
+      "kind": "capture",
+      "status": "COMPLETED"
+    },
+    "seeded": false
+  },
+  "turn": {
+    "cost": 0.023856,
+    "deployment": "MEMENTO-REF",
+    "input": "The PSW8GeK oxford in M I ordered (order reference memento-shopper01-06) arrived and fits well across the shoulders and in the sleeves. Record that for me.",
+    "label": "feedback",
+    "latency_ms": 3990,
+    "reply": "Got it \u2014 your feedback is recorded:\n\n- **Feedback ID:** fb_000002\n- **SKU:** PSW8GeK, **Size:** M\n- **Order:** memento-shopper01-06\n- **Verdict:** fits well (shoulders and sleeves) \u2713\n\nThis counts toward the fit evidence for your size M in this line (belief **blf_2b9d60**). Is there anything else you'd like help with?",
+    "step": "04",
+    "timestamp": "2026-11-11T11:41:56.000Z",
+    "tools": [
+      {
+        "end": "2026-11-11T11:41:50.300Z",
+        "name": "record_feedback",
+        "start": "2026-11-11T11:41:49.449Z"
+      }
+    ],
+    "trace_id_short": "11d83a4f"
+  }
+}

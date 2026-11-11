@@ -1,0 +1,752 @@
+{
+  "belief_before_correction": {
+    "belief_id": "blf_8f2c41",
+    "guidance": {
+      "basis": "correction",
+      "belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "text": "Take size M for Brand X"
+    },
+    "status": "Building"
+  },
+  "correction": {
+    "belief_after": {
+      "belief_id": "blf_8f2c41",
+      "contradicted": true,
+      "evidence_count": 3,
+      "status": "Out of true"
+    },
+    "correction_after": {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "recorded_at": "2026-11-11T11:40:20Z",
+      "text": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction."
+    },
+    "correction_before": {
+      "correction_id": "corr_000003",
+      "recorded_at": "2026-11-11T11:34:39Z",
+      "text": "I've dropped a size since October. For Brand X oxfords, I take M now - please record that as my correction."
+    },
+    "guidance_after": {
+      "basis": "correction",
+      "belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "text": "Take size M for Brand X"
+    },
+    "turns": [
+      {
+        "cost": 0.033672,
+        "deployment": "MEMENTO-REF",
+        "input": "I need a Brand X oxford shirt in the regular fit. What size should I take?",
+        "label": "ask",
+        "latency_ms": 6850,
+        "reply": "**Recommendation: Size M**\n\n**What this rests on \u2014 Step: Correction (`corr_000003`) \u00b7 Precedence: Out of true**\n\nYour own correction on 2026-11-11 overrides the earlier belief:\n> *\"I've dropped a size since October. For Brand X oxfords, I take M now - please record that as my correction.\"*\n\nThis overrides belief `blf_8f2c41` (\"runs small, take size L\"), which was built on three seeded returns of M (too tight in shoulders, chest, and sleeves in Oct 2026), but your correction takes precedence.\n\n**For context \u2014 the pool also rides along (overridden, shown for transparency):**\nPool status: **Earned** \u00b7 22 settled shoppers (all 22 seeded) \u00b7 size M \u00b7 direction: **runs small**\n- Returns too small: **12** (seeded: 12) | Returns too large: **3** (seeded: 3)\n- Kept/fits well: **2 kept, 4 fits-well feedback** (seeded: 4)\n\nThe pool would normally suggest sizing up to L, but your correction takes precedence over both your own prior evidence and the pool.\n\n---\n\nShall I go ahead with **Brand X oxford shirt, regular fit, size M**? Reply **yes** to confirm.",
+        "step": "03",
+        "timestamp": "2026-11-11T11:39:21.000Z",
+        "tools": [
+          {
+            "end": "2026-11-11T11:39:12.813Z",
+            "name": "recall_for_purchase",
+            "start": "2026-11-11T11:39:12.648Z"
+          }
+        ],
+        "trace_id_short": "ded28ebc"
+      },
+      {
+        "cost": 0.075863999999,
+        "deployment": "MEMENTO-REF",
+        "input": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction.",
+        "label": "correct",
+        "latency_ms": 7342,
+        "reply": "Recall already shows a correction on record (`corr_000003`) that matches exactly what you're saying. I'll record your words now as a fresh correction against belief `blf_8f2c41`.Done. Correction `corr_000004` is recorded and takes immediate precedence.\n\n- **Contradicts:** belief `blf_8f2c41` (\"runs small, take size L\") \u2014 status now **Out of true**\n- **Guidance going forward:** Size **M** for Brand X oxford shirt, regular fit\n\nThe prior evidence (3 seeded returns of M in Oct 2026 for being too small) stays on file but is overridden by your correction. Would you like to go ahead with size M?",
+        "step": "03",
+        "timestamp": "2026-11-11T11:40:26.000Z",
+        "tools": [
+          {
+            "end": "2026-11-11T11:40:17.897Z",
+            "name": "recall_for_purchase",
+            "start": "2026-11-11T11:40:17.726Z"
+          },
+          {
+            "end": "2026-11-11T11:40:20.829Z",
+            "name": "record_correction",
+            "start": "2026-11-11T11:40:20.383Z"
+          }
+        ],
+        "trace_id_short": "c94448ee"
+      },
+      {
+        "cost": 0.065819999999,
+        "deployment": "MEMENTO-REF",
+        "input": "So what size do you recommend for the Brand X oxford now?",
+        "label": "next",
+        "latency_ms": 5938,
+        "reply": "**Recommendation: Size M** \u2014 confidence: **Out of true**\n\n**Step: Correction (`corr_000004`) \u2014 takes precedence over all below**\n> *\"Use M for me on Brand X oxfords from now on - I've gone down a size since October.\"*\n\nThis overrides belief `blf_8f2c41` (\"runs small, take size L\"), which was built on 3 seeded returns of M in October 2026 (too tight in shoulders, chest, and sleeves). That belief is now **Out of true**.\n\n**Pool rides along but is overridden:** Earned \u00b7 22 settled shoppers (all 22 seeded) \u00b7 12 returns too small, 3 returns too large, 4 fits-well feedback (seeded: 4) \u2014 pool direction is *runs small*, but your correction takes precedence.\n\nReady to go ahead with size M? Reply **yes** to confirm.",
+        "step": "03",
+        "timestamp": "2026-11-11T11:41:11.000Z",
+        "tools": [
+          {
+            "end": "2026-11-11T11:41:04.025Z",
+            "name": "recall_for_purchase",
+            "start": "2026-11-11T11:41:03.846Z"
+          }
+        ],
+        "trace_id_short": "82d6512f"
+      }
+    ]
+  },
+  "dispute": {
+    "dispute_rows_in_sizing": [],
+    "recall_guidance": {
+      "basis": "correction",
+      "belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "text": "Take size M for Brand X"
+    },
+    "recall_pool_status": "Earned",
+    "seller_belief": {
+      "belief_id": "blf_1a5e09",
+      "evidence_count": 1,
+      "rows": [
+        {
+          "counts_toward": "seller_reliability",
+          "outcome": "dispute",
+          "reason": {
+            "category": "not_arrived",
+            "confidence": 1,
+            "text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED"
+          }
+        }
+      ],
+      "standing": "None",
+      "status": "Claimed",
+      "value": "ships reliably for this shopper"
+    },
+    "sizing_belief_evidence": [
+      "ev_6d1a09",
+      "ev_6d1a10",
+      "ev_6d1a11"
+    ]
+  },
+  "gaps": [
+    {
+      "step": "5",
+      "text": "the dispute's seller belief never reaches recall (the contract serves seller beliefs through the ledger and explain reads only), and the agent key is refused on ledger reads, so a live agent turn cannot mention it; the demo shows the seller row and the untouched sizing belief by live read instead"
+    },
+    {
+      "step": "6",
+      "text": "a belief counts the same purchase more than once: [{\"belief_id\": \"blf_2b9d60\", \"evidence_id\": [\"ev_51c2d8\"]}]. Each record_feedback for the same purchase appends that purchase's evidence to the belief again, so one kept purchase's repeated feedback can lift the belief's standing. The pool row stays one (the writer is idempotent there). A layer defect for the handoff"
+    },
+    {
+      "step": "6",
+      "text": "the deployed ledger page replays the frozen story from fixtures (its counts read 60 settled / 48 seeded, the fixture vintage); it has no live transport yet. The live ledger reads are the API answers recorded here; the screens are the page as deployed and are labelled as a fixture replay"
+    },
+    {
+      "step": "7",
+      "text": "the merchant page reads live pool counts through its proxy; the ledger page's screenshot is the fixture replay recorded under step 6"
+    },
+    {
+      "step": "0",
+      "text": "a new shopper cannot be recalled live: the agent key is bound to shopper_01 only, so shopper_02 answers 401 {\"error\": {\"code\": \"unauthenticated\", \"message\": \"unauthorized\"}}. Sizing a day-one shopper needs an operator to add the shopper to the agent key's binding (a Render secret change)."
+    },
+    {
+      "step": "4",
+      "text": "the feedback turn called record_feedback without recalling first; recorded as it came"
+    }
+  ],
+  "layer": "https://memento-emptor.onrender.com",
+  "ledger": {
+    "duplicate_evidence_ids": [],
+    "evidence_rows": [
+      {
+        "belief_ids": [
+          "blf_2b9d60"
+        ],
+        "evidence_id": "ev_51c2d8",
+        "kind": "capture",
+        "reason": {
+          "category": "none",
+          "confidence": 1,
+          "text": "fits well across the shoulders and in the sleeves"
+        },
+        "seeded": false
+      },
+      {
+        "belief_ids": [
+          "blf_1a5e09"
+        ],
+        "evidence_id": "ev_9d4c22",
+        "kind": "dispute",
+        "reason": {
+          "category": "not_arrived",
+          "confidence": 1,
+          "text": "MERCHANDISE_OR_SERVICE_NOT_RECEIVED"
+        },
+        "seeded": false
+      },
+      {
+        "belief_ids": [
+          "blf_8f2c41"
+        ],
+        "evidence_id": "ev_6d1a11",
+        "kind": "refund",
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "sleeves too short in M"
+        },
+        "seeded": true
+      },
+      {
+        "belief_ids": [
+          "blf_8f2c41"
+        ],
+        "evidence_id": "ev_6d1a10",
+        "kind": "refund",
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "too tight across the chest"
+        },
+        "seeded": true
+      },
+      {
+        "belief_ids": [
+          "blf_8f2c41"
+        ],
+        "evidence_id": "ev_6d1a09",
+        "kind": "refund",
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "too tight in the shoulders"
+        },
+        "seeded": true
+      }
+    ],
+    "ledger_rows": [
+      {
+        "belief_id": "blf_8f2c41",
+        "contradicted": true,
+        "evidence_count": 3,
+        "kind": "fit",
+        "seeded": true,
+        "standing": "Venerable",
+        "status": "Out of true",
+        "value": "runs small, take size L"
+      },
+      {
+        "belief_id": "blf_2b9d60",
+        "contradicted": false,
+        "evidence_count": 3,
+        "kind": "fit",
+        "seeded": false,
+        "standing": "Candidate",
+        "status": "Building",
+        "value": "size M fits this shopper now"
+      },
+      {
+        "belief_id": "blf_1a5e09",
+        "contradicted": false,
+        "evidence_count": 1,
+        "kind": "seller_reliability",
+        "seeded": false,
+        "standing": "None",
+        "status": "Claimed",
+        "value": "ships reliably for this shopper"
+      },
+      {
+        "belief_id": "blf_77c310",
+        "contradicted": false,
+        "evidence_count": 0,
+        "kind": "fit",
+        "seeded": true,
+        "standing": "None",
+        "status": "Claimed",
+        "value": "shopper says they are usually size M"
+      }
+    ],
+    "raw_evidence_rows": 5,
+    "recall_decision": {
+      "basis": "correction",
+      "belief_precedence": [
+        {
+          "belief_id": "blf_2b9d60",
+          "precedence": {
+            "overridden": true,
+            "overridden_by": "correction",
+            "step": "own_evidence"
+          }
+        },
+        {
+          "belief_id": "blf_8f2c41",
+          "precedence": {
+            "overridden": true,
+            "overridden_by": "correction",
+            "step": "own_evidence"
+          }
+        },
+        {
+          "belief_id": "blf_77c310",
+          "precedence": {
+            "overridden": true,
+            "overridden_by": "correction",
+            "step": "statement"
+          }
+        }
+      ],
+      "correction": "corr_000004",
+      "guidance": "Take size M for Brand X",
+      "pool_precedence": {
+        "overridden": true,
+        "overridden_by": "correction",
+        "step": "pool"
+      }
+    },
+    "screens": [
+      "06-ledger-belief.png",
+      "06-ledger-table.png"
+    ]
+  },
+  "merchant": "https://memento-merchant.onrender.com",
+  "pool": {
+    "new_shopper_recall": {
+      "answer": {
+        "error": {
+          "code": "unauthenticated",
+          "message": "unauthorized"
+        }
+      },
+      "request": {
+        "brand_id": "brand-x-001",
+        "category": "shirts",
+        "fit_handle": "regular",
+        "size_considered": "M"
+      },
+      "shopper_id": "shopper_02",
+      "status": 401
+    },
+    "product_fit": {
+      "direction": "small",
+      "feedback": {
+        "fits_well": 4,
+        "too_large": 0,
+        "too_small": 0
+      },
+      "kept": 2,
+      "line": {
+        "brand_id": "brand-x-001",
+        "category": "shirts",
+        "fit_handle": "regular"
+      },
+      "live": 0,
+      "recent": 10,
+      "returns": {
+        "too_large": 3,
+        "too_small": 12
+      },
+      "seeded": 22,
+      "settled": 22,
+      "shoppers": {
+        "fit": 19,
+        "too_large": 3,
+        "too_small": 12
+      },
+      "size": "M",
+      "status": "Earned"
+    }
+  },
+  "purchase_and_feedback": {
+    "fit_belief": {
+      "belief": {
+        "belief_id": "blf_2b9d60",
+        "contradicted": false,
+        "contradicted_by": null,
+        "evidence": [
+          {
+            "counts_toward": "fit",
+            "evidence_id": "ev_51c2d8",
+            "item": {
+              "brand_id": "brand-x-001",
+              "brand_name": "Brand X",
+              "category": "shirts",
+              "line_name": "oxford shirt",
+              "size": "M",
+              "sku": "PSW8GeK"
+            },
+            "link": {
+              "capture_id": "CAP-7XK-06",
+              "custom_id": "memento-shopper01-06",
+              "event_id": "WH-2EV-06",
+              "order_id": "ORD-7XK-06"
+            },
+            "occurred_at": "2026-11-08T20:10:00Z",
+            "outcome": {
+              "amount_minor": 19500,
+              "currency": "USD",
+              "kind": "capture",
+              "status": "COMPLETED"
+            },
+            "reason": {
+              "category": "none",
+              "confidence": 1,
+              "text": "fits well across the shoulders and in the sleeves"
+            },
+            "seeded": false,
+            "write_op": "record_action"
+          },
+          {
+            "counts_toward": "fit",
+            "evidence_id": "ev_51c2d8",
+            "item": {
+              "brand_id": "brand-x-001",
+              "brand_name": "Brand X",
+              "category": "shirts",
+              "line_name": "oxford shirt",
+              "size": "M",
+              "sku": "PSW8GeK"
+            },
+            "link": {
+              "capture_id": "CAP-7XK-06",
+              "custom_id": "memento-shopper01-06",
+              "event_id": "WH-2EV-06",
+              "order_id": "ORD-7XK-06"
+            },
+            "occurred_at": "2026-11-08T20:10:00Z",
+            "outcome": {
+              "amount_minor": 19500,
+              "currency": "USD",
+              "kind": "capture",
+              "status": "COMPLETED"
+            },
+            "reason": {
+              "category": "none",
+              "confidence": 1,
+              "text": "fits well across the shoulders and in the sleeves"
+            },
+            "seeded": false,
+            "write_op": "record_action"
+          },
+          {
+            "counts_toward": "fit",
+            "evidence_id": "ev_51c2d8",
+            "item": {
+              "brand_id": "brand-x-001",
+              "brand_name": "Brand X",
+              "category": "shirts",
+              "line_name": "oxford shirt",
+              "size": "M",
+              "sku": "PSW8GeK"
+            },
+            "link": {
+              "capture_id": "CAP-7XK-06",
+              "custom_id": "memento-shopper01-06",
+              "event_id": "WH-2EV-06",
+              "order_id": "ORD-7XK-06"
+            },
+            "occurred_at": "2026-11-08T20:10:00Z",
+            "outcome": {
+              "amount_minor": 19500,
+              "currency": "USD",
+              "kind": "capture",
+              "status": "COMPLETED"
+            },
+            "reason": {
+              "category": "none",
+              "confidence": 1,
+              "text": "fits well across the shoulders and in the sleeves"
+            },
+            "seeded": false,
+            "write_op": "record_action"
+          }
+        ],
+        "kind": "fit",
+        "precedence": null,
+        "seeded": false,
+        "standing": "Candidate",
+        "status": "Building",
+        "subject": {
+          "id": "brand-x-001",
+          "kind": "brand",
+          "name": "Brand X"
+        },
+        "updated_at": "2026-11-11T11:41:49Z",
+        "value": "size M fits this shopper now"
+      },
+      "corrections": [],
+      "timeline": [
+        {
+          "at": "2026-11-11T11:35:33Z",
+          "kind": "feedback",
+          "ref_id": "fb_000001",
+          "summary": "Feedback on oxford shirt size M: fits well across the shoulders and in the sleeves."
+        },
+        {
+          "at": "2026-11-11T11:41:49Z",
+          "kind": "feedback",
+          "ref_id": "fb_000002",
+          "summary": "Feedback on oxford shirt size M: fits well across the shoulders and in the sleeves."
+        }
+      ]
+    },
+    "product_fit_after": {
+      "direction": "small",
+      "feedback": {
+        "fits_well": 5,
+        "too_large": 0,
+        "too_small": 0
+      },
+      "kept": 2,
+      "line": {
+        "brand_id": "brand-x-001",
+        "category": "shirts",
+        "fit_handle": "regular"
+      },
+      "live": 1,
+      "recent": 11,
+      "returns": {
+        "too_large": 3,
+        "too_small": 12
+      },
+      "seeded": 22,
+      "settled": 23,
+      "shoppers": {
+        "fit": 20,
+        "too_large": 3,
+        "too_small": 12
+      },
+      "size": "M",
+      "status": "Earned"
+    },
+    "product_fit_before": {
+      "direction": "small",
+      "feedback": {
+        "fits_well": 4,
+        "too_large": 0,
+        "too_small": 0
+      },
+      "kept": 2,
+      "line": {
+        "brand_id": "brand-x-001",
+        "category": "shirts",
+        "fit_handle": "regular"
+      },
+      "live": 0,
+      "recent": 10,
+      "returns": {
+        "too_large": 3,
+        "too_small": 12
+      },
+      "seeded": 22,
+      "settled": 22,
+      "shoppers": {
+        "fit": 19,
+        "too_large": 3,
+        "too_small": 12
+      },
+      "size": "M",
+      "status": "Earned"
+    },
+    "purchase": {
+      "custom_id": "memento-shopper01-06",
+      "evidence_id": "ev_51c2d8",
+      "item": {
+        "brand_id": "brand-x-001",
+        "brand_name": "Brand X",
+        "category": "shirts",
+        "line_name": "oxford shirt",
+        "size": "M",
+        "sku": "PSW8GeK"
+      },
+      "occurred_at": "2026-11-08T20:10:00Z",
+      "outcome": {
+        "amount_minor": 19500,
+        "currency": "USD",
+        "kind": "capture",
+        "status": "COMPLETED"
+      },
+      "seeded": false
+    },
+    "turn": {
+      "cost": 0.023856,
+      "deployment": "MEMENTO-REF",
+      "input": "The PSW8GeK oxford in M I ordered (order reference memento-shopper01-06) arrived and fits well across the shoulders and in the sleeves. Record that for me.",
+      "label": "feedback",
+      "latency_ms": 3990,
+      "reply": "Got it \u2014 your feedback is recorded:\n\n- **Feedback ID:** fb_000002\n- **SKU:** PSW8GeK, **Size:** M\n- **Order:** memento-shopper01-06\n- **Verdict:** fits well (shoulders and sleeves) \u2713\n\nThis counts toward the fit evidence for your size M in this line (belief **blf_2b9d60**). Is there anything else you'd like help with?",
+      "step": "04",
+      "timestamp": "2026-11-11T11:41:56.000Z",
+      "tools": [
+        {
+          "end": "2026-11-11T11:41:50.300Z",
+          "name": "record_feedback",
+          "start": "2026-11-11T11:41:49.449Z"
+        }
+      ],
+      "trace_id_short": "11d83a4f"
+    }
+  },
+  "run": "6",
+  "second_agent": {
+    "correction": {
+      "contradicts_belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "recorded_at": "2026-11-11T11:40:20Z",
+      "text": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction."
+    },
+    "merchant_product_fit": {
+      "direction": "small",
+      "feedback": {
+        "fits_well": 5,
+        "too_large": 0,
+        "too_small": 0
+      },
+      "kept": 2,
+      "line": {
+        "brand_id": "brand-x-001",
+        "category": "shirts",
+        "fit_handle": "regular"
+      },
+      "live": 1,
+      "recent": 11,
+      "returns": {
+        "too_large": 3,
+        "too_small": 12
+      },
+      "seeded": 22,
+      "settled": 23,
+      "shoppers": {
+        "fit": 20,
+        "too_large": 3,
+        "too_small": 12
+      },
+      "size": "M",
+      "status": "Earned"
+    },
+    "screens": [
+      "07-merchant.png"
+    ],
+    "turn": {
+      "cost": 0.038493,
+      "deployment": "MEMENTO-SECOND",
+      "input": "I need a Brand X oxford shirt. What size should I take?",
+      "label": "second-agent",
+      "latency_ms": 10344,
+      "reply": "Let me check the layer for your fit history and the pooled data right away.Here's the full picture \u2014 your correction is in charge here.\n\n---\n\n## Recommendation: **Size M** \u2014 *Out of true* (correction overrules prior record)\n\n**Winning rung: Correction** (`corr_000004`, overriding belief `blf_8f2c41`)\n\nYour own note on file reads:\n> *\"Use M for me on Brand X oxfords from now on \u2014 I've gone down a size since October.\"*\n\nThat correction takes precedence over everything else, so **M is the call**.\n\n---\n\n### What was overruled (and why it's still visible)\n\n| Rung | Belief | Standing | Verdict | Overruled? |\n|---|---|---|---|---|\n| **Correction** (winner) | `corr_000004` | \u2014 | Take M | \u2705 Wins |\n| Own fit record | `blf_8f2c41` | Venerable | Runs small \u2192 take L | \u2b1b Overridden |\n| Recent fit evidence | `blf_2b9d60` | Building | M fits well (Nov 2026) | \u2b1b Overridden |\n| Broad statement | `blf_77c310` | Claimed | Shopper says usually M | \u2b1b Overridden |\n\nThe older **Venerable** record (`blf_8f2c41`, **Earned** in the pool) showed 3 returns of M in Oct 2026 \u2014 too tight in the shoulders, chest, and sleeves. Those were seeded rows. Your correction explicitly says you've gone down a size since then, which is what flipped the guidance.\n\n---\n\n### Pool context (shown but overridden)\nPool for Brand X oxford shirt, size M \u2014 **Earned** status, direction: **runs small**\n- 23 settled outcomes across 20 shoppers (seeded: 22 / live: 1)\n- Returns: 12 too-small, 3 too-large | Kept: 2 | Fits-well feedback: 5\n- Recent (live): 11 settled, 8 too-small returns, 2 fits-well feedbacks\n\nThe pool also nudges toward L \u2014 but your correction overrides it.\n\n---\n\n**Go with M.** Would you like to go ahead and purchase it?",
+      "step": "07",
+      "timestamp": "2026-11-11T11:49:15.000Z",
+      "tools": [
+        {
+          "end": "2026-11-11T11:49:09.623Z",
+          "name": "recall_for_purchase",
+          "start": "2026-11-11T11:49:09.451Z"
+        }
+      ],
+      "trace_id_short": "9d4893e7"
+    }
+  },
+  "seeded_returns": {
+    "belief": {
+      "belief_id": "blf_8f2c41",
+      "contradicted": true,
+      "seeded": true,
+      "standing": "Venerable",
+      "status": "Out of true",
+      "value": "runs small, take size L"
+    },
+    "guidance": {
+      "basis": "correction",
+      "belief_id": "blf_8f2c41",
+      "correction_id": "corr_000004",
+      "text": "Take size M for Brand X"
+    },
+    "pool": {
+      "direction": "small",
+      "feedback": {
+        "fits_well": 5,
+        "too_large": 0,
+        "too_small": 0
+      },
+      "kept": 2,
+      "line": {
+        "brand_id": "brand-x-001",
+        "category": "shirts",
+        "fit_handle": "regular"
+      },
+      "live": 1,
+      "recent": 11,
+      "returns": {
+        "too_large": 3,
+        "too_small": 12
+      },
+      "seeded": 22,
+      "settled": 23,
+      "shoppers": {
+        "fit": 20,
+        "too_large": 3,
+        "too_small": 12
+      },
+      "size": "M",
+      "status": "Earned"
+    },
+    "pool_lookup": "consulted",
+    "returns": [
+      {
+        "evidence_id": "ev_6d1a09",
+        "occurred_at": "2026-10-14T10:00:00Z",
+        "outcome": "refund",
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "too tight in the shoulders"
+        },
+        "seeded": true,
+        "size": "M"
+      },
+      {
+        "evidence_id": "ev_6d1a10",
+        "occurred_at": "2026-10-20T10:00:00Z",
+        "outcome": "refund",
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "too tight across the chest"
+        },
+        "seeded": true,
+        "size": "M"
+      },
+      {
+        "evidence_id": "ev_6d1a11",
+        "occurred_at": "2026-10-26T10:00:00Z",
+        "outcome": "refund",
+        "reason": {
+          "category": "fit_too_small",
+          "confidence": 1,
+          "text": "sleeves too short in M"
+        },
+        "seeded": true,
+        "size": "M"
+      }
+    ]
+  },
+  "spend": {
+    "billing_after": {
+      "credit_left": 4.36,
+      "usage_spend": 5.64
+    },
+    "billing_before": {
+      "credit_left": 4.69,
+      "usage_spend": 5.31
+    },
+    "note": "trace costs are the agent turns; the billing delta also carries platform compute",
+    "trace_costs": {
+      "11d83a4f": 0.023856,
+      "82d6512f": 0.065819999999,
+      "9d4893e7": 0.038493,
+      "c94448ee": 0.075863999999,
+      "ded28ebc": 0.033672
+    },
+    "trace_total": 0.2377,
+    "usage_spend_delta": 0.33
+  }
+}

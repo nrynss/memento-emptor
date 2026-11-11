@@ -1,0 +1,86 @@
+{
+  "belief_after": {
+    "belief_id": "blf_8f2c41",
+    "contradicted": true,
+    "evidence_count": 3,
+    "status": "Out of true"
+  },
+  "correction_after": {
+    "contradicts_belief_id": "blf_8f2c41",
+    "correction_id": "corr_000004",
+    "recorded_at": "2026-11-11T11:40:20Z",
+    "text": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction."
+  },
+  "correction_before": {
+    "correction_id": "corr_000003",
+    "recorded_at": "2026-11-11T11:34:39Z",
+    "text": "I've dropped a size since October. For Brand X oxfords, I take M now - please record that as my correction."
+  },
+  "guidance_after": {
+    "basis": "correction",
+    "belief_id": "blf_8f2c41",
+    "correction_id": "corr_000004",
+    "text": "Take size M for Brand X"
+  },
+  "turns": [
+    {
+      "cost": 0.033672,
+      "deployment": "MEMENTO-REF",
+      "input": "I need a Brand X oxford shirt in the regular fit. What size should I take?",
+      "label": "ask",
+      "latency_ms": 6850,
+      "reply": "**Recommendation: Size M**\n\n**What this rests on \u2014 Step: Correction (`corr_000003`) \u00b7 Precedence: Out of true**\n\nYour own correction on 2026-11-11 overrides the earlier belief:\n> *\"I've dropped a size since October. For Brand X oxfords, I take M now - please record that as my correction.\"*\n\nThis overrides belief `blf_8f2c41` (\"runs small, take size L\"), which was built on three seeded returns of M (too tight in shoulders, chest, and sleeves in Oct 2026), but your correction takes precedence.\n\n**For context \u2014 the pool also rides along (overridden, shown for transparency):**\nPool status: **Earned** \u00b7 22 settled shoppers (all 22 seeded) \u00b7 size M \u00b7 direction: **runs small**\n- Returns too small: **12** (seeded: 12) | Returns too large: **3** (seeded: 3)\n- Kept/fits well: **2 kept, 4 fits-well feedback** (seeded: 4)\n\nThe pool would normally suggest sizing up to L, but your correction takes precedence over both your own prior evidence and the pool.\n\n---\n\nShall I go ahead with **Brand X oxford shirt, regular fit, size M**? Reply **yes** to confirm.",
+      "step": "03",
+      "timestamp": "2026-11-11T11:39:21.000Z",
+      "tools": [
+        {
+          "end": "2026-11-11T11:39:12.813Z",
+          "name": "recall_for_purchase",
+          "start": "2026-11-11T11:39:12.648Z"
+        }
+      ],
+      "trace_id_short": "ded28ebc"
+    },
+    {
+      "cost": 0.075863999999,
+      "deployment": "MEMENTO-REF",
+      "input": "Use M for me on Brand X oxfords from now on - I've gone down a size since October. Record that correction.",
+      "label": "correct",
+      "latency_ms": 7342,
+      "reply": "Recall already shows a correction on record (`corr_000003`) that matches exactly what you're saying. I'll record your words now as a fresh correction against belief `blf_8f2c41`.Done. Correction `corr_000004` is recorded and takes immediate precedence.\n\n- **Contradicts:** belief `blf_8f2c41` (\"runs small, take size L\") \u2014 status now **Out of true**\n- **Guidance going forward:** Size **M** for Brand X oxford shirt, regular fit\n\nThe prior evidence (3 seeded returns of M in Oct 2026 for being too small) stays on file but is overridden by your correction. Would you like to go ahead with size M?",
+      "step": "03",
+      "timestamp": "2026-11-11T11:40:26.000Z",
+      "tools": [
+        {
+          "end": "2026-11-11T11:40:17.897Z",
+          "name": "recall_for_purchase",
+          "start": "2026-11-11T11:40:17.726Z"
+        },
+        {
+          "end": "2026-11-11T11:40:20.829Z",
+          "name": "record_correction",
+          "start": "2026-11-11T11:40:20.383Z"
+        }
+      ],
+      "trace_id_short": "c94448ee"
+    },
+    {
+      "cost": 0.065819999999,
+      "deployment": "MEMENTO-REF",
+      "input": "So what size do you recommend for the Brand X oxford now?",
+      "label": "next",
+      "latency_ms": 5938,
+      "reply": "**Recommendation: Size M** \u2014 confidence: **Out of true**\n\n**Step: Correction (`corr_000004`) \u2014 takes precedence over all below**\n> *\"Use M for me on Brand X oxfords from now on - I've gone down a size since October.\"*\n\nThis overrides belief `blf_8f2c41` (\"runs small, take size L\"), which was built on 3 seeded returns of M in October 2026 (too tight in shoulders, chest, and sleeves). That belief is now **Out of true**.\n\n**Pool rides along but is overridden:** Earned \u00b7 22 settled shoppers (all 22 seeded) \u00b7 12 returns too small, 3 returns too large, 4 fits-well feedback (seeded: 4) \u2014 pool direction is *runs small*, but your correction takes precedence.\n\nReady to go ahead with size M? Reply **yes** to confirm.",
+      "step": "03",
+      "timestamp": "2026-11-11T11:41:11.000Z",
+      "tools": [
+        {
+          "end": "2026-11-11T11:41:04.025Z",
+          "name": "recall_for_purchase",
+          "start": "2026-11-11T11:41:03.846Z"
+        }
+      ],
+      "trace_id_short": "82d6512f"
+    }
+  ]
+}

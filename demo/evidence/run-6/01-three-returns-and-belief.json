@@ -1,0 +1,84 @@
+{
+  "belief": {
+    "belief_id": "blf_8f2c41",
+    "contradicted": true,
+    "seeded": true,
+    "standing": "Venerable",
+    "status": "Out of true",
+    "value": "runs small, take size L"
+  },
+  "guidance": {
+    "basis": "correction",
+    "belief_id": "blf_8f2c41",
+    "correction_id": "corr_000004",
+    "text": "Take size M for Brand X"
+  },
+  "pool": {
+    "direction": "small",
+    "feedback": {
+      "fits_well": 5,
+      "too_large": 0,
+      "too_small": 0
+    },
+    "kept": 2,
+    "line": {
+      "brand_id": "brand-x-001",
+      "category": "shirts",
+      "fit_handle": "regular"
+    },
+    "live": 1,
+    "recent": 11,
+    "returns": {
+      "too_large": 3,
+      "too_small": 12
+    },
+    "seeded": 22,
+    "settled": 23,
+    "shoppers": {
+      "fit": 20,
+      "too_large": 3,
+      "too_small": 12
+    },
+    "size": "M",
+    "status": "Earned"
+  },
+  "pool_lookup": "consulted",
+  "returns": [
+    {
+      "evidence_id": "ev_6d1a09",
+      "occurred_at": "2026-10-14T10:00:00Z",
+      "outcome": "refund",
+      "reason": {
+        "category": "fit_too_small",
+        "confidence": 1,
+        "text": "too tight in the shoulders"
+      },
+      "seeded": true,
+      "size": "M"
+    },
+    {
+      "evidence_id": "ev_6d1a10",
+      "occurred_at": "2026-10-20T10:00:00Z",
+      "outcome": "refund",
+      "reason": {
+        "category": "fit_too_small",
+        "confidence": 1,
+        "text": "too tight across the chest"
+      },
+      "seeded": true,
+      "size": "M"
+    },
+    {
+      "evidence_id": "ev_6d1a11",
+      "occurred_at": "2026-10-26T10:00:00Z",
+      "outcome": "refund",
+      "reason": {
+        "category": "fit_too_small",
+        "confidence": 1,
+        "text": "sleeves too short in M"
+      },
+      "seeded": true,
+      "size": "M"
+    }
+  ]
+}

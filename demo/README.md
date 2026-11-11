@@ -1,119 +1,123 @@
-# T3.6: the full demo, live on the real stack
+# The demo, after the pivot
 
-Product.md's six demo steps, end to end, starting from the seeded demo
-shopper. One orchestration (`run.sh`) drives only frozen pieces: the
-recording payment source (whose shapes T2.1b proved identical to the
-live sandbox reads), the frozen interface service and write rule over a
-live Lambo session with native embeddings, a live Jev classifier, the
-frozen catalog match over a live Channel3 detail, the deployed reference
-agent over the messaging proxy, and the frozen orders state machine over
-a live sandbox REST transport.
+Product.md's demo (steps 0-7) against the hosted services. One shopper,
+one layer, two agents and two read-only apps. The run record is
+[`RUN-6.md`](RUN-6.md) and its evidence is in [`evidence/run-6/`](evidence/run-6/).
 
-## The six steps and where each runs live
+## What runs where
 
-1. **Three documented fit returns → Earned.** The three T1.3b sandbox
-   cycles (`t13b-demo-003/004/005`) are read back live (refund
-   COMPLETED, capture settled — REFUNDED, as the cycles were fully
-   refunded by design — order with line items, free). The layer
-   ingests their recording twins (`WH-2EV-01/02/03`, whose shapes T2.1b
-   proved identical to the live reads); the live calls are
-   verification, not the ingested bytes. Their reason words go through
-   live Jev (4 classifications on the fixture wording incl. the vague
-   ask-again, ~$0.0001 total, pinned build, 10x-per-call guard) and the
-   writes land on a live Lambo 0.10.1 session (native
-   `.jina-embeddings-v3`, throwaway SQLite store beside the session,
-   erased at the end). Recall serves Earned/Venerable with guidance
-   toward L.
-2. **Channel3 candidate, size-L recommendation.** One live detail call
-   for `PSW8GeK` (free; detail calls cost no credits, no searches are
-   used) plus the returned `tbnrl46`: the frozen match keeps the new SKU
-   on brand + category + equal `top-fit`, skips the returned SKU, and
-   marks sizes-at-retailer and simulated fulfilment. The L
-   recommendation is served by the live layer recall (guidance text with
-   its three evidence rows). The deployed agent's tools are fake-backed
-   at the post-correction fixture state (the known T3.1 standing
-   configuration: the layer is not served to the agent yet), so its
-   turns demonstrate the correction-honoured M, not the pre-correction
-   L. Both halves are recorded below.
-3. **Shopper correction → M at once.** Live `record_correction`
-   against the earned belief: Out of true, standing Venerable, guidance
-   M. Agent turn 1 (shopping question) recommends M per the correction
-   as seen through its fake-backed tools (post-correction fixture
-   state, not the live session), cites the belief/returns, asks the
-   pending question and asks for an explicit yes. Its trace shows
-   `recall_for_purchase` before the recommendation generation.
-4. **Approval, then a sandbox purchase of the M.** Agent turn 2 is the
-   buy intent and turn 3 answers "yes" with the honest not-wired
-   statement. The demo then executes the approved purchase through the
-   frozen orders machine: propose → capture-before-approval refused
-   (`ErrNoApproval`, transport never called) → scripted shopper click on
-   the real approval URL → `ApproveAfterYes("yes")` with the
-   source-side approval mirrored → capture COMPLETED. The verified
-   capture delivery joins the layer under its real event id, and
-   fits-well feedback ties to the live custom id. Sandbox only; the
-   service constructor refuses anything else.
-5. **Never-arrived dispute → seller only.** The T1.3b OPEN dispute is
-   read back live (reason `MERCHANDISE_OR_SERVICE_NOT_RECEIVED`) and its
-   recording twin is ingested: the sizing recall is byte-identical
-   before and after, and the seller belief reads Claimed with exactly
-   one row.
-6. **Ledger + traces.** `ledger_beliefs`, `ledger_evidence` and
-   `explain_belief` snapshots plus the demo trace's call log
-   (`recall_for_purchase` then `record_correction`) and the two agent
-   traces with their tool spans in order, costs and reply texts.
+| Piece | Address | What the demo reads from it |
+|---|---|---|
+| The layer's edge | `https://memento-emptor.onrender.com` | `recall_for_purchase`, `product_fit`, the ledger reads, `record_correction`, `record_feedback`, `set_pooling` |
+| The reference agent | Astropods deployment `MEMENTO-REF` | two conversations: the correction, then the feedback |
+| The second agent | Astropods deployment `MEMENTO-SECOND` | one fresh conversation: does it honour the correction it never saw? |
+| The evidence ledger | `https://memento-emptor.onrender.com/belief` and `/ledger` | the page as deployed (a fixture replay; the live reads are the API) |
+| The merchant app | `https://memento-merchant.onrender.com` | the live pool through `product_fit`, and the "why" for the demo line |
 
-## Reset procedure
+Keys come from the system keyring (`source tools/env.sh`, plus the caller
+tokens in `memento-tokens`). The scripts read them into the process and never
+print or write one. Raw answers and full trace ids stay in `demo/out/`
+(git-ignored, mode 0600); the committed evidence is redacted and uses short
+trace ids.
+
+## The eight steps and each one's artifact
+
+| Step | What happened | Artifact |
+|---|---|---|
+| **0. Day one, from the pool** | `product_fit` for brand-x-001 / shirts / regular, size M reads **Earned, small**: 22 settled, 22 seeded, 12 too-small returns against 3 too-large and 4 fits-well, 19 fit shoppers. The empty-shopper recall is **blocked**: the agent key binds `shopper_01` only, so `shopper_02` answers `401 unauthenticated`. Recorded, not faked. | [`00-pool-and-new-shopper.json`](evidence/run-6/00-pool-and-new-shopper.json) |
+| **1. Three returns** | Live recall and `explain_belief` for `blf_8f2c41`: three refunds of the M oxford, every reason `fit_too_small` ("too tight in the shoulders", "too tight across the chest", "sleeves too short in M"), standing **Venerable**. | [`01-three-returns-and-belief.json`](evidence/run-6/01-three-returns-and-belief.json), [`02-belief-explained.json`](evidence/run-6/02-belief-explained.json) |
+| **2. The belief they earn** | The belief's value is "runs small, take size L" and the pool agrees (also L). No live Channel3 candidate call exists in the reference agent; the candidate SKU (`PSW8GeK`) appears only in the captured purchase in step 4. | same as step 1 |
+| **3. The correction, through the reference agent** | Two turns in one conversation. Trace `ded28ebc` (ask) recalls first; trace `c94448ee` recalls then calls `record_correction` and the layer mints `corr_000004`; trace `82d6512f` recalls and recommends M under it. The belief stays, **Out of true**, with its three rows. | [`03-correction-through-the-agent.json`](evidence/run-6/03-correction-through-the-agent.json) |
+| **4. The purchase and feedback** | The live purchase is the capture `ev_51c2d8`, custom id `memento-shopper01-06`, SKU `PSW8GeK`, size M (the one the earlier sandbox cycle recorded). Trace `11d83a4f` calls `record_feedback`; the fit row settles live and the pool moves 22 → 23 settled, 0 → 1 live, fits-well 4 → 5. A new purchase cannot be ingested (see **gaps**). | [`04-purchase-and-feedback.json`](evidence/run-6/04-purchase-and-feedback.json) |
+| **5. The dispute that leaves sizing alone** | Live reads: seller belief `blf_1a5e09` is **Claimed** with exactly one row, the not-arrived dispute (`PP-D-51713`); the sizing belief still holds exactly its three fit rows and no dispute row, and recall still decides on the correction, not on the dispute. | [`05-dispute-leaves-sizing-alone.json`](evidence/run-6/05-dispute-leaves-sizing-alone.json) |
+| **6. The ledger** | Live `ledger_beliefs`, `ledger_evidence` and recall: the decision is the correction, the pool is overridden by it (`pool.precedence`), the belief rows carry statuses, seeded marks and counts. The deployed page is a **fixture replay** (60 settled / 48 seeded in the screenshot, not the live 23 / 22 / 1) and has no live transport yet; it is shown and labelled, never counted as the live read. | [`06-ledger.json`](evidence/run-6/06-ledger.json), `06-ledger-belief.png`, `06-ledger-table.png` |
+| **7. The second agent and the merchant** | Trace `9d4893e7` (fresh conversation, no correction in its prompt) recalls first and recommends M citing `corr_000004`, quotes its words, and shows the overridden pool and beliefs with the live/seeded split. The merchant app reads **Earned small, 23 settled (22 seeded, 1 live)** through its proxy; its "why" panel names the counts and the rule. | [`07-second-agent-and-merchant.json`](evidence/run-6/07-second-agent-and-merchant.json), `07-merchant.png` |
+
+The run was recorded in one pass, then a transient `401` from the agent
+platform's conversation create stopped step 7; `demo/run.py --resume`
+re-read the free layer state and drove that one turn, so the paid turns are
+the ones the record cites. The summary in the evidence says so.
+
+## Reset
 
 ```sh
-bash demo/reset.sh <run-number>   # fresh Lambo session (erased ids tombstone, never reused), clean out/, spend baseline
-bash demo/run.sh                  # the six steps; stops on the first failure or tripped guard
+bash demo/reset.sh <run-number>
 ```
 
-PayPal sandbox records are immutable history: no reset deletes them,
-and every run re-reads the T1.3b cycles. Each run creates exactly one
-new sandbox order (the step-4 purchase) plus its capture; refunds and
-disputes are never created by the demo. A second run from reset repeats
-the same six outcomes with new session, order, conversation and trace
-ids; only the reply *wording* may differ (the outcomes are asserted,
-the prose is recorded).
+It reads the demo line and restores the starting counts without touching the
+seeded pool or the seller's other lines. When an earlier run left a live
+settled row, it opts the demo shopper out of pooling (the layer removes that
+shopper's own fit rows and reports how many) and back in, then asserts the
+seeded state: the pool Earned small at 22 settled / 22 seeded / 0 live, the
+sizing belief with its three seeded returns, the latest capture and dispute
+in memory, and a spend baseline.
 
-## Placeholders
+What a reset cannot do: **delete a correction**. Corrections are append-only
+and live in the layer's standing journal, so each run records a new one and
+the newest wins. The reset records the correction in force at the start so
+the run's own correction can be told apart from it.
 
-Committed files carry placeholders only (T0.4 table plus RUN-scoped
-ids). Real ids stay in `demo/out/` (git-ignored, mode 0600).
+## Run
 
-| Placeholder | What was removed |
-|---|---|
-| `ORD-LIVE-R<n>-F<k>` / `CAP-…` / `RFD-…` / `EVT-…` | live fit-cycle order/capture/refund/webhook-event ids |
-| `DSP-LIVE-R<n>`, `EVT-LIVE-R<n>-D1` | live dispute id and its webhook event id |
-| `ORD-T36-R<n>` / `CAP-T36-R<n>` / `CUSTOM-T36-R<n>` / `EVT-T36-R<n>-PURCHASE` | the run's new purchase order/capture/custom/event ids |
-| `APPROVAL-URL-REDACTED` | the payer-action approval URL (carries an order token) |
-| `CONV-T36-R<n>` | the agent conversation id |
-| `TRACE-T36-R<n>[-T1,-T2,-T3]` (8 hex chars in prose) | agent/platform trace ids (kept short; costs kept) |
-| `BLF-T36-R<n>[-SELLER]` | the run's belief ids |
+```sh
+MEMENTO_SECOND_DEPLOYMENT=<id> bash demo/run.sh
+```
 
-Trace ids and costs are kept (short ids in prose, full only in `out/`).
-No key, token, email, shopper credential, bearer, order id or other
-live value enters any committed file; the only route config is
-`drive.py`'s standing deployment id and API host (the agent's address,
-no secret — predates this task). The driver refuses to finish if a live
-value outside that config survives into `demo/` outside `out/`.
+The second agent's deployment id never lives in this repository; it comes
+from the operator's environment. Every step writes its raw answer under
+`demo/out/run-<n>/` and its redacted evidence under `demo/evidence/run-<n>/`.
 
 ## Spend
 
-| Leg | Cost model | Guard |
-|---|---|---|
-| PayPal reads, capture, Channel3 details | sandbox free, details free | none needed |
-| Jev (4 classifications/run) | ~$0.00002 each | pinned build, 10x per-call, stop |
-| Lambo + Elastic native inference | no billable resources | session erased |
-| Astropods turns (3/run) | ~$0.03-0.04 each | $0.10 per turn, billing before/after every turn |
-| Evaluator re-run (if any) | server-side judge | billing delta watched, $0.10 cap |
+This task spent **$0.69** of usage (billing $4.95 → $5.64; credit $5.05 →
+$4.36), of which **$0.2377** is the recorded run's five agent turns and
+about $0.45 is the rehearsal, three failed attempts before the recorded pass,
+and two step-7 turns superseded while the run record was fixed. Nothing but
+agent turns is billable: the layer, PayPal sandbox, both read-only apps and
+the Elastic pool reads are covered by the deployed services. Budget was
+$1.00; the recorded run fits inside it.
 
-Cap: stop and report if total new spend exceeds $1.00 or any single
-turn exceeds $0.10. Prefer reusing existing live records (T1.3b cycles,
-T2.4b session patterns) over creating new ones: only the step-4
-purchase is created per run, because a purchase cannot be reused.
+## What is not live, and who owns it
 
-## Runs
+Every gap below is in the run's summary and in the phase document; none is
+filled in from a fixture:
 
-Run records follow once the clean runs complete.
+1. **Step 0's empty shopper** is refused by the edge: the agent key binds
+   `shopper_01` only. An operator adds the day-one shopper to the key's
+   binding (a Render secret change) or mints a second agent key. Until then
+   the pool read is live and the empty-shopper recall is recorded as `401`.
+2. **A new purchase and a new dispute cannot be ingested.** The PayPal app's
+   only webhook subscription points at an external test receiver, not at the
+   layer, and the served layer's ingest reads verified events through the
+   recording demo source (`cmd/memento` passes `fakes.NewRecordingPaymentSource`),
+   so a genuine delivery would verify and then find no event to read. The
+   run records the existing live capture and writes the fit row through
+   `record_feedback`; the probe and the subscription facts are in
+   [`04-purchase-blockers.json`](evidence/run-6/04-purchase-blockers.json).
+3. **The ledger page is a fixture replay.** It has no live transport; the
+   live reads are the API answers in step 6.
+4. **The seller belief never reaches recall**, and the agent key is refused
+   on ledger reads, so no live agent turn can mention the dispute; the live
+   reads prove sizing is untouched.
+5. **`record_feedback` is not idempotent per purchase** in the shopper's
+   belief: a second feedback for the same purchase appends the same evidence
+   again, and this run's three feedback calls left `ev_51c2d8` three times on
+   `blf_2b9d60` (which lifted it from Claimed to Building). The pool row is
+   idempotent; the belief is not.
+6. **A correction can reuse an id after a restart.** The served layer
+   restores the standing journal but not the id sequence, so the next mint
+   overwrote the restored `corr_000001` during an early attempt (the run's
+   own `corr_000004` is unaffected). Recorded, not worked around.
+7. **The reference agent skipped recall** on the correction turn in one
+   attempt and on the recorded feedback turn; recall-first holds on the ask
+   and next-recommendation turns. The traces show it as it happened.
+8. **Both deployed apps render their own source comments** as visible text
+   above the heading (the `// ...` blocks), and the belief page lists an
+   overridden step twice. Presentation defects outside this task's `owns`.
+
+## The pre-pivot record
+
+`RUN-1.md`, `RUN-2.md`, `drive.py` and `driver/` are the T3.6 demo on the
+pre-pivot stack (local Lambo session, recording payments, the layer not yet
+served to the agents). They are kept as history and are not used by the
+pivot run above.
