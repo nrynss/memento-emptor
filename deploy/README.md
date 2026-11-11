@@ -310,17 +310,40 @@ run never stands in for the deployed seed.
 
 Deliveries go to `https://<service>.onrender.com/webhooks/paypal`;
 the edge rewrites the path to the layer's frozen `/webhooks/payment`
-route. After the first green deploy:
+route, and it serves `/webhooks/payment` directly too. After the first
+green deploy:
 
 ```sh
 source tools/env.sh
 PUBLIC_URL=https://<service>.onrender.com bash deploy/paypal-webhook.sh
 ```
 
-It subscribes the three proved event types (capture completed and
-refunded, dispute created), idempotently. Raw-delivery verification
-and the shopper join belong to the ingest task: the shim answers with
-the layer's verdict and documents the gap rather than inventing one.
+It subscribes the three event types the layer stores (capture completed,
+capture refunded, dispute created), idempotently: a subscription already
+at the URL gets any missing event types added while keeping the ones it
+has, and a subscription that already carries all three is left alone.
+
+The layer verifies every delivery itself: the route hands the raw body
+and PayPal's transmission headers to the verifier, which calls
+`POST /v1/notifications/verify-webhook-signature` and stores nothing
+until PayPal answers `SUCCESS`. It then resolves the delivery's shopper
+in the same request: `resource.custom_id` for a capture or a refund, and
+the first non-empty `disputed_transactions[].custom` for a
+`CUSTOMER.DISPUTE.*` delivery. A dispute that carries neither is refused
+with the route's distinct missing-shopper refusal
+(`server.ErrDisputeWithoutShopper`) instead of being defaulted to a
+partition.
+
+The script reads the app credentials from `tools/env.sh` and prints
+neither; the subscription id it prints is account detail, so a transcript
+redacts it as `SUBSCRIPTION-ID-REDACTED`. Keys stay in the environment,
+never in a file.
+
+The live delivery path is implemented but not yet proved on the hosted
+layer. That needs the redeploy of this branch and the resume steps
+(register the subscription, create/capture/refund, file the dispute,
+resend all three) recorded in `dev-diary/PHASE-8-pivot-layer.md`; this
+section is not a live-delivery transcript.
 
 ## Spend guard
 
@@ -347,4 +370,4 @@ It prints the suspend it would issue and exits 2; nothing is called.
 | `seed/` | First-boot Lambo seeder (proven arc, marker-idempotent) |
 | `guard.sh` | Spend ceiling: audit, alert, suspend |
 | `guard-snapshot-over-limit.json` | Dry-run trip fixture (placeholder ids) |
-| `paypal-webhook.sh` | Webhook subscription, idempotent, sandbox only |
+| `paypal-webhook.sh` | Webhook subscription, idempotent on URL and event list, sandbox only |
