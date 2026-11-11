@@ -160,7 +160,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | Phase | Tasks complete | Status |
 |---|---|---|
 | P0 | 12 / 12 | Done |
-| P1 | 6 / 7 | In progress (T1.1c) |
+| P1 | 7 / 8 | In progress (T1.1d) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 6 / 8 | In progress (T4.6, T4.8) |
@@ -175,7 +175,15 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 ## Handoff Log
 
-Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T1.1c: The live ingest driver on unknown codes (done)
+
+**What exists.** The live ingest driver now maps an unknown dispute code the way served ingest stores it (`none` plus the code as text) instead of aborting, and its row assertions derive the category and counts from the case's own code instead of assuming non-arrival. It re-ran live: the recorded refund and non-arrival dispute stored one row each with verified signatures, both redeliveries were duplicate-safe, no new sandbox record exists, spend $0. The not-as-described spelling remains unobserved: the sandbox refuses the create (reason-only → `MISSING_ISSUE_TYPE`; with items → `TRANSACTION_NOT_ELIGIBLE`; `seller_transaction_id` → 500), the response is committed as a fixture, and a reproducible probe plus the README record all three shapes. Review fixed a probe that printed a created case's body and two inaccurate claims, and opened **T1.1d** because the disposition now exists in two places.
+
+**What surprised.** T0.4's minimal create shape now fails earlier at schema; with items it reaches the same eligibility refusal. Naming the capture as seller transaction returns a 500, a sandbox defect.
+
+**The next agent should not have to work out.** To observe the spelling, file the case as the shopper in the resolution center (the `tests/live/seed/dispute.py` click path) and re-run the driver: it prints the live code and the mapped category, no code change needed.
 
 ### T4.7: Plain language in the why cards (done)
 
