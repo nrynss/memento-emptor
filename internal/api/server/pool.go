@@ -120,8 +120,8 @@ func (s *Service) classifyFitRows(ctx context.Context, st *shopperState, rows []
 }
 
 // feedbackFitRow records fit feedback tied to a purchase in the fit row.
-// Only fit verdicts settle a fit row; a seller verdict never reaches
-// here, because the verdict check above already refused it.
+// Only a fit verdict settles a row: any other verdict returns without
+// writing, and the callers reach here only for a fit verdict.
 func (s *Service) feedbackFitRow(ctx context.Context, st *shopperState, rec *evidenceRecord, verdict contract.FeedbackVerdict, at time.Time) error {
 	if st.writer == nil {
 		return nil

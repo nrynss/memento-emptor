@@ -2,6 +2,9 @@ package server
 
 import (
 	"context"
+	"errors"
+	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -312,4 +315,505 @@ func seededFeedbackService(t *testing.T, fitIdx fitindex.Index, change func(*See
 		t.Fatalf("load seed: %v", err)
 	}
 	return svc, spy
+}
+
+// freshFeedbackService builds the pivot service with the fit writer wired
+// and one captured purchase, so a test can deliver that purchase's first
+// feedback and read the pool's rows.
+func freshFeedbackService(t *testing.T) (*Service, *spyGraph, *fakeFitIndex, string) {
+	t.Helper()
+	fitIdx := &fakeFitIndex{}
+	svc, spy := pivotHarness(t, nil, fitIdx, "")
+	shopper := "shopper_01"
+	if _, err := svc.IngestWebhook(context.Background(), shopper, "WH-2EV-06"); err != nil {
+		t.Fatalf("ingest capture: %v", err)
+	}
+	return svc, spy, fitIdx, shopper
+}
+
+// freshFeedbackRequest names the captured purchase freshFeedbackService
+// ingested.
+func freshFeedbackRequest(shopper, text string) contract.RecordFeedbackRequest {
+	return contract.RecordFeedbackRequest{
+		ShopperID:    shopper,
+		CustomID:     "memento-shopper01-06",
+		SKU:          "PSW8GeK",
+		Size:         "M",
+		FeedbackText: text,
+	}
+}
+
+// fitRowsOf copies the fit index's rows under its lock, so a test can
+// compare the pool's store before and after a delivery.
+func fitRowsOf(f *fakeFitIndex) map[string]domain.FitRow {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	out := make(map[string]domain.FitRow, len(f.rows))
+	for id, row := range f.rows {
+		out[id] = row
+	}
+	return out
+}
+
+// fitBeliefsFor lists the fit beliefs stored for one brand.
+func fitBeliefsFor(st *shopperState, brandID string) []*beliefRecord {
+	out := []*beliefRecord{}
+	for _, rec := range st.beliefs {
+		if rec.kind == domain.BeliefKindFit && rec.subject.ID == brandID {
+			out = append(out, rec)
+		}
+	}
+	return out
+}
+
+// purchaseFeedback returns the feedback marker on the purchase's capture
+// row, or nil while the purchase carries none.
+func purchaseFeedback(t *testing.T, st *shopperState, customID string) *recordedFeedback {
+	t.Helper()
+	ids := st.captures[customID]
+	if len(ids) == 0 {
+		t.Fatalf("purchase %q has no capture row", customID)
+	}
+	rec := st.evidence[ids[0]]
+	if rec == nil {
+		t.Fatalf("purchase %q names an unknown capture row %q", customID, ids[0])
+	}
+	return rec.feedback
+}
+
+// TestSellerFeedbackWritesSellerEvidence proves a seller verdict is
+// recorded honestly: it counts toward seller reliability, names the seller
+// belief, writes one evidence action citing that belief, and leaves every
+// fit belief and the purchase's fit row untouched. A repeat of the same
+// verdict changes nothing.
+func TestSellerFeedbackWritesSellerEvidence(t *testing.T) {
+	ctx := context.Background()
+	svc, spy, fitIdx, shopper := freshFeedbackService(t)
+	st, err := svc.state(ctx, shopper)
+	if err != nil {
+		t.Fatalf("partition: %v", err)
+	}
+	rowsBefore := fitRowsOf(fitIdx)
+	putsBefore := fitIdx.puts
+	spy.mu.Lock()
+	actionsBefore := len(spy.actions)
+	spy.mu.Unlock()
+
+	req := freshFeedbackRequest(shopper, "It arrived damaged: the seam is split.")
+	first, err := svc.RecordFeedback(ctx, req)
+	if err != nil {
+		t.Fatalf("first seller feedback: %v", err)
+	}
+	if !first.Accepted {
+		t.Fatalf("seller feedback answered accepted false, want the evidence recorded")
+	}
+	if first.Verdict != contract.FeedbackDamagedOrDefective {
+		t.Fatalf("verdict %q, want damaged_or_defective", first.Verdict)
+	}
+	if first.CountsToward == nil || *first.CountsToward != domain.BeliefKindSeller {
+		t.Fatalf("counts toward %v, want seller_reliability", first.CountsToward)
+	}
+	if first.BeliefID == nil {
+		t.Fatal("seller feedback named no belief")
+	}
+	belief := st.beliefs[*first.BeliefID]
+	if belief == nil || belief.kind != domain.BeliefKindSeller {
+		t.Fatalf("belief %q is %+v, want the seller belief", *first.BeliefID, belief)
+	}
+	if fits := fitBeliefsFor(st, "brand-x-001"); len(fits) != 0 {
+		t.Fatalf("seller feedback left %d fit beliefs, want none", len(fits))
+	}
+	row := st.evidence[st.captures["memento-shopper01-06"][0]]
+	if row == nil || row.counts != domain.BeliefKindSeller {
+		t.Fatalf("the purchase row counts toward %v, want seller_reliability", row)
+	}
+	if row.row.Reason == nil || row.row.Reason.Category != domain.CategoryDamagedOrDefective {
+		t.Fatalf("the purchase row carries reason %+v, want damaged_or_defective", row.row.Reason)
+	}
+	if len(row.beliefIDs) != 1 || row.beliefIDs[0] != belief.id {
+		t.Fatalf("the purchase row links %v, want the seller belief %q", row.beliefIDs, belief.id)
+	}
+	if len(belief.evIDs) != 1 || belief.evIDs[0] != row.id {
+		t.Fatalf("the seller belief holds %v, want the purchase row %q", belief.evIDs, row.id)
+	}
+
+	spy.mu.Lock()
+	actions := append([]recordedAction(nil), spy.actions...)
+	spy.mu.Unlock()
+	if len(actions) != actionsBefore+1 {
+		t.Fatalf("seller feedback wrote %d actions, want 1", len(actions)-actionsBefore)
+	}
+	last := actions[len(actions)-1]
+	if len(last.dependsOn) != 1 || last.dependsOn[0] != belief.content {
+		t.Fatalf("seller feedback cites %v, want the seller belief %q", last.dependsOn, belief.content)
+	}
+	if after := fitRowsOf(fitIdx); !reflect.DeepEqual(after, rowsBefore) {
+		t.Fatalf("seller feedback moved the fit rows:\nbefore: %+v\nafter:  %+v", rowsBefore, after)
+	}
+	if fitIdx.puts != putsBefore {
+		t.Fatalf("seller feedback wrote %d fit rows, want none", fitIdx.puts-putsBefore)
+	}
+
+	second := req
+	second.FeedbackText = "The shirt was broken when I opened the parcel."
+	again, err := svc.RecordFeedback(ctx, second)
+	if err != nil {
+		t.Fatalf("repeat seller feedback: %v", err)
+	}
+	if again.FeedbackID != first.FeedbackID {
+		t.Fatalf("repeat answered %q, want the first id %q", again.FeedbackID, first.FeedbackID)
+	}
+	if !again.Accepted || again.CountsToward == nil || *again.CountsToward != domain.BeliefKindSeller {
+		t.Fatalf("repeat answered accepted %v counts %v, want accepted seller evidence", again.Accepted, again.CountsToward)
+	}
+	if again.BeliefID == nil || *again.BeliefID != *first.BeliefID {
+		t.Fatalf("repeat answered belief %v, want %q", again.BeliefID, *first.BeliefID)
+	}
+	spy.mu.Lock()
+	afterRepeat := len(spy.actions)
+	spy.mu.Unlock()
+	if afterRepeat != actionsBefore+1 {
+		t.Fatalf("repeat wrote %d actions, want none", afterRepeat-(actionsBefore+1))
+	}
+	if after := fitRowsOf(fitIdx); !reflect.DeepEqual(after, rowsBefore) {
+		t.Fatalf("repeat moved the fit rows:\nbefore: %+v\nafter:  %+v", rowsBefore, after)
+	}
+	if fits := fitBeliefsFor(st, "brand-x-001"); len(fits) != 0 {
+		t.Fatalf("repeat left %d fit beliefs, want none", len(fits))
+	}
+	if st.seq["fb"] != 1 {
+		t.Fatalf("two seller deliveries minted %d feedback ids, want 1", st.seq["fb"])
+	}
+}
+
+// TestNotArrivedFeedbackWritesSellerEvidence proves the second seller
+// verdict takes the same path with its own category, so the row reads
+// non-arrival and never damage.
+func TestNotArrivedFeedbackWritesSellerEvidence(t *testing.T) {
+	ctx := context.Background()
+	svc, _, fitIdx, shopper := freshFeedbackService(t)
+	st, err := svc.state(ctx, shopper)
+	if err != nil {
+		t.Fatalf("partition: %v", err)
+	}
+	rowsBefore := fitRowsOf(fitIdx)
+
+	res, err := svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, "It never arrived."))
+	if err != nil {
+		t.Fatalf("seller feedback: %v", err)
+	}
+	if !res.Accepted || res.Verdict != contract.FeedbackNotArrived {
+		t.Fatalf("answered accepted %v verdict %q, want true not_arrived", res.Accepted, res.Verdict)
+	}
+	if res.CountsToward == nil || *res.CountsToward != domain.BeliefKindSeller {
+		t.Fatalf("counts toward %v, want seller_reliability", res.CountsToward)
+	}
+	if res.BeliefID == nil {
+		t.Fatal("seller feedback named no belief")
+	}
+	belief := st.beliefs[*res.BeliefID]
+	if belief == nil || belief.kind != domain.BeliefKindSeller {
+		t.Fatalf("belief %q is %+v, want the seller belief", *res.BeliefID, belief)
+	}
+	row := st.evidence[st.captures["memento-shopper01-06"][0]]
+	if row == nil || row.row.Reason == nil || row.row.Reason.Category != domain.CategoryNotArrived {
+		t.Fatalf("the purchase row carries reason %+v, want not_arrived", row)
+	}
+	if fits := fitBeliefsFor(st, "brand-x-001"); len(fits) != 0 {
+		t.Fatalf("seller feedback left %d fit beliefs, want none", len(fits))
+	}
+	if after := fitRowsOf(fitIdx); !reflect.DeepEqual(after, rowsBefore) {
+		t.Fatalf("seller feedback moved the fit rows:\nbefore: %+v\nafter:  %+v", rowsBefore, after)
+	}
+}
+
+// TestSameVerdictRepeatIsIdempotent proves a repeat of the recorded
+// verdict, in the same or other words, writes nothing and answers the
+// first answer: one feedback id, one evidence row, one belief, and
+// accepted echoing whether the verdict counts toward anything.
+func TestSameVerdictRepeatIsIdempotent(t *testing.T) {
+	cases := []struct {
+		name    string
+		first   string
+		second  string
+		verdict contract.FeedbackVerdict
+		counts  domain.BeliefKind
+	}{
+		{name: "fit", first: "The M fits well across the shoulders.", second: "fits great on me", verdict: contract.FeedbackFitsWell, counts: domain.BeliefKindFit},
+		{name: "seller", first: "It arrived damaged.", second: "The item was broken in the box.", verdict: contract.FeedbackDamagedOrDefective, counts: domain.BeliefKindSeller},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
+			svc, spy, fitIdx, shopper := freshFeedbackService(t)
+			st, err := svc.state(ctx, shopper)
+			if err != nil {
+				t.Fatalf("partition: %v", err)
+			}
+			first, err := svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, tc.first))
+			if err != nil {
+				t.Fatalf("first send: %v", err)
+			}
+			if !first.Accepted || first.Verdict != tc.verdict {
+				t.Fatalf("first send: accepted %v verdict %q, want true %q", first.Accepted, first.Verdict, tc.verdict)
+			}
+			spy.mu.Lock()
+			actions := len(spy.actions)
+			spy.mu.Unlock()
+			rows := fitRowsOf(fitIdx)
+
+			second, err := svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, tc.second))
+			if err != nil {
+				t.Fatalf("repeat send: %v", err)
+			}
+			if second.FeedbackID != first.FeedbackID {
+				t.Fatalf("repeat answered %q, want the first id %q", second.FeedbackID, first.FeedbackID)
+			}
+			if second.Verdict != tc.verdict || second.Accepted != true {
+				t.Fatalf("repeat answered %q accepted %v, want %q accepted true", second.Verdict, second.Accepted, tc.verdict)
+			}
+			if second.CountsToward == nil || *second.CountsToward != tc.counts {
+				t.Fatalf("repeat counts toward %v, want %q", second.CountsToward, tc.counts)
+			}
+			if second.BeliefID == nil || first.BeliefID == nil || *second.BeliefID != *first.BeliefID {
+				t.Fatalf("repeat answered belief %v, want the first belief %v", second.BeliefID, first.BeliefID)
+			}
+			spy.mu.Lock()
+			after := len(spy.actions)
+			spy.mu.Unlock()
+			if after != actions {
+				t.Fatalf("repeat wrote %d actions, want none", after-actions)
+			}
+			if !reflect.DeepEqual(fitRowsOf(fitIdx), rows) {
+				t.Fatal("repeat moved the purchase's fit row")
+			}
+			purchase := purchaseFeedback(t, st, "memento-shopper01-06")
+			if purchase == nil || purchase.id != first.FeedbackID {
+				t.Fatalf("purchase holds feedback %+v, want %q", purchase, first.FeedbackID)
+			}
+			if st.seq["fb"] != 1 {
+				t.Fatalf("two sends minted %d feedback ids, want 1", st.seq["fb"])
+			}
+		})
+	}
+}
+
+// TestConflictingFeedbackIsRefused proves a repeat whose words read as a
+// different verdict is refused honestly: the sentinel matches, the error
+// names the recorded verdict, and the store is exactly as the first
+// delivery left it. Nothing is written and no accepted answer is given
+// over words the purchase does not hold.
+func TestConflictingFeedbackIsRefused(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("fresh purchase", func(t *testing.T) {
+		svc, spy, fitIdx, shopper := freshFeedbackService(t)
+		st, err := svc.state(ctx, shopper)
+		if err != nil {
+			t.Fatalf("partition: %v", err)
+		}
+		first, err := svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, "The M fits well across the shoulders."))
+		if err != nil {
+			t.Fatalf("first send: %v", err)
+		}
+		rowsBefore := fitRowsOf(fitIdx)
+		putsBefore := fitIdx.puts
+		spy.mu.Lock()
+		actionsBefore := len(spy.actions)
+		spy.mu.Unlock()
+		evidenceBefore := st.evidence[st.captures["memento-shopper01-06"][0]]
+		reasonBefore := evidenceBefore.row.Reason
+
+		_, err = svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, "It arrived damaged."))
+		if !errors.Is(err, ErrFeedbackConflict) {
+			t.Fatalf("conflicting repeat error = %v, want ErrFeedbackConflict", err)
+		}
+		if !strings.Contains(err.Error(), "already holds a recorded") {
+			t.Fatalf("conflicting repeat error %q does not name the recorded verdict", err)
+		}
+		spy.mu.Lock()
+		actionsAfter := len(spy.actions)
+		spy.mu.Unlock()
+		if actionsAfter != actionsBefore {
+			t.Fatalf("conflicting repeat wrote %d actions, want none", actionsAfter-actionsBefore)
+		}
+		if after := fitRowsOf(fitIdx); !reflect.DeepEqual(after, rowsBefore) {
+			t.Fatalf("conflicting repeat moved the fit rows:\nbefore: %+v\nafter:  %+v", rowsBefore, after)
+		}
+		if fitIdx.puts != putsBefore {
+			t.Fatalf("conflicting repeat wrote %d fit rows, want none", fitIdx.puts-putsBefore)
+		}
+		if st.evidence[evidenceBefore.id].row.Reason != reasonBefore {
+			t.Fatal("conflicting repeat replaced the purchase's recorded reason")
+		}
+		if len(fitBeliefsFor(st, "brand-x-001")) != 1 {
+			t.Fatal("conflicting repeat changed the brand's fit beliefs")
+		}
+		if len(st.beliefs) != 1 {
+			t.Fatalf("conflicting repeat left %d beliefs, want the one fit belief", len(st.beliefs))
+		}
+		if st.seq["fb"] != 1 {
+			t.Fatalf("conflicting repeat minted %d feedback ids, want the first only", st.seq["fb"])
+		}
+		if purchase := purchaseFeedback(t, st, "memento-shopper01-06"); purchase == nil || purchase.id != first.FeedbackID || purchase.verdict != contract.FeedbackFitsWell {
+			t.Fatalf("purchase holds %+v, want the recorded fits-well feedback %q", purchase, first.FeedbackID)
+		}
+	})
+
+	t.Run("seeded purchase", func(t *testing.T) {
+		svc, spy := seededSpyService(t)
+		st, err := svc.state(ctx, "shopper_01")
+		if err != nil {
+			t.Fatalf("partition: %v", err)
+		}
+		spy.mu.Lock()
+		actionsBefore, derivesBefore := len(spy.actions), len(spy.derives)
+		spy.mu.Unlock()
+		evidenceBefore := st.evidence["ev_51c2d8"]
+		reasonBefore := evidenceBefore.row.Reason.Text
+
+		_, err = svc.RecordFeedback(ctx, freshFeedbackRequest("shopper_01", "It arrived damaged."))
+		if !errors.Is(err, ErrFeedbackConflict) {
+			t.Fatalf("conflicting repeat error = %v, want ErrFeedbackConflict", err)
+		}
+		if !strings.Contains(err.Error(), "already holds a recorded") {
+			t.Fatalf("conflicting repeat error %q does not name the recorded verdict", err)
+		}
+		spy.mu.Lock()
+		actionsAfter, derivesAfter := len(spy.actions), len(spy.derives)
+		spy.mu.Unlock()
+		if actionsAfter != actionsBefore || derivesAfter != derivesBefore {
+			t.Fatalf("conflicting repeat wrote %d actions and %d derives, want none",
+				actionsAfter-actionsBefore, derivesAfter-derivesBefore)
+		}
+		if len(st.beliefs) != 4 {
+			t.Fatalf("conflicting repeat left %d beliefs, want the seeded four", len(st.beliefs))
+		}
+		if len(st.evidence["ev_51c2d8"].beliefIDs) != 1 || st.evidence["ev_51c2d8"].beliefIDs[0] != "blf_2b9d60" {
+			t.Fatalf("conflicting repeat changed the seeded row's belief links: %v", st.evidence["ev_51c2d8"].beliefIDs)
+		}
+		if st.evidence["ev_51c2d8"].row.Reason.Text != reasonBefore {
+			t.Fatal("conflicting repeat replaced the seeded row's reason")
+		}
+		if purchase := purchaseFeedback(t, st, "memento-shopper01-06"); purchase == nil || purchase.id != "fb_51c2d8" || purchase.verdict != contract.FeedbackFitsWell {
+			t.Fatalf("purchase holds %+v, want the seeded fits-well feedback fb_51c2d8", purchase)
+		}
+		if st.seq["fb"] != 0 {
+			t.Fatalf("conflicting repeat minted %d feedback ids, want none", st.seq["fb"])
+		}
+	})
+
+	t.Run("no-count first delivery", func(t *testing.T) {
+		svc, spy, fitIdx, shopper := freshFeedbackService(t)
+		st, err := svc.state(ctx, shopper)
+		if err != nil {
+			t.Fatalf("partition: %v", err)
+		}
+		first, err := svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, "I'm not sure yet."))
+		if err != nil {
+			t.Fatalf("first send: %v", err)
+		}
+		rowsBefore := fitRowsOf(fitIdx)
+		spy.mu.Lock()
+		actionsBefore, derivesBefore := len(spy.actions), len(spy.derives)
+		spy.mu.Unlock()
+
+		_, err = svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, "The M fits well."))
+		if !errors.Is(err, ErrFeedbackConflict) {
+			t.Fatalf("conflicting repeat error = %v, want ErrFeedbackConflict", err)
+		}
+		spy.mu.Lock()
+		actionsAfter, derivesAfter := len(spy.actions), len(spy.derives)
+		spy.mu.Unlock()
+		if actionsAfter != actionsBefore || derivesAfter != derivesBefore {
+			t.Fatalf("conflicting repeat wrote %d actions and %d derives, want none",
+				actionsAfter-actionsBefore, derivesAfter-derivesBefore)
+		}
+		if len(st.beliefs) != 0 {
+			t.Fatalf("conflicting repeat created %d beliefs, want none", len(st.beliefs))
+		}
+		if !reflect.DeepEqual(fitRowsOf(fitIdx), rowsBefore) {
+			t.Fatal("conflicting repeat moved the purchase's fit row")
+		}
+		if purchase := purchaseFeedback(t, st, "memento-shopper01-06"); purchase == nil || purchase.id != first.FeedbackID || purchase.verdict != contract.FeedbackUnclear {
+			t.Fatalf("purchase holds %+v, want the recorded unclear feedback %q", purchase, first.FeedbackID)
+		}
+		if st.seq["fb"] != 1 {
+			t.Fatalf("conflicting repeat minted %d feedback ids, want the first only", st.seq["fb"])
+		}
+	})
+}
+
+// TestNoCountFeedbackIsIdempotentOnResend proves a first delivery that
+// counts toward nothing mints one id, records it on the purchase with its
+// verdict, and answers every resend with that id and accepted false.
+func TestNoCountFeedbackIsIdempotentOnResend(t *testing.T) {
+	cases := []struct {
+		name    string
+		first   string
+		second  string
+		verdict contract.FeedbackVerdict
+	}{
+		{name: "unclear", first: "I'm not sure yet.", second: "Hard to say.", verdict: contract.FeedbackUnclear},
+		{name: "changed mind", first: "I changed my mind.", second: "Actually I don't want it.", verdict: contract.FeedbackChangedMind},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := context.Background()
+			svc, spy, fitIdx, shopper := freshFeedbackService(t)
+			st, err := svc.state(ctx, shopper)
+			if err != nil {
+				t.Fatalf("partition: %v", err)
+			}
+			rowsBefore := fitRowsOf(fitIdx)
+			spy.mu.Lock()
+			actionsBefore := len(spy.actions)
+			spy.mu.Unlock()
+
+			first, err := svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, tc.first))
+			if err != nil {
+				t.Fatalf("first send: %v", err)
+			}
+			if first.Accepted || first.Verdict != tc.verdict || first.CountsToward != nil || first.BeliefID != nil {
+				t.Fatalf("first send: accepted %v verdict %q counts %v belief %v, want accepted false %q toward nothing",
+					first.Accepted, first.Verdict, first.CountsToward, first.BeliefID, tc.verdict)
+			}
+			if first.FeedbackID == "" {
+				t.Fatal("first send minted no feedback id")
+			}
+			purchase := purchaseFeedback(t, st, "memento-shopper01-06")
+			if purchase == nil || purchase.id != first.FeedbackID || purchase.verdict != tc.verdict {
+				t.Fatalf("purchase holds %+v, want %q with verdict %q", purchase, first.FeedbackID, tc.verdict)
+			}
+
+			for _, text := range []string{tc.first, tc.second} {
+				again, err := svc.RecordFeedback(ctx, freshFeedbackRequest(shopper, text))
+				if err != nil {
+					t.Fatalf("resend %q: %v", text, err)
+				}
+				if again.FeedbackID != first.FeedbackID {
+					t.Fatalf("resend %q answered %q, want %q", text, again.FeedbackID, first.FeedbackID)
+				}
+				if again.Accepted || again.CountsToward != nil || again.BeliefID != nil {
+					t.Fatalf("resend %q answered accepted %v counts %v belief %v, want accepted false toward nothing",
+						text, again.Accepted, again.CountsToward, again.BeliefID)
+				}
+			}
+			spy.mu.Lock()
+			actionsAfter := len(spy.actions)
+			spy.mu.Unlock()
+			if actionsAfter != actionsBefore {
+				t.Fatalf("three no-count deliveries wrote %d actions, want none", actionsAfter-actionsBefore)
+			}
+			if len(st.beliefs) != 0 {
+				t.Fatalf("three no-count deliveries created %d beliefs, want none", len(st.beliefs))
+			}
+			if !reflect.DeepEqual(fitRowsOf(fitIdx), rowsBefore) {
+				t.Fatal("no-count deliveries moved the purchase's fit row")
+			}
+			if st.seq["fb"] != 1 {
+				t.Fatalf("three no-count deliveries minted %d feedback ids, want 1", st.seq["fb"])
+			}
+		})
+	}
 }

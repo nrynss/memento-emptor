@@ -186,6 +186,7 @@ func isNotFound(err error) bool {
 // verification is the caller's body, not the layer's fault.
 func isInvalid(err error) bool {
 	return errors.Is(err, ErrQuestionClosed) || errors.Is(err, ErrFeedbackMismatch) ||
+		errors.Is(err, ErrFeedbackConflict) ||
 		errors.Is(err, ErrEmptyCorrection) || errors.Is(err, ErrMissingShopper) || errors.Is(err, ErrAlreadySeeded) ||
 		errors.Is(err, ingest.ErrBadSignature) || errors.Is(err, ingest.ErrMalformedEvent)
 }

@@ -805,11 +805,31 @@ requires:   [T8.5l]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     claimed:t85o-feedback
+status:     in-review
 ```
 A repeat feedback whose new words read as a different verdict (another fit verdict, `changed_mind`, or a seller verdict) is answered with the recorded one and `accepted: true`, silently dropping the new words; `record_feedback` cannot record `damaged_or_defective`/`not_arrived` at all. The same shape: an `unclear`/`changed_mind` first delivery marks no row, so every resend mints a fresh `fb_` id. Decide and implement: refuse the conflicting repeat honestly, record it as a second distinct feedback, or widen the tool — the response shape is frozen, so this is the orchestrator's call.
 
 **Done when:** a repeat with different words gets a decided, honest answer (not a silent drop); an `unclear` first delivery is idempotent on resend; tests pin both; the gate passes.
+
+**Notes (in-review).** The decision: a purchase holds one feedback. A second delivery is judged by the verdict its new words read as, and the purchase's recorded verdict decides what the layer does with it. That keeps the response shape frozen — `accepted` is the one field that can say whether anything counted — while making every answer true of the store.
+
+1. **Seller verdicts are seller evidence, not fit feedback.** `damaged_or_defective` and `not_arrived` resolve to the seller belief through `ensureSellerBelief`, the helper `beliefForReason`'s seller branch calls (the brief's `sellerBeliefFor`; there is no helper under that name), and the purchase's row is written through the reason path with the category the verdict names. They answer `accepted: true`, `counts_toward: seller_reliability` and the seller `belief_id`. `beliefForFeedback` runs only for a fit verdict, and `feedbackFitRow` is reached only when the verdict counts toward fit, so a seller verdict creates or joins no fit belief and settles no fit row. This is the same honesty rule `record_reason` already held: the verdict is the reason, and the belief it counts toward must match it.
+
+2. **A repeat of the recorded verdict changes nothing.** It answers the first `feedback_id`, the recorded `verdict`, `counts_toward`, `belief_id`, and writes no graph action and no evidence row; the purchase still settles its one fit row when the recorded verdict is a fit verdict. `accepted` now echoes whether that verdict counts toward anything rather than being true by construction.
+
+3. **A repeat whose words read as a different verdict is refused with `ErrFeedbackConflict`.** It is wrapped with the purchase and both verdicts, so the message says the purchase already holds a recorded verdict and which one; `errors.Is` matches the sentinel. Nothing is minted, nothing is written, no belief is created and the fit row does not move. The sentinel maps to an invalid request (400) beside `ErrFeedbackMismatch`, so the caller reads a refusal, not a server fault. Rule 2 holds: the new words never become evidence.
+
+4. **A first delivery that counts toward nothing is recorded on the purchase.** `unclear` and `changed_mind` mint one `fb_` id and mark the purchase's capture row with the verdict — the same `recordedFeedback` marker T8.5l put there — so every resend answers that id with `accepted: false` and `counts_toward: null`. A resend whose words read as a different verdict is a conflict (shape 3), including after a no-count first delivery.
+
+The tests are in `internal/api/server/feedback_test.go`: `TestSellerFeedbackWritesSellerEvidence` pins the seller response, the seller belief, the purchase row's seller category and link, one graph action citing the seller belief, no fit belief, and both the fit rows and the fit index unchanged before and after the first delivery and its repeat; `TestSameVerdictRepeatIsIdempotent` tables a fit and a seller verdict and pins one id, one belief, one mint and no action on the repeat; `TestConflictingFeedbackIsRefused` covers a fresh purchase, the seeded purchase and a no-count first delivery, asserting `errors.Is`, the "already holds a recorded" text, and the store itself — actions, derives, beliefs, evidence links and reasons, feedback marker, mint count and fit rows all unchanged; `TestNoCountFeedbackIsIdempotentOnResend` tables unclear and changed-mind and pins the one id and `accepted: false` across three sends, with no action, no belief and the fit row untouched.
+
+On the parent commit these fail at exactly the defects: a seller delivery errors with `memory: evidence counts toward a different belief kind: feedback counts toward "seller_reliability", offered to "fit"` after already deriving a fit belief; a conflicting repeat answers `accepted: true` with the recorded verdict and no error; and a no-count delivery answers an id it never records, so its first resend mints a second.
+
+No response shape and no schema changed, and no fixture changed: the frozen `record_feedback` pair is a fits-well repeat, still `accepted: true` on `fb_51c2d8`, so `TestInterfaceDocExamples` stays byte-exact. The `recordedFeedback` marker and the new sentinel are internal to `internal/api/server/`.
+
+Three things outside `owns`, for the orchestrator: `docs/interface.md`'s `record_feedback` section still says only that a fits-well verdict counts toward fit and unclear counts toward nothing, so it should gain the seller verdicts, the conflict refusal and the no-count idempotence; `contract.RecordFeedbackResponse`'s doc comment carries the same two-verdict shorthand and is a frozen shared type (rule 1); and T8.5l's review finding, which names this task's subject without its id, is now closed by this task's shapes 2–4 — the orchestrator may want to name it there. The ungated `tests/live/layer/main.go` feedback step is one first fits-well delivery on a purchase the seed does not hold, so it reads the same answer it always did.
+
+Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree), ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 

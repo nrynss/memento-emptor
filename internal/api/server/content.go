@@ -315,9 +315,9 @@ func noGuidance() contract.GuidanceView {
 	}
 }
 
-// verdictForFeedback reads explicit fit feedback tied to a purchase and
+// verdictForFeedback reads explicit feedback tied to a purchase and
 // returns the layer's verdict. It reads the shopper's words about the
-// worn size, never a reason category: a fits-well verdict has no reason
+// purchase, never a reason category: a fits-well verdict has no reason
 // category yet counts toward fit. Anything it cannot read is unclear,
 // and the agent asks again.
 func verdictForFeedback(text string) contract.FeedbackVerdict {
@@ -344,4 +344,15 @@ func verdictForFeedback(text string) contract.FeedbackVerdict {
 	default:
 		return contract.FeedbackUnclear
 	}
+}
+
+// sellerFeedbackCategory returns the seller reason category a seller
+// verdict records: damaged or defective goods are damage, and goods that
+// never arrived are non-arrival. It is called only for the two seller
+// verdicts; every other verdict carries no seller category.
+func sellerFeedbackCategory(v contract.FeedbackVerdict) domain.Category {
+	if v == contract.FeedbackNotArrived {
+		return domain.CategoryNotArrived
+	}
+	return domain.CategoryDamagedOrDefective
 }

@@ -38,6 +38,10 @@ var (
 	// ErrFeedbackMismatch answers feedback whose variant does not match
 	// the purchase it names. Fit feedback is tied to a specific purchase.
 	ErrFeedbackMismatch = errors.New("server: feedback does not match the purchase")
+	// ErrFeedbackConflict answers a repeat delivery whose words read as a
+	// different verdict than the purchase already holds. The purchase
+	// keeps its recorded verdict and nothing is written.
+	ErrFeedbackConflict = errors.New("server: feedback conflicts with the recorded verdict")
 	// ErrEmptyCorrection answers a correction with no shopper words.
 	ErrEmptyCorrection = errors.New("server: correction has no text")
 	// ErrMissingShopper answers a call with no shopper id. Every call is
