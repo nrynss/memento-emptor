@@ -30,12 +30,15 @@ if [ -f bench/round2/runs/FREEZE.json ]; then
 fi
 bench/round2/freeze_check.sh $round2_freeze_flag || fail "freeze round 2" "frozen round 2 inputs mismatch (bench/round2/FROZEN.md section 1)"
 
-# The Go and Node pins live in six places: both images' FROM lines, CI's
-# setup-go and setup-node, go.mod, and deploy/README.md's table. Bun's live in
-# every Dockerfile's `oven/bun:` build stage and CI's setup-bun. An image
-# built on a toolchain CI does not use builds green in both places, so the
-# pins are compared here, first in the gate. tools/pincheck's own table test
-# proves the disagreements it catches; `go test` below runs it.
+# The toolchain pins are compared across every file that states one, first in
+# the gate. Go's are both deploy images' FROM lines, CI's setup-go, go.mod and
+# the Go row of deploy/README.md's table; Node's are both deploy images'
+# web-build stages, CI's setup-node and the table's Node row; Bun's are the
+# `oven/bun:` stage of every Dockerfile in the tree, CI's setup-bun and the
+# table's Bun row. That is 18 declarations in all. An image built on a
+# toolchain CI does not use builds green in both places, so the pins are
+# compared here. tools/pincheck's own table test proves the disagreements it
+# catches; `go test` below runs it.
 echo "-- toolchain pins"
 go run ./tools/pincheck || fail "pins" "toolchain pins disagree (see above)"
 
@@ -114,17 +117,54 @@ run_frontend "agent/frontend relay tests" node --test agent/frontend/server/rela
 # cannot stand in for it. CI supplies both -- setup-bun at the version
 # `tools/pincheck` compares against the images, then `bun install
 # --frozen-lockfile` in agent/frontend/ -- so the whole package is checked on
-# every push. A workstation with neither bun nor the modules checks the module
-# the tests above cover, with the TypeScript it already installed for web/
+# every push. A workstation with neither bun nor the modules checks the two
+# import-free modules the tests above cover -- server/relay.ts and
+# server/status.ts -- with the TypeScript it already installed for web/
 # (that install is required by check_frontend above), and prints the limit
 # instead of passing the package silently.
 if command -v bun >/dev/null 2>&1 && [ -d agent/frontend/node_modules ]; then
 	echo "-- agent/frontend typecheck (bun run typecheck)"
 	(cd agent/frontend && bun run typecheck) || fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server"
 else
-	echo "-- agent/frontend typecheck (no bun here, or agent/frontend/node_modules absent: server/relay.ts only)"
-	(cd agent/frontend && ../../web/node_modules/.bin/tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler server/relay.ts) ||
-		fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server/relay.ts"
+	echo "-- agent/frontend typecheck (no bun here, or agent/frontend/node_modules absent: server/relay.ts and server/status.ts only)"
+	(cd agent/frontend && ../../web/node_modules/.bin/tsc --noEmit --strict --target ES2022 --module ESNext --moduleResolution Bundler server/relay.ts server/status.ts) ||
+		fail "agent/frontend typecheck" "tsc reported problems in agent/frontend/server/relay.ts or server/status.ts"
 fi
+
+# --- agents: the two deployments' offline checks (T9.9, T9.19) ---
+# Each package's check runs its own tool bindings against the frozen contract
+# examples: the ids the model is offered, their input schemas, the request each
+# `execute` sends, the edge's access table, and the memory contract. No model,
+# no keys, no external network. A changed tool id, a renamed or retyped field,
+# or a tool the edge would refuse fails the gate here.
+#
+# Both checks need bun plus the package's modules, which only `bun install`
+# provides: each package tracks bun.lock, not package-lock.json, so `npm ci`
+# cannot stand in. The checks read the package's dependencies through the
+# package's own resolution, and they use Bun's runtime (`Bun.file`,
+# `import.meta.dir`), so node cannot run them in bun's place. CI installs both
+# with `bun install --frozen-lockfile`; a workstation without bun, or without a
+# package's modules, prints which check it skipped and why rather than passing
+# silently.
+check_agent() {
+	local dir=$1
+	local script=$2
+	local name=$3
+
+	if ! command -v bun >/dev/null 2>&1; then
+		echo "-- $name (skipped: bun is not on PATH; it cannot be run on node)"
+		return
+	fi
+	if [ ! -d "$dir/node_modules" ]; then
+		echo "-- $name (skipped: $dir/node_modules is absent; run bun install --frozen-lockfile in $dir)"
+		return
+	fi
+
+	echo "-- $name (bun $script)"
+	run_frontend "$name" bun "$script"
+}
+
+check_agent agent/runtime agent/runtime/agent/offline-check.ts "agent/runtime offline check"
+check_agent agent/second agent/second/agent/check.ts "agent/second offline check"
 
 echo "OK all checks passed"

@@ -24,10 +24,11 @@ jobs:
             merchant/package-lock.json
 
       # The gate's shopper-page typecheck is `bun run typecheck` over
-      # agent/frontend/server, and it needs bun plus that package's modules.
-      # Without them the gate falls back to type-checking server/relay.ts
-      # alone. The version matches the one the gate was proved on; the cache
-      # holds bun's package downloads, keyed by the frozen lockfile.
+      # agent/frontend/server, and both agents' offline checks run under bun.
+      # Each needs bun plus that package's modules; without them the gate
+      # prints which check it skipped. The version matches the one the gate was
+      # proved on; the cache holds bun's package downloads, keyed by the three
+      # frozen lockfiles.
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.3.14'
@@ -35,7 +36,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('agent/frontend/bun.lock') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('agent/frontend/bun.lock', 'agent/runtime/bun.lock', 'agent/second/bun.lock') }}
 
       - name: Install web dependencies
         run: npm ci
@@ -48,6 +49,14 @@ jobs:
       - name: Install shopper frontend dependencies
         run: bun install --frozen-lockfile
         working-directory: agent/frontend
+
+      - name: Install reference agent dependencies
+        run: bun install --frozen-lockfile
+        working-directory: agent/runtime
+
+      - name: Install second agent dependencies
+        run: bun install --frozen-lockfile
+        working-directory: agent/second
 
       - name: Run the gate
         run: ./tools/check.sh
