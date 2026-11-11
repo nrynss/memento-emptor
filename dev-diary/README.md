@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 21 / 30 | In progress (T8.5i, T8.5k, T8.5m, T8.5n, T8.5o, T8.5p, T8.5q, T8.7b) |
+| P8 | 22 / 31 | In progress (T8.5i, T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5s, T8.7b) |
 | P9 | 18 / 24 | In progress (T9.9, T9.11, T9.14, T9.15, T9.16, T9.17) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5m: A correction id is never reused (done)
+
+**What exists.** `takeCorrection` is the only writer of a correction's place: it inserts an id once, keeps the first view, and reserves its number against the mint sequence, so a restored `corr_000001` makes the next mint `corr_000002`. `explain_belief` and `ledger_belief` share `correctionsFor`, which serves one row per id even for a journal already written with duplicates. Tests cover the restart, a re-seed, a repeated order, and the T9.7 run's own seven-row/five-id journal (now five rows, next mint `corr_000005`). Rule 4 unchanged: the correction still wins, the belief stays, the timeline event stays single.
+
+**What surprised.** The duplicate rows came from `LoadSeed` replaying beside the restored journal because beliefs are not restored, so `ErrAlreadySeeded` never fires after a restart. Review also found `LoadSeed` re-issues the correction's graph write at every boot even when the restore holds it — no served-state effect offline; **T8.5s** proves it on the live hub.
+
+**The next agent should not have to work out.** Only correction ids are reserved: `ev`, `q`, `blf`, `rsn`, `fb` still start at 1 each process because nothing restores them; `reserveID` is generic if that changes.
 
 ### T1.1c: The live ingest driver on unknown codes (done)
 
