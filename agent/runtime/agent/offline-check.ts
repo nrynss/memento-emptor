@@ -501,19 +501,20 @@ check(
   ),
 );
 check("a write may not be repeated blind", instructions.includes("A write may not be repeated blind"));
-for (const [tool, reader] of [
-  ["record_correction", "recall_for_purchase"],
-  ["record_reason", "pending_questions"],
-  ["record_feedback", "explain_belief"],
+for (const [tool, reader, subject] of [
+  ["record_correction", "recall_for_purchase", "a correction"],
+  ["record_reason", "pending_questions", "a reason"],
+  ["record_feedback", "explain_belief", "feedback"],
 ] as const) {
   check(
     `${tool}'s retry reads ${reader} first`,
-    new RegExp(`${reader} for`).test(instructions) && instructions.includes(tool),
+    instructions.includes(`${reader} for ${subject}`) && instructions.includes(tool),
+    `wants "${reader} for ${subject}"`,
   );
 }
 check("the rule asks before resending what it cannot see", instructions.includes("ask before sending it again"));
 check("set_pooling is named as safe to repeat", /set_pooling states the shopper's choice/.test(instructions));
-check("no blanket retry survives", !/retry it once with shopper_01/.test(instructions));
+check("no blanket retry survives", !/retry (it|the call|that call|any call)\b/i.test(instructions));
 
 // --- The HTTP path: the request the deployment sends, against a local stub ---
 interface Seen {

@@ -418,13 +418,35 @@ check("the instructions carry no belief id", !/blf_[0-9a-z]/i.test(prompt.split(
 const instructions = prompt.split("const INSTRUCTIONS")[1] ?? "";
 check("the retry rule is in the instructions", /look before sending it again/.test(instructions));
 check("a lookup may be tried again", instructions.includes("earns one more try with shopper_01"));
+const lookupList = /A lookup — ([^—]+) — earns one more try/.exec(instructions)?.[1] ?? "";
+const lookups = lookupList
+  .split(/\s*,\s*|\s+or\s+/)
+  .map((name) => name.trim())
+  .filter((name) => name !== "")
+  .sort();
+check(
+  "only the four reads may be tried again",
+  sameList(lookups, ["explain_belief", "pending_questions", "product_fit", "recall_for_purchase"]),
+  `lookup list ${JSON.stringify(lookups)}`,
+);
 check("a write is never resent on a guess", instructions.includes("never send it again on a guess"));
+const writeList = /A note that writes — ([^—]+) —/.exec(instructions)?.[1] ?? "";
+const writers = writeList
+  .split(/\s*,\s*|\s+or\s+/)
+  .map((name) => name.trim())
+  .filter((name) => name !== "")
+  .sort();
+check(
+  "the rule names the three row-adding writes",
+  sameList(writers, ["record_correction", "record_feedback", "record_reason"]),
+  `write list ${JSON.stringify(writers)}`,
+);
 for (const reader of ["recall_for_purchase shows a correction", "pending_questions shows whether the question has been answered", "explain_belief shows a remark in the record"]) {
   check(`the rule names its confirmation: ${reader.split(" ")[0]}`, instructions.includes(reader));
 }
 check("the rule asks before filing a second time", instructions.includes("ask them before filing it a second time"));
 check("set_pooling is named as safe to repeat", instructions.includes("set_pooling only states a preference"));
-check("no blanket retry survives", !/give it one more attempt/.test(instructions));
+check("no blanket retry survives", !/give it one more attempt|retry (it|the call|that call|any call)\b/i.test(instructions));
 
 // --- The HTTP path: the request this deployment sends, against a local stub ---
 interface Caught {
