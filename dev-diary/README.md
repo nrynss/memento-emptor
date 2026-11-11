@@ -161,7 +161,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 12 / 12 | Done |
 | P1 | 5 / 6 | In progress (T1.1b) |
-| P2 | 12 / 15 | In progress (T2.2c, T2.3c, T2.5b) |
+| P2 | 14 / 16 | In progress (T2.2d, T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T2.2c: The story's third classifier answer (done)
+
+**What exists.** The labelled Jev set is thirteen recordings. `12-…sleeves-too-short-in-m.json` is the frozen third answer (`fit_too_small`, 1.00), and `13-…tight-across-chest.json` was needed because the replay's second return answer was unrecorded too (the old tests pinned it as an intentional missing-recording probe). `fakes.Run` now classifies every documented return through the seam and fails unless it is a clear fit reason, so no category is written into the replay; `TestReplayOffline` counts each answer exactly once, and the story test answers its third return with the new recording. Spend: two calls, $0.000042756. Review findings: the live reasons driver still pins eleven and would refuse the set (owner **T2.2d**, opened), and the notes' "$0.10 budget" claim was corrected — no brief stated one.
+
+**What surprised.** The thirteen-file set breaks `tests/live/reasons` before any call, because its guard reads and rejects any set not exactly eleven.
+
+**The next agent should not have to work out.** `internal/reasons/doc.go`'s "eleven-phrase labelled set" is the T0.7 floor measurement and stays; the current set is thirteen.
 
 ### T9.3i: Toolchain pins checked mechanically (done)
 

@@ -420,7 +420,7 @@ requires:   [T2.2]
 fixture-ok: yes
 size:       XS · mid
 owns:       testdata/jev/, internal/fakes/
-status:     in-review
+status:     done
 ```
 The frozen story's third answer ("sleeves too short in M") has no Jev recording in `testdata/jev/`, so `TestStoryEndToEnd` reuses the "too tight in the shoulders" reply and `fakes.Run` hard-codes its category; the frozen phrase is validated only by T2.6's live leg. Record one classification for that phrase, add it to the fixture set, and let the story replay its own answer.
 
