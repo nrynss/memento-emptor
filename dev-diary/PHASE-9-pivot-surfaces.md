@@ -659,7 +659,7 @@ requires:   [T9.16]
 fixture-ok: yes
 size:       XS · mid
 owns:       deploy/README.md, tools/pincheck/
-status:     not-started
+status:     claimed:t918-deploy-pins
 ```
 `tools/pincheck` now compares Go, Node and bun, but `deploy/README.md`'s toolchain section still lists only Go and Node and still says what the gate reads. Add bun's pin and its sources, and correct the paragraph about what the check covers.
 
@@ -675,7 +675,7 @@ requires:   [T9.9, T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/check.sh, .github/workflows/ci.yml
-status:     not-started
+status:     claimed:t919-gate-agents
 ```
 T9.9 gave both agents' tool bindings offline coverage, but `tools/check.sh` does not invoke it: `bun agent/offline-check.ts` and `bun agent/check.ts` run only when someone runs them by hand, so a tool-surface drift passes the gate. Add both checks to the gate behind the same bun guard the frontend step uses, and install the two agent packages' frozen dependencies in CI, or the runner lacks `agent/runtime/node_modules` and `agent/second/node_modules` and both checks fall through.
 
