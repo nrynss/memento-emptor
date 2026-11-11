@@ -165,10 +165,11 @@ func checkSet(want []recording) error {
 		return fmt.Errorf("recorded set totals %.9f USD, pinned %.9f: the pin and the recordings disagree",
 			totalCost, expectedTotalCost)
 	}
-	// The per-call guard bounds one call at ten times the reference, so a
-	// run of this many calls cannot cost more than the guard times the
-	// call count. The pin must sit under that bound; if it does not, one
-	// of the two numbers is wrong and the run stops before it spends.
+	// The run guard is the per-call guard times the call count: the
+	// ceiling a replay of the recorded set fits under, since each
+	// recording sits far below the per-call guard. The pin must sit under
+	// it; if it does not, one of the two numbers is wrong and the check
+	// stops before a call is sent.
 	guard := 10 * referenceCostPerCall * float64(len(want))
 	if expectedTotalCost > guard {
 		return fmt.Errorf("pinned total %.9f USD is over the %.9f run guard of %d calls at 10x the %.7f reference",

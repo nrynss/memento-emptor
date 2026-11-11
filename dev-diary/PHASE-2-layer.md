@@ -475,6 +475,45 @@ A new `-check` mode runs the structural half with no key read and no call sent: 
 
 Done-when evidence, dry only, $0 spend. `go run ./tests/live/reasons -check` prints `set: 13 recordings, recorded total 0.000278040 USD for 6620 input tokens, under the 0.002782000 USD run guard`, and `bash tests/live/reasons/run.sh` prints that same line before stopping at the empty key, so the set is accepted and the live path reaches its only remaining precondition. Mutation checks, on a copy of the set or a reverted edit of `main.go`: the set minus `13-fit-too-small-tight-across-chest.json` fails `labelled set holds 12 phrases, want 13`; a pin of 0.000278000 fails `recorded set totals ..., the pin and the recordings disagree`; a zeroed cost in one fixture fails `has no recorded usage cost`; a reference of 0.0000010 fails `pinned total ... is over the 0.000130000 run guard`, which is the derived check biting. `./tools/check.sh` passes in the worktree, with `npm ci` run first in `web/` and `merchant/`.
 
+**Review (fresh eyes), APPROVE.** Re-derived from the tree, not the report: the
+thirteen fixtures' `response.usage.cost` sum to $0.000278040 over 6,620 input
+tokens; the eleven T0.7 files reproduce `dev-diary/research/jev.md`'s per-phrase
+costs and its $0.000235284 for 5,602 tokens exactly, the two T2.2c files add
+$0.000042756 and 1,018, and 10 × 0.0000214 × 13 = $0.002782, so the pin, both
+counts and the bound all hold. The commit touches only `tests/live/reasons/` and
+the T2.2c and T2.2d lines; `testdata/` and `internal/` are identical to `main`.
+The two T2.2c sentences the worker corrected read as honest correction: the
+past-tense framing ("when this task closed", "refused a thirteen-file set")
+names what was true then, and the finding keeps the defect's original text while
+recording its closure, so nothing is rewritten out of the record. `-check` takes
+no key (the check path reads no environment variable and builds no client) and
+sends nothing: it passes with a bogus key exported and with none, and writes no
+`out/`. Mutation checks of my own, on copies of the set and a reverted edit of
+`main.go`: a set minus one file fails `labelled set holds 12 phrases, want 13`; a
+set with a fourteenth file fails `holds 14 phrases, want 13`; one changed cost
+fails `recorded set totals ..., the pin and the recordings disagree`; a zeroed
+cost fails `has no recorded usage cost`; a reference of 0.0000010 fails the
+derived check with `pinned total 0.000278040 USD is over the 0.000130000 run
+guard`. With `run.sh`'s check line pointed at the twelve-file copy and no key
+set, the script stops on the phrase count and never reaches the key line, so a
+stale set cannot spend. `./tools/check.sh` passes. Wording says thirteen
+throughout except the two composition sentences ("the eleven T0.7 phrases plus
+the two T2.2c recorded"), which the per-file costs above confirm. No date, path,
+account detail or key in the change; the commit message is plain.
+
+One finding, low, owner T2.2d (fixed in this review). The README and
+`checkSet`'s comment said a run of thirteen "cannot cost more than" the derived
+$0.002782, which the guard cannot deliver: an over-guard reply is billed before
+the guard reads it, so the guard ends the run before the next call, it does not
+cap what the last one costs. Both now call the figure the ceiling a replay of the
+recorded set fits under, and say why the pin must sit below it. No behaviour
+changed and the printed check line is unchanged, so the evidence above still
+matches the tree. Observation, no finding: the 6,620-token figure is printed and
+re-derives, but nothing pins it, and no behaviour or guard rests on it; and
+`run()` checks the key before the set, so a bare `go run` of the driver refuses
+on the key first, while `run.sh` runs the check before either, so the spend order
+holds.
+
 ---
 
 ## Exit Criteria

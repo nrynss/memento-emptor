@@ -45,20 +45,23 @@ exact vague-item probability.
 ## Budget and guards
 
 The thirteen recordings' own usage costs sum to **$0.000278040** for
-6,620 input tokens at T0.7's measured $0.0000214 per call, and the
+6,620 input tokens, about T0.7's measured $0.0000214 per call, and the
 driver pins that total. `-check` sums the recorded costs, compares them
 with the pin, and refuses a set that is not thirteen recordings or a pin
 that disagrees with them.
 
 On every call the driver stops if the per-call cost exceeds 10x that
-reference, so a run of thirteen cannot cost more than the guard times
-the call count, **$0.002782**. `-check` refuses the set as well if the
-pin ever sits over that bound, which would mean the pin or the guard is
-wrong. On the first call the driver also stops if the endpoint resolves
-a different model build than `typesafe/jev-1.14-20261014` (a version
-change re-opens the floor). A later reply that resolves another build
-is counted as a mismatch and fails the run at the end. Either stop is
-reported, not retried.
+reference. The over-guard reply is already billed when the guard reads
+it, so the guard ends the run before the next call rather than capping
+what one reply can cost. The guard times the call count, **$0.002782**,
+is the ceiling a replay of the recorded set fits under, since every
+recording sits far below the per-call guard; `-check` refuses the set as
+well if the pin ever sits over that ceiling, which would mean the pin or
+the guard is wrong. On the first call the driver also stops if the
+endpoint resolves a different model build than
+`typesafe/jev-1.14-20261014` (a version change re-opens the floor). A
+later reply that resolves another build is counted as a mismatch and
+fails the run at the end. Either stop is reported, not retried.
 
 ## Outputs
 
