@@ -20,6 +20,7 @@ import (
 	"github.com/nrynss/memento-emptor/internal/memory"
 	"github.com/nrynss/memento-emptor/internal/pool"
 	"github.com/nrynss/memento-emptor/internal/standing"
+	"github.com/nrynss/memento-emptor/seed"
 )
 
 // The service's sentinel conditions. Callers branch on these with errors.Is
@@ -311,6 +312,11 @@ type Service struct {
 	lines           fitindex.Lines
 	standing        standing.Store
 	evidenceJournal *evidence.Journal
+	// population is the product lines the layer's own seeded population
+	// covers. Recall resolves a request that names a brand and category
+	// but no fit handle against it, so a caller that may not invent a
+	// handle still reads the pool when exactly one line matches.
+	population []domain.ProductLine
 }
 
 // NewService builds the service over its deps. It fails closed when a
@@ -341,11 +347,12 @@ func NewService(deps Deps) (*Service, error) {
 		schemas[string(tool.Name)] = raw
 	}
 	svc := &Service{
-		deps:     deps,
-		graph:    graphAdapter{inner: deps.Graph},
-		shoppers: map[string]*shopperState{},
-		schemas:  schemas,
-		lines:    deps.Lines,
+		deps:       deps,
+		graph:      graphAdapter{inner: deps.Graph},
+		shoppers:   map[string]*shopperState{},
+		schemas:    schemas,
+		lines:      deps.Lines,
+		population: seed.PopulationLines(),
 	}
 	if deps.Pool != nil {
 		reader, err := pool.NewReader(deps.Pool)

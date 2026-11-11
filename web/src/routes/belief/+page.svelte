@@ -13,6 +13,12 @@
 	// failure of that read and leaves no earlier answer on screen; the live
 	// source label appears only once a live read has answered, so nothing
 	// here can be mistaken for live data.
+	//
+	// The live recommendation reads the product line the page can honestly
+	// name: the belief's subject's brand and the one category its evidence
+	// rows agree on, never a fit handle. The layer resolves the handle from
+	// its own population, and a pool it could not read is said out loud
+	// beside the recommendation rather than reported as nothing applying.
 
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
@@ -57,6 +63,7 @@
 	} from '$lib/ledger';
 	import { toLedgerGridRow } from '$lib/ledger/rows';
 	import { buildWhyView, tracesForBelief, WhyView, type WhyViewData } from '$lib/why';
+	import { poolNoteFor, recallLineFor } from './pool-line';
 
 	const stepOptions: { step: LedgerFixtureStep; label: string }[] = (
 		Object.entries(fixtureStepLabels) as [string, string][]
@@ -114,6 +121,14 @@
 	const caseShopper = $derived(
 		liveLink !== null ? liveLink.shopperId : recallCaseShopper[recallCase]
 	);
+
+	// The product line the page can honestly name for the belief it explains:
+	// its subject's brand and the one category its evidence rows agree on,
+	// never a fit handle. The live recall sends exactly this and the layer
+	// resolves the handle from its own population; a replay sends the shopper
+	// alone, as its fixture answers only that.
+	const recallLine = $derived(detail === null ? null : recallLineFor(detail.belief));
+
 	// One correction transport per shopper: a live link's corrects for that
 	// shopper through the edge, and a replay's is the fixture's for the
 	// shopper its case names, so a standing correction can never be recorded
@@ -130,6 +145,10 @@
 			: createFixturePoolingState(caseShopper)
 	);
 	let standingList = $state<ContestCorrectionView[]>([]);
+
+	// What the page says when the recall carries no pool: consulted with
+	// nothing to say, or not consulted at all and why.
+	const poolNote = $derived(recall === null ? null : poolNoteFor(recall, recallLine));
 
 	const overridden = $derived.by((): OverriddenStep[] => {
 		const current = recall;
@@ -215,18 +234,54 @@
 
 	$effect(() => {
 		const link = liveLink;
-		const current = recallCase;
+		if (link === null) {
+			// A replay answers its fixture's shopper alone, exactly as before.
+			const current = recallCase;
+			let live = true;
+			recallLoading = true;
+			recallError = null;
+			void (async () => {
+				try {
+					const transport = createFixtureRecallTransport(current);
+					const shopper = recallCaseShopper[current];
+					const raw = await transport.call('recall_for_purchase', {
+						shopper_id: shopper
+					});
+					if (!live) return;
+					recall = decodeRecallResponse(raw);
+				} catch (error) {
+					if (!live) return;
+					recall = null;
+					recallError = error instanceof Error ? error.message : 'The recommendation failed to load';
+				} finally {
+					if (live) recallLoading = false;
+				}
+			})();
+			return () => {
+				live = false;
+			};
+		}
+		// A live recall reads the line the belief lets the page name, so it
+		// waits for the belief read to settle instead of asking for a pool the
+		// layer has no way to key. A belief that failed to load names no line:
+		// the recall still runs, and the page says why the pool was not
+		// consulted.
+		const line = recallLine;
+		if (loading) return;
 		let live = true;
 		recallLoading = true;
 		recallError = null;
 		void (async () => {
 			try {
-				const transport: RecallTransport =
-					link === null ? createFixtureRecallTransport(current) : createLiveTransport(link);
-				const shopper = link === null ? recallCaseShopper[current] : link.shopperId;
-				const raw = await transport.call('recall_for_purchase', {
-					shopper_id: shopper
-				});
+				const transport: RecallTransport = createLiveTransport(link);
+				const request: Record<string, unknown> = { shopper_id: link.shopperId };
+				if (line !== null && line.brand !== '') {
+					request['brand_id'] = line.brand;
+					if (line.category !== null) {
+						request['category'] = line.category;
+					}
+				}
+				const raw = await transport.call('recall_for_purchase', request);
 				if (!live) return;
 				recall = decodeRecallResponse(raw);
 			} catch (error) {
@@ -361,8 +416,8 @@
 	<DecisionLine text={recall.guidance.text} basis={recall.guidance.basis} overridden={overridden} />
 	{#if recall.pool !== null && recall.pool !== undefined}
 		<PoolCounts pool={recall.pool} />
-	{:else}
-		<p class="why-loading">No pooled belief applies here.</p>
+	{:else if poolNote !== null}
+		<p class="why-pool-note" data-pool-note={poolNote.kind}>{poolNote.text}</p>
 	{/if}
 {/if}
 
@@ -415,6 +470,11 @@
 
 	.why-loading {
 		color: var(--dim);
+	}
+
+	.why-pool-note {
+		color: var(--dim);
+		margin: 0 0 1.5rem;
 	}
 
 	.why-empty {

@@ -35,11 +35,11 @@ var ErrPoolUnavailable = errors.New("server: pool index unavailable")
 // own beside it, so every contradiction stays overridable. A present pool
 // rides with a consulted lookup; an absent pool rides with whatever the
 // lookup says —
-// unavailable when the pool is unwired, the request names no full line, or
-// the index could not be reached, consulted when the wired pool named no
-// direction (Claimed, or Building with the directions level or only
-// fits-well outcomes) — so a full-line recall on a pool with nothing to
-// say serves the consulted lookup instead of failing. The pool and the
+// unavailable when the pool is unwired, no single line can be named for the
+// request, or the index could not be reached, consulted when the wired pool
+// named no direction (Claimed, or Building with the directions level or only
+// fits-well outcomes) — so a recall on a pool with nothing to say serves the
+// consulted lookup instead of failing. The pool and the
 // lookup are always present: an absent pool is null, never a missing key.
 // Every handler builds recall through here, so no code path can return the
 // belief without the correction beside it, or a pool without saying whether
@@ -267,12 +267,13 @@ func usualSize(st *shopperState, served []contract.BeliefView) domain.UsualSize 
 	return domain.UsualSizeFor(list, stated)
 }
 
-// poolQuery resolves the pool read for one recall: the line from the
-// request, and the size from the usual size when one is known, else the
-// size under consideration. It reports false when the request does not
-// name a full line and size, and recall then skips the pool.
-func poolQuery(req contract.RecallRequest, usual domain.UsualSize) (domain.ProductLine, string, bool) {
-	if req.BrandID == "" || req.Category == "" || req.FitHandle == "" {
+// poolQuery resolves the pool read for one recall: the line and the size
+// to read, and whether a line could be named at all. The size is the usual
+// size when one is known, else the size under consideration; without one
+// there is nothing to read.
+func poolQuery(req contract.RecallRequest, usual domain.UsualSize, lines []domain.ProductLine) (domain.ProductLine, string, bool) {
+	line, ok := requestLine(req, lines)
+	if !ok {
 		return domain.ProductLine{}, "", false
 	}
 	size := usual.Size
@@ -282,7 +283,47 @@ func poolQuery(req contract.RecallRequest, usual domain.UsualSize) (domain.Produ
 	if size == "" {
 		return domain.ProductLine{}, "", false
 	}
-	return domain.ProductLine{Brand: req.BrandID, Category: req.Category, FitHandle: req.FitHandle}, size, true
+	return line, size, true
+}
+
+// requestLine names the product line one recall asks about. A request that
+// carries a fit handle names its line outright and it is used as given: the
+// caller is the authority on the line it asks about. A request that names
+// the brand and category but no fit handle is resolved against the layer's
+// own population, so a caller that can honestly name only what it knows —
+// such as the why view, whose belief carries the brand and whose evidence
+// rows carry the category — still reads the right line instead of
+// inventing a cut. The population must name exactly one line: none and
+// more than one both leave the pool unconsulted rather than pick a line or
+// make one up.
+func requestLine(req contract.RecallRequest, lines []domain.ProductLine) (domain.ProductLine, bool) {
+	if req.BrandID == "" || req.Category == "" {
+		return domain.ProductLine{}, false
+	}
+	if req.FitHandle != "" {
+		return domain.ProductLine{Brand: req.BrandID, Category: req.Category, FitHandle: req.FitHandle}, true
+	}
+	return populationLine(lines, req.BrandID, req.Category)
+}
+
+// populationLine returns the one line the population seeds for a brand and
+// category. It reports false when none matches or more than one does: two
+// handles for one brand and category are two lines, and recall never
+// chooses between them.
+func populationLine(lines []domain.ProductLine, brand, category string) (domain.ProductLine, bool) {
+	found := domain.ProductLine{}
+	matches := 0
+	for _, line := range lines {
+		if line.Brand != brand || line.Category != category {
+			continue
+		}
+		found = line
+		matches++
+	}
+	if matches != 1 {
+		return domain.ProductLine{}, false
+	}
+	return found, true
 }
 
 // poolStep is one recall's pool contribution: the view recall serves and
@@ -299,18 +340,21 @@ type poolStep struct {
 }
 
 // lookupPool reads the pooled product fit for one recall. Without a wired
-// pool index, or without a full line and size to read, there is nothing
-// to consult: the lookup reads unavailable and recall carries on without
-// the pool, never pretending an empty one. Any index error answers
-// unavailable the same way: recall never refuses for the pool's sake. A
-// pool that names no direction says nothing about how the size runs off,
-// so it is consulted but yields no step: recall's pool precedence rung
-// applies only when the pool says the product runs off-size.
+// pool index, or without a line and size to read, there is nothing to
+// consult: the lookup reads unavailable and recall carries on without the
+// pool, never pretending an empty one. The line comes from the request's
+// own fit handle when it names one, else from the one line the layer's
+// population seeds for the request's brand and category. Any index error
+// answers unavailable the same way: recall never refuses for the pool's
+// sake. A pool that names no direction says nothing about how the size
+// runs off, so it is consulted but yields no step: recall's pool
+// precedence rung applies only when the pool says the product runs
+// off-size.
 func (s *Service) lookupPool(ctx context.Context, req contract.RecallRequest, usual domain.UsualSize) (*poolStep, contract.PoolLookup) {
 	if s.pool == nil {
 		return nil, contract.PoolUnavailable
 	}
-	line, size, ok := poolQuery(req, usual)
+	line, size, ok := poolQuery(req, usual, s.population)
 	if !ok {
 		return nil, contract.PoolUnavailable
 	}
