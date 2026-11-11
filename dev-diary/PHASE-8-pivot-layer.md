@@ -846,6 +846,18 @@ No live call was made (the driver needs the hub binary, the deployment URL and k
 
 Gate green after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
+**Review (fresh eyes).** APPROVE, with the two diagnostic fixes below committed on the review branch, both inside `owns`. Re-verified from the tree, no live call, $0.
+
+Scope holds: against the task's base the commit touches only `demo/driver/main.go` and this task's lines. The one-return step asserts the shape T8.5i pinned — one belief, Claimed/None, its one too-small row, `own_evidence` deciding and not overridden, and the no-pool guidance "Take size L for Brand X" — and its transcript line states the label and the sentence. The final recall asserts the sizing belief first by its id and the fits-well belief Claimed with its one row; `recallBeliefs` sorts by evidence count, so three rows ahead of one is the rank the note claims.
+
+A temporary in-package check in `demo/driver/` (deleted before the review commit) built the driver's own wiring — fresh store, recording classifier, the recording payment source behind `purchaseSource`, no pool, and a graph stub that reads None below three dependents and Venerable at three — and ran both assertion blocks verbatim: one return reads Claimed/None with 1 row and guidance "Take size L for Brand X", and the final recall serves the sizing belief then "size M fits this shopper now", Claimed with 1 row. It also read `thin.BeliefID == sizingID`, which is the whole reason the one-return line prints no id: the id is redacted only at the third answer, so printing it earlier would put it in the console transcript raw, and the final recall checks it where it can. The limit stands: nothing runs `main()`, `go vet` only compiles it, and T8.5u runs the layer harness rather than this demo driver, so a live demo run is what closes it.
+
+Mutation-checked, each reverted: restoring the old emptiness check on the one-return step fails with "one return earns nothing, recall serves 1 beliefs"; putting the pre-T8.5i guard back in `recallBeliefs` (`len(view.Evidence) < 2`) fails the new assertion with "one return serves 0 beliefs".
+
+Two diagnostic fixes. The first answer's own classification is now asserted where it is asked (accepted, no ask-again, too-small), because the new step depends on it and a classifier drift would otherwise surface as "one return serves 0 beliefs" and read as a layer defect. The final recall's count and order checks are separate, so a right-count/wrong-order run names the belief it got instead of reporting a count it did not get wrong.
+
+Gate green in the review worktree after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`. The builder's report of one gate run failing at web vitest did not reproduce: the review ran the full web suite three times and the five web test files that poll a mounted component for up to 4 s five times each, all green, and the diary records no known flake. Nothing changed on that account; it is recorded here so the next run is not surprised. Spend $0.00: no live call, no key.
+
 ---
 
 ### T8.5u: Run the layer driver with thin evidence served

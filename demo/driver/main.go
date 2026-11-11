@@ -578,7 +578,11 @@ func main() {
 		fail(fmt.Errorf("pending holds %d questions, want 3", len(pending.Questions)))
 	}
 	say("pending: 3 open questions")
-	answer("WH-2EV-01", "too tight in the shoulders")
+	first := answer("WH-2EV-01", "too tight in the shoulders")
+	if !first.Accepted || first.AskAgain || first.Category != domain.CategoryFitTooSmall {
+		fail(fmt.Errorf("first return: accepted %t ask again %t category %s, want the too-small return",
+			first.Accepted, first.AskAgain, first.Category))
+	}
 	recall, err := svc.Recall(ctx, contract.RecallRequest{ShopperID: shopper, BrandID: "brand-x-001"})
 	if err != nil {
 		fail(err)
@@ -905,9 +909,13 @@ func main() {
 	if err != nil {
 		fail(err)
 	}
-	if len(final.Beliefs) != 2 || final.Beliefs[0].BeliefID != sizingID {
-		fail(fmt.Errorf("final recall serves %d beliefs, want the sizing belief first and the fits-well feedback beside it",
+	if len(final.Beliefs) != 2 {
+		fail(fmt.Errorf("final recall serves %d beliefs, want the sizing belief and the fits-well feedback beside it",
 			len(final.Beliefs)))
+	}
+	if final.Beliefs[0].BeliefID != sizingID {
+		fail(fmt.Errorf("final recall serves %q first, want the earned sizing belief %s",
+			final.Beliefs[0].BeliefID, sizingID))
 	}
 	// The feedback grew a belief with one row. Recall serves it with its
 	// label rather than holding it back, ranked after the sizing belief.
