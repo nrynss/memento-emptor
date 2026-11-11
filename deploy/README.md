@@ -160,9 +160,9 @@ memory sits on the disk in `lambo.db` either way.
 probe scores the session's own stored vectors, so the per-query cost
 grows with the session's concept count on the hub's 0.5 CPU and memory.
 A demo shopper's session holds a few hundred vectors at most, because
-the layer writes beliefs and corrections and not catalogue data. One hub
-also cannot share a vector index between processes; it does not need to,
-because one process holds every session.
+the layer writes beliefs and corrections and not catalogue data. Nor
+does a second process need a shared index: `serve-web` runs the same
+exact scan against SQLite, for the one session a request names.
 
 **What enabling it would take, and what it would change.** The pinned
 0.10.1 binary ships `recall-elastic` (the release's `ship` feature set),
