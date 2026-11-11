@@ -690,7 +690,7 @@ requires:   [T8.5d]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, internal/standing/
-status:     not-started
+status:     claimed:t85m-corr-ids
 ```
 The T9.7 live run found `restoreStanding` restores the journal's correction ids but not the mint sequence, so after a restart the next `record_correction` minted `corr_000001` over a restored one. A correction id must identify one correction for the life of the store.
 
