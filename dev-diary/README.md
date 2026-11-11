@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 7 / 8 | In progress (T1.1d) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
-| P4 | 7 / 9 | In progress (T4.8, T4.9) |
+| P4 | 8 / 10 | In progress (T4.9, T4.10) |
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T4.8: The ledger reads live (done)
+
+**What exists.** `web/src/lib/api/http.ts` posts one tool call to same-origin `/tools/<tool>` with the shopper link token as `Authorization: Bearer`; `live.ts` reads `?t=` (and `?s=` for the shopper the token binds, default the demo shopper). `/ledger` and `/belief` with a token render the layer's beliefs, evidence, pending questions, recall and live contest/standing/pooling writes, label their source, and show a failure alert with no data when a live read fails (never a replay passed off as live). Without `?t=` the demo story replays, labelled and with no fetch. Review fixed the belief page claiming a live source when nothing live answered, pinned the unreachable failure as token-free, and corrected the test count.
+
+**What surprised.** A token does not name its shopper: the guard compares the body's `shopper_id` to the binding and nothing in the edge reports it, so `?s=` exists (default the demo shopper). The ledger page also fetches evidence it never renders, and a failed evidence read fails the page → **T4.10**.
+
+**The next agent should not have to work out.** The token is meant to be visible in the URL only; no failure message may contain it. `demo/README.md`'s stale "fixture replay" lines are T9.20's.
 
 ### T9.11: The Astropods org id is scrubbed (done)
 
