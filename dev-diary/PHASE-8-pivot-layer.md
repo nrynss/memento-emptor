@@ -634,6 +634,48 @@ status:     not-started
 
 ---
 
+### T8.5l: Feedback is idempotent per purchase
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/, internal/memory/
+status:     not-started
+```
+The T9.7 live run found `record_feedback` is not idempotent per purchase in the shopper's belief: repeated feedback appended the same capture's evidence (`ev_51c2d8`) three times to `blf_2b9d60` and lifted it Claimed → Building, while the pool row stayed one. A retried or duplicated feedback delivery must not multiply that purchase's evidence or move the belief's status.
+
+**Done when:** feedback for a purchase already carrying that capture's evidence is a no-op that reports the duplicate; a table test proves three sends leave one evidence row and the same status; the gate passes.
+
+---
+
+### T8.5m: A correction id is never reused
+```yaml
+requires:   [T8.5d]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/, internal/standing/
+status:     not-started
+```
+The T9.7 live run found `restoreStanding` restores the journal's correction ids but not the mint sequence, so after a restart the next `record_correction` minted `corr_000001` over a restored one. A correction id must identify one correction for the life of the store.
+
+**Done when:** the mint sequence resumes past every restored id (or ids are minted from a source that cannot collide); a restart test proves the next correction gets a fresh id and the restored one still resolves; the gate passes.
+
+---
+
+### T8.7b: Live payment events reach the layer
+```yaml
+requires:   [T8.7, T8.5]
+fixture-ok: no
+size:       M · frontier
+owns:       cmd/memento/, internal/payments/, internal/ingest/, deploy/paypal-webhook.sh
+status:     not-started
+```
+The T9.7 run found the served layer cannot ingest a live PayPal outcome: the verifier is real, but `cmd/memento` builds the ingest service with the recording demo source, and the PayPal app's only webhook subscription does not point at the layer. So a new purchase or dispute cannot be recorded live; the demo re-read the existing capture and wrote feedback through the layer instead. Build the real REST source (order, capture, refund and dispute reads) behind the existing seam, wire it in `cmd/memento`, point the sandbox app's subscription at the public webhook route, and prove one live delivery end to end. Budget: no model spend; sandbox calls only.
+
+**Done when:** a real sandbox capture and a real refund delivery reach the layer, write their evidence and fit rows, and are idempotent on redelivery; an unknown event is refused; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).

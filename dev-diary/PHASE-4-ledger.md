@@ -108,6 +108,20 @@ The P4 review found the why cards print the raw reason category (`fit_too_small`
 
 ---
 
+### T4.8: The ledger reads live
+```yaml
+requires:   [T4.1, T9.6]
+fixture-ok: yes
+size:       M · mid
+owns:       web/src/lib/api/, web/src/routes/ledger/
+status:     not-started
+```
+The T9.7 run found the deployed ledger page is a fixture replay: its live numbers exist only as API reads, and the screen is labelled as a replay. Add an HTTP transport behind `LedgerClient` (same-origin or the edge, with the shopper link token), keep the fixture transport for tests, and fall back loudly rather than silently showing a replay as live.
+
+**Done when:** the deployed ledger renders the live layer's beliefs, evidence and recall for the signed-in shopper; the fixture transport remains for tests; a failed live read is labelled, never shown as live; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] The ledger reads through a typed client (T4.1).

@@ -518,6 +518,20 @@ status:     not-started
 
 ---
 
+### T9.15: A second shopper for day one
+```yaml
+requires:   [T9.8]
+fixture-ok: no
+size:       XS · mid
+owns:       none (Render secrets and the keyring)
+status:     not-started
+```
+The T9.7 run found the agent key binds only `shopper_01`, so a new shopper's day-one recall answered 401 before the pool: the demo's step 0 has no live path. Mint an agent key bound to a second demo shopper (or widen the existing entry's shopper list), set it on the layer's secret, redeploy, and prove the new shopper's first recall reads the pool.
+
+**Done when:** a second demo shopper's recall through the edge returns the pool (never 401); the key is in the keyring and the Render secret, never a file; the proof is recorded.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
