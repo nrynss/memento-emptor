@@ -177,6 +177,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### T7.6: Subject JSON tags (done)
+
+**What exists.** `domain.Subject` carries `json:"kind"`, `json:"id"`, `json:"name"`; both rename workarounds are deleted (the server's encode walk and the fakes' normalization), and `TestExamplesMarshalBackToSchema` now validates marshaled output with no forgiveness. `TestSubjectSerializesAsTheContract` pins the three keys. No fixture changed: every `testdata/api` example marshals back deep-equal to its file, verified with a throwaway check over all 33. Mutation: stripping the tags fails the domain pin, seven contract examples, the served-examples test and the replay comparison.
+
+**What surprised.** A third, undeclared reliance existed: `bench/runs/cmd/t55|t58|t59` marshal contract values directly, so two committed round-1 files (`t59-a3-noisy-large.json`, `t59-a3-noisy-small.json`) carry `Kind`/`ID`/`Name`. They are not in the freeze manifest and nothing reads them, so nothing broke; T7.7 owns the decision.
+
+**The next agent should not have to work out.** Decoding was never broken (encoding/json matches field names case-insensitively), so old documents still load. T7.7 must state the decision where the commands are documented and may amend `PHASE-2-layer.md`'s now-false encode-boundary sentence (its `owns` covers both).
+
 ### P3 E2E review: FINDINGS, fixes landed
 
 **What exists.** The P3 review verified all eight tasks from code, tests and records, mutation-checked every money-safety guard (approve-first on capture and webhook, double-buy, request-id idempotency, webhook idempotency, strict yes, catalog fit matching), and landed ten fixes on `6c5d31d`: correct test counts and stale claims in the phase notes, malformed YAML fences, the demo README's three-turn record, a previously unread Channel3 fixture now replayed, a dead test wrapper removed, and the paging limitation stated. All six P3 exit boxes now tick.
