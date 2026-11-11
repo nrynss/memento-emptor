@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 26 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
-| P9 | 28 / 32 | In progress (T9.15, T9.17, T9.20, T9.23, T9.24) |
+| P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 5 / 8 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -177,6 +177,16 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
 
+### T9.23 / T9.20: Step 2 re-recorded, both clauses (done)
+
+**What came before.** The first re-record (trace `ae5d5e49`, $0.1112, three Channel3 credits) proved only the sequencing: recall answered 2.6 s before the first search, no overlap. The reply then named `PSW8GeK`, a kept purchase its own evidence carried, after dropping the exclusion when the filtered search returned nothing — so the turn overran both budgets and reopened T9.22. T9.25 is the lever that closed it: the exclusion's source is in the tool description and the parameter description, and the instruction says an empty filtered answer is reported, never retried without the exclusions.
+**What exists.** After T9.25's redeploy (build `bee5a9e7`), one fresh conversation with the product request and nothing else made trace `600bf64f`: `recall_for_purchase` 06.851–07.311, one `search_catalog` 09.718–10.883, answer generation 10.893. Recall answered 2.4 s before the search started, there was one search and one Channel3 credit, and the reply names `VyAkjCA` ("Button Down Oxford Shirt", Brand X/Sunspel, Regular) — in the demo cut, and no returned row carries it. Size M comes from recall under `corr_000004`. Evidence [`demo/evidence/step2-catalog/04-catalog-candidate-t925.json`](../demo/evidence/step2-catalog/04-catalog-candidate-t925.json). Turn cost $0.0660 (under the $0.10 budget) and one credit (within budget); both turns together moved usage $6.17 → $6.31 and credit $3.83 → $3.69. This closes T9.23's naming clause and T9.20's flaw.
+
+**What surprised.** The hosted chat does not record agent replies. Two turns in that conversation each left the shopper's message and an **empty** agent message in `GET /conversations/<id>/history` (`content: ""`, `is_complete: true`), while each turn's trace carries the full reply. The demo's evidence reads traces, so the run is unaffected, but a person opening the deployment's chat URL sees no answer.
+
+**The next agent should not have to work out.** Do not point a judge at the chat URL until the reply persistence is explained. A trace records span names and times, not tool arguments, so "the search excluded the returned SKUs" rests on the reply's words and the candidate not being a returned row — re-record rather than argue. Issue text for Astropods: "Hosted web chat at `deployments/<id>/messaging`: `POST /conversations/<id>/messages` runs the turn (trace carries the reply) but `GET /conversations/<id>/history` returns the user message and an empty agent message with `is_complete: true`; two turns, both empty, no error in the agent logs."
+
+### T4.10: The ledger loads only what it shows (done)
 ### T8.5t: The demo driver expects thin evidence (done)
 
 **What exists.** `demo/driver/main.go` asserts the shape T8.5i serves: one return comes back Claimed/None with its one too-small row, `own_evidence` deciding, guidance "Take size L for Brand X"; the final recall serves the sizing belief first with the Claimed fits-well belief beside it. Review rebuilt the driver's wiring on the fakes and ran both assertion blocks verbatim, mutation-checked the old emptiness check and the pre-T8.5i filter, asserted the first answer's classification where it is asked, and split the final recall's count and order diagnostics. No live run (the live leg is T8.5u's driver, not this one).
@@ -208,14 +218,6 @@ Newest first. What exists, what surprised, and what the next agent should not ha
 **What surprised.** The kept rows are declared inside the session, so no return window has closed; no arm can see a window, so it is an accepted limit now stated in the freeze. The review's original "kept S" was a measurement error. T10.5's limits must say the kept rows were declared.
 
 **The next agent should not have to work out.** T10.6 (ladder) must land before T10.4, or its edit fails the freeze under an open run marker. The order–capture pairing key is the report time; a record without `create_time` would unpair every purchase.
-
-### T9.23: Step 2 re-recorded (in review)
-
-**What exists.** One live turn (trace `ae5d5e49`, $0.1112, three Channel3 credits) proved the sequencing: recall answered 2.6 s before the first search, no overlap. But the reply still named a memory-carried SKU: with the returned SKUs excluded the search came back empty, the model dropped the filter and named `PSW8GeK`, a kept purchase in its own evidence. The turn overran both budgets ($0.10 agent, one credit) and the record says so. `demo/run.py` now records the recall span, every search span and the credit count from the calls, and checks the demo cut; the evidence is `03-catalog-candidate-rerecorded.json`.
-
-**What surprised.** The model obeyed the sequence and defeated the exclusion by retrying without it. Three searches in one turn is a spend trap the driver now counts. Neither the trace nor `ast agent logs` carries tool arguments or answers.
-
-**The next agent should not have to work out.** T9.25 owns the exclusion lever and the empty-answer rule; T9.20 and T9.17 stay in review until a fresh candidate is named. Do not re-run step 2 until T9.25's deployment.
 
 ### T8.5w: Two corrected beliefs for one brand (done)
 

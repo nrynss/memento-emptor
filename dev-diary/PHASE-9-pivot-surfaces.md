@@ -820,7 +820,7 @@ requires:   [T9.17]
 fixture-ok: no
 size:       XS · mid
 owns:       demo/
-status:     in-review
+status:     done
 ```
 T9.17 gave the reference agent a catalog search, but no live turn has used it and `demo/run.py` does not call it, so product.md's step 2 still has no live path. After the agent is redeployed with `CHANNEL3_API_KEY`, add the catalog call to the demo driver, take one live turn that names the matched candidate (line, size, SKU) before its recommendation, and record the step-2 evidence and the one Channel3 credit it costs.
 
@@ -835,6 +835,8 @@ Credit and spend. One catalog search, **one Channel3 credit**; the turn made no 
 Limit, recorded rather than smoothed over: `tbnrl46` is the SKU the three seeded returns carry, so it matches the cut but is the returned item, not a new candidate. The trace carries tool span names and times, not the tool's arguments or answer, so the demo cannot tell whether the SKU came from the search answer or from recall. The catalog tool's `exclude_skus` description offers to skip the products the shopper already returned, but the agent's step-2 instruction never asks for it, and the spans show the search launched 3 ms after recall and outliving it, so the search was issued before recall answered. Finding (owner T9.17): tighten the agent's step-2 instruction so recall answers first and the search is given the returned SKUs as `exclude_skus`; that file is outside this task's `owns`. The T9.17 review's note that `product.md`'s step 2 still says the size chart maps the candidate to the shopper's measurements also stands; `product.md` is outside every task's `owns`.
 
 The gate passes after `npm ci` in `web/` and `merchant/`.
+
+**Closed by T9.25's re-record (done).** The flaw this note records — the search issued before recall's answer and the candidate being the returned SKU `tbnrl46` — is the one T9.23's re-record after T9.25 removed: trace `600bf64f`, recall answered before the search, one search, candidate `VyAkjCA` not a returned row. See T9.23's re-record note and `04-catalog-candidate-t925.json`; the turn, its credit and its spend are recorded there.
 
 **Review (fresh eyes, T9.20).** Re-verified from the committed files; no live call, $0. `git show --stat ab64aa9` is `demo/` plus this block. The evidence's spans match the note to the millisecond, its named line and SKU are the recording's (`tbnrl46`, "Men's Button Down Oxford Shirt", `variants` null), `turn.cost` is 0.055296, and the redactor strips a query string: the recording's offer link carries `?o=…&aid=…`, and the committed reply holds only the bare path, so no affiliate id is in the evidence. The three README lines about the ledger were checked against T4.8's landed code on `main` — `live.ts`'s `?t=`/`?s=` with the demo shopper as the absent `?s=` default, the replay label without a token, and the failed read's alert with no grid and no pending line — and T4.8 landed on `main` after this branch's cut, so this tree does not carry that code and the lines describe `main`, not the branch. `./tools/check.sh` passes.
 
@@ -930,7 +932,7 @@ requires:   [T9.22, T9.20]
 fixture-ok: no
 size:       XS · mid
 owns:       demo/
-status:     in-review
+status:     done
 ```
 T9.22 changed the reference agent's instruction so recall answers before `search_catalog`, with the returned SKUs passed as `exclude_skus`. Only a live turn proves the model obeys: re-run the step-2 turn after the redeploy, record it, and confirm the reply names a SKU the search returned that the seeded returns do not carry. Budget: one Channel3 credit and under $0.10 of agent spend.
 
@@ -945,6 +947,12 @@ Evidence and spend. [`03-catalog-candidate-rerecorded.json`](demo/evidence/step2
 Proof of the driver, no live call and $0: `python3 -m py_compile demo/run.py demo/drive.py` is clean, and `catalog_use` was exercised on synthetic traces for the four shapes — recall then a spaced search, a search starting 3 ms after recall, a reply naming `tbnrl46`, and a reply naming only the off-cut `3SAdGdJ` — plus a tools list with the search span first. The last is refused with "the reply names no SKU the demo cut matches"; the parallel case records `answered_before_search: false`; the returned case records `returned_sku: true`. `normalise_gaps` yields the two step-2 gaps for those flags and none for the passing shape. Limit, stated: the trace and the deployment's `ast agent logs` carry span names and times, not tool arguments or answers, so which SKUs went into `exclude_skus` and what each of the three searches returned cannot be read from here — the same limit T9.20 recorded.
 
 The gate passes after `npm ci` in `web/` and `merchant/`.
+
+**Re-record after T9.25 (done).** T9.25 put the exclusion's source in the tool description and the parameter description, and fixed the instruction's empty-answer and memory-SKU clauses. After the redeploy (build `bee5a9e7`), a second fresh conversation through `demo/drive.py` with the same request and nothing else made one turn, trace `600bf64f` (full id in `demo/out/`): `recall_for_purchase` 06.851–07.311, `search_catalog` 09.718–10.883, answer generation 10.893. Recall answered 2.4 s before the search started and nothing overlapped it, so the search followed recall's answer. There was **one** search call, not three, and its one Channel3 credit is the whole catalog cost. The reply says it excluded the recalled evidence SKUs, and the candidate it names is `VyAkjCA` — "Button Down Oxford Shirt", Brand X/Sunspel, Regular — which is in the demo cut and none of the shopper's returned rows carries; size M comes from recall under `corr_000004` because the catalog's `variants` is null. So one turn now proves both of T9.22's clauses. Limit, unchanged from T9.20: a trace carries span names and times, not tool arguments, so "the search carried the returned SKUs as exclusions" rests on the reply's own words and on the candidate not being a returned row, not on the arguments themselves. Evidence [`04-catalog-candidate-t925.json`](../demo/evidence/step2-catalog/04-catalog-candidate-t925.json) holds the turn, the single search span, the ordering flags (`recall.answered_before_search: true`, `search_after_recall: true`), the reply with its offer URL stripped of the affiliate query string, and the candidate (`returned_sku: false`, `in_cut: true`).
+
+Spend. The turn cost **$0.0660** — under this task's $0.10 budget — and **one Channel3 credit**, within the one-credit budget. One further turn in the same conversation (trace `3cc83ed8`, $0.0602, recall only, no catalog call) was made to test whether the hosted chat records agent replies: it does not, and that gap is recorded below rather than paid for again. Across both turns usage spend moved $6.17 → $6.31 and credit $3.83 → $3.69. They are the only live calls this task made; the create, the trace reads, the log reads and the billing reads are free.
+
+Gap (external, owner: Astropods; the user files it). In two turns of the same hosted conversation the platform's `GET /conversations/<id>/history` returns the shopper's message and an **empty** agent message (`content: ""`, `is_complete: true`), while each turn's trace carries the full reply text. The cause is not established from outside: the app's own `serve(agent, …)` adapter is the only writer, and its logs show the turn's streamed responses leaving the app. The demo's evidence does not read conversation history — it reads traces — so the recorded run and the steps above are unaffected; but a person opening the deployment's chat URL sees their own message and no answer, so the demo should not point a judge at that surface until this is explained.
 
 ---
 

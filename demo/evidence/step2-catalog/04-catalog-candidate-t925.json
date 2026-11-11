@@ -1,0 +1,68 @@
+{
+  "candidate": {
+    "in_cut": true,
+    "line": "Button Down Oxford Shirt",
+    "line_named": true,
+    "named_before_size": false,
+    "note": "the named SKU is in the demo cut and none of the shopper's returned rows carries it",
+    "returned_sku": false,
+    "size": "M",
+    "size_source": "recall: the catalog carries no size for this line (variants is null)",
+    "sku": "VyAkjCA"
+  },
+  "catalog": {
+    "answer_generation_start": "2026-11-11T15:20:10.893Z",
+    "calls": [
+      {
+        "end": "2026-11-11T15:20:10.883Z",
+        "start": "2026-11-11T15:20:09.718Z"
+      }
+    ],
+    "match_basis": "the demo's reading of the recording: brand SMwk, category dress-shirts, top-fit Regular",
+    "named_skus": [
+      "VyAkjCA"
+    ],
+    "off_cut_named": [],
+    "search_after_recall": true,
+    "search_end": "2026-11-11T15:20:10.883Z",
+    "search_start": "2026-11-11T15:20:09.718Z",
+    "searched": true,
+    "searched_before_answer": true,
+    "tool": "search_catalog"
+  },
+  "channel3": {
+    "credits": 1,
+    "note": "one search per tool call costs one credit; product detail calls are free",
+    "searches": 1
+  },
+  "recall": {
+    "answered_before_search": true,
+    "called": true,
+    "end": "2026-11-11T15:20:07.311Z",
+    "start": "2026-11-11T15:20:06.851Z",
+    "started_before_search": true
+  },
+  "turn": {
+    "cost": 0.06597,
+    "deployment": "MEMENTO-REF",
+    "input": "I need a Brand X oxford shirt in the regular fit. Which one would you recommend?",
+    "label": "catalog",
+    "latency_ms": 13112,
+    "reply": "Let me recall your purchase history and preferences first!Now let me search the catalog for a matching candidate, excluding the SKUs already in the recalled evidence.Here's my recommendation, based on your correction (`corr_000004`, overriding belief `blf_8f2c41`):\n\n---\n\n**Recommended size: M**\n**Product: Button Down Oxford Shirt \u2014 SKU `VyAkjCA`** (Brand X / Sunspel, Regular fit, dress shirt)\n\n**Why M?** Your explicit correction on 2026-11-11 \u2014 *\"Use M for me on Brand X oxfords from now on - I've gone down a size since October\"* \u2014 takes precedence (**Out of true**, step: correction). This overrides the older evidence from three M-size returns in October 2026 (belief `blf_8f2c41`, \"runs small, take size L\"), and is consistent with your more recent kept purchase of M (belief `blf_2b9d60`, Building).\n\n**What it shares with your previous Oxford shirts:** same brand (Brand X/SMwk), same category (dress shirts), same fit label (Regular).\n\n> \u26a0\ufe0f This line's variants are `null`, so the size is chosen at the retailer's offer page \u2014 no size is pre-confirmed in the catalog.\n> **Offer:** [us.sunspel.com \u2013 $195](https://buy.trychannel3.com/VyAkjCA-m1d3-8aUHo5)\n\n---\n\nShall I proceed? Reply **\"yes\"** to confirm, and I'll walk you through the next step.",
+    "step": "02",
+    "timestamp": "2026-11-11T15:20:12.000Z",
+    "tools": [
+      {
+        "end": "2026-11-11T15:20:07.311Z",
+        "name": "recall_for_purchase",
+        "start": "2026-11-11T15:20:06.851Z"
+      },
+      {
+        "end": "2026-11-11T15:20:10.883Z",
+        "name": "search_catalog",
+        "start": "2026-11-11T15:20:09.718Z"
+      }
+    ],
+    "trace_id_short": "600bf64f"
+  }
+}
