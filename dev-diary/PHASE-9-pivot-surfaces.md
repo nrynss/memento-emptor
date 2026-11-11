@@ -473,6 +473,20 @@ The P3 review found T3.8's live result has no committed transcript, nothing test
 
 ---
 
+### T9.13: Typecheck the shopper page in CI
+```yaml
+requires:   [T9.12]
+fixture-ok: yes
+size:       XS · mid
+owns:       .github/workflows/ci.yml
+status:     not-started
+```
+T9.12 wired the frontend guard into the gate, but the full-package typecheck needs `bun` and the package's modules, which the CI runner does not have: CI takes the reduced fallback that checks only `server/relay.ts`. Add `setup-bun` and a frozen `bun install` for `agent/frontend/` to the workflow so CI runs the same full typecheck as a workstation.
+
+**Done when:** CI installs bun and the package's frozen dependencies and the gate's frontend step runs the full typecheck there; a run shows it green; no other gate step changes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
