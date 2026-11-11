@@ -81,7 +81,7 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 | **C: Ledger** | P4 | 11 / 11 | Done |
 | **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
 | **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
-| **F: Pivot surfaces** | P9 | 31 / 32 | In progress (T9.24) |
+| **F: Pivot surfaces** | P9 | 32 / 32 | Done |
 | **G: Round 2** | P10 | 8 / 8 | Done |
 
 If capacity is short, run A first and then B: the demo needs both, and the ledger can follow on fixtures.
@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
-| P9 | 31 / 32 | In progress (T9.24) |
+| P9 | 32 / 32 | Done |
 | P10 | 8 / 8 | Done |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.24: Demo step 5 is a read-only demonstration (done)
+
+**What exists.** The step is decided as a read-only demonstration, not an agent turn, and recorded in `product.md`, `demo/README.md`, `demo/RUN-6.md` and the phase note, with the reason: recall is the recommendation surface whose five precedence steps are sizing rungs, so a seller belief served there would land on the own-evidence rung and be rendered as a size recommendation. `internal/api/server/dispute_read_only_test.go` pins both halves — the dispute's seller belief and its one row reach `explain_belief`, `ledger_beliefs`, `ledger_belief` and `ledger_evidence`, while recall for the brand serves the fit belief, its guidance and the consulted pool with the seller belief absent; a brandless recall pins the kind guard. The P9 finding is annotated as fixed.
+
+**What surprised.** `explain_belief` is already agent-admitted and shopper-scoped, and `record_reason`/`record_feedback` can return the seller belief's id — so "no agent turn can mention it" was too strong; no turn can reach it *by reading*, and recall is the only read that would name the id. The review corrected that wording in the record.
+
+**The next agent should not have to work out.** A future agent-visible seller read is its own admission decision (an agent-admitted seller-evidence read, or seller beliefs in recall); it is not an outstanding defect. The run-6 evidence already shows the dispute live.
 
 ### T9.15: A second shopper for day one (done)
 
