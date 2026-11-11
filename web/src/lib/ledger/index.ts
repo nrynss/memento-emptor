@@ -1,7 +1,8 @@
 // The ledger table: flat grid rows, the plain-API grid, and its theme.
 // Beside it, the pivot's reads: which precedence step decided, the pooled
 // counts, and the shopper's pooling choice.
-export { createLedgerGrid, ledgerColumnDefs } from './grid';
+export { createLedgerGrid, explainCellRenderer, explainColumnDefs, ledgerColumnDefs } from './grid';
+export { linkedBeliefId, pickBeliefId } from './deeplink';
 export {
 	decisionLineFor,
 	decodePrecedence,

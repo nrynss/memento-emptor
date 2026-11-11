@@ -1,41 +1,83 @@
 <script lang="ts">
 	// The evidence ledger page. Beliefs render in AG Grid; the grid component
 	// loads lazily so the landing page never pays for the grid bundle. The step
-	// picker replays the demo story from fixtures, one step at a time.
+	// picker replays the demo story from fixtures, one step at a time. Every row
+	// links to its why view and opens the contest editor, and a recorded
+	// correction updates the rows from the layer's own answer, so the
+	// contradicted belief stays on screen beside the shopper's words.
 
-	import { untrack, type Component } from 'svelte';
-	import { reactive } from '@nrynss/chaaya/svelte';
+	import { type Component } from 'svelte';
 	import {
 		createFixtureState,
 		finalFixtureStep,
 		fixtureShopperId,
 		fixtureStepLabels,
-		type LedgerFixtureStep
+		type LedgerBeliefRow,
+		type LedgerFixtureStep,
+		type LedgerLoadStatus,
+		type QuestionView
 	} from '$lib/api';
+	import {
+		ContestEditor,
+		contestEditColumnDefs,
+		createFixtureContestState,
+		type ContestState
+	} from '$lib/contest';
+	import { explainColumnDefs } from '$lib/ledger';
 	import { toLedgerGridRows, type LedgerGridRow } from '$lib/ledger/rows';
 
 	const stepOptions: { step: LedgerFixtureStep; label: string }[] = (
 		Object.entries(fixtureStepLabels) as [string, string][]
 	).map(([raw, label]) => ({ step: Number(raw) as LedgerFixtureStep, label }));
 
+	const extraColumns = [...explainColumnDefs(), ...contestEditColumnDefs()];
+
 	let step = $state<LedgerFixtureStep>(finalFixtureStep);
 	let ledgerState = $derived(createFixtureState(fixtureShopperId, step));
-	let view = $derived(reactive(ledgerState));
 
-	// Refresh when the step changes. The refresh call runs untracked: every
-	// property read on the reactive view subscribes, and subscribing this
-	// effect to the state's own notifications would re-run the refresh on
-	// every notify. The template below reads the view and re-renders it.
+	let status = $state<LedgerLoadStatus>('idle');
+	let loadError = $state<string | null>(null);
+	let pending = $state<QuestionView[]>([]);
+	let rows = $state<LedgerGridRow[]>([]);
+	let contest = $state<ContestState | null>(null);
+	let contendingId = $state<string | null>(null);
+	let contendingValue = $state('');
+
+	// Load the chosen step. The rows land in local state, so the grid and the
+	// editor read the same answer the layer gave without waiting on an outside
+	// notification.
 	$effect(() => {
 		const current = ledgerState;
-		untrack(() => {
-			void reactive(current).refresh();
-		});
+		let live = true;
+		status = 'loading';
+		loadError = null;
+		void (async () => {
+			await current.refresh();
+			if (!live) return;
+			status = current.status;
+			loadError = current.error;
+			pending = current.pending;
+			if (current.status === 'ready') {
+				loadRows(current.beliefs);
+			}
+		})();
+		return () => {
+			live = false;
+		};
 	});
 
-	let rows = $derived(view.status === 'ready' ? toLedgerGridRows(view.beliefs) : []);
+	function loadRows(beliefs: LedgerBeliefRow[]): void {
+		contest = createFixtureContestState(fixtureShopperId, beliefs);
+		rows = toLedgerGridRows(beliefs);
+		contendingId = null;
+		contendingValue = '';
+	}
 
-	let LedgerGrid = $state<Component<{ rows: LedgerGridRow[] }> | undefined>(undefined);
+	let LedgerGrid = $state<Component<{
+		rows: LedgerGridRow[];
+		extraColumns: typeof extraColumns;
+		onContest: (beliefId: string) => void;
+	}> | undefined>(undefined);
 
 	$effect(() => {
 		let live = true;
@@ -53,12 +95,27 @@
 		step = Number((event.currentTarget as HTMLSelectElement).value) as LedgerFixtureStep;
 	}
 
+	function openContest(beliefId: string): void {
+		const row = contest?.beliefs.find((candidate) => candidate.belief.belief_id === beliefId);
+		if (row === undefined) return;
+		contendingId = beliefId;
+		contendingValue = row.belief.value;
+	}
+
+	// The layer's answer landed: read the state's rows back so the grid shows
+	// the contradicted belief with its correction beside it.
+	function refreshRows(): void {
+		if (contest !== null) {
+			rows = toLedgerGridRows(contest.beliefs);
+		}
+	}
+
 	const pendingLine = $derived(
-		view.pending.length === 1
+		pending.length === 1
 			? '1 refund still missing its reason. It counts toward nothing until the shopper answers.'
-			: view.pending.length === 0
+			: pending.length === 0
 				? null
-				: `${String(view.pending.length)} refunds still missing their reasons. They count toward nothing until the shopper answers.`
+				: `${String(pending.length)} refunds still missing their reasons. They count toward nothing until the shopper answers.`
 	);
 </script>
 
@@ -74,7 +131,8 @@
 <p class="lede">
 	What the layer believes for this shopper, and what earned it. Seeded rows were
 	generated, not lived. A kept item with no feedback is a weak inferred signal,
-	never confirmed satisfaction.
+	never confirmed satisfaction. Open a belief's why view for its evidence, or
+	contest the belief in your own words.
 </p>
 
 <div class="ledger-controls">
@@ -86,17 +144,32 @@
 	</select>
 </div>
 
-{#if view.status === 'error'}
+{#if status === 'error'}
 	<p role="alert" class="ledger-error">
-		The ledger failed to load: {view.error ?? 'unknown error'}
+		The ledger failed to load: {loadError ?? 'unknown error'}
 	</p>
-{:else if view.status !== 'ready' || LedgerGrid === undefined}
+{:else if status !== 'ready' || LedgerGrid === undefined}
 	<p class="ledger-loading">Loading the ledger…</p>
-{:else if LedgerGrid !== undefined}
-	<LedgerGrid rows={rows} />
+{:else}
+	<LedgerGrid {rows} {extraColumns} onContest={openContest} />
 {/if}
 
-{#if view.status === 'ready' && pendingLine !== null}
+{#if status === 'ready' && contest !== null && contendingId !== null}
+	<section class="ledger-contest" aria-label="Contest this belief">
+		<h2>Contest this belief</h2>
+		{#key contendingId}
+			<ContestEditor
+				contest={contest}
+				beliefId={contendingId}
+				currentValue={contendingValue}
+				formId={`contest-${contendingId}`}
+				onRecorded={refreshRows}
+			/>
+		{/key}
+	</section>
+{/if}
+
+{#if status === 'ready' && pendingLine !== null}
 	<p class="ledger-pending">{pendingLine}</p>
 {/if}
 
@@ -120,6 +193,19 @@
 		border-radius: var(--radius-control);
 		padding: 0.35rem 0.7rem;
 		max-width: 100%;
+	}
+
+	.ledger-contest {
+		margin: 1.5rem 0 0;
+		padding: 1rem;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-panel);
+		background: var(--surface);
+	}
+
+	.ledger-contest h2 {
+		margin: 0 0 0.75rem;
+		font-size: 1.1rem;
 	}
 
 	.ledger-loading,

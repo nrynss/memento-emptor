@@ -8,7 +8,9 @@
 	// that won, the pooled belief as counts with its seeded split, a standing
 	// correction with no belief, and the pooling opt-out with rows removed.
 
+	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import {
 		createFixtureTransport,
 		finalFixtureStep,
@@ -26,6 +28,8 @@
 		createFixtureRecallTransport,
 		DecisionLine,
 		decodeRecallResponse,
+		linkedBeliefId,
+		pickBeliefId,
 		PoolCounts,
 		PoolingToggle,
 		recallCaseLabels,
@@ -51,6 +55,18 @@
 
 	let step = $state<LedgerFixtureStep>(finalFixtureStep);
 	let beliefId = $state<string | null>(null);
+	// A link from the ledger names the belief to explain. The query wins on
+	// arrival and the picker works from there. The browser guard keeps the
+	// request-bound URL off the server, where the page is prerendered without
+	// a query.
+	const linkedId = $derived(browser ? linkedBeliefId(page.url) : null);
+
+	$effect(() => {
+		if (linkedId !== null) {
+			beliefId = linkedId;
+		}
+	});
+
 	let pickerRows = $state<LedgerBeliefRow[]>([]);
 	let detail = $state<WhyViewData | null>(null);
 	let loadError = $state<string | null>(null);
@@ -108,12 +124,7 @@
 				if (!live) return;
 				pickerRows = listed.beliefs;
 				const available = listed.beliefs.map((row) => row.belief.belief_id);
-				const chosen =
-					wanted !== null && available.includes(wanted)
-						? wanted
-						: available.includes(preferredBeliefId)
-							? preferredBeliefId
-							: (available[0] ?? null);
+				const chosen = pickBeliefId(wanted, available, preferredBeliefId);
 				if (chosen === null) {
 					detail = null;
 					return;

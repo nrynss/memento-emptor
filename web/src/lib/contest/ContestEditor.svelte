@@ -4,7 +4,9 @@
 	// box, the button, and the result in plain words. With a belief the edit
 	// goes through the contest state's declared path; with none it stands
 	// on its own through the standing path. The form never touches a belief
-	// itself. Svelte 5 runes only: props in, local $state out.
+	// itself. The host names the form, so a page can open one per belief
+	// without duplicating element ids. Svelte 5 runes only: props in, local
+	// $state out.
 
 	import type { ContestState } from './state';
 	import type { RecordCorrectionResponse } from './types';
@@ -14,10 +16,17 @@
 		contest: ContestState;
 		beliefId?: string | null;
 		currentValue?: string;
+		formId?: string;
 		onRecorded?: (response: RecordCorrectionResponse) => void;
 	}
 
-	let { contest, beliefId = null, currentValue, onRecorded }: Props = $props();
+	let {
+		contest,
+		beliefId = null,
+		currentValue,
+		formId = 'contest',
+		onRecorded
+	}: Props = $props();
 
 	let text = $state('');
 	let sending = $state(false);
@@ -25,6 +34,8 @@
 	let confirmed = $state<string | null>(null);
 
 	const standing = $derived(beliefId === null);
+	const textId = $derived(`${formId}-text`);
+	const previewId = $derived(`${formId}-preview`);
 
 	async function submit(event: Event): Promise<void> {
 		event.preventDefault();
@@ -51,28 +62,28 @@
 	}
 </script>
 
-<form class="contest-editor" onsubmit={submit}>
-	<label class="contest-label" for="contest-text">
+<form id={formId} class="contest-editor" onsubmit={submit}>
+	<label class="contest-label" for={textId}>
 		{standing ? 'Record a standing correction' : 'Contest this belief'}
 	</label>
 	{#if currentValue !== undefined}
 		<p class="contest-current">The ledger currently says: “{currentValue}”.</p>
 	{/if}
 	{#if standing}
-		<p class="contest-preview" id="contest-preview">
+		<p class="contest-preview" id={previewId}>
 			No belief yet: your correction stands on its own and decides at once.
 		</p>
 	{:else}
-		<p class="contest-preview" id="contest-preview">
+		<p class="contest-preview" id={previewId}>
 			{correctionPreviewLine}
 		</p>
 	{/if}
 	<textarea
-		id="contest-text"
+		id={textId}
 		class="contest-input"
 		bind:value={text}
 		rows="2"
-		aria-describedby="contest-preview"
+		aria-describedby={previewId}
 		placeholder="I've lost weight, use M"
 		disabled={sending}
 	></textarea>

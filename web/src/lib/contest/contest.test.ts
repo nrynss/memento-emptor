@@ -248,7 +248,8 @@ describe('contest editor simplicity', () => {
 		const editor = editorSource();
 		expect(editor).toContain('Contest this belief');
 		expect(editor).toContain('correctionPreviewLine');
-		expect(editor).toContain('aria-describedby="contest-preview"');
+		expect(editor).toContain('aria-describedby={previewId}');
+		expect(editor).toContain('formId');
 		expect(editor).toContain('role="alert"');
 		expect(editor).toContain('role="status"');
 		expect(editor).toContain('confirmationLineFor(confirmed)');

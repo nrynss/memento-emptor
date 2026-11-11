@@ -52,11 +52,13 @@ size:       S · mid
 owns:       web/src/lib/ledger/, web/src/routes/belief/, web/src/lib/contest/
 status:     done
 ```
-The shopper's ledger shows which precedence step decided each recommendation, an overridden step beside the one that won, a standing correction with no belief, and the pooled belief that applies to them as counts with its seeded count. It never shows another shopper's rows. The shopper can opt out of pooling here, and back in, through `set_pooling`, with the number of rows removed shown. Fix the pre-pivot correction types in `web/src/lib/contest/`: a standing correction is schema-valid now, and the decoder must accept it. Svelte 5 runes only.
+The shopper's ledger links each belief to its why view, and the why view at `/belief` shows which precedence step decided each recommendation, an overridden step beside the one that won, a standing correction with no belief, and the pooled belief that applies to them as counts with its seeded count. It never shows another shopper's rows. The shopper can opt out of pooling here, and back in, through `set_pooling`, with the number of rows removed shown. Fix the pre-pivot correction types in `web/src/lib/contest/`: a standing correction is schema-valid now, and the decoder must accept it. Svelte 5 runes only.
 
 **Done when:** component tests cover each step, an overridden pair, a standing correction, and the opt-out toggle. The pooled row shows counts only. The gate passes.
 
 **Notes (in-review).** New in `web/src/lib/ledger/`: `precedence.ts` (five steps, decoders, plain-words lines), `recall.ts` (fixture recall for one case per shopper plus a statement-decides synthesis with the pool unreachable, and the demo-oxford `product_fit` fixture), `pool.ts` (counts-only pool decoders and lines), `pooling.ts` (typed `set_pooling` client, fixture transport, state), and four small views (`DecisionLine`, `PoolCounts`, `StandingCorrection`, `PoolingToggle`). `web/src/routes/belief/+page.svelte` gains a recommendation case picker (one shopper per case), the decision line with overridden steps, the pooled counts, a standing-correction form with its list, and the pooling toggle. `web/src/lib/contest/` now accepts the standing shape everywhere: optional `contradicts_belief_id` / `belief_id`, `contradicted` as a boolean, five-step guidance basis, a standing fixture path, `submitStandingCorrection`, and a standing mode for `ContestEditor` with an `onRecorded` callback.
+
+**Correction (T4.5).** The task line above said the shopper's ledger shows precedence, the pool and the opt-out. Those surfaces live on `/belief`, which `/ledger` now links to per row; the line is corrected to say so.
 
 Four things the next agent should not have to rediscover:
 

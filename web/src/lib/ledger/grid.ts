@@ -1,7 +1,8 @@
 // The ledger grid through AG Grid's plain JavaScript API. No framework
 // wrapper is used, so there is no framework-adapter version to track. The
-// grid is read-only: contesting a belief belongs to the contest task, so
-// no column edits and no edit callback exist here.
+// grid itself is read-only: no column edits and no edit callback exist
+// here. A host page appends its own columns, and the only host callback is
+// a click on the contest column, reported by belief id.
 
 import {
 	AllCommunityModule,
@@ -81,6 +82,30 @@ export function lastChangeCellRenderer(params: ICellRendererParams<LedgerGridRow
 	return `<span title="${escapeLedgerHtml(full)}">${escapeLedgerHtml(params.value as string)}</span>`;
 }
 
+/**
+ * The link column to the why view: one anchor per row carrying its belief
+ * id, so a judge reaches the evidence from the table.
+ */
+export function explainCellRenderer(params: ICellRendererParams<LedgerGridRow>): string {
+	const id = params.data?.id ?? '';
+	return `<a class="ledger-explain" href="/belief?belief=${escapeLedgerHtml(encodeURIComponent(id))}">Why</a>`;
+}
+
+/** The one-link column to the why view, beside the read-only columns. */
+export function explainColumnDefs(): ColDef<LedgerGridRow>[] {
+	return [
+		{
+			colId: 'explain',
+			headerName: 'Why',
+			field: 'id',
+			width: 78,
+			sortable: false,
+			resizable: false,
+			cellRenderer: explainCellRenderer
+		}
+	];
+}
+
 /** The six ledger columns plus the seeded mark. Status and seeded carry the renderers. */
 export function ledgerColumnDefs(): ColDef<LedgerGridRow>[] {
 	return [
@@ -121,6 +146,10 @@ export function ledgerColumnDefs(): ColDef<LedgerGridRow>[] {
 export interface LedgerGridOptions {
 	rows?: LedgerGridRow[];
 	mode?: LedgerGridMode;
+	/** Extra columns a host page concatenates after the read-only ones. */
+	extraColumns?: ColDef<LedgerGridRow>[];
+	/** Called with the belief id when a host extra column is clicked. */
+	onContest?: (beliefId: string) => void;
 }
 
 /**
@@ -128,20 +157,29 @@ export interface LedgerGridOptions {
  * lifetime and must call `destroy()` on the returned API. Module
  * registration runs once at import. Columns never virtualize away: the
  * seven narrow columns always fit side by side, which keeps rendering
- * complete in headless DOMs that report no width.
+ * complete in headless DOMs that report no width. A host page adds its own
+ * columns after the read-only ones, and the grid reports a click on the
+ * `contest` column by belief id.
  */
 export function createLedgerGrid(
 	host: HTMLElement,
 	options: LedgerGridOptions = {}
 ): GridApi<LedgerGridRow> {
+	const onContest = options.onContest;
 	const gridOptions: GridOptions<LedgerGridRow> = {
 		theme: ledgerGridTheme(options.mode ?? 'light'),
-		columnDefs: ledgerColumnDefs(),
+		columnDefs: [...ledgerColumnDefs(), ...(options.extraColumns ?? [])],
 		rowData: options.rows ?? [],
 		getRowId: (params) => params.data.id,
 		defaultColDef: {
 			resizable: true,
 			sortable: true
+		},
+		onCellClicked: (event) => {
+			if (onContest === undefined || event.colDef.colId !== 'contest' || event.data === undefined) {
+				return;
+			}
+			onContest(event.data.id);
 		},
 		suppressColumnVirtualisation: true,
 		domLayout: 'autoHeight'

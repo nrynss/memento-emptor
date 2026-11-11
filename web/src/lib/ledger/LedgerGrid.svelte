@@ -1,20 +1,24 @@
 <script lang="ts">
 	// The ledger grid as a Svelte 5 component. The grid is created once in an
-	// effect and destroyed in its teardown; row updates and theme switches
-	// arrive through grid options, so in-flight state survives a theme toggle.
+	// effect and destroyed in its teardown; row updates, host columns and
+	// theme switches arrive through grid options, so in-flight state survives
+	// a theme toggle. A host page adds its own columns after the read-only
+	// ones and receives a contest click by belief id.
 
 	import { theme as themeStore } from '@nrynss/chaaya/theme';
 	import { reactive } from '@nrynss/chaaya/svelte';
-	import type { GridApi } from 'ag-grid-community';
+	import type { ColDef, GridApi } from 'ag-grid-community';
 	import { createLedgerGrid } from './grid';
 	import { ledgerGridTheme } from './theme';
 	import type { LedgerGridRow } from './rows';
 
 	interface Props {
 		rows: LedgerGridRow[];
+		extraColumns?: ColDef<LedgerGridRow>[];
+		onContest?: (beliefId: string) => void;
 	}
 
-	let { rows }: Props = $props();
+	let { rows, extraColumns, onContest }: Props = $props();
 
 	const theme = reactive(themeStore);
 
@@ -25,7 +29,7 @@
 		if (host === undefined) {
 			return;
 		}
-		const gridApi = createLedgerGrid(host, { rows });
+		const gridApi = createLedgerGrid(host, { extraColumns, onContest });
 		api = gridApi;
 		return () => {
 			gridApi.destroy();
@@ -113,6 +117,12 @@
 		font-weight: 600;
 		border: 1px dashed var(--dim);
 		color: var(--dim);
+		white-space: nowrap;
+	}
+
+	.ledger-grid-host :global(.ledger-explain) {
+		color: var(--accent);
+		text-decoration: underline;
 		white-space: nowrap;
 	}
 </style>
