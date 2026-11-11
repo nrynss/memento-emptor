@@ -65,8 +65,10 @@ func fitBeliefValue(category domain.Category, brandName, size string) string {
 }
 
 // sellerSubject derives the seller subject behind a brand's transaction.
-// Dispute records carry no seller identity, so the layer keys the seller
-// belief to the brand it sold through and says so in the name.
+// A dispute names a seller, but only the payment account that received the
+// money, which is one account for the whole layer; so the layer keys the
+// seller belief to the brand it sold through and says so in the name
+// (docs/architecture.md, "The seller subject").
 func sellerSubject(item domain.Item) domain.Subject {
 	name := strings.TrimSpace(item.BrandName)
 	if name == "" {
