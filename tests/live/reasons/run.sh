@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# T2.2b live run: classify the eleven labelled shopper answers through
+# T2.2b live run: classify the thirteen labelled shopper answers through
 # the real classifier service via the frozen client and compare
-# category and confidence against the recorded T0.7 table.
+# category and confidence against the recorded table.
 #
 # The key never enters this file: OPENROUTER_API_KEY comes from
 # `source tools/env.sh`. Raw replies land in out/ (git-ignored); the
@@ -11,11 +11,16 @@
 #   source tools/env.sh
 #   bash tests/live/reasons/run.sh
 #
+# The set and its pinned cost total are checked first, with no key and no
+# call, so a stale set stops here instead of at the first paid phrase.
+#
 # Nothing here runs in CI and nothing here gates a build: there are no
 # *_test.go files under tests/live/reasons/, so the gate builds the
 # driver but never executes it.
 set -euo pipefail
 cd "$(dirname "$0")/../../.."
+
+go run ./tests/live/reasons -check
 
 : "${OPENROUTER_API_KEY:?source tools/env.sh first}"
 mkdir -p tests/live/reasons/out

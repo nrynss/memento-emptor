@@ -1,6 +1,7 @@
-// Live T2.2b driver: classifies the eleven labelled shopper answers
+// Live T2.2b driver: classifies the thirteen labelled shopper answers
 // through the real classifier service via the frozen client and compares
-// category and confidence against the recorded T0.7 table.
+// category and confidence against the recorded T0.7 table and the two
+// T2.2c recordings.
 //
 // This is a main program, never a test: no *_test.go lives under
 // tests/live/, so CI builds this package but never runs it and spends
@@ -14,8 +15,13 @@
 // properties that gate beliefs. Confidence drift on a vague phrase is
 // reported loudly but does not fail the run: vague answers sample
 // nondeterministically, and the recorded research already warns the
-// eleven-phrase set is a calibration sample, not proof. What must not
+// thirteen-phrase set is a calibration sample, not proof. What must not
 // move is the verdict, and the floor margin it rests on.
+//
+// -check runs the structural half alone: it loads the labelled set,
+// refuses anything that is not the thirteen recordings the driver pins,
+// and proves the pinned total is their own recorded cost sum. It reads
+// no key and sends nothing, so it can run before a live call is paid for.
 //
 // The key travels only in the Authorization header. Raw replies land in
 // out/ (git-ignored): they carry per-request generation ids, never the
@@ -29,6 +35,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -44,25 +51,44 @@ import (
 // call costing ten times this trips the guard and stops the run.
 const referenceCostPerCall = 0.0000214
 
+// expectedPhrases is the size of the labelled set the driver replays:
+// the eleven T0.7 phrases plus the two T2.2c recorded for the frozen
+// story's returns. A set of any other size is refused before a call.
+const expectedPhrases = 13
+
+// expectedTotalCost is the sum of the thirteen recordings' own usage
+// costs in USD: 0.000278040 for 6,620 input tokens. checkSet compares
+// the recordings against it, so the pinned total and the set cannot
+// drift apart unnoticed.
+const expectedTotalCost = 0.000278040
+
+// costTolerance is the slack allowed when the recorded costs are summed
+// and compared with expectedTotalCost. Each recording carries five
+// significant digits, so the sum is exact to well under this.
+const costTolerance = 1e-9
+
 // expectedBuild is the model string the endpoint resolved on the T0.7
 // run. A different resolution re-opens the floor and stops the run.
 const expectedBuild = "typesafe/jev-1.14-20261014"
 
-// pauseBetweenCalls spaces the eleven calls the way T0.7 did: no
+// pauseBetweenCalls spaces the thirteen calls the way T0.7 did: no
 // retries were needed then, and none are expected now.
 const pauseBetweenCalls = 2 * time.Second
 
 // recording is one labelled fixture: the shopper's words plus the
-// recorded choice and confidence the live run must reproduce.
+// recorded choice, confidence, spend and input tokens the live run must
+// reproduce.
 type recording struct {
 	file       string
 	answer     string
 	choice     string
 	confidence float64
+	cost       float64
+	inputToken int
 }
 
 // loadRecordings reads every labelled fixture under dir in filename
-// order, so the run follows the T0.7 table phrase 1 through 11.
+// order, so the run follows the recorded table phrase 1 through 13.
 func loadRecordings(dir string) ([]recording, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -95,6 +121,10 @@ func loadRecordings(dir string) ([]recording, error) {
 						Confidence float64 `json:"confidence"`
 					} `json:"reason"`
 				} `json:"answers"`
+				Usage struct {
+					Cost        float64 `json:"cost"`
+					InputTokens int     `json:"input_tokens"`
+				} `json:"usage"`
 			} `json:"response"`
 		}
 		if err := json.Unmarshal(raw, &doc); err != nil {
@@ -103,14 +133,60 @@ func loadRecordings(dir string) ([]recording, error) {
 		if doc.Request.State.Answer == "" || doc.Response.Answers.Reason.Choice == "" {
 			return nil, fmt.Errorf("fixture %s has no answer or choice", name)
 		}
+		if doc.Response.Usage.Cost <= 0 {
+			return nil, fmt.Errorf("fixture %s has no recorded usage cost", name)
+		}
 		out = append(out, recording{
 			file:       name,
 			answer:     doc.Request.State.Answer,
 			choice:     doc.Response.Answers.Reason.Choice,
 			confidence: doc.Response.Answers.Reason.Confidence,
+			cost:       doc.Response.Usage.Cost,
+			inputToken: doc.Response.Usage.InputTokens,
 		})
 	}
 	return out, nil
+}
+
+// checkSet refuses a labelled set that is not the thirteen recordings the
+// driver pins, and a pinned total that disagrees with their own recorded
+// costs. It sends nothing and reads no key.
+func checkSet(want []recording) error {
+	if len(want) != expectedPhrases {
+		return fmt.Errorf("labelled set holds %d phrases, want %d", len(want), expectedPhrases)
+	}
+	var totalCost float64
+	var totalTokens int
+	for _, rec := range want {
+		totalCost += rec.cost
+		totalTokens += rec.inputToken
+	}
+	if math.Abs(totalCost-expectedTotalCost) > costTolerance {
+		return fmt.Errorf("recorded set totals %.9f USD, pinned %.9f: the pin and the recordings disagree",
+			totalCost, expectedTotalCost)
+	}
+	// The per-call guard bounds one call at ten times the reference, so a
+	// run of this many calls cannot cost more than the guard times the
+	// call count. The pin must sit under that bound; if it does not, one
+	// of the two numbers is wrong and the run stops before it spends.
+	guard := 10 * referenceCostPerCall * float64(len(want))
+	if expectedTotalCost > guard {
+		return fmt.Errorf("pinned total %.9f USD is over the %.9f run guard of %d calls at 10x the %.7f reference",
+			expectedTotalCost, guard, len(want), referenceCostPerCall)
+	}
+	fmt.Printf("set: %d recordings, recorded total %.9f USD for %d input tokens, under the %.9f USD run guard\n",
+		len(want), totalCost, totalTokens, guard)
+	return nil
+}
+
+// checkRun loads the labelled set and runs the structural check alone,
+// with no key read and no call sent.
+func checkRun(fixtures string) error {
+	want, err := loadRecordings(fixtures)
+	if err != nil {
+		return err
+	}
+	return checkSet(want)
 }
 
 // liveReply is the billing and provenance surface of one live reply.
@@ -159,11 +235,18 @@ func captureDo(inner func(*http.Request) (*http.Response, error), key, out strin
 }
 
 func main() {
-	fixtures := flag.String("fixtures", "testdata/jev", "directory holding the eleven labelled recordings")
+	fixtures := flag.String("fixtures", "testdata/jev", "directory holding the thirteen labelled recordings")
 	out := flag.String("out", "tests/live/reasons/out", "directory for raw live replies (git-ignored)")
+	check := flag.Bool("check", false, "verify the labelled set and its pinned total, then exit without a key or a call")
 	flag.Parse()
 
-	if err := run(*fixtures, *out); err != nil {
+	var err error
+	if *check {
+		err = checkRun(*fixtures)
+	} else {
+		err = run(*fixtures, *out)
+	}
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "t22b-live: %v\n", err)
 		os.Exit(1)
 	}
@@ -178,8 +261,8 @@ func run(fixtures, out string) error {
 	if err != nil {
 		return err
 	}
-	if len(want) != 11 {
-		return fmt.Errorf("labelled set holds %d phrases, want 11", len(want))
+	if err := checkSet(want); err != nil {
+		return err
 	}
 	if err := os.MkdirAll(out, 0o755); err != nil {
 		return fmt.Errorf("make out dir: %w", err)
@@ -205,7 +288,7 @@ func run(fixtures, out string) error {
 		class, err := client.Classify(ctx, rec.answer)
 		stop()
 		if err != nil {
-			return fmt.Errorf("phrase %d %q: %w (after %d of 11 calls)", i+1, rec.answer, err, i)
+			return fmt.Errorf("phrase %d %q: %w (after %d of %d calls)", i+1, rec.answer, err, i, len(want))
 		}
 		totalCost += reply.cost
 		totalTokens += reply.inputToken
@@ -259,12 +342,12 @@ func run(fixtures, out string) error {
 		}
 	}
 
-	fmt.Printf("total: %.9f USD for %d calls and %d input tokens (reference about $0.00024)\n", totalCost, len(want), totalTokens)
+	fmt.Printf("total: %.9f USD for %d calls and %d input tokens (recorded set totals %.9f USD)\n", totalCost, len(want), totalTokens, expectedTotalCost)
 	fmt.Printf("model: last reply resolved %s (expected %s)\n", lastModel, expectedBuild)
 	if mismatches > 0 {
-		return fmt.Errorf("%d of 11 phrases differ from the recorded table in category or verdict", mismatches)
+		return fmt.Errorf("%d of %d phrases differ from the recorded table in category or verdict", mismatches, len(want))
 	}
-	fmt.Println("match: all 11 phrases reproduce the recorded category and ask-again verdict")
+	fmt.Printf("match: all %d phrases reproduce the recorded category and ask-again verdict\n", len(want))
 	if drift > 0 {
 		fmt.Printf("note: confidence drifted on %d vague phrase(s); every verdict still holds (see DRIFT lines)\n", drift)
 	}
