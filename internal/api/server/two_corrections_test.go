@@ -137,6 +137,12 @@ func TestTwoCorrectedBeliefsDoNotMakeRecallRefuse(t *testing.T) {
 		if belief.ContradictedBy.ContradictsBeliefID != belief.BeliefID {
 			t.Fatalf("belief %q carries the correction of %q", belief.BeliefID, belief.ContradictedBy.ContradictsBeliefID)
 		}
+		// Rule 4: the correction decides for each belief, and the belief stays
+		// beside it marked overridden.
+		if belief.Precedence == nil || !belief.Precedence.Overridden ||
+			belief.Precedence.OverriddenBy == nil || *belief.Precedence.OverriddenBy != contract.GuidanceCorrection {
+			t.Fatalf("served belief %q precedence reads %+v, want it overridden by the correction", belief.BeliefID, belief.Precedence)
+		}
 		inline[belief.ContradictedBy.CorrectionID] = belief.BeliefID
 	}
 	if len(inline) != 2 {
@@ -156,6 +162,9 @@ func TestTwoCorrectedBeliefsDoNotMakeRecallRefuse(t *testing.T) {
 	if _, ok := inline[over.CorrectionID]; !ok {
 		t.Fatalf("the top-level override %q is no served belief's own correction", over.CorrectionID)
 	}
+	// The harness pins one clock for both corrections, so the two record
+	// times tie and recency cannot decide: the pick falls to arrival order,
+	// and the rival's correction, recorded second, is the top level.
 	if over.CorrectionID != rival.Correction.CorrectionID {
 		t.Errorf("the top-level override is %q, want the later correction %q",
 			over.CorrectionID, rival.Correction.CorrectionID)

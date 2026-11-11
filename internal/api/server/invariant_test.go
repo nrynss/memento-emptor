@@ -87,7 +87,8 @@ func TestRecallWithoutOverrideIsUnrepresentable(t *testing.T) {
 // carries one top-level override and each contradicted belief carries its
 // own inline, so recall serves both instead of refusing. The override must
 // still be one of those inline corrections — a foreign one fails closed,
-// and a contradicted belief with no inline fails closed — so a second
+// a contradicted belief with no inline fails closed, and one carrying a
+// correction that cites another belief fails closed — so a second
 // correction is never a way to smuggle a belief past its own warning.
 func TestRecallWithTwoCorrectionsNeedsEachInline(t *testing.T) {
 	first := contradictedView()
@@ -126,6 +127,14 @@ func TestRecallWithTwoCorrectionsNeedsEachInline(t *testing.T) {
 	bare.ContradictedBy = nil
 	if _, err := assembleRecall("shopper_01", []contract.BeliefView{first, bare}, nil, "", &firstInline, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
 		t.Errorf("a contradicted belief with no inline correction assembles: %v", err)
+	}
+
+	// A correction that cites another belief is not this belief's own: the
+	// warning would point at the wrong row, so assembly fails closed.
+	crossed := second
+	crossed.ContradictedBy = &firstInline
+	if _, err := assembleRecall("shopper_01", []contract.BeliefView{first, crossed}, nil, "", &firstInline, guidance, 0, nil); !errors.Is(err, ErrOverrideMissing) {
+		t.Errorf("a belief carrying another belief's inline correction assembles: %v", err)
 	}
 }
 

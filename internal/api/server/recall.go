@@ -12,9 +12,9 @@ import (
 )
 
 // ErrOverrideMissing is returned when a recall would serve a contradicted
-// belief without its override: a contradicted belief with no correction
-// inline, or contradicted beliefs served under a top-level override that
-// carries none of them. The service fails the call instead of letting an
+// belief without its override: a contradicted belief with no correction of
+// its own inline, or contradicted beliefs served under a top-level override
+// that carries none of them. The service fails the call instead of letting an
 // agent recommend from a belief the shopper has overruled.
 var ErrOverrideMissing = errors.New("server: contradicted belief has no overriding correction")
 
@@ -25,15 +25,16 @@ var ErrOverrideMissing = errors.New("server: contradicted belief has no overridi
 var ErrPoolUnavailable = errors.New("server: pool index unavailable")
 
 // assembleRecall builds the recall response from its parts. A contradicted
-// belief is unrepresentable without its override: it must carry its own
-// correction inline, and when any contradicted belief is served the
-// top-level override must be one of those corrections. Assembly fails
-// rather than serving a belief the shopper has overruled. One brand can
-// hold two fit beliefs, one each way, and the shopper can correct both: the
-// response then carries one top-level override — the latest, which
-// overridingCorrection picked — and each belief keeps its own beside it, so
-// every contradiction stays overridable. A present pool rides with a
-// consulted lookup; an absent pool rides with whatever the lookup says —
+// belief is unrepresentable without its override: it must carry the
+// correction that cites it inline, and the top-level override, when
+// contradicted beliefs are served, must be one of those corrections.
+// Assembly fails rather than serving a belief the shopper has overruled.
+// One brand can hold two fit beliefs, one each way, and the shopper can
+// correct both: the response then carries one top-level override — the
+// latest, which overridingCorrection picked — and each belief keeps its
+// own beside it, so every contradiction stays overridable. A present pool
+// rides with a consulted lookup; an absent pool rides with whatever the
+// lookup says —
 // unavailable when the pool is unwired, the request names no full line, or
 // the index could not be reached, consulted when the wired pool answered
 // empty (Claimed) — so a full-line recall on an empty line serves the
@@ -51,7 +52,7 @@ func assembleRecall(shopper string, beliefs []contract.BeliefView, poolView *con
 		if !belief.Contradicted {
 			continue
 		}
-		if belief.ContradictedBy == nil {
+		if belief.ContradictedBy == nil || belief.ContradictedBy.ContradictsBeliefID != belief.BeliefID {
 			return contract.RecallResponse{}, fmt.Errorf("%w: belief %q", ErrOverrideMissing, belief.BeliefID)
 		}
 		inline[belief.ContradictedBy.CorrectionID] = true
@@ -138,7 +139,10 @@ func beliefStep(view contract.BeliefView) contract.GuidanceBasis {
 // correction naming a belief this recall does not serve applies to
 // another recall, never this one. When two served beliefs are each
 // corrected, this returns the newer of the two as the top-level override
-// and the older one rides inline on its own belief.
+// and the older one rides inline on its own belief. Two corrections
+// recorded at the same instant go to the one recorded later: arrival
+// order breaks the tie, the same way latestCorrection does, so the pick
+// never depends on map order or on a clock finer than the store keeps.
 func overridingCorrection(st *shopperState, served []contract.BeliefView, brandID string) *contract.CorrectionView {
 	servedIDs := map[string]bool{}
 	for _, view := range served {
