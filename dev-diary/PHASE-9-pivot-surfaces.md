@@ -425,7 +425,7 @@ requires:   [T9.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/runtime/, agent/second/
-status:     not-started
+status:     claimed:t99-agent-surface
 ```
 The T9.8 review found three low defects in the live agent surface. Both agents expose `ledger_beliefs`, `ledger_belief` and `ledger_evidence`, which the edge admits for `CallerShopper` only, so an agent key gets a 403 on each. `tools.ts` has no offline coverage: the checks inject the transport below it, so tool ids, schemas and execute bindings are exercised only by a live build. And the reference prompt tells the agent to retry any failed tool call once, so a `record_correction` that landed and then timed out could be written twice; retries must be for reads only, or a write must recall before retrying.
 

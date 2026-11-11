@@ -87,7 +87,7 @@ requires:   [T9.2]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/belief/, web/src/lib/ledger/pooling.ts, web/src/lib/contest/fixture.ts
-status:     not-started
+status:     claimed:t46-one-shopper
 ```
 The P4 review found the pivot's pooling and standing fixtures are built with the recall case's shopper but answer only the demo shopper: a `shopper_02` pooling call returns `shopper_01`'s answer (`{answered: 'shopper_01', removed: 3}`), a `shopper_02` standing correction throws, and `PoolingToggle` keeps its opening choice without a key, so switching cases leaves the previous shopper's result on screen. Make each fixture answer the shopper it was built for (reject a mismatch), reset the toggle when the case changes, and make the frozen standing request and fixture agree.
 
