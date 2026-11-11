@@ -443,40 +443,11 @@ func TestExamplesMatchGoTypes(t *testing.T) {
 	}
 }
 
-// wireSubjectKeys renames the frozen domain.Subject's Go field names to the
-// wire's lowercase kind, id and name. The subject type carries no JSON tags
-// and contracts freeze at the end of P1, so this is the one key-name
-// difference the gate forgives: the served layer normalises it in
-// marshalResponse, and the replay's comparison normalises it too. Every
-// other difference a marshal introduces fails the build.
-func wireSubjectKeys(node any) {
-	switch current := node.(type) {
-	case map[string]any:
-		for key, value := range current {
-			if key == "subject" {
-				if obj, ok := value.(map[string]any); ok {
-					for _, field := range []string{"Kind", "ID", "Name"} {
-						if value, present := obj[field]; present {
-							delete(obj, field)
-							obj[strings.ToLower(field)] = value
-						}
-					}
-				}
-			}
-			wireSubjectKeys(value)
-		}
-	case []any:
-		for _, value := range current {
-			wireSubjectKeys(value)
-		}
-	}
-}
-
 // TestExamplesMarshalBackToSchema closes the gate's other direction: it
 // unmarshals every example into its Go wire type, marshals it back, and
 // validates the result against the same schema. Unmarshalling alone cannot
 // see a field that serialises under another key or disappears; this can,
-// except for the frozen subject keys, which are normalised first.
+// and it forbids every key the schema does not declare.
 func TestExamplesMarshalBackToSchema(t *testing.T) {
 	dir := apiDir(t)
 	validator := &schemaValidator{dir: dir, cache: map[string]any{}}
@@ -507,7 +478,6 @@ func TestExamplesMarshalBackToSchema(t *testing.T) {
 			t.Errorf("%s marshaled to invalid JSON: %v", name, err)
 			continue
 		}
-		wireSubjectKeys(value)
 		schemaName, ok := schemaForExample(name)
 		if !ok {
 			t.Errorf("%s: cannot map example to schema", name)
