@@ -671,11 +671,31 @@ requires:   [T9.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/runtime/
-status:     claimed:t917-catalog
+status:     in-review
 ```
 The T9.7 run found product.md's demo step 2 has no live path: the reference agent exposes no product-search tool, so the Channel3 candidate never appears in a turn and the SKU exists only in step 4's capture. Add a catalog search tool (backed by `agent/catalog`, which already replays the Channel3 recordings) to the reference agent, bind it to the live layer's edge as the other tools are, and prove one live turn that names a real candidate line and SKU before recall.
 
 **Done when:** a live reference-agent turn searches the catalog and names the matched candidate (line, size, SKU) before its recommendation; the tool's output carries no field Channel3 did not return; the offline checks cover it; the gate passes.
+
+**Notes (in-review).** The reference agent now offers a ninth tool, `search_catalog`, and the demo's step 2 has a path in the code. Two facts shaped the build. A Bun deployment cannot import `agent/catalog` (Go), so the rule is ported to `agent/runtime/agent/catalog.ts`: same brand, same category, equal category-specific fit-label set, never the line name alone, with `exclude_skus` skipping the products behind the belief. The port is checked against the recordings `agent/catalog`'s tests use and against the same negative controls, so the two implementations are held to one set of fixtures. And the tool is agent-local, not an edge tool: the layer holds no product shelf and Channel3 appears only behind this agent, so `internal/auth/surface.go` neither admits nor refuses `search_catalog`. The check now separates the two sets: the eight layer tools this deployment offers still equal the table's `CallerAgent` set exactly, the catalog tool is named as the one local exception, and the layer binding still holds one method per admitted tool.
+
+The answer is Channel3's own product records, unchanged: the search filters the recording's products by the cut and returns `{products}`, with no size note, no fulfilment label, no shared-signal list and no match evidence added. That is the Done-when's field clause held literally, and the check enforces it twice: every returned record's field set equals the recorded record's field set, and a list of plausible invented fields (`size_note`, `fulfilment`, `shared`, `available_sizes`, `match`, `size_chart`) must be absent. The two marks `agent/catalog` carries for behaviour — sizes live at the retailer, real-retailer fulfilment is simulated — did not vanish; they are in the tool description and in the instructions, which the model reads, rather than in the output, where they would be fields Channel3 never returned.
+
+The live path is `httpCatalogTransport`: `POST <base>/search` with the key in `x-api-key`, a 20 s timeout, and typed refusals (`catalog-unconfigured`, `catalog-unreachable`, `catalog-timeout`, `catalog-bad-response`, plus the local `catalog-empty-query`, `catalog-bad-limit` and `catalog-invalid-want`). `astropods.yml` declares `CHANNEL3_API_KEY` as a secret input and `CHANNEL3_CATALOG_URL` as a non-secret default, so the T9.8 trap applies: the key reaches the container only because the blueprint declares it. The redeploy is the standing command plus the new var, after the vault secret exists:
+
+```sh
+cd agent/runtime && bun agent/offline-check.ts && ast spec validate && ast push -V private -y && ast agent redeploy --id <deployment-id> --latest --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY --var CHANNEL3_API_KEY=@CHANNEL3_API_KEY --wait
+```
+
+Offline, `bun agent/offline-check.ts` runs 178 checks (T9.9 left 130) and `./node_modules/.bin/tsc --noEmit` is clean. The catalog side replays `testdata/channel3`: the oxford search returns `tbnrl46`, `VyAkjCA` and `PSW8GeK`; excluding `tbnrl46` leaves the other two; the candidate names the line "Button Down Oxford Shirt" and the SKU `PSW8GeK`; the Bonobos line name alone matches only the equal `top-fit` set, as `agent/catalog` proves; an incomplete cut, an empty query and a non-positive limit are refused before the transport is called. The size clause is proved where Channel3 carries a size: the footwear search against `footwear-cut: Low cut` names `VWvTIPF`, its line and its listed sizes 7.5 through 10.5. The demo oxford line has `variants: null`, and the check proves the tool says exactly that rather than inventing a size — which is the honest reading of "line, size and SKU" for that line: the size it recommends comes from recall, and the catalog names the line and SKU. The HTTP half is pinned against a local stub: the search path, the `x-api-key` header, the query and limit body, one request per call, a 401 carrying the service's code, a non-JSON answer, an answer with no products array, and a deployment with no key.
+
+No live call, no spend, $0. The live turn the phase block's Done-when asks for was not made: this task's brief scoped the proof to offline and forbade live calls. The code path and the key wiring are in place; what remains is a deployment and a turn. Three things the next agent should not have to rediscover:
+
+- `agent/catalog` (Go) and `agent/catalog.ts` (the agent) are two implementations of one rule, kept in step only by the shared recordings and the same negative controls. Keep their fixtures the same; a new recording should reach both.
+- The layer's line identity and Channel3's are different: recall's `brand-x-001` / `shirts` / `regular` is Channel3's `SMwk` / `dress-shirts` / `top-fit: Regular`. The mapping is demo identity, carried in the instructions, not derived from the layer, so a second line (or T9.15's second shopper asking about one) needs its mapping added there.
+- A search costs one Channel3 credit and product detail calls are free; this tool makes one search per product turn and no detail calls. A demo run should budget one credit per step-2 turn.
+
+Findings, each with an owner. The live step-2 turn is unproven, owner: a future `demo/` task the orchestrator numbers to add the catalog call to `demo/run.py` and record the trace — `demo/` is outside this task's `owns`. The vault secret and redeploy are pending, owner: the orchestrator's redeploy step above; `ast secrets list` shows the name, never the value. The per-turn Channel3 credit is a new line in the demo's spend, owner: that same demo task's budget.
 
 ---
 

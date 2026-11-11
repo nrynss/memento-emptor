@@ -20,6 +20,17 @@ agent:
       datatype: string
       description: Base URL of the layer's edge.
       default: https://memento-emptor.onrender.com
+    # The catalog search is agent-local: the layer holds no product shelf, so
+    # the agent calls Channel3 itself. The key is a secret input, never
+    # written here or in the image; the URL is overridable for a stub.
+    - name: CHANNEL3_API_KEY
+      datatype: string
+      secret: true
+      description: Channel3 catalog key the agent's product search authenticates.
+    - name: CHANNEL3_CATALOG_URL
+      datatype: string
+      description: Base URL of the Channel3 catalog API.
+      default: https://api.trychannel3.com/v1
 
 models:
   # Astro AI Gateway — managed model access (injects ASTRO_GATEWAY_URL +

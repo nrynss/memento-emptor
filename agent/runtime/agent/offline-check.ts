@@ -15,9 +15,28 @@
  * the request the deployed code would send, that one call sends one request,
  * and that a refusal is reported with the layer's own code.
  *
+ * The catalog search is proved the same way: its transport replays
+ * `testdata/channel3`, the recordings `agent/catalog`'s own tests use, and
+ * every returned product is compared field for field with the recording so
+ * the tool can carry nothing Channel3 did not return. The search is
+ * agent-local, so it is explicitly outside the edge's access table.
+ *
  * Run: bun agent/offline-check.ts
  */
 import { join } from "node:path";
+import {
+  buildCatalog,
+  httpCatalogTransport,
+  CatalogError,
+  CodeBadLimit,
+  CodeCatalogBadResponse,
+  CodeCatalogUnconfigured,
+  CodeEmptyQuery,
+  CodeInvalidWant,
+  type CatalogTransport,
+  type ProductRecord,
+  type SearchInput,
+} from "./catalog.js";
 import { buildLayer, httpTransport, LayerError, type Body, type LayerTransport } from "./layer.js";
 import { createTools, tools } from "./tools.js";
 
@@ -153,6 +172,47 @@ async function fakeEdge(): Promise<{ transport: LayerTransport; calls: Recorded[
 
 const { transport, calls } = await fakeEdge();
 const layer = buildLayer(transport);
+
+// --- The catalog: the agent's own shelf over Channel3's recordings ---
+//
+// `agent/catalog` (Go) proves this same rule against these same recordings.
+// The tool returns Channel3's product records unchanged, so the checks below
+// also compare each returned record with its recording, field for field.
+
+const CHANNEL3_DIR = join(REPO_DIR, "testdata/channel3");
+
+/** channel3Recording reads one recorded Channel3 search answer. */
+async function channel3Recording(name: string): Promise<JSON_> {
+  return (await Bun.file(join(CHANNEL3_DIR, name)).json()) as JSON_;
+}
+
+/** recordedCatalog answers the two recorded searches and nothing else. */
+async function recordedCatalog(): Promise<{
+  transport: CatalogTransport;
+  calls: { query: string; limit: number }[];
+}> {
+  const oxford = await channel3Recording("search-oxford-shirts.json");
+  const puma = await channel3Recording("search-puma-running-shoes.json");
+  const catalogCalls: { query: string; limit: number }[] = [];
+  return {
+    calls: catalogCalls,
+    transport: {
+      async search(query, limit) {
+        catalogCalls.push({ query, limit });
+        if (query === "mens oxford button-down shirt") {
+          return oxford.products as ProductRecord[];
+        }
+        if (query === "puma running shoes") {
+          return puma.products as ProductRecord[];
+        }
+        return [];
+      },
+    },
+  };
+}
+
+const recorded = await recordedCatalog();
+const catalog = buildCatalog(recorded.transport);
 
 // Turn 1: a shopping request answered from the served layer's shapes.
 // Recall first, and the correction decides while the belief stays.
@@ -354,6 +414,14 @@ async function agentAdmitted(): Promise<string[]> {
 
 const sameList = (a: string[], b: string[]) => a.length === b.length && a.every((value, i) => value === b[i]);
 
+/**
+ * AGENT_LOCAL_TOOLS are the tools this agent owns rather than the layer. The
+ * edge's access table admits only layer calls, so a catalog search is neither
+ * admitted nor refused there: it must sit outside the edge set and the edge
+ * set must stay exactly as the table reads.
+ */
+const AGENT_LOCAL_TOOLS = ["search_catalog"];
+
 let admitted: string[] = [];
 try {
   admitted = await agentAdmitted();
@@ -370,9 +438,18 @@ check("the access table admits the eight agent calls", sameList(admitted.slice()
   "record_reason",
   "set_pooling",
 ]));
+const offeredEdge = Object.keys(tools)
+  .filter((name) => !AGENT_LOCAL_TOOLS.includes(name))
+  .sort();
 check(
-  "the deployment offers exactly the tools an agent key reaches",
-  sameList(Object.keys(tools).sort(), admitted),
+  "the deployment offers exactly the tools an agent key reaches, plus its own catalog search",
+  sameList(offeredEdge, admitted),
+  `offers ${JSON.stringify(offeredEdge)}`,
+);
+check(
+  "the catalog search is agent-local, outside the edge's set",
+  sameList([...AGENT_LOCAL_TOOLS].sort(), ["search_catalog"]) &&
+    AGENT_LOCAL_TOOLS.every((name) => !admitted.includes(name)),
   `offers ${JSON.stringify(Object.keys(tools).sort())}`,
 );
 check(
@@ -399,6 +476,7 @@ type ToolLike = {
   id?: string;
   description?: string;
   inputSchema?: { shape?: Record<string, ZodField> };
+  outputSchema?: { shape?: Record<string, ZodField> };
   execute?: unknown;
 };
 
@@ -445,9 +523,10 @@ const bound = createTools(
       return {};
     },
   }),
+  catalog,
 );
 
-for (const name of Object.keys(tools).sort()) {
+for (const name of admitted) {
   const offered = (tools as Record<string, ToolLike>)[name];
   const executable = (bound as Record<string, ToolLike>)[name];
   if (offered === undefined || executable === undefined) {
@@ -496,7 +575,7 @@ const instructions = (await Bun.file(join(import.meta.dir, "index.ts")).text()).
 check("the retry rule is in the instructions", /Retries\./.test(instructions));
 check(
   "a read may be tried again",
-  /read that fails \(recall_for_purchase, pending_questions, explain_belief, product_fit\) may be called once more/.test(
+  /read that fails \(recall_for_purchase, pending_questions, explain_belief, product_fit, search_catalog\) may be called once more/.test(
     instructions,
   ),
 );
@@ -516,11 +595,233 @@ check("the rule asks before resending what it cannot see", instructions.includes
 check("set_pooling is named as safe to repeat", /set_pooling states the shopper's choice/.test(instructions));
 check("no blanket retry survives", !/retry (it|the call|that call|any call)\b/i.test(instructions));
 
+// --- The catalog search: a real candidate line, size and SKU, Channel3's fields only ---
+//
+// The recordings are the ones agent/catalog's tests replay, so the rule is
+// checked against the same evidence. Every product the search returns is
+// compared with its recording field for field: the tool may drop a product
+// the cut does not match, but it may not add a field Channel3 did not send.
+
+/** idsOf reads product ids in listing order. */
+const idsOf = (products: ProductRecord[]): string[] =>
+  products.map((product) => (typeof product.id === "string" ? product.id : ""));
+
+/** sizeLabels reads the Size option's listed labels, or empty when the record models no variants. */
+function sizeLabels(product: ProductRecord): string[] {
+  const variants = product.variants;
+  if (typeof variants !== "object" || variants === null) {
+    return [];
+  }
+  const options = (variants as { options?: unknown }).options;
+  if (!Array.isArray(options)) {
+    return [];
+  }
+  const labels: string[] = [];
+  for (const option of options) {
+    if (typeof option !== "object" || option === null) {
+      continue;
+    }
+    if ((option as { name?: unknown }).name !== "Size") {
+      continue;
+    }
+    const values = (option as { values?: unknown }).values;
+    if (!Array.isArray(values)) {
+      continue;
+    }
+    for (const value of values) {
+      if (typeof value !== "object" || value === null) {
+        continue;
+      }
+      const label = (value as { label?: unknown }).label;
+      if (typeof label === "string") {
+        labels.push(label);
+      }
+    }
+  }
+  return labels;
+}
+
+/** catalogRefusal runs a search expected to fail and returns its typed refusal. */
+async function catalogRefusal(run: () => Promise<unknown>): Promise<CatalogError | undefined> {
+  try {
+    await run();
+  } catch (cause) {
+    return cause instanceof CatalogError ? cause : undefined;
+  }
+  return undefined;
+}
+
+const oxfordWant: SearchInput = {
+  query: "mens oxford button-down shirt",
+  brand_id: "SMwk",
+  category: "dress-shirts",
+  fit_attribute: "top-fit",
+  fit_values: ["Regular"],
+};
+
+const line = await catalog.search(oxfordWant);
+check(
+  "the oxford search returns the three SKUs that share the cut",
+  sameList(idsOf(line.products), ["tbnrl46", "VyAkjCA", "PSW8GeK"]),
+  `ids ${JSON.stringify(idsOf(line.products))}`,
+);
+const newLine = await catalog.search({ ...oxfordWant, exclude_skus: ["tbnrl46"] });
+check(
+  "excluding a returned SKU leaves the other two",
+  sameList(idsOf(newLine.products), ["VyAkjCA", "PSW8GeK"]),
+  `ids ${JSON.stringify(idsOf(newLine.products))}`,
+);
+const candidate = newLine.products.find((product) => product.id === "PSW8GeK");
+check("the demo search names a real candidate line", candidate?.title === "Button Down Oxford Shirt");
+check("the demo search names the candidate's real SKU", candidate?.id === "PSW8GeK");
+check(
+  "the apparel candidate carries no size Channel3 did not return",
+  candidate?.variants === null && sizeLabels(candidate ?? {}).length === 0,
+);
+
+const footwear = await catalog.search({
+  query: "puma running shoes",
+  brand_id: "T0QO",
+  category: "athletic-shoes",
+  fit_attribute: "footwear-cut",
+  fit_values: ["Low cut"],
+});
+check(
+  "the footwear search keeps the two Low cut SKUs",
+  sameList(idsOf(footwear.products), ["4d8UHzT", "VWvTIPF"]),
+  `ids ${JSON.stringify(idsOf(footwear.products))}`,
+);
+const darter = footwear.products.find((product) => product.id === "VWvTIPF");
+check("the footwear search names a real candidate line", darter?.title === "Men's Puma Darter Pro 2 Running Shoes");
+check("the footwear search names the candidate's real SKU", darter?.id === "VWvTIPF");
+check(
+  "the footwear search names the sizes Channel3 lists",
+  sameList(sizeLabels(darter ?? {}), ["7.5", "9", "9.5", "10", "10.5"]),
+  `sizes ${JSON.stringify(sizeLabels(darter ?? {}))}`,
+);
+
+// Field for field: no field appears that Channel3 did not return.
+const recordings = new Map<string, string[]>();
+for (const recording of [await channel3Recording("search-oxford-shirts.json"), await channel3Recording("search-puma-running-shoes.json")]) {
+  for (const product of recording.products as JSON_[]) {
+    recordings.set(String(product.id), Object.keys(product).sort());
+  }
+}
+const returned = new Map<string, ProductRecord>();
+for (const product of [...line.products, ...newLine.products, ...footwear.products]) {
+  returned.set(String(product.id), product);
+}
+for (const [id, product] of returned) {
+  const recordedFields = recordings.get(id);
+  check(
+    `candidate ${id} carries exactly Channel3's fields`,
+    recordedFields !== undefined && sameList(Object.keys(product).sort(), recordedFields),
+    `fields ${JSON.stringify(Object.keys(product).sort())}`,
+  );
+}
+for (const invented of ["size_note", "fulfilment", "shared", "available_sizes", "match", "size_chart"]) {
+  check(
+    `no candidate carries an invented ${invented} field`,
+    [...returned.values()].every((product) => !(invented in product)),
+  );
+}
+check("the search answer carries only Channel3's products field", sameList(Object.keys(line).sort(), ["products"]));
+
+// The negative control: one line name, divergent fit labels. The line name
+// alone never matches, exactly as agent/catalog's own test proves.
+const slim = await catalog.search({
+  query: "mens oxford button-down shirt",
+  brand_id: "ISZ8",
+  category: "dress-shirts",
+  fit_attribute: "top-fit",
+  fit_values: ["Slim"],
+});
+check("the Bonobos line name alone does not match both SKUs", sameList(idsOf(slim.products), ["V9BYM3z"]));
+const slimTailored = await catalog.search({
+  query: "mens oxford button-down shirt",
+  brand_id: "ISZ8",
+  category: "dress-shirts",
+  fit_attribute: "top-fit",
+  fit_values: ["Slim", "Tailored"],
+});
+check("an equal fit set matches the other Bonobos SKU", sameList(idsOf(slimTailored.products), ["m4iRrEM"]));
+
+// A search that cannot match says so, and never reaches the catalog.
+const callsBeforeRefusal = recorded.calls.length;
+check(
+  "an incomplete cut is refused",
+  (await catalogRefusal(() => catalog.search({ ...oxfordWant, brand_id: "" })))?.code === CodeInvalidWant,
+);
+check(
+  "a search with no query is refused",
+  (await catalogRefusal(() => catalog.search({ ...oxfordWant, query: "   " })))?.code === CodeEmptyQuery,
+);
+check(
+  "a non-positive limit is refused",
+  (await catalogRefusal(() => catalog.search({ ...oxfordWant, limit: 0 })))?.code === CodeBadLimit,
+);
+check("a refused search never reaches the catalog", recorded.calls.length === callsBeforeRefusal);
+
+// The tool binding itself: agent-local, and the same factory the deployment uses.
+const searchTool = (tools as Record<string, ToolLike>).search_catalog;
+const searchBound = (bound as Record<string, ToolLike>).search_catalog;
+check("search_catalog is offered with its own id", searchTool?.id === "search_catalog" && searchBound !== undefined);
+check(
+  "search_catalog has a description",
+  typeof searchTool?.description === "string" && searchTool.description.length > 0,
+);
+const toolCallsBefore = recorded.calls.length;
+const toolAnswer = (await (searchBound?.execute as (input: unknown, options?: unknown) => Promise<unknown>)(
+  { ...oxfordWant, exclude_skus: ["tbnrl46"] },
+  {},
+)) as { products: ProductRecord[] };
+check(
+  "the tool asks the catalog for the line with the default limit",
+  recorded.calls.length === toolCallsBefore + 1 &&
+    recorded.calls[recorded.calls.length - 1].query === oxfordWant.query &&
+    recorded.calls[recorded.calls.length - 1].limit === 10,
+);
+check("the tool returns the matched Channel3 records", sameList(idsOf(toolAnswer.products), ["VyAkjCA", "PSW8GeK"]));
+check("the tool's answer carries only products", sameList(Object.keys(toolAnswer).sort(), ["products"]));
+check(
+  "the tool's input names the cut the rule needs",
+  sameList(Object.keys(searchTool?.inputSchema?.shape ?? {}).sort(), [
+    "brand_id",
+    "category",
+    "exclude_skus",
+    "fit_attribute",
+    "fit_values",
+    "limit",
+    "query",
+  ]),
+);
+check(
+  "the tool's output carries Channel3's products",
+  sameList(Object.keys(searchTool?.outputSchema?.shape ?? {}), ["products"]),
+);
+check(
+  "search_catalog is not a frozen edge tool",
+  !(await Bun.file(join(API_DIR, "search_catalog.request.schema.json")).exists()),
+);
+check(
+  "the instructions search the catalog before naming a product",
+  /FIND THE CANDIDATE/.test(instructions) && instructions.includes("search_catalog"),
+);
+check(
+  "the instructions name the catalog's own ids",
+  instructions.includes("SMwk") && instructions.includes("dress-shirts") && instructions.includes("top-fit"),
+);
+check(
+  "the instructions forbid inventing a size",
+  /Never state a size the catalog does not carry/.test(instructions),
+);
+
 // --- The HTTP path: the request the deployment sends, against a local stub ---
 interface Seen {
   method: string;
   path: string;
   authorization: string;
+  apiKey: string;
   contentType: string;
   body: JSON_;
 }
@@ -535,9 +836,32 @@ const stub = Bun.serve({
       method: request.method,
       path: url.pathname,
       authorization: request.headers.get("authorization") ?? "",
+      apiKey: request.headers.get("x-api-key") ?? "",
       contentType: request.headers.get("content-type") ?? "",
       body,
     });
+    // The catalog's own paths: one search answer, one refusal, one
+    // unreadable answer and one that carries no products.
+    if (url.pathname === "/v1/search") {
+      const products = (await channel3Recording("search-oxford-shirts.json")).products as JSON_[];
+      const stripe = products.find((product) => product.id === "PSW8GeK");
+      return new Response(JSON.stringify({ products: [stripe] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (url.pathname === "/refused/search") {
+      return new Response(JSON.stringify({ error: { code: "invalid_api_key", message: "bad key" } }), {
+        status: 401,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (url.pathname === "/garbled/search") {
+      return new Response("<html>catalog down</html>", { status: 502 });
+    }
+    if (url.pathname === "/empty/search") {
+      return new Response(JSON.stringify({}), { status: 200, headers: { "content-type": "application/json" } });
+    }
     // The three ledger reads are the paths the edge refuses an agent key on.
     if (url.pathname === "/tools/ledger_belief") {
       return new Response(JSON.stringify({ error: { code: "unauthenticated", message: "unauthorized" } }), {
@@ -621,10 +945,74 @@ check(
   unconfigured instanceof LayerError && unconfigured.code === "unconfigured",
 );
 
+// The catalog search's own HTTP path: its request shape and its refusals.
+const httpCatalog = buildCatalog(httpCatalogTransport({ url: `${stub.url}/v1`, key: "offline-catalog-key" }));
+const onlineCatalog = await httpCatalog.search(oxfordWant);
+const catalogRequest = seen[seen.length - 1];
+check("the catalog search posts to its own path", catalogRequest.method === "POST" && catalogRequest.path === "/v1/search");
+check("the catalog key travels in x-api-key", catalogRequest.apiKey === "offline-catalog-key");
+check(
+  "the catalog body carries the query and limit",
+  catalogRequest.body.query === oxfordWant.query && catalogRequest.body.limit === 10,
+);
+check(
+  "a catalog answer is matched, not echoed",
+  sameList(idsOf(onlineCatalog.products), ["PSW8GeK"]),
+  `ids ${JSON.stringify(idsOf(onlineCatalog.products))}`,
+);
+const beforeCatalogCall = seen.length;
+await httpCatalog.search({ ...oxfordWant, limit: 5 });
+check("one catalog call sends exactly one request", seen.length === beforeCatalogCall + 1);
+
+let catalogRefused: unknown;
+try {
+  await httpCatalogTransport({ url: `${stub.url}/refused`, key: "offline-check-key" }).search("mens oxford", 1);
+} catch (cause) {
+  catalogRefused = cause;
+}
+check(
+  "a refused catalog call carries the service's code",
+  catalogRefused instanceof CatalogError && catalogRefused.status === 401 && catalogRefused.code === "invalid_api_key",
+);
+let catalogGarbled: unknown;
+try {
+  await httpCatalogTransport({ url: `${stub.url}/garbled`, key: "offline-check-key" }).search("mens oxford", 1);
+} catch (cause) {
+  catalogGarbled = cause;
+}
+check(
+  "a non-JSON catalog answer is a reported failure",
+  catalogGarbled instanceof CatalogError &&
+    catalogGarbled.status === 502 &&
+    catalogGarbled.code === CodeCatalogBadResponse,
+);
+let catalogEmpty: unknown;
+try {
+  await httpCatalogTransport({ url: `${stub.url}/empty`, key: "offline-check-key" }).search("mens oxford", 1);
+} catch (cause) {
+  catalogEmpty = cause;
+}
+check(
+  "an answer with no products array is a reported failure, never an empty shelf",
+  catalogEmpty instanceof CatalogError && catalogEmpty.code === CodeCatalogBadResponse,
+);
+let catalogUnconfigured: unknown;
+try {
+  await httpCatalogTransport({ url: `${stub.url}/v1` }).search("mens oxford", 1);
+} catch (cause) {
+  catalogUnconfigured = cause;
+}
+check(
+  "a deployment without a catalog key fails loudly",
+  catalogUnconfigured instanceof CatalogError && catalogUnconfigured.code === CodeCatalogUnconfigured,
+);
+
 stub.stop(true);
 
 if (failures > 0) {
   console.log(`${failures} check(s) failed`);
   process.exit(1);
 }
-console.log("offline check passed: the tool surface matches the edge, recall first, no blind write");
+console.log(
+  "offline check passed: the layer's eight tools plus the agent-local catalog search, recall first, no blind write",
+);

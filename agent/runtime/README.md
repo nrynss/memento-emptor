@@ -1,4 +1,4 @@
-# memento-agent (T3.1; pivot behaviour T9.4; served layer T9.8)
+# memento-agent (T3.1; pivot behaviour T9.4; served layer T9.8; catalog search T9.17)
 
 The Memento Emptor reference shopping agent as a deployed Astropods service.
 
@@ -17,7 +17,9 @@ The Memento Emptor reference shopping agent as a deployed Astropods service.
   shopper-only in that table, so this agent holds no tool for them rather
   than offering one the edge would refuse. Tool names and input shapes are
   the layer's frozen contract; the descriptions keep the layer's own words
-  plus this agent's recall-first guidance.
+  plus this agent's recall-first guidance. The ninth tool, `search_catalog`,
+  is agent-local, not an edge tool: it searches Channel3 directly through
+  `agent/catalog.ts` and returns Channel3's product records unchanged.
 - Precedence (T9.4): the agent recommends from `guidance.basis` and states
   confidence from the label (Earned, Building, Claimed, Out of true). It
   never refuses when recall returns evidence; only `none` says plainly no
@@ -49,29 +51,59 @@ deployment's environment and never from a file:
   fails as `unconfigured` rather than answering from anywhere else.
 - `MEMENTO_LAYER_URL` — the edge's base, defaulting to the hosted layer.
 
-`agent/layer.ts` builds the call, `agent/tools.ts` binds the eight tools to
-it, and `agent/offline-check.ts` swaps the transport for the contract's own
-frozen examples, which is how the recall-first contract and the request
-shape are proved without a deployment. It also reads the edge's access table
-(`internal/auth/surface.go`) and the contract's request schemas
+`agent/layer.ts` builds the call, `agent/tools.ts` binds the eight layer
+tools to it, and `agent/offline-check.ts` swaps the transport for the
+contract's own frozen examples, which is how the recall-first contract and
+the request shape are proved without a deployment. It also reads the edge's
+access table (`internal/auth/surface.go`) and the contract's request schemas
 (`testdata/api`) and compares them with the tools this deployment offers, so
 a tool id or an input field that drifts from the layer fails the check here
 rather than as a refusal on a live turn.
+
+## The catalog
+
+`search_catalog` is the one tool the layer does not serve. The layer holds no
+product shelf, so the agent searches Channel3 itself (`agent/catalog.ts`) for
+a candidate that shares the cut of what the shopper returned: same brand,
+same category, equal category-specific fit label. The rule is the same one
+`agent/catalog` (Go) applies for the demo driver, and the offline check
+replays the recordings in `testdata/channel3` that package's tests use.
+
+The tool's answer is Channel3's own product records, unchanged: no size note,
+no fulfilment label and no match evidence is added, so the model can only see
+fields Channel3 returned. On apparel `variants` is null and sizes live at the
+retailer's offer URL; where Channel3 models variants, its listed sizes are
+quoted as they are. Real-retailer fulfilment stays simulated in the demo.
+Channel3 is not a layer caller and the edge's access table neither admits nor
+refuses this tool, so the edge set stays exactly the eight memory calls.
+
+Two values configure the catalog, both from the deployment's environment:
+
+- `CHANNEL3_API_KEY` — the catalog key, from the platform secret store by
+  reference (`--var CHANNEL3_API_KEY=@CHANNEL3_API_KEY`). Without it a search
+  fails as `catalog-unconfigured` rather than answering from a recording.
+- `CHANNEL3_CATALOG_URL` — the API base, defaulting to Channel3's own.
+
+A search costs one Channel3 credit; product detail calls are free and this
+agent makes none.
 
 ## Run
 
 ```sh
 cd agent/runtime
-bun agent/offline-check.ts   # contract examples through the same tool code, no model, no network
+bun agent/offline-check.ts   # contract examples and catalog recordings through the same tool code, no model, no network
 ast spec validate            # spec check, local
 ast push -V private -y       # build + register the blueprint
-ast agent redeploy --id <deployment-id> --latest --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY --wait
+ast agent redeploy --id <deployment-id> --latest \
+  --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY \
+  --var CHANNEL3_API_KEY=@CHANNEL3_API_KEY --wait
 ```
 
-The key is set once in the account vault (`ast secrets create
-MEMENTO_AGENT_KEY --description <text>`, value entered at the prompt or
-passed from the keyring without echoing it); a redeploy then injects it by
-reference. `ast secrets list` shows the name and never the value.
+The keys are set once in the account vault (`ast secrets create
+MEMENTO_AGENT_KEY --description <text>` and `ast secrets create
+CHANNEL3_API_KEY --description <text>`, value entered at the prompt or
+passed from the keyring without echoing it); a redeploy then injects each by
+reference. `ast secrets list` shows the names and never the values.
 
 Shopping turns are driven through the platform messaging proxy with the
 CLI's own login (the chat host sits behind SSO and cannot be driven
