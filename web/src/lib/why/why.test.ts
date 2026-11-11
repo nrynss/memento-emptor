@@ -17,6 +17,7 @@ import {
 	matchesEvidenceQuery,
 	notCountedReason,
 	PENDING_WHY_NOT,
+	reasonReading,
 	reasonWord,
 	type WhyViewData
 } from './why';
@@ -215,18 +216,18 @@ describe('why view plain language', () => {
 		}
 	});
 
-	it('names every reason category in plain words, never the raw code', () => {
-		const categories: ReasonCategory[] = [
+	it('names every classified reason category in plain words, never the raw code', () => {
+		const classified: ReasonCategory[] = [
 			'fit_too_small',
 			'fit_too_large',
 			'damaged_or_defective',
 			'not_arrived',
 			'changed_mind',
-			'unclear',
-			'none'
+			'unclear'
 		];
-		for (const category of categories) {
-			const word = reasonWord(category);
+		for (const category of classified) {
+			const word = reasonWord(category) ?? '';
+			expect(word).not.toBe('');
 			expect(word).not.toMatch(/_/);
 			expect(word).toMatch(/^[a-z ]+$/);
 		}
@@ -235,7 +236,41 @@ describe('why view plain language', () => {
 		expect(reasonWord('damaged_or_defective')).toBe('damaged');
 		expect(reasonWord('not_arrived')).toBe('not arrived');
 		expect(reasonWord('changed_mind')).toBe('changed mind');
-		expect(reasonWord('none')).toBe('fits well');
+	});
+
+	it('names no category for the layer zero value, which is no classified reason', () => {
+		// domain.CategoryNone is the zero value: no classified reason, not a
+		// verdict. The unauthorised-transaction dispute is stored with it, so a
+		// card calling it "fits well" would assert a verdict nobody gave.
+		expect(reasonWord('none')).toBeNull();
+	});
+
+	it('quotes the shopper and names the category for a classified refund', async () => {
+		const view = await whyAt(9, sizingId);
+		const first = view.counted[0];
+		expect(first.reason?.text).toBe('too tight in the shoulders');
+		expect(reasonReading(first)).toEqual({
+			text: 'too tight in the shoulders',
+			quoted: true,
+			word: 'too small'
+		});
+	});
+
+	it('never quotes a dispute code as the shopper words', async () => {
+		const view = await whyAt(9, sellerId);
+		const dispute = view.counted[0];
+		expect(dispute.outcome.kind).toBe('dispute');
+		expect(reasonReading(dispute)).toEqual({
+			text: 'MERCHANDISE_OR_SERVICE_NOT_RECEIVED',
+			quoted: false,
+			word: 'not arrived'
+		});
+	});
+
+	it('reports an outcome with no known cause rather than reading one in', async () => {
+		const view = await whyAt(9, sizingId);
+		const pendingRow = view.counted[0];
+		expect(reasonReading({ ...pendingRow, reason: null })).toBeNull();
 	});
 
 	it('reads the demo evidence back in plain words', async () => {

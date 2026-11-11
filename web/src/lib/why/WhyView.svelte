@@ -7,7 +7,8 @@
 	// below phone width.
 
 	import { kindLabelFor, OUT_OF_TRUE_TOOLTIP, SEEDED_MARK_LABEL, SEEDED_MARK_TOOLTIP } from '$lib/ledger/rows';
-	import { filterWhyView, reasonWord, type WhyViewData } from './why';
+	import type { EvidenceView } from '$lib/api';
+	import { filterWhyView, reasonReading, type WhyViewData } from './why';
 
 	interface Props {
 		view: WhyViewData;
@@ -32,6 +33,26 @@
 		return `${(minor / 100).toFixed(2)} ${currency}`;
 	}
 </script>
+
+{#snippet reasonColumn(evidence: EvidenceView)}
+	{@const reading = reasonReading(evidence)}
+	<div class="why-column">
+		<h4>Reason</h4>
+		{#if reading === null}
+			<p>No reason recorded.</p>
+		{:else if reading.quoted}
+			<p class="why-words"><q>{reading.text}</q></p>
+			{#if reading.word !== null}
+				<p class="why-reason-word">{reading.word}</p>
+			{/if}
+		{:else if reading.word !== null}
+			<p class="why-words">{reading.word}</p>
+			<p class="why-reason-word">{reading.text}</p>
+		{:else}
+			<p class="why-words">{reading.text}</p>
+		{/if}
+	</div>
+{/snippet}
 
 <article class="why" aria-label={`Why the layer believes ${view.belief.value}`}>
 	<header class="why-head">
@@ -104,15 +125,7 @@
 				{#each filtered.counted as row (row.evidence_id)}
 					<li class="why-card">
 						<div class="why-columns">
-							<div class="why-column">
-								<h4>Reason</h4>
-								{#if row.reason === null}
-									<p>No reason recorded.</p>
-								{:else}
-									<p class="why-words"><q>{row.reason.text}</q></p>
-									<p class="why-reason-word">{reasonWord(row.reason.category)}</p>
-								{/if}
-							</div>
+							{@render reasonColumn(row)}
 							<div class="why-column">
 								<h4>Outcome</h4>
 								<p>{row.outcome.kind} · {row.outcome.status}</p>
@@ -152,17 +165,7 @@
 					<li class="why-card">
 						<p class="why-not">{row.why_not}</p>
 						<div class="why-columns">
-							<div class="why-column">
-								<h4>Reason</h4>
-								{#if row.evidence.reason === null}
-									<p>No reason recorded.</p>
-								{:else}
-									<p class="why-words"><q>{row.evidence.reason.text}</q></p>
-									<p class="why-reason-word">
-										{reasonWord(row.evidence.reason.category)}
-									</p>
-								{/if}
-							</div>
+							{@render reasonColumn(row.evidence)}
 							<div class="why-column">
 								<h4>Outcome</h4>
 								<p>{row.evidence.outcome.kind} · {row.evidence.outcome.status}</p>

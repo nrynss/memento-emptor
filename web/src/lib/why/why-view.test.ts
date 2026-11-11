@@ -35,19 +35,22 @@ describe('why view simplicity guards', () => {
 	});
 
 	it('leads each card with the shopper words, never a raw reason code', () => {
-		expect(componentSource).toContain('row.reason.text');
-		expect(componentSource).toContain('reasonWord(row.reason.category)');
-		expect(componentSource).toContain('row.evidence.reason.text');
-		expect(componentSource).toContain('reasonWord(row.evidence.reason.category)');
-		expect(componentSource).not.toContain('{row.reason.category}');
-		expect(componentSource).not.toContain('{row.evidence.reason.category}');
+		expect(componentSource).toContain('reasonColumn(row)');
+		expect(componentSource).toContain('reasonColumn(row.evidence)');
+		expect(componentSource).toContain('reasonReading(evidence)');
+		// The category word is chosen in the model, never printed raw here.
+		expect(componentSource).not.toContain('reason.category');
 		expect(componentSource).not.toContain('fit_too_small');
-		expect(componentSource.indexOf('<q>{row.reason.text}</q>')).toBeLessThan(
-			componentSource.indexOf('{reasonWord(row.reason.category)}')
+		// The shopper's words are quoted, and the plain word follows them.
+		expect(componentSource.indexOf('<q>{reading.text}</q>')).toBeLessThan(
+			componentSource.indexOf('<p class="why-reason-word">{reading.word}</p>')
 		);
-		expect(componentSource.indexOf('<q>{row.evidence.reason.text}</q>')).toBeLessThan(
-			componentSource.indexOf('{reasonWord(row.evidence.reason.category)}')
+		// A dispute code is not the shopper's words: the plain word leads and
+		// the recorded text follows it unquoted.
+		expect(componentSource.indexOf('<p class="why-words">{reading.word}</p>')).toBeLessThan(
+			componentSource.indexOf('<p class="why-reason-word">{reading.text}</p>')
 		);
+		expect(componentSource).not.toContain('fits well');
 	});
 
 	it('stacks the evidence columns at phone width', () => {

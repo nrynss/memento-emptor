@@ -50,23 +50,60 @@ export function kindWord(kind: BeliefKind): string {
 }
 
 /**
- * The reason categories in the ledger's own words: the merchant grid's reason
- * columns and the pool's too-small returns. The card prints the shopper's
- * quote, then this word; the raw category never reaches the screen.
+ * The classified reason categories in the project's own plain words: the
+ * merchant grid's reason columns (Fit: small, Fit: large, Damaged, Not
+ * arrived, Changed mind) and the domain's category comments, which read
+ * fit_too_small as "too small or too tight" and fit_too_large as "too big or
+ * too loose". The layer's `none` is absent on purpose: it is the zero value,
+ * no classified reason rather than a verdict, so a card that named a word for
+ * it would assert a reason the layer never classified.
  */
-const reasonWords: Record<ReasonCategory, string> = {
+const reasonWords: Record<Exclude<ReasonCategory, 'none'>, string> = {
 	fit_too_small: 'too small',
 	fit_too_large: 'too large',
 	damaged_or_defective: 'damaged',
 	not_arrived: 'not arrived',
 	changed_mind: 'changed mind',
-	unclear: 'unclear',
-	none: 'fits well'
+	unclear: 'unclear'
 };
 
-/** The plain-language name of one reason category. */
-export function reasonWord(category: ReasonCategory): string {
-	return reasonWords[category];
+/**
+ * The plain-language name of one classified reason category, or null for the
+ * layer's `none`: that is no classified reason, so the card shows the recorded
+ * text alone instead of naming a category nobody classified. The unauthorised-
+ * transaction dispute is stored with `none`, which is why `none` cannot read
+ * as a fit verdict.
+ */
+export function reasonWord(category: ReasonCategory): string | null {
+	return category === 'none' ? null : reasonWords[category];
+}
+
+/** One evidence row's reason as a card shows it. */
+export interface ReasonReading {
+	/** The recorded text: the shopper's words, or a dispute's code. */
+	text: string;
+	/** Whether the text is the shopper's own words, and so reads as a quote. */
+	quoted: boolean;
+	/** The plain category word, or null when the layer classified no reason. */
+	word: string | null;
+}
+
+/**
+ * Reads one evidence row's reason for a card, or null when the outcome has no
+ * known cause yet. The wire type says the reason text is the shopper's words,
+ * or the dispute code for a dispute, so a dispute's text never reads as a
+ * quote: the plain category word leads and the code follows as the record.
+ */
+export function reasonReading(evidence: EvidenceView): ReasonReading | null {
+	const reason = evidence.reason;
+	if (reason === null) {
+		return null;
+	}
+	return {
+		text: reason.text,
+		quoted: evidence.outcome.kind !== 'dispute',
+		word: reasonWord(reason.category)
+	};
 }
 
 /**
