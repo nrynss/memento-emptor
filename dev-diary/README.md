@@ -166,8 +166,8 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
-| P7 | 3 / 4 | T7.4 waits on T8.5 |
-| P8 | 13 / 15 | In progress (T8.5d, T8.5e) |
+| P7 | 5 / 5 | Done |
+| P8 | 14 / 15 | In progress (T8.5e) |
 | P9 | 8 / 10 | In progress (T9.6, T9.7) |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### Stack landing: T7.4, T7.5, T8.5d, T9.2b, T9.3f (done)
+
+**What exists.** The pivot core is now required end to end: contract schemas and Go types require pool, pool_lookup and per-item precedence (with the null conventions pinned); the frozen replay carries the tightened shape; the served layer re-links declared views by persisted view↔entry pairing and compares without stripping; both frontends decode the required fields strictly. Landed as one fast-forward (7 commits: 5 task + 1 review fix + 1 diary reconcile) so `main` never pointed at an intermediate red state. Gate green on the landing branch and re-run on `main`. Reviews were APPROVE across all three (T8.5d, T9.2b, T9.3f); spend $0 throughout.
+
+**What surprised.** Rebasing the stack onto `main` duplicated the T7.5 and T9.3f diary sections (parallel claim/task edits of the same file region) — reconciled on the landing branch: T7.4's worker notes moved back under T7.4, one T7.5 kept, one T9.3f kept with the three transport notes moved to T9.3e. Code merged cleanly; only diary conflicted.
+
+**The next agent should not have to work out.** T8.5e (flip the re-link tripwires live, requires T8.5d) is the next layer task; the live tripwires in `tests/live/precedence/` still pin the old defect shapes. T9.6's public-URL proof and the merchant green deploy still wait on the user's push approval. P7 is 5/5; P8 is 14/15.
 
 ### T9.2: Ledger with precedence and the pool (done)
 

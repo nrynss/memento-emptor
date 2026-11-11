@@ -73,7 +73,7 @@ requires:   [T7.4]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/lib/ledger/, web/src/lib/api/, web/src/routes/belief/, web/src/lib/contest/
-status:     in-review
+status:     done
 ```
 T7.4 requires the pivot pool and precedence fields, so the ledger decoders and fixture tests that expected them absent now fail (6 tests: api snapshots, pool precedence, pre-pool belief). Update the decoders to the required shape and the tests to the tightened fixtures. No behaviour change beyond the contract.
 
@@ -261,7 +261,7 @@ requires:   [T7.4]
 fixture-ok: yes
 size:       S · mid
 owns:       merchant/
-status:     in-review
+status:     done
 ```
 T7.4 requires the pivot pool `precedence`, but merchant's `decodePool` dropped it, so the decoded Earned demo oxford no longer equalled the frozen snapshot. Carry the required pool `precedence` through `decode.ts` + `types.ts` the way T9.2b did for web. One-test fix; no contract change.
 

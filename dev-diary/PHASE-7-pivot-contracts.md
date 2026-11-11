@@ -90,7 +90,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/contract/, testdata/api/, docs/interface.md, docs/architecture.md
-status:     in-review
+status:     done
 ```
 T7.1 could not make the pivot's core required: `internal/api/server` compares its served JSON to the base fixtures and `testdata/replay/` is frozen, so `pool`, `pool_lookup` and per-item `precedence` are optional and a conforming implementation could never return a pool. Once T8.5 serves the pivot, make them required, add a Claimed and a Building `product_fit` example (all four current pool fixtures are Earned), and update the schemas, Go types, tests and docs in the same commit. Do this before the round 2 freeze (T10.3).
 
@@ -120,7 +120,7 @@ requires:   [T7.4]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/fakes/, testdata/replay/
-status:     in-review
+status:     done
 ```
 T7.4 requires the pivot's pool and precedence fields, but the replay builds contract Go values directly, so its marshaled output already emits the new null keys while frozen `testdata/replay/p3-turns.json` and `p4-ledger.json` do not have them. Update the fakes to emit the required fields where they do not already, and refresh the two frozen replay fixtures to the tightened shape in the same commit (orchestrator's call under rule 1; the freeze manifest gains no new files). Do not change what the replay proves — only the wire shape.
 
@@ -135,4 +135,4 @@ T7.4 requires the pivot's pool and precedence fields, but the replay builds cont
 - [ ] The pivot's contract, fit row, status rule and usual-size rule are in place with fixtures (T7.1).
 - [x] Every stored key is built in one place, with the salt from the keyring (T7.2).
 - [x] Consent for pooling is decided: opt-out (T7.3).
-- [ ] The contract requires the pool and per-item precedence once the served layer supports them (T7.4).
+- [x] The contract requires the pool and per-item precedence once the served layer supports them (T7.4).

@@ -400,7 +400,7 @@ requires:   [T8.5c, T7.4]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/api/server/, internal/standing/
-status:     in-review
+status:     done
 ```
 T8.5c's re-link works for the direct and standing paths, but the review proved three edge defects live in `internal/api/server/`: same-words/two-subjects cross-link on divergent rebuild (recall hard-fails `ErrOverrideMissing` — the refusal this layer exists to eliminate); silent declared views with no rewritten belief; same-subject two-belief collapse. Persist the view↔entry pairing (or equivalent) so a rebuild re-links exactly. In the same task, update the served-side comparison against T7.4's tightened fixtures (the two failing subtests the T7.4 review pinned).
 
