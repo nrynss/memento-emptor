@@ -23,7 +23,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -99,21 +98,6 @@ func (d *delivery) resource() map[string]any {
 		return nil
 	}
 	return body.Resource
-}
-
-// disputeCategory maps a dispute code to its category the way served
-// ingest does: a code the frozen table does not name stores with no
-// classified reason instead of failing the read, so the delivery is
-// stored and counts toward nothing. Any other mapping error is returned.
-func disputeCategory(code domain.DisputeCode) (domain.Category, error) {
-	category, err := domain.CategoryForDispute(code)
-	if errors.Is(err, domain.ErrUnknownDisputeCode) {
-		return domain.CategoryNone, nil
-	}
-	if err != nil {
-		return domain.CategoryNone, err
-	}
-	return category, nil
 }
 
 // client is a minimal sandbox REST client.
@@ -598,7 +582,9 @@ func (s *liveSource) GetRefund(ctx context.Context, refundID string) (fakes.Refu
 
 // GetDispute returns the dispute read with its reason code mapped. A
 // code the frozen table does not name keeps its spelling on the row and
-// carries no category, exactly as served ingest stores it.
+// carries no category: the mapping comes from
+// domain.StoredCategoryForDispute, so this read makes no judgement of its
+// own about an unknown code.
 func (s *liveSource) GetDispute(ctx context.Context, disputeID string) (fakes.DisputeRecord, error) {
 	if record, ok := s.disputes[disputeID]; ok {
 		return record, nil
@@ -608,7 +594,7 @@ func (s *liveSource) GetDispute(ctx context.Context, disputeID string) (fakes.Di
 		return fakes.DisputeRecord{}, err
 	}
 	code := domain.DisputeCode(str(got, "reason"))
-	category, err := disputeCategory(code)
+	category, err := domain.StoredCategoryForDispute(code)
 	if err != nil {
 		return fakes.DisputeRecord{}, err
 	}
@@ -827,11 +813,12 @@ func main() {
 	if len(disputeResult.Rows) == 0 {
 		fail(fmt.Errorf("live: dispute produced no rows"))
 	}
-	// The dispute's own code decides the row's reason, through the same
-	// mapping served ingest uses: a code outside the frozen table keeps
-	// its spelling, carries no category, and counts toward nothing.
+	// The dispute's own code decides the row's reason, through
+	// domain.StoredCategoryForDispute: a code outside the frozen table
+	// keeps its spelling, carries no category, and counts toward
+	// nothing.
 	disputeCode := domain.DisputeCode(str(deliveries[disputePick.id].resource(), "reason"))
-	disputeWant, err := disputeCategory(disputeCode)
+	disputeWant, err := domain.StoredCategoryForDispute(disputeCode)
 	if err != nil {
 		fail(fmt.Errorf("live: map dispute code %q: %w", disputeCode, err))
 	}

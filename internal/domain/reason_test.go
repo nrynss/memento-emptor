@@ -96,6 +96,37 @@ func TestCategoryForDisputeUnknown(t *testing.T) {
 	}
 }
 
+// TestStoredCategoryForDispute pins the disposition the store takes: a code
+// outside the frozen table is not an error, because the outcome is stored
+// with no classified reason rather than dropped. Every table code maps as
+// CategoryForDispute maps it.
+func TestStoredCategoryForDispute(t *testing.T) {
+	for _, code := range DisputeCodes {
+		want, err := CategoryForDispute(code)
+		if err != nil {
+			t.Fatalf("CategoryForDispute(%q) returned error: %v", code, err)
+		}
+		got, err := StoredCategoryForDispute(code)
+		if err != nil {
+			t.Errorf("StoredCategoryForDispute(%q) returned error: %v", code, err)
+			continue
+		}
+		if got != want {
+			t.Errorf("StoredCategoryForDispute(%q) = %q, want %q", code, got, want)
+		}
+	}
+	got, err := StoredCategoryForDispute("NOT_A_REAL_CODE")
+	if err != nil {
+		t.Fatalf("StoredCategoryForDispute(unknown) returned error: %v", err)
+	}
+	if got != CategoryNone {
+		t.Errorf("StoredCategoryForDispute(unknown) = %q, want none", got)
+	}
+	if kind := got.CountsToward(); kind != BeliefKindNone {
+		t.Errorf("stored unknown dispute code counts toward %q, want nothing", kind)
+	}
+}
+
 func TestDisputeCodesListsAll(t *testing.T) {
 	for _, code := range DisputeCodes {
 		if _, err := CategoryForDispute(code); err != nil {

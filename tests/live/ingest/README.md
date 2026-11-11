@@ -20,10 +20,11 @@ gate's `go test -race` finds no tests and `go vet` sees only `main.go`.
   non-arrival case that is `not_arrived` and the seller.
 - A code the table does not name is stored the way served ingest stores
   it: the code stays as the reason's text, the category is `none`, and
-  the row counts toward nothing. The driver no longer aborts the read
-  on such a code. No live sandbox case carries such a code, so this
-  path rests on the served ingest's table test and on the driver
-  restating the same mapping; no live run has taken it.
+  the row counts toward nothing. The driver does not abort the read on
+  such a code, and it makes no judgement of its own about one: the
+  mapping comes from `domain.StoredCategoryForDispute`. No live sandbox
+  case carries such a code, so this path rests on the domain's table
+  test; no live run has taken it.
 - Redelivering either event returns the stored rows with `Duplicate`
   set and writes nothing new.
 
