@@ -158,7 +158,7 @@ describe('the why page reads live from a shopper link', () => {
 
 		// The recommendation read is independent and did answer here, so the
 		// alert names what failed rather than claiming the page is all fixture.
-		expect(host.textContent ?? '').toContain('No belief is shown from the live layer');
+		expect(host.textContent ?? '').toContain('No belief card is shown');
 		expect(host.querySelector('.why-value')).toBeNull();
 		expect(host.textContent ?? '').not.toContain(token);
 	});

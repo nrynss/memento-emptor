@@ -316,7 +316,7 @@
 {#if loadError !== null}
 	<p role="alert" class="why-error">
 		{#if liveLink !== null}
-			The live why view read failed: {loadError}. No belief is shown from the live layer.
+			The live why view read failed: {loadError}. No belief card is shown.
 		{:else}
 			The why view failed to load: {loadError}
 		{/if}
