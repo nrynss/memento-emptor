@@ -3,27 +3,19 @@
  *
  * Descriptions are the layer's own frozen words (internal/api/contract:
  * Tools), which is the one shared text the task allows — the agent's
- * instructions are written fresh and carry no correction story. Shapes
- * match the frozen contract, so the live swap changes no tool the agent
- * reads. No purchase-execution tool exists here on purpose: the agent can
- * advise and ask for approval but cannot move money.
+ * instructions are written fresh and carry no correction story. Each tool
+ * calls the served layer's edge through an injected connection (see
+ * edge.ts); nothing stands in for the layer, so a turn either reads live
+ * memory or reports that it could not. No purchase-execution tool exists
+ * here on purpose: the agent can advise and ask for approval but cannot
+ * move money.
  */
 
 import { createTool } from "@mastra/core/tools";
 import { z } from "zod";
-import {
-  answerReason,
-  describeBelief,
-  ledgerProof,
-  ledgerRow,
-  ledgerRows,
-  noteCorrection,
-  noteFeedback,
-  openQuestions,
-  pooledFit,
-  poolingChoice,
-  recall,
-} from "./store.js";
+import { landingFromEnv } from "./edge.js";
+
+const landing = landingFromEnv();
 
 const traceField = z.string().optional().describe("Host trace id for per-trace review");
 
@@ -33,7 +25,7 @@ export const recallTool = createTool({
     "Recall what applies before recommending. It never refuses: the shopper's beliefs and the pooled product fit come back each with a status label, thin evidence included. Guidance names the precedence step that decided (correction, own_evidence, pool, statement, none); when steps disagree both are returned with the lower marked overridden. When a correction is present, recommend from it.",
   inputSchema: z.object({
     shopper_id: z.string(),
-    brand_id: z.string().optional(),
+    brand_id: z.string().describe("The brand asked about; Brand X is brand-x-001"),
     line_name: z.string().optional(),
     category: z.string().optional(),
     fit_handle: z.string().optional(),
@@ -42,7 +34,7 @@ export const recallTool = createTool({
     trace_id: traceField,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => recall(input.shopper_id, input.trace_id),
+  execute: async (input) => landing.recall(input),
 });
 
 export const correctionTool = createTool({
@@ -56,8 +48,7 @@ export const correctionTool = createTool({
     trace_id: traceField,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) =>
-    noteCorrection(input.shopper_id, input.text, input.contradicts_belief_id, input.trace_id),
+  execute: async (input) => landing.correct(input),
 });
 
 export const questionsTool = createTool({
@@ -69,7 +60,7 @@ export const questionsTool = createTool({
     limit: z.number().optional(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => openQuestions(input.shopper_id),
+  execute: async (input) => landing.questions(input),
 });
 
 export const reasonTool = createTool({
@@ -83,10 +74,7 @@ export const reasonTool = createTool({
     trace_id: traceField,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => {
-    void input.shopper_id;
-    return answerReason(input.question_id, input.answer_text, input.trace_id);
-  },
+  execute: async (input) => landing.reason(input),
 });
 
 export const feedbackTool = createTool({
@@ -102,10 +90,7 @@ export const feedbackTool = createTool({
     trace_id: traceField,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => {
-    void input.shopper_id;
-    return noteFeedback(input.custom_id, input.sku, input.size, input.feedback_text, input.trace_id);
-  },
+  execute: async (input) => landing.feedback(input),
 });
 
 export const explainTool = createTool({
@@ -117,10 +102,7 @@ export const explainTool = createTool({
     belief_id: z.string(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => {
-    void input.shopper_id;
-    return describeBelief(input.belief_id) ?? { error: `unknown belief ${input.belief_id}` };
-  },
+  execute: async (input) => landing.explain(input),
 });
 
 export const poolTool = createTool({
@@ -134,7 +116,7 @@ export const poolTool = createTool({
     size: z.string(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => pooledFit(input.brand_id, input.category, input.fit_handle, input.size),
+  execute: async (input) => landing.fit(input),
 });
 
 export const poolingTool = createTool({
@@ -147,7 +129,7 @@ export const poolingTool = createTool({
     trace_id: traceField,
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => poolingChoice(input.shopper_id, input.pooling, input.trace_id),
+  execute: async (input) => landing.pooling(input),
 });
 
 export const ledgerListTool = createTool({
@@ -159,7 +141,7 @@ export const ledgerListTool = createTool({
     include_seeded: z.boolean().optional(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => ledgerRows(input.shopper_id),
+  execute: async (input) => landing.ledger(input),
 });
 
 export const ledgerOneTool = createTool({
@@ -170,10 +152,7 @@ export const ledgerOneTool = createTool({
     belief_id: z.string(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => {
-    void input.shopper_id;
-    return ledgerRow(input.belief_id) ?? { error: `unknown belief ${input.belief_id}` };
-  },
+  execute: async (input) => landing.ledgerRow(input),
 });
 
 export const ledgerProofTool = createTool({
@@ -182,9 +161,10 @@ export const ledgerProofTool = createTool({
     "List the ledger's evidence rows: outcomes with their reasons, what each counts toward, seeded marks and belief links.",
   inputSchema: z.object({
     shopper_id: z.string(),
+    belief_id: z.string().optional(),
   }),
   outputSchema: z.object({}).passthrough(),
-  execute: async (input) => ledgerProof(input.shopper_id),
+  execute: async (input) => landing.ledgerProof(input),
 });
 
 export const tools = {

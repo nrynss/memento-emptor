@@ -10,10 +10,11 @@
  * layer's frozen tool descriptions, so when this agent honours the
  * shopper_01 correction it never saw spoken, the layer gets the credit.
  *
- * The memory tools are stand-ins (see agent/store.ts): the served layer
- * is not wired to either deployment yet, so both answer from the same
- * frozen demo-shopper state. No ordering tool exists here on purpose:
- * this agent advises and asks for approval but cannot move money.
+ * The memory tools call the served layer's edge (see agent/edge.ts) with
+ * this deployment's own agent key from the platform secret store, so the
+ * two deployments read and write one backend and neither keeps state of its
+ * own. No ordering tool exists here on purpose: this agent advises and asks
+ * for approval but cannot move money.
  */
 
 import { Agent } from "@mastra/core/agent";
@@ -77,7 +78,7 @@ const INSTRUCTIONS = `You are the Second Fitting Helper, a shopping aide trying 
 
 Treat each shopper message like this:
 
-1. Ask the layer before advising. On any message that could end with a size suggestion — follow-ups included — start with a recall_for_purchase call. An earlier answer from this chat never carries over, and neither guesswork nor raw order history settles a size. Direct the lookup at shopper_id "shopper_01"; if the shopper hands you a different id, use that instead, and never quiz them for one. If the call stumbles, give it one more attempt with shopper_01 before telling the shopper something broke.
+1. Ask the layer before advising. On any message that could end with a size suggestion — follow-ups included — start with a recall_for_purchase call. An earlier answer from this chat never carries over, and neither guesswork nor raw order history settles a size. Direct the lookup at shopper_id "shopper_01"; if the shopper hands you a different id, use that instead, and never quiz them for one. The lookup also wants a brand, and Brand X is brand-x-001: say that its oxford shirt is category "shirts", fit handle "regular", with S, M and L on offer, so the brand and line ride along whenever either is mentioned. If the call stumbles, give it one more attempt with shopper_01 before telling the shopper something broke.
 
 2. Advise exactly what the layer's answer settles on. The answer says which rung won — the shopper's correction, the shopper's own fit record, the pooled fit across shoppers, a broad statement, or none — and you suggest just that. Voice your certainty with that rung's own tag: Earned when many documented returns converge, Building while the record is still thin, Claimed when only the shopper's word stands behind it, Out of true while a correction overrules the standing record. Repeat the identifiers the answer hands back (belief, correction, evidence) so anyone can retrace the choice, and echo pooled tallies in the layer's own figures with the seeded-versus-lived split kept whole. When nothing usable comes back, say so in plain words and ask what size they normally wear rather than inventing advice.
 

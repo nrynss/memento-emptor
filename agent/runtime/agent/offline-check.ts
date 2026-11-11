@@ -1,24 +1,21 @@
 /**
- * Offline check: the agent answers a shopping request against the fakes
- * before anything is deployed. No model, no network, no keys: it exercises
- * the fake-backed tools the deployed agent will call and asserts the
- * recall-first contract (correction wins, belief stays, vague answers ask
- * again) plus one block per precedence step (correction, own evidence,
- * pool, statement, none) and the standalone correction that stands on its
- * own when recall served no belief. Run: bun agent/offline-check.ts
+ * Offline check: the agent's own tool code against the layer's frozen
+ * contract examples. No model, no keys, no external network.
+ *
+ * The transport is injected, which is the point: the deployed path always
+ * calls the served layer's edge (agent/layer.ts), and this check swaps the
+ * edge for the contract's own example responses so the recall-first contract
+ * (correction wins, belief stays, one rung per precedence step, the
+ * standalone correction), the eleven tool bindings and the HTTP call shape
+ * are all proved without a live deployment. A local stub server proves the
+ * request the deployed code would send.
+ *
+ * Run: bun agent/offline-check.ts
  */
-import {
-  explainBelief,
-  ledgerBeliefs,
-  lookupReturn,
-  pendingQuestions,
-  productFit,
-  recallForPurchase,
-  recordCorrection,
-  recordFeedback,
-  recordReason,
-  setPooling,
-} from "./memory.js";
+import { join } from "node:path";
+import { buildLayer, httpTransport, LayerError, type Body, type LayerTransport } from "./layer.js";
+
+const API_DIR = join(import.meta.dir, "../../../testdata/api");
 
 let failures = 0;
 
@@ -31,154 +28,406 @@ function check(name: string, cond: boolean, detail?: string) {
   }
 }
 
-// Turn 1: a shopping request answered against the fakes. Recall first.
-const recall = recallForPurchase("shopper_01", "trace_3f8a01") as {
-  beliefs: Array<{
-    belief_id: string;
-    status: string;
-    standing: string;
-    contradicted: boolean;
-    evidence: unknown[];
-  }>;
-  overriding_correction: { text: string } | null;
-  guidance: { text: string; basis: string };
-  pending_count: number;
-};
-check("recall returns the sizing belief", recall.beliefs.length === 1);
-check("recall belief is Out of true, standing Venerable", recall.beliefs[0].status === "Out of true" && recall.beliefs[0].standing === "Venerable");
-check("recall belief stays contradicted, not deleted", recall.beliefs[0].contradicted === true);
-check("recall cites 3 fit returns", recall.beliefs[0].evidence.length === 3);
-check("correction wins the recommendation", recall.guidance.text === "Take size M for Brand X" && recall.guidance.basis === "correction");
-check("overriding correction present", recall.overriding_correction?.text === "I've lost weight, use M");
+type JSON_ = Record<string, any>;
+
+/** example reads one of the layer's frozen contract examples. */
+async function example(name: string): Promise<JSON_> {
+  return (await Bun.file(join(API_DIR, name)).json()) as JSON_;
+}
+
+/** One recorded call, as the fake edge saw it. */
+interface Recorded {
+  tool: string;
+  body: Body;
+}
+
+/**
+ * fakeEdge answers like the served layer does on the contract's examples.
+ * shopper_01 is the demo correction story, shopper_02 the pool rung,
+ * shopper_04 own evidence, shopper_06 the statement rung, anyone else none.
+ * A standing correction recorded through the edge is served back on that
+ * shopper's next recall, as the layer does.
+ */
+async function fakeEdge(): Promise<{ transport: LayerTransport; calls: Recorded[] }> {
+  const correction = await example("recall_for_purchase.response.example-correction.json");
+  const pool = await example("recall_for_purchase.response.example-pool.json");
+  const own = await example("recall_for_purchase.response.example-own.json");
+  const none = await example("recall_for_purchase.response.example-none.json");
+  const declared = await example("record_correction.response.example.json");
+  const standing = await example("record_correction.response.example-standing.json");
+  const fit = await example("product_fit.response.example.json");
+  const fitBuilding = await example("product_fit.response.example-building.json");
+  const fitClaimed = await example("product_fit.response.example-claimed.json");
+  const questions = await example("pending_questions.response.example.json");
+  const reason = await example("record_reason.response.example.json");
+  const unclear = await example("record_reason.response.example-unclear.json");
+  const feedback = await example("record_feedback.response.example.json");
+  const explain = await example("explain_belief.response.example.json");
+  const ledgerAll = await example("ledger_beliefs.response.example.json");
+  const ledgerOne = await example("ledger_belief.response.example.json");
+  const evidence = await example("ledger_evidence.response.example.json");
+  const pooling = await example("set_pooling.response.example.json");
+
+  // The statement rung decides on the shopper's Claimed words alone: the
+  // pool rung's example with the pool gone, the belief no longer overridden
+  // and the guidance on the statement.
+  const statement: JSON_ = JSON.parse(JSON.stringify(pool));
+  statement.beliefs[0].precedence = { step: "statement", overridden: false, overridden_by: null };
+  statement.pool = null;
+  statement.pool_lookup = "unavailable";
+  statement.guidance = {
+    text: "Take size M for Brand X: the shopper's usual size.",
+    basis: "statement",
+    correction_id: null,
+    belief_id: statement.beliefs[0].belief_id,
+  };
+
+  const calls: Recorded[] = [];
+  const standings = new Map<string, JSON_>();
+  const route = (tool: string, body: Body): JSON_ => {
+    switch (tool) {
+      case "recall_for_purchase": {
+        const shopper = String(body.shopper_id);
+        const held = standings.get(shopper);
+        if (held) {
+          const out = JSON.parse(JSON.stringify(none));
+          out.shopper_id = shopper;
+          out.overriding_correction = held.correction;
+          out.guidance = held.guidance;
+          return out;
+        }
+        if (shopper === "shopper_01") return JSON.parse(JSON.stringify(correction));
+        if (shopper === "shopper_02") return JSON.parse(JSON.stringify(pool));
+        if (shopper === "shopper_04") return JSON.parse(JSON.stringify(own));
+        if (shopper === "shopper_06") return JSON.parse(JSON.stringify(statement));
+        const out = JSON.parse(JSON.stringify(none));
+        out.shopper_id = shopper;
+        return out;
+      }
+      case "record_correction": {
+        if (typeof body.contradicts_belief_id === "string" && body.contradicts_belief_id !== "") {
+          return JSON.parse(JSON.stringify(declared));
+        }
+        const out = JSON.parse(JSON.stringify(standing));
+        standings.set(String(body.shopper_id), out);
+        return out;
+      }
+      case "product_fit": {
+        if (body.size === "M") return JSON.parse(JSON.stringify(fit));
+        if (body.size === "L") return JSON.parse(JSON.stringify(fitBuilding));
+        return JSON.parse(JSON.stringify(fitClaimed));
+      }
+      case "pending_questions":
+        return JSON.parse(JSON.stringify(questions));
+      case "record_reason":
+        return JSON.parse(
+          JSON.stringify(/tight|small|short|sleeve|button|loose|large|big/i.test(String(body.answer_text)) ? reason : unclear),
+        );
+      case "record_feedback":
+        return JSON.parse(JSON.stringify(feedback));
+      case "explain_belief":
+        return JSON.parse(JSON.stringify(explain));
+      case "ledger_beliefs":
+        return JSON.parse(JSON.stringify(ledgerAll));
+      case "ledger_belief":
+        return JSON.parse(JSON.stringify(ledgerOne));
+      case "ledger_evidence":
+        return JSON.parse(JSON.stringify(evidence));
+      case "set_pooling":
+        return JSON.parse(JSON.stringify(pooling));
+      default:
+        throw new Error(`fake edge: unknown tool ${tool}`);
+    }
+  };
+  return {
+    calls,
+    transport: {
+      async call(tool, body) {
+        calls.push({ tool, body });
+        const out = route(tool, body);
+        out.trace_id = typeof body.trace_id === "string" ? body.trace_id : null;
+        return out;
+      },
+    },
+  };
+}
+
+const { transport, calls } = await fakeEdge();
+const layer = buildLayer(transport);
+
+// Turn 1: a shopping request answered from the served layer's shapes.
+// Recall first, and the correction decides while the belief stays.
+const recall = await layer.recallForPurchase({
+  shopper_id: "shopper_01",
+  brand_id: "brand-x-001",
+  category: "shirts",
+  fit_handle: "regular",
+  size_considered: "M",
+  trace_id: "trace_3f8a01",
+});
+check("the first call is recall_for_purchase", calls.length === 1 && calls[0].tool === "recall_for_purchase");
+check("recall sends the shopper and the brand", calls[0].body.shopper_id === "shopper_01" && calls[0].body.brand_id === "brand-x-001");
+const beliefs = recall.beliefs as JSON_[];
+check("recall returns the sizing belief", beliefs.length === 1 && beliefs[0].belief_id === "blf_8f2c41");
+check(
+  "recall belief is Out of true, standing Venerable",
+  beliefs[0].status === "Out of true" && beliefs[0].standing === "Venerable",
+);
+check("recall belief stays contradicted, not deleted", beliefs[0].contradicted === true);
+check("recall cites 3 fit returns", (beliefs[0].evidence as unknown[]).length === 3);
+const guidance = recall.guidance as JSON_;
+check(
+  "correction wins the recommendation",
+  guidance.text === "Take size M for Brand X" && guidance.basis === "correction",
+);
+check("overriding correction present", (recall.overriding_correction as JSON_).correction_id === "corr_3b7e52");
 check("pending refund surfaces", recall.pending_count === 1);
+check("the trace id travels", recall.trace_id === "trace_3f8a01");
 
-// Unknown shoppers are isolated: no memory leaks across sessions.
-const stranger = recallForPurchase("shopper_99") as { beliefs: unknown[]; pending_count: number };
-check("unknown shopper gets no beliefs", stranger.beliefs.length === 0 && stranger.pending_count === 0);
+// Correction step: the own evidence and the pool both ride along overridden.
+const demoPool = recall.pool as JSON_;
+check(
+  "correction step marks own evidence overridden",
+  beliefs[0].precedence.step === "own_evidence" &&
+    beliefs[0].precedence.overridden === true &&
+    beliefs[0].precedence.overridden_by === "correction",
+);
+check(
+  "correction step marks the pool overridden",
+  demoPool.precedence.step === "pool" &&
+    demoPool.precedence.overridden === true &&
+    demoPool.precedence.overridden_by === "correction",
+);
+check(
+  "correction step consulted the Earned pool",
+  recall.pool_lookup === "consulted" && demoPool.status === "Earned" && demoPool.direction === "small",
+);
+check(
+  "the pool's seeded split is quoted, not summed",
+  demoPool.counts.settled === demoPool.seeded.settled + demoPool.live.settled,
+);
 
-// Correction applies at once with precedence.
-const corr = recordCorrection("shopper_01", "I've lost weight, use M", "blf_8f2c41", "trace_3f8a02") as {
-  correction: { takes_precedence: boolean };
-  status: string;
-  guidance: { basis: string };
-};
-check("correction takes precedence", corr.correction.takes_precedence === true);
-check("belief stays Out of true beside the correction", corr.status === "Out of true" && corr.guidance.basis === "correction");
+// Pool step: a newcomer is sized from the pool over their usual size.
+const pooled = await layer.recallForPurchase({ shopper_id: "shopper_02", brand_id: "brand-x-001" });
+const pooledPool = pooled.pool as JSON_;
+const pooledBeliefs = pooled.beliefs as JSON_[];
+check(
+  "pool step decides from the pool",
+  (pooled.guidance as JSON_).basis === "pool" && pooledPool.status === "Earned" && pooledPool.direction === "small",
+);
+check("pool guidance cites its counts", String((pooled.guidance as JSON_).text).includes("29 of the 47"));
+check(
+  "pool step marks the statement overridden",
+  pooledBeliefs[0].precedence.step === "statement" &&
+    pooledBeliefs[0].precedence.overridden === true &&
+    pooledBeliefs[0].precedence.overridden_by === "pool",
+);
 
-// Pending question, then the vague answer asks again (frozen ask-again shape).
-const pending = pendingQuestions("shopper_01") as { questions: Array<{ question_id: string }> };
-check("one pending question", pending.questions.length === 1 && pending.questions[0].question_id === "q_9f04ab");
-const vague = recordReason("q_9f04ab", "not great", "trace_3f8a03") as { ask_again: boolean; accepted: boolean };
+// Own-evidence step: the shopper unlike the crowd, pool overridden.
+const own = await layer.recallForPurchase({ shopper_id: "shopper_04", brand_id: "brand-x-001" });
+check("own-evidence step beats the pool", (own.guidance as JSON_).basis === "own_evidence");
+check(
+  "own-evidence step marks the pool overridden",
+  (own.pool as JSON_).precedence.overridden === true && (own.pool as JSON_).precedence.overridden_by === "own_evidence",
+);
+
+// Statement step: the usual size decides, labelled Claimed, never evidence.
+const stmt = await layer.recallForPurchase({ shopper_id: "shopper_06", brand_id: "brand-x-001" });
+const stmtBeliefs = stmt.beliefs as JSON_[];
+check("statement step decides from the usual size", (stmt.guidance as JSON_).basis === "statement");
+check(
+  "statement step stays Claimed and un-overridden",
+  stmtBeliefs[0].status === "Claimed" && stmtBeliefs[0].precedence.overridden === false,
+);
+
+// None step: the layer never refuses, it says plainly no memory applies.
+const none = await layer.recallForPurchase({ shopper_id: "shopper_99", brand_id: "brand-x-001" });
+check(
+  "none step says so plainly, never refuses",
+  (none.beliefs as unknown[]).length === 0 &&
+    (none.guidance as JSON_).basis === "none" &&
+    String((none.guidance as JSON_).text).includes("No memory applies yet"),
+);
+
+// A correction against a served belief returns the declared shape.
+const corr = await layer.recordCorrection({
+  shopper_id: "shopper_01",
+  text: "I've lost weight, use M",
+  contradicts_belief_id: "blf_8f2c41",
+  trace_id: "trace_3f8a02",
+});
+check("declared correction takes precedence", (corr.correction as JSON_).takes_precedence === true);
+check(
+  "the belief stays Out of true beside the correction",
+  corr.status === "Out of true" && (corr.guidance as JSON_).basis === "correction",
+);
+
+// Standalone correction: recall served nothing, so the correction is
+// recorded with no belief id, stands Claimed, and decides again.
+const stand = await layer.recordCorrection({ shopper_id: "shopper_77", text: "Actually use size M for me" });
+check(
+  "standalone correction stands Claimed",
+  stand.status === "Claimed" && stand.standing === "None" && stand.contradicted === false,
+);
+const again = await layer.recallForPurchase({ shopper_id: "shopper_77", brand_id: "brand-x-001" });
+check(
+  "standalone correction stays in force",
+  (again.overriding_correction as JSON_).correction_id === (stand.correction as JSON_).correction_id &&
+    (again.guidance as JSON_).basis === "correction",
+);
+
+// Pending question, then the vague answer asks again.
+const pending = await layer.pendingQuestions({ shopper_id: "shopper_01" });
+check("one pending question", (pending.questions as unknown[]).length === 1);
+const vague = await layer.recordReason({ shopper_id: "shopper_01", question_id: "q_9f04ab", answer_text: "not great" });
 check("vague answer asks again", vague.ask_again === true && vague.accepted === false);
-const clear = recordReason("q_9f04ab", "Too tight in the shoulders, couldn't button it.", "trace_3f8a03") as {
-  accepted: boolean;
-  category: string;
-};
+const clear = await layer.recordReason({
+  shopper_id: "shopper_01",
+  question_id: "q_9f04ab",
+  answer_text: "Too tight in the shoulders, couldn't button it.",
+});
 check("clear fit answer counts toward fit", clear.accepted === true && clear.category === "fit_too_small");
 
 // Feedback ties to the purchase.
-const fb = recordFeedback("memento-shopper01-06", "PSW8GeK", "M", "The M fits well across the shoulders.", "trace_3f8a04") as {
-  verdict: string;
-  accepted: boolean;
-};
+const fb = await layer.recordFeedback({
+  shopper_id: "shopper_01",
+  custom_id: "memento-shopper01-06",
+  sku: "PSW8GeK",
+  size: "M",
+  feedback_text: "The M fits well across the shoulders.",
+});
 check("fits-well feedback accepted", fb.verdict === "fits_well" && fb.accepted === true);
 
-// Explanation carries the whole history for citations.
-const expl = explainBelief("blf_8f2c41") as { timeline: unknown[]; corrections: unknown[] } | null;
-check("explanation has 6 timeline steps and the correction", expl !== null && expl.timeline.length === 6 && expl.corrections.length === 1);
-check("unknown belief explains nothing", explainBelief("blf_nope") === null);
-
-// Ledger reads serve the four rows.
-const rows = ledgerBeliefs("shopper_01") as { beliefs: Array<{ evidence_count: number }> };
-check("ledger lists 4 rows, strongest first", rows.beliefs.length === 4 && rows.beliefs[0].evidence_count === 3);
-
-// PayPal-flavoured read is recall-shaped, never a purchase.
-const ret = lookupReturn("ORD-7XK-01") as { outcome: string; reason: string };
-check("lookup_return reads the recorded return", ret.outcome === "refunded" && ret.reason === "too tight in the shoulders");
-
-// Correction step: the demo shopper's own belief and the pool both ride
-// along overridden by the correction that decides.
-const demo = recallForPurchase("shopper_01", "trace_3f8a01") as {
-  beliefs: Array<{ precedence: { step: string; overridden: boolean; overridden_by: string | null } }>;
-  pool: { status: string; precedence: { step: string; overridden: boolean; overridden_by: string | null } };
-  pool_lookup: string;
-};
-check("correction step marks own evidence overridden", demo.beliefs[0].precedence.step === "own_evidence" && demo.beliefs[0].precedence.overridden === true && demo.beliefs[0].precedence.overridden_by === "correction");
-check("correction step marks the pool overridden", demo.pool.precedence.step === "pool" && demo.pool.precedence.overridden === true && demo.pool.precedence.overridden_by === "correction");
-check("correction step consulted the pool", demo.pool_lookup === "consulted" && demo.pool.status === "Earned");
-
-// Pool step: a new shopper on the Earned-small line is sized up from the
-// usual size, and the Claimed statement rides along overridden.
-const pooled = recallForPurchase("shopper_02") as {
-  beliefs: Array<{ precedence: { step: string; overridden: boolean; overridden_by: string | null }; status: string }>;
-  pool: { status: string; direction: string; counts: { settled: number }; seeded: { settled: number }; precedence: { step: string; overridden: boolean } };
-  guidance: { text: string; basis: string };
-};
-check("pool step decides from the pool", pooled.guidance.basis === "pool" && pooled.pool.status === "Earned" && pooled.pool.direction === "small");
-check("pool guidance cites counts", pooled.guidance.text.includes("29 of the 47") && pooled.guidance.text.includes("too small"));
-check("pool step shows the seeded split", pooled.pool.seeded.settled === 48 && pooled.pool.counts.settled === 60);
-check("pool step marks the statement overridden", pooled.beliefs[0].status === "Claimed" && pooled.beliefs[0].precedence.step === "statement" && pooled.beliefs[0].precedence.overridden === true);
-check("pool step pool rides along", pooled.pool.precedence.step === "pool" && pooled.pool.precedence.overridden === false);
-
-// Own-evidence step: the shopper unlike the crowd keeps their size, and
-// the disagreeing pool rides along overridden.
-const own = recallForPurchase("shopper_04") as {
-  guidance: { text: string; basis: string };
-  pool: { precedence: { step: string; overridden: boolean; overridden_by: string | null } };
-};
-check("own-evidence step beats the pool", own.guidance.basis === "own_evidence" && own.guidance.text.includes("ahead of the pool"));
-check("own-evidence step marks the pool overridden", own.pool.precedence.step === "pool" && own.pool.precedence.overridden === true && own.pool.precedence.overridden_by === "own_evidence");
-
-// Statement step: the usual size decides, labelled Claimed, never as
-// evidence.
-const stmt = recallForPurchase("shopper_06") as {
-  guidance: { text: string; basis: string };
-  beliefs: Array<{ status: string; precedence: { step: string; overridden: boolean } }>;
-};
-check("statement step decides from the usual size", stmt.guidance.basis === "statement" && stmt.guidance.text.includes("usual size"));
-check("statement step stays Claimed", stmt.beliefs[0].status === "Claimed" && stmt.beliefs[0].precedence.overridden === false);
-
-// None step: the layer never refuses, it says plainly no memory applies.
-const none = recallForPurchase("shopper_99") as {
-  beliefs: unknown[];
-  guidance: { text: string; basis: string };
-  pool_lookup: string;
-};
-check("none step says so plainly, never refuses", none.beliefs.length === 0 && none.guidance.basis === "none" && none.guidance.text.includes("No memory applies yet"));
-
-// Standalone correction: recall served no belief, so the correction is
-// recorded with no belief id, stands Claimed, and stays in force.
-const stand = recordCorrection("shopper_99", "Actually use size M for me") as {
-  correction: { correction_id: string };
-  status: string;
-  standing: string;
-  contradicted: boolean;
-  guidance: { text: string; basis: string; belief_id: string | null };
-};
-check("standalone correction stands Claimed", stand.status === "Claimed" && stand.standing === "None" && stand.contradicted === false);
-check("standalone correction decides the next recommendation", stand.guidance.basis === "correction" && stand.guidance.text === "Take size M" && stand.guidance.belief_id === null);
-const again = recallForPurchase("shopper_99") as {
-  overriding_correction: { correction_id: string } | null;
-  guidance: { text: string; basis: string };
-};
-check("standalone correction stays in force", again.overriding_correction?.correction_id === stand.correction.correction_id && again.guidance.basis === "correction" && again.guidance.text === "Take size M for Brand X");
+// Explanation and ledger reads serve the layer's rows.
+const expl = await layer.explainBelief({ shopper_id: "shopper_01", belief_id: "blf_8f2c41" });
+check("explanation carries the timeline and the correction", (expl.timeline as unknown[]).length > 0 && (expl.corrections as unknown[]).length === 1);
+const rows = await layer.ledgerBeliefs({ shopper_id: "shopper_01" });
+check("ledger lists its rows", (rows.beliefs as unknown[]).length > 0);
+check("ledger reads ask for the seeded rows", calls[calls.length - 1].body.include_seeded === true);
+const row = await layer.ledgerBelief({ shopper_id: "shopper_01", belief_id: "blf_8f2c41" });
+check("one ledger row reads in full", (row.belief as JSON_).belief_id === "blf_8f2c41");
+const proof = await layer.ledgerEvidence({ shopper_id: "shopper_01" });
+check("ledger evidence serves rows", (proof.evidence as unknown[]).length > 0);
 
 // Pool and pooling tools serve counts, never shopper rows.
-const fit = productFit("brand-x-001", "shirts", "regular", "M") as {
-  pool: { status: string; counts: { shoppers: { fit: number } } };
-};
-check("product_fit serves the Earned pool", fit.pool.status === "Earned" && fit.pool.counts.shoppers.fit === 39);
-const empty = productFit("brand-x-001", "shirts", "regular", "XL") as {
-  pool: { status: string; counts: { settled: number } };
-};
-check("product_fit on an empty line says Claimed", empty.pool.status === "Claimed" && empty.pool.counts.settled === 0);
-const optout = setPooling("shopper_02", false) as { pooling: boolean; rows_removed: number };
-check("opting out removes rows", optout.pooling === false && optout.rows_removed === 1);
-const optin = setPooling("shopper_02", true) as { pooling: boolean; rows_removed: number };
-check("opting back in removes nothing", optin.pooling === true && optin.rows_removed === 0);
+const fit = await layer.productFit({ brand_id: "brand-x-001", category: "shirts", fit_handle: "regular", size: "M" });
+check("product_fit serves the Earned pool", (fit.pool as JSON_).status === "Earned");
+check("product_fit carries no shopper", calls[calls.length - 1].body.shopper_id === undefined);
+const optout = await layer.setPooling({ shopper_id: "shopper_02", pooling: false });
+check("opting out reports the rows removed", optout.pooling === false && optout.rows_removed === 3);
+
+// The deployed tool set is the layer's eleven: no stand-in tool rides along.
+check("the layer binding is the eleven frozen tools", Object.keys(layer).length === 11);
+for (const tool of [
+  "recall_for_purchase",
+  "record_correction",
+  "pending_questions",
+  "record_reason",
+  "record_feedback",
+  "explain_belief",
+  "product_fit",
+  "set_pooling",
+  "ledger_beliefs",
+  "ledger_belief",
+  "ledger_evidence",
+]) {
+  check(`recall-first contract covers ${tool}`, calls.some((c) => c.tool === tool));
+}
+
+// The HTTP path: the request the deployment sends, against a local stub.
+interface Seen {
+  method: string;
+  path: string;
+  authorization: string;
+  contentType: string;
+  body: JSON_;
+}
+const seen: Seen[] = [];
+const stub = Bun.serve({
+  port: 0,
+  hostname: "127.0.0.1",
+  async fetch(request) {
+    const url = new URL(request.url);
+    const body = (await request.json().catch(() => ({}))) as JSON_;
+    seen.push({
+      method: request.method,
+      path: url.pathname,
+      authorization: request.headers.get("authorization") ?? "",
+      contentType: request.headers.get("content-type") ?? "",
+      body,
+    });
+    if (url.pathname === "/tools/ledger_belief") {
+      return new Response(JSON.stringify({ error: { code: "unauthenticated", message: "unauthorized" } }), {
+        status: 401,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (url.pathname === "/tools/ledger_evidence") {
+      return new Response("<html>bad gateway</html>", { status: 502 });
+    }
+    return new Response(JSON.stringify(await example("recall_for_purchase.response.example-correction.json")), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  },
+});
+
+const httpLayer = buildLayer(httpTransport({ url: stub.url.toString(), key: "offline-check-key" }));
+const live = await httpLayer.recallForPurchase({
+  shopper_id: "shopper_01",
+  brand_id: "brand-x-001",
+  category: "shirts",
+  fit_handle: "regular",
+  size_considered: "M",
+  trace_id: "trace_3f8a09",
+});
+check("the HTTP path answers with the layer's response", (live.guidance as JSON_).basis === "correction");
+const sent = seen[seen.length - 1];
+check("the call posts to the tool's edge path", sent.method === "POST" && sent.path === "/tools/recall_for_purchase");
+check("the agent key travels as a bearer token", sent.authorization === "Bearer offline-check-key");
+check("the body carries the shopper and the brand", sent.body.shopper_id === "shopper_01" && sent.body.brand_id === "brand-x-001");
+check("the call sends JSON", sent.contentType.startsWith("application/json"));
+
+// A refused call carries the layer's own code and status.
+let refused: unknown;
+try {
+  await httpLayer.ledgerBelief({ shopper_id: "shopper_01", belief_id: "blf_8f2c41" });
+} catch (cause) {
+  refused = cause;
+}
+check(
+  "a refusal surfaces the layer's code",
+  refused instanceof LayerError && refused.status === 401 && refused.code === "unauthenticated",
+);
+let garbled: unknown;
+try {
+  await httpLayer.ledgerEvidence({ shopper_id: "shopper_01" });
+} catch (cause) {
+  garbled = cause;
+}
+check("a non-JSON answer is a reported failure", garbled instanceof LayerError && garbled.status === 502);
+
+// No key: the deployment refuses to call rather than answer locally.
+let unconfigured: unknown;
+try {
+  await buildLayer(httpTransport({ url: stub.url.toString() })).productFit({
+    brand_id: "brand-x-001",
+    category: "shirts",
+    fit_handle: "regular",
+    size: "M",
+  });
+} catch (cause) {
+  unconfigured = cause;
+}
+check(
+  "a deployment without an agent key fails loudly",
+  unconfigured instanceof LayerError && unconfigured.code === "unconfigured",
+);
+
+stub.stop(true);
 
 if (failures > 0) {
   console.log(`${failures} check(s) failed`);
   process.exit(1);
 }
-console.log("offline check passed: shopping request answered against the fakes, recall first");
+console.log("offline check passed: every tool calls the served layer's edge, recall first");
