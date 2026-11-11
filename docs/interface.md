@@ -790,7 +790,10 @@ seeded population's oxford line at size M, but the counts do not. They
 show the shape and the arithmetic — seeded plus live equals the total on
 every field, and recent never exceeds the total — not the population's
 own rows. The Claimed and Building examples below do carry the seeded
-population's rows for their lines, with no live rows yet.
+population's rows for their lines, with no live rows yet. The example's
+`live.kept` is illustrative as well: no served path writes a kept row,
+so in the layer's own index a live split reads `kept` as 0. Kept rows
+come from the seeded population.
 
 The counts are settled purchases only. A purchase still inside its
 return window, and a refund with no reason yet, count toward nothing.
@@ -1591,11 +1594,18 @@ How a signal is written:
 | Classified return or dispute, fit or seller feedback | record_action | yes |
 | The shopper's correction | record_action, citing the belief in `against` only | never: it overrides, it adds no evidence |
 | General statement | derive, from the seed only | never |
-| Kept past the window, no feedback | observe | never |
+| Kept past the window, no feedback | observe, from the seed only | never |
 
 The statement row is the seed's: no tool records one, so the `derive`
 there is written by the boot replay, and a statement the seed does not
 carry does not exist. See "Where the general statement comes from".
+
+The kept row is the seed's: only the seed declares a kept signal, and the
+seeded population declares kept fit rows through the fit writer. No
+delivered outcome or tool records one. The layer models no return window
+and nothing decides that a window has closed, so a live purchase never
+settles as kept. The `kept` count in `product_fit` is the seeded
+population's today. See `product.md` "How a fit row is written".
 
 Seeded means marked. Every seeded row carries the mark, and the ledger
 shows it beside the row and in the seeded notice. The `shopper_01`

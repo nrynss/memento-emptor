@@ -126,9 +126,12 @@ the fit index (Elastic), not a belief in the graph. One purchase is one row.
   writer's merge keeps the higher rank whatever the event times say, and
   within rank 4 the later event wins. The rank stays as it is — it is
   frozen with the contract, and renumbering it would renumber every row
-  version. In practice each purchase settles once: the kept path fires
-  only for purchases never refunded, and classification answers the
-  pending question the refund opened. When a classification and a
+  version. A served purchase can settle only by a classified return reason
+  or by feedback, and classification answers the pending question the
+  refund opened. The kept write has no served producer — the seeded
+  population declares its kept rows — and the contested write has no
+  served caller, so the rank-4 collision this rule guards is not
+  reachable from a served event today. When a classification and a
   feedback do meet on one row, they point the same way — the shopper's
   answer and their feedback agree on how the size ran — so the
   directional counts the status rule reads are unchanged; only the
@@ -144,8 +147,12 @@ the fit index (Elastic), not a belief in the graph. One purchase is one row.
   (`research/elastic-fit.md` check 1)
 - **Only settled rows count.** A purchase settles when it is returned
   with a classified reason, gets fit feedback, or is kept past the return
-  window. A purchase still inside its window, and a refund with no reason
-  yet, are stored but count toward nothing.
+  window. The kept leg has no served producer: no delivered outcome emits
+  a kept state and nothing decides that a return window has closed, so a
+  live purchase settles only by a classified reason or feedback, and the
+  seeded population is where kept rows come from. A purchase still inside
+  its window, and a refund with no reason yet, are stored but count
+  toward nothing.
   (`research/elastic-fit.md` check 3)
 - **The shopper key is salted per line.** The key is an HMAC-SHA256 keyed
   with the identity salt over a version tag and the length-prefixed
