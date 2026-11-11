@@ -86,7 +86,8 @@ order reads carry the same account as `payee.merchant_id`, the refund as
 money, and in a layer that account is one value: a seller or a platform
 runs one layer beside its own payment app, and the recordings show the same
 merchant id on captures of two different orders (`capture-get.json`,
-`capture2-get.json`, `order-get-approved-line-items.json`). Keyed on it,
+`capture2-get.json`, `order-get-approved-line-items.json`; the committed
+copies redact the id to one placeholder). Keyed on it,
 every brand in the catalog would answer to one seller subject, and a
 dispute over one brand's parcel would count against every brand the layer
 serves. The brand is the unit the shopper's purchase, the fit row and the
