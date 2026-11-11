@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 5 / 6 | In progress (T7.6) |
 | P8 | 19 / 21 | In progress (T8.5i, T8.5j) |
-| P9 | 14 / 17 | In progress (T9.3i, T9.7, T9.9) |
+| P9 | 15 / 19 | In progress (T9.7, T9.9, T9.10, T9.11) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.3i: Toolchain pins checked mechanically (done)
+
+**What exists.** `tools/pincheck` reads every place Go and Node pins live — both images' build stages, CI's `setup-go`/`setup-node`, `go.mod`, and the README table — and fails naming the drifting file, its line and both versions; a source that lost its pin fails instead of shortening the list. `tools/check.sh` runs it before gofmt, so CI gets it for free. `TestCheckTable` (14 cases) proves each drift and missing-pin path, and the current tree prints `go 1.27 and node 26 agree across 9 declarations`. The README no longer claims the table is the only guard, and its one intended asymmetry (the Go tag floats the patch) is stated.
+
+**What surprised.** The guard's source list is literal: a third image or a second workflow pinning another Node would pass. Tightening that needs a decision about single-toolchain images, so it is recorded as a limit.
+
+**The next agent should not have to work out.** When an image or workflow joins the repo, add it to `tools/pincheck`'s source list or the guard silently ignores it.
 
 ### T8.5h: The statement rung (done)
 
