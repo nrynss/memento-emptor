@@ -171,6 +171,27 @@ describe('the belief page keeps one shopper at a time', () => {
 		expect(poolingChoice(host)).toContain('Pooling is on');
 	});
 
+	it('remounts the standing editor when the case changes', async () => {
+		const host = await openPage();
+		await waitFor(() => host.querySelector('.contest-editor') !== null, 'the standing form');
+
+		const input = () => host.querySelector('.contest-input') as HTMLTextAreaElement;
+		input().value = 'Use M from now on';
+		input().dispatchEvent(new Event('input', { bubbles: true }));
+		host
+			.querySelector('.contest-editor')!
+			.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+		await waitFor(
+			() => host.querySelector('.contest-done') !== null,
+			"the demo shopper's standing confirmation"
+		);
+
+		pickCase(host, 'pool');
+		await tick();
+		expect(host.querySelector('.contest-done')).toBeNull();
+		expect(input().value).toBe('');
+	});
+
 	it('shows no pooling answer at all for a shopper the fixture does not carry', async () => {
 		const host = await openPage();
 		pickCase(host, 'pool');
