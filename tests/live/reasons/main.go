@@ -195,6 +195,7 @@ func run(fixtures, out string) error {
 	var totalTokens int
 	mismatches := 0
 	drift := 0
+	lastModel := ""
 	fmt.Printf("%-3s %-50s %-18s %-18s %-8s %-9s %-12s\n", "#", "answer", "recorded", "live", "conf", "ask-again", "cost-usd")
 	for i, rec := range want {
 		if i > 0 {
@@ -208,14 +209,20 @@ func run(fixtures, out string) error {
 		}
 		totalCost += reply.cost
 		totalTokens += reply.inputToken
+		lastModel = reply.model
 
+		// The spend guard runs on every call: a single expensive reply
+		// stops the run before the next one is sent. The model guard
+		// runs on the first call, where a version change re-opens the
+		// floor; later drift is reported below as a mismatch.
+		if reply.cost > 10*referenceCostPerCall {
+			return fmt.Errorf("phrase %d cost %.9f USD, over 10x the %.7f reference: stopping per the guard",
+				i+1, reply.cost, referenceCostPerCall)
+		}
 		if i == 0 {
 			fmt.Printf("live model resolves to %s\n", reply.model)
 			if reply.model != expectedBuild {
 				return fmt.Errorf("model resolved to %s, want %s: version change re-opens the floor, stopping per the guard", reply.model, expectedBuild)
-			}
-			if reply.cost > 10*referenceCostPerCall {
-				return fmt.Errorf("first call cost %.9f USD, over 10x the %.7f reference: stopping per the guard", reply.cost, referenceCostPerCall)
 			}
 		}
 		if reply.model != expectedBuild {
@@ -253,7 +260,7 @@ func run(fixtures, out string) error {
 	}
 
 	fmt.Printf("total: %.9f USD for %d calls and %d input tokens (reference about $0.00024)\n", totalCost, len(want), totalTokens)
-	fmt.Printf("model: %s (expected %s)\n", expectedBuild, expectedBuild)
+	fmt.Printf("model: last reply resolved %s (expected %s)\n", lastModel, expectedBuild)
 	if mismatches > 0 {
 		return fmt.Errorf("%d of 11 phrases differ from the recorded table in category or verdict", mismatches)
 	}

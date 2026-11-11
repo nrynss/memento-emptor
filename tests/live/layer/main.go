@@ -2,8 +2,8 @@
 // with no agent, against the real pieces.
 //
 // The scripted client drives server.Service (the T2.5 service) over
-// recording payments (fakes.DemoStoryInputs, whose shapes the T2.1b
-// live leg proves identical to the sandbox reads), a live Jev
+// recording payments (fakes.DemoStoryInputs, whose seam shapes the T2.1b
+// live leg shows the sandbox reads also produce), a live Jev
 // classifier (internal/reasons.Client with the key attached by the
 // transport wrapper), and a live Lambo 0.10.1 graph client over a fresh
 // session with native embeddings. The evidence store is the in-memory

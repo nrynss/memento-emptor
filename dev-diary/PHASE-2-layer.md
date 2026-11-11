@@ -101,6 +101,18 @@ Raw documents in Elastic: shopper messages, classified reasons and product text.
 
 **Done when:** tests replay T0.6's queries; a test proves a Lambo write carries a document ID and no prose body.
 
+note: worker branch task/t23-evidence. `internal/evidence/` implements the
+`fakes.EvidenceStore` seam: `Document` values (message, reason, product)
+keyed by the brand/category/fit-handle line, `IndexDocument` assigning
+`doc-0001…` ids, `GraphStub` composing `evidence[<id>] <key>` and nothing
+else, `ForReason`/`ForProduct` building the text, and `FuseRRF` for the
+combined legs. Tests replay T0.6's recorded legs and prove the stub carries
+the id with no prose. Built shape, recorded in T8.1d: the store holds the
+texts in process (it is not an Elastic writer), beliefs live in the hub, and
+Elastic holds the pooled `fit-rows` index. T2.3c owns whether the raw
+evidence persists across a restart; it also owns this package's vectors
+comment.
+
 ---
 
 ### T2.3b: The evidence store, live
@@ -237,9 +249,9 @@ both redeliveries duplicate. Leg 2 re-runs the T2.3b evidence driver:
 BM25 + native-kNN + RRF legs pass on the real deployment, paraphrase
 0.674 in band, throwaway indices deleted. Leg 3 walks the demo story
 through the T2.5 service with recording payments (DemoStoryInputs,
-whose shapes leg 1 proves identical to live), a live Jev classifier,
-and a live Lambo 0.10.1 graph client (`lamboGraph` over MCP stdio,
-native `.jina-embeddings-v3`, session `t26-layer` erased afterward):
+whose seam shapes leg 1 shows the live reads also produce), a live Jev
+classifier, and a live Lambo 0.10.1 graph client (`lamboGraph` over MCP
+stdio, native `.jina-embeddings-v3`, session `t26-layer` erased afterward):
 three refunds in, three live classifications all `fit_too_small` at
 1.00 — "too tight in the shoulders" ($0.000021336), "the sleeves are
 way too short and I can't button it" ($0.000021630), "sleeves too

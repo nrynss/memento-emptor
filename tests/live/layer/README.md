@@ -31,7 +31,8 @@ LAMBO_BIN=$HOME/work/lambo/target/release/lambo \
    deployment (throwaway indices, deleted afterward).
 3. The layer driver (`main.go` in this directory): the interface story
    on the T2.5 service with recording payments (DemoStoryInputs, whose
-   shapes leg 1 proves identical to live), a live Jev classifier, and
+   seam shapes leg 1 shows the live sandbox reads also produce), a live
+   Jev classifier, and
    a live Lambo graph client over a fresh `t26-layer` session with
    native `.jina-embeddings-v3` embeddings. The session is erased at
    the end, so its id is spent: a re-run needs a fresh `OUT` directory

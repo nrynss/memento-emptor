@@ -34,10 +34,12 @@ exact vague-item probability.
 ## Budget and guards
 
 Eleven calls cost about **$0.00024** total at T0.7's measured
-$0.0000214 per call. After the first call the driver stops if the
-per-call cost exceeds 10x that reference, or if the endpoint resolves
-a different model build than `typesafe/jev-1.14-20261014` (a version
-change re-opens the floor). Either stop is reported, not retried.
+$0.0000214 per call. On every call the driver stops if the per-call cost
+exceeds 10x that reference; on the first call it also stops if the
+endpoint resolves a different model build than
+`typesafe/jev-1.14-20261014` (a version change re-opens the floor). A
+later reply that resolves another build is counted as a mismatch and
+fails the run at the end. Either stop is reported, not retried.
 
 ## Outputs
 

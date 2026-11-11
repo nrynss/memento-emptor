@@ -785,6 +785,22 @@ func TestWebhookRouteVerifiesDelivery(t *testing.T) {
 	if status := post(newRoute(acceptVerifier{}), good); status != 200 {
 		t.Fatalf("good delivery status %d, want 200", status)
 	}
+	// A replayed delivery writes nothing new at the deployed route too:
+	// the same service serves the event twice and still holds the one
+	// question the first delivery filed.
+	replayed := newRoute(acceptVerifier{})
+	for i := 0; i < 2; i++ {
+		if status := post(replayed, good); status != 200 {
+			t.Fatalf("delivery %d status %d, want 200", i+1, status)
+		}
+	}
+	held, err := replayed.PendingQuestions(context.Background(), contract.PendingQuestionsRequest{ShopperID: "webhook_shopper"})
+	if err != nil {
+		t.Fatalf("pending questions after replay: %v", err)
+	}
+	if len(held.Questions) != 1 {
+		t.Fatalf("replayed delivery holds %d questions, want the 1 the first delivery filed", len(held.Questions))
+	}
 	refused := newRoute(acceptVerifier{err: errors.New("nope")})
 	if status := post(refused, good); status != 400 {
 		t.Fatalf("rejected delivery status %d, want 400", status)

@@ -220,7 +220,11 @@ func TestStoryEndToEnd(t *testing.T) {
 	// runs-small belief. Opposite-direction answers are covered by the
 	// direction test, which proves they attach nowhere on a
 	// runs-small-only graph. The classifier fake serves recordings only,
-	// so the story reuses a recorded all-small answer here.
+	// so the story reuses a recorded all-small answer here. The frozen
+	// third phrase ("sleeves too short in M") has no classifier recording:
+	// only T2.6's live leg classifies it, and T2.2 owns adding that
+	// fixture (one Jev call, and the live drivers' eleven-phrase count
+	// moves with it).
 	third := answerReason(t, svc, shopper, "WH-2EV-03", "too tight in the shoulders")
 	if !third.Accepted {
 		t.Fatal("third return was not accepted as evidence")

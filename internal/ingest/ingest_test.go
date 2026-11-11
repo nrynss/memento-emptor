@@ -250,6 +250,25 @@ func TestDisputeForEachMappedCode(t *testing.T) {
 		{domain.DisputeItemNotReceived, domain.CategoryNotArrived, domain.BeliefKindSeller},
 		{domain.DisputeUnauthorizedTransaction, domain.CategoryNone, domain.BeliefKindNone},
 	}
+	// The table is hand-copied so the expected category and belief kind
+	// are stated independently of CategoryForDispute. That copy drifts
+	// when the frozen table grows, so the case list must cover every
+	// code in it: a new code fails here until its row is added.
+	covered := map[domain.DisputeCode]bool{}
+	for _, tc := range cases {
+		if covered[tc.code] {
+			t.Fatalf("dispute code %s appears twice in the case list", tc.code)
+		}
+		covered[tc.code] = true
+	}
+	for _, code := range domain.DisputeCodes {
+		if !covered[code] {
+			t.Errorf("dispute code %s has no case: the frozen table grew past this test", code)
+		}
+	}
+	if len(covered) != len(domain.DisputeCodes) {
+		t.Errorf("case list covers %d codes, the frozen table holds %d", len(covered), len(domain.DisputeCodes))
+	}
 	for i, tc := range cases {
 		eventID := fmt.Sprintf("WH-D-0%d", i)
 		event, dispute, order := disputeFor(eventID, fmt.Sprintf("PP-D-0%d", i), tc.code)

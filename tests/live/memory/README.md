@@ -5,16 +5,21 @@ Live sibling of T2.4. It seeds the demo shopper's history
 T0.3's settings (local session, backdated event times spanning the
 extent, GC cadence from the proven toml, receipt waits), then proves the
 Done-when clauses: the belief reaches Venerable, and the contradiction
-shows on recall. Nothing here runs in CI and nothing here gates a build:
-there are no `*_test.go` files under `tests/live/`, so the gate's
+shows on recall. The writes go straight to the Lambo MCP tools, one
+write per history row, in the shape the frozen write rule prescribes
+(`internal/memory`: derive for a belief or statement, `record_action`
+with `depends_on` for evidence, `against` for the correction). The Go
+writer itself is exercised by T2.4's tests and by T2.6's layer drive,
+which serves the interface; this driver proves the graph behaviour the
+writer relies on. Nothing here runs in CI and nothing here gates a
+build: there are no `*_test.go` files under `tests/live/`, so the gate's
 `go test -race` has no tests to run.
 
 ## What it writes
 
-One write per history row, through the frozen write rule
-(`internal/memory`, never modified here). Contents mirror the proven
-T0.3 shape, with the fit-return wording taken from the demo fixture's
-own notes:
+One write per history row, issued as direct Lambo MCP calls in the shape
+the frozen write rule prescribes (`internal/memory`), with the fit-return
+wording taken from the demo fixture's own notes:
 
 | Step | Write | Time |
 |---|---|---|
