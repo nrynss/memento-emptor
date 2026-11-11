@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 5 | Done |
-| P8 | 17 / 18 | In progress (T8.1d) |
+| P8 | 18 / 18 | Done |
 | P9 | 13 / 16 | In progress (T9.3i, T9.7, T9.8) |
 | P10 | 3 / 6 | In progress |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T8.1d: Retire the recall-tier claim (done, P8 closed)
+
+**What exists.** `product.md`, `docs/architecture.md`, `dev-diary/research/README.md` and `dev-diary/PHASE-0-ground.md` now state the hub's store-only decision with its reason, or mark the passage historical in sequence; no product doc asserts the tier as the deployed shape. The same task fixed a second false claim: Elastic does **not** store the layer's raw evidence. The served layer keeps each shopper's evidence texts in its own process store (no vectors), beliefs live in the hub, and Elastic holds only the pooled `fit-rows` index. The consequence is documented: after a restart the pool and a restored correction still decide, belief-backed steps return as writes replay, and the seeded story's evidence rows return at boot through `LoadSeed` (only a live event's row is lost until T2.3c decides persistence).
+
+**What surprised.** The review found four more wrong sentences: T0.11 said "as the deploy ran it at the time" though the deploy never ran the tier; both product docs described the store as holding messages and catalog text when the served path indexes one text per classified outcome; the post-restart panel was overstated as fully empty when the seed re-indexes at boot; and an architecture dependency row's title contradicted its own text.
+
+**The next agent should not have to work out.** P8 is 18/18. T2.3c owns evidence durability and the `internal/evidence` comment that still mentions vectors; its `owns` includes that package and both product docs.
 
 ### T9.3h: Merchant image Node pin (done)
 

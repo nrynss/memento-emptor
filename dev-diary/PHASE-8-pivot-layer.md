@@ -509,7 +509,7 @@ requires:   [T8.1c]
 fixture-ok: yes
 size:       XS · mid
 owns:       product.md, docs/architecture.md, dev-diary/research/README.md, dev-diary/PHASE-0-ground.md
-status:     in-review
+status:     done
 ```
 T8.1c recorded the hub as store-only and corrected `research/elastic.md`, but present-tense claims that Elastic is the graph's or Lambo's recall tier remain in `product.md` (the consumption section and the stack table), `docs/architecture.md`, `dev-diary/research/README.md` and T0.11's check 4 ("as the deploy runs it"). `product.md` is the first file a reader opens, so it must not assert the retired shape.
 
