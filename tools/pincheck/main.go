@@ -326,7 +326,24 @@ func goModPins(root string) ([]pin, error) {
 	return nil, fmt.Errorf("%s: no go directive, so the module states no Go version", rel)
 }
 
-// readmePins reads the Go and Node rows of the toolchain table in
+// readmeKinds are the toolchains the toolchain table must state a row for. It
+// is every toolchain the check compares: a row is a source like any other, so
+// one the table has lost is a failure rather than one fewer pin to compare.
+func readmeKinds() []kind {
+	return []kind{kindGo, kindNode, kindBun}
+}
+
+// isReadmeKind reports whether a row names a toolchain the table must state.
+func isReadmeKind(k kind) bool {
+	for _, want := range readmeKinds() {
+		if k == want {
+			return true
+		}
+	}
+	return false
+}
+
+// readmePins reads the Go, Node and bun rows of the toolchain table in
 // deploy/README.md, the table that records the pins for a reader.
 func readmePins(root string) ([]pin, error) {
 	const rel = "deploy/README.md"
@@ -345,7 +362,7 @@ func readmePins(root string) ([]pin, error) {
 			continue
 		}
 		k := kind(strings.ToLower(strings.TrimSpace(cells[1])))
-		if k != kindGo && k != kindNode {
+		if !isReadmeKind(k) {
 			continue
 		}
 		source := fmt.Sprintf("%s's toolchain table %s row (line %d)", rel, k, i+1)
@@ -360,7 +377,7 @@ func readmePins(root string) ([]pin, error) {
 		}
 		pins = append(pins, pin{kind: k, version: version, source: source})
 	}
-	for _, k := range []kind{kindGo, kindNode} {
+	for _, k := range readmeKinds() {
 		found := false
 		for _, p := range pins {
 			found = found || p.kind == k

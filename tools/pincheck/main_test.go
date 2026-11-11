@@ -60,6 +60,7 @@ go 1.27.1
 |---|---|---|
 | Go | 1.27 | ` + "`golang:1.27-bookworm`" + ` |
 | Node | 26 | ` + "`node:26-bookworm`" + ` |
+| Bun | 1 | ` + "`oven/bun:1`" + ` |
 `,
 	}
 }
@@ -184,6 +185,20 @@ func TestCheckTable(t *testing.T) {
 				replace(t, files, ".github/workflows/ci.yml", "bun-version: '1.3.14'", "bun-version: '2.0.0'")
 			},
 			want: []string{"bun: .github/workflows/ci.yml", "says 2.0.0"},
+		},
+		{
+			name: "bun drifts in the readme table",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "deploy/README.md", "| Bun | 1 |", "| Bun | 2 |")
+			},
+			want: []string{"bun: deploy/README.md", "says 2"},
+		},
+		{
+			name: "the table loses its bun row",
+			edit: func(t *testing.T, files map[string]string) {
+				replace(t, files, "deploy/README.md", "| Bun | 1 | `oven/bun:1` |\n", "")
+			},
+			want: []string{"deploy/README.md: no bun row"},
 		},
 		{
 			name: "a dockerfile that gains a bun stage is read",

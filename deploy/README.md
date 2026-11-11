@@ -18,22 +18,28 @@ region and cost are unchanged: $0 delta.
 
 ## Toolchain pins
 
-The two images choose three toolchain versions between them, and each
-must match the one the contract (T0.2) and CI name, so a build cannot
-pass in one place and fail in another:
+The two deploy images choose three toolchain versions between them, and
+the reference agents' images the fourth. Go and Node must match the
+versions the contract (T0.2) records, bun must match the one CI
+installs, and no build may pass in one place and fail in another:
 
 | Tool | Pin | Where the images pin it | Where the pin is checked |
 |---|---|---|---|
 | Go | 1.27 | `Dockerfile` and `merchant/Dockerfile`: `golang:1.27-bookworm` | `go.mod` (`go 1.27.1`) and `ci.yml`'s `setup-go` 1.27.1 |
 | Node | 26 | `Dockerfile`'s `web-build` and `merchant/Dockerfile`'s `web-build`: `node:26-bookworm` | `ci.yml`'s `setup-node` 26 |
+| Bun | 1 | `agent/frontend/Dockerfile`'s one stage, and the builder plus runtime stages of `agent/runtime/`, `agent/second/` and `bench/pilot/agent/`: `oven/bun:1` and `oven/bun:1-slim` | `ci.yml`'s `setup-bun` 1.3.14 |
 | Lambo | 0.10.1 | `Dockerfile`: the release download, sha256-pinned | the image build's own `sha256sum -c`; no CI step pins it |
 
-One asymmetry, intended: the Go tag floats the latest 1.27 patch where
-CI and `go.mod` fix 1.27.1. The table is no longer the record alone: the
-gate runs `tools/pincheck`, which reads both images' `FROM` lines, CI's
-`go-version` and `node-version`, `go.mod` and these rows, and fails
+Both asymmetries are intended: the Go tag floats the latest 1.27 patch
+where CI and `go.mod` fix 1.27.1, and the bun tags name a major where CI
+installs 1.3.14, so those two are compared by major, as Node is. The
+table is no longer the record alone: the gate runs `tools/pincheck`,
+which reads both deploy images' `FROM` lines, the `oven/bun:` `FROM`
+line of every Dockerfile in the tree, CI's `go-version`, `node-version`
+and `bun-version`, `go.mod` and all three rows of this table, and fails
 naming the file and version that drift. It also fails when a source
-stops stating its pin, so it cannot pass by reading less.
+stops stating its pin, so it cannot pass by reading less: over this tree
+it reads 18 declarations and prints `go 1.27, node 26 and bun 1 agree`.
 
 The Node major is the whole frontend pin: neither `web/package.json` nor
 `merchant/package.json` declares an `engines` field, so nothing but the
