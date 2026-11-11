@@ -39,7 +39,8 @@ func TestAssertKeysAbsent(t *testing.T) {
 
 // TestClassifierReplaysLabelledSet proves the fake serves the thirteen
 // recorded Jev answers with their recorded choices and confidences. The
-// expectations below are the research table, not the loader's output.
+// expectations below are the recorded table — T0.7's research table plus
+// the story's two fit answers — not the loader's output.
 func TestClassifierReplaysLabelledSet(t *testing.T) {
 	fake, err := NewRecordingReasonClassifier(filepath.Join(fixtureRoot(t), "jev"))
 	if err != nil {
