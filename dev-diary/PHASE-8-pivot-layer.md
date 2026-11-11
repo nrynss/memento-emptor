@@ -940,9 +940,9 @@ source tools/env.sh
 LAMBO_BIN=/tmp/opencode/t85q-lambo/lambo OUT=tests/live/precedence/out bash tests/live/precedence/run.sh
 ```
 
-The binary was the v0.10.1 release asset, downloaded and checked against its published `.sha256` (`b04eeab4…`), the same asset `deploy/Dockerfile` fetches and verifies. The cargo build at `~/work/lambo/target/release/lambo` also reports `lambo 0.10.1` but hashes `a1b4da7f…`, so it is not that asset; the run used the verified one. Deployment: the T0.12 Elastic project, with the test-prefixed recall indices `t85b-*` and the fit index `t85b-fit-rows`; the hub runs store-only (T8.1c), so no deployed recall index is read or written. Embedder: fixture, in-process vectors, no embedding endpoint called. Classifier: recording replay, no model call. The statement step ran with T8.5j's mark assertion active and passed all of its checks.
+The binary was the v0.10.1 release asset, downloaded and checked against its published `.sha256` (`b04eeab4…`), the same asset `deploy/Dockerfile` fetches and verifies. The cargo build at `~/work/lambo/target/release/lambo` also reports `lambo 0.10.1` but hashes `a1b4da7f…`, so it is not that asset; the run used the verified one. Deployment: the T0.12 Elastic project, with the test-prefixed recall indices `t85b-*` and the fit index `t85b-fit-rows`; the run's own hub uses the live recall tier under that prefix, while the deployed hub runs store-only (T8.1c), so no deployed recall index is read or written. Embedder: fixture, in-process vectors, no embedding endpoint called. Classifier: recording replay, no model call. The statement step ran with T8.5j's mark assertion active and passed all of its checks.
 
-The transcript, verbatim except the loopback address and port (shown as `<loopback>`) and the runner's last line, which names the local `out/` path:
+The transcript, verbatim except the loopback address and port (shown as `<loopback>`), with `run.sh`'s cleanup and leak checks appended; the runner's last line, which names the local `out/` path, is omitted:
 
 ```
 T8.5b live layer: recall never refuses, and says which step decided
@@ -1019,9 +1019,25 @@ prefix t85b- is empty
 
 The mark assertion is the `seeded=true` on `seed_stmt_001`: the recall served exactly one belief, the seeded statement, carrying the mark `LoadSeed` copied from the row. The pool's seeded/live split (`10`/`0`, and `10`/`3` beside the shopper's own writes) is the same rule on the other seeded rows. The one-return tripwire is not in this driver: it lives in `tests/live/layer` (T8.5u), which this task neither ran nor owns; the own-evidence shopper here serves its Claimed three-return belief, and the pool rides along overridden.
 
-Cleanup: the driver deleted the 3 `t85b-*` indices, its after listing and `run.sh`'s independent listing are both `[]`, and the run dir (store, configs, standing dir, child logs) was removed. `run.sh`'s leak check over `tests/live/precedence/` excluding `out/` found no key or deployment location. The transcript is the git-ignored `tests/live/precedence/out/transcript.txt`; this note carries the redacted excerpt.
+Cleanup: the driver deleted the 3 `t85b-*` indices, its after listing and `run.sh`'s independent listing are both `[]`, and the run dir (store, configs, standing dir, child logs) was removed. `run.sh`'s leak check over `tests/live/precedence/` excluding `out/` found no key or deployment location. The driver's transcript is the git-ignored `tests/live/precedence/out/transcript.txt`.
 
 Spend: $0.00 embedding (fixture embedder, no endpoint called) and $0.00 model (recording replay), against the $0.20 budget. Elastic use was test-prefixed index churn only — three `t85b-*` indices created, written and deleted on the existing T0.12 project, no new billable resource. Render, PayPal, Channel3, Jev and the discount credits were untouched.
+
+**Review (fresh eyes).** APPROVE, with two wording corrections committed here, both inside the T8.5q lines. Re-verified from the tree and the run's own transcript; no live call, $0.
+
+Scope holds against the task's base `506ca6d`: the commit touches only this file, and `tests/live/precedence/` is byte-identical to the base (`git diff` empty). The mark assertion is T8.5j's (`04c7083`), not this commit's.
+
+The excerpt is the driver's own. The fenced block above is `tests/live/precedence/out/transcript.txt` (git-ignored; its mtime precedes the commit) line for line after substituting the loopback address and port, plus `run.sh`'s four post-driver lines; every line matches a `d.printf`/`d.say` format string in the committed `main.go` — the mark line is `1246`'s `-- statement decides: guidance %q, belief %s seeded=%t`, the pool line `1175`, the own-evidence lines `1215`/`1217`, and the re-link lines `1383`/`1427`/`1470`. `out/indices-after.json` is `[]`.
+
+The mark assertion is the seeded statement's. `statementSeed` builds `seed_stmt_001` with `Seeded: true` (`main.go:900-922`); the step requires exactly one served belief, that id and `Seeded` (`1234-1247`); `LoadSeed` copies `view.Seeded` into `beliefRecord.seeded` (`seed.go:212`) and `beliefView` serves `rec.seeded` (`server.go:609`); the guidance text is `guidanceForStatement`'s template (`content.go:299`) applied to size M and Brand S, not a hand-written string. The transcript's `seeded=true` is the driver's own `%t`.
+
+The hash finding is right, and the run used the verified asset. `/tmp/opencode/t85q-lambo/lambo` hashes `b04eeab4a40af9e5e698ee446d50745f488da3a551114b0e3c195c3cdf30b92d`, matching the `.sha256` beside it (which names `lambo-0.10.1-linux-x86_64`) and the sha `tests/live/precedence/README.md` records; `deploy/Dockerfile` fetches that same asset and its `.sha256` and verifies. The cargo build hashes `a1b4da7feceabf1c7ab40bab6ff47b77edf5e58597c738fb19313abc78b3132e`; both binaries print `lambo 0.10.1`, so the version line alone would not separate them. `run.sh` and the README both require the release artifact. Limit: the download itself cannot be re-proven offline; the on-disk hash and the recorded published sha match.
+
+Cleanup is honest and no wider than the transcript: the prefix was empty before, the driver deleted 3 indices and printed an empty after listing, and `run.sh`'s independent listing is `[]`; the run dir was removed. The one-return limit is accurate: T8.5u owns `tests/live/layer/`, and its driver carries the one-return tripwire (`tests/live/layer/main.go:631-654`); this driver's own-evidence step is the three-return step.
+
+Two wording corrections. (Medium) The note said "the hub runs store-only (T8.1c)"; the hub this run boots is not store-only — `hubConfig` writes `[recall] kind = "elastic"` with `index_prefix = "t85b-"` (`main.go:660-678`), which is how the run proves the live tier — so the sentence now says the deployed hub is store-only and the run's own hub writes only the test-prefixed indices. (Low) The transcript sentence now says `run.sh`'s two checks are appended to the driver's transcript and that the omitted last line is the runner's `done:` line; the excerpt is otherwise the file verbatim.
+
+Hygiene holds: the note carries no key, account, IP or personal path beyond `~/work/lambo/...`; the raw transcript (loopback port) is git-ignored by `tests/live/precedence/.gitignore` (`out/`); the commit message is plain and the diary carries no dates. Gate green in the review worktree after `npm ci` in `web/` and `merchant/` and `bun install --frozen-lockfile` in `agent/frontend`, `agent/runtime` and `agent/second`, ending `OK all checks passed`.
 
 ---
 
