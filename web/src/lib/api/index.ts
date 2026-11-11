@@ -19,6 +19,18 @@ export {
 	fixtureStepLabels,
 	type LedgerFixtureStep
 } from './fixture';
+export {
+	createHttpTransport,
+	type HttpTransport,
+	type HttpTransportOptions
+} from './http';
+export {
+	createLiveState,
+	createLiveTransport,
+	defaultLiveShopper,
+	liveLinkFrom,
+	type LiveLink
+} from './live';
 export { createFixtureState, LedgerState, type LedgerLoadStatus } from './state';
 export { ledgerToolNames, type LedgerToolName } from './types';
 export type {

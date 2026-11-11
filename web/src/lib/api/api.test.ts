@@ -10,6 +10,7 @@ import beliefExample from '../../../../testdata/api/ledger_belief.response.examp
 import beliefsExample from '../../../../testdata/api/ledger_beliefs.response.example.json';
 import evidenceExample from '../../../../testdata/api/ledger_evidence.response.example.json';
 import pendingExample from '../../../../testdata/api/pending_questions.response.example.json';
+import typesSource from './types.ts?raw';
 import { LedgerClient } from './client';
 import {
 	decodeLedgerBeliefResponse,
@@ -65,6 +66,15 @@ describe('frozen ledger snapshots satisfy the client types', () => {
 		const row = decodeLedgerBeliefResponse(beliefExample);
 		expect(row.corrections).toHaveLength(1);
 		expect(row.seeded_notice).toContain('Seeded history');
+	});
+});
+
+describe('the reason contract in words', () => {
+	it('calls none the zero value, never a fits-well verdict', () => {
+		// The contract's none is no classified reason: an unauthorised-charge
+		// dispute is stored with it, so it cannot read as a fit verdict.
+		expect(typesSource).toContain('None is the zero value: no classified reason');
+		expect(typesSource).not.toMatch(/fits-well verdict/i);
 	});
 });
 

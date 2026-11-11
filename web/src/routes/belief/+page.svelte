@@ -1,22 +1,29 @@
 <script lang="ts">
-	// The why view page. One belief at a time, replayed from fixtures: a step
-	// picker walks the demo story, a belief picker walks the rows at that step,
-	// and the view shows what counts toward the belief, what was deliberately
-	// not counted and why, the correction beside it, and the trace placeholders.
-	// Below it, the pivot's reads for one shopper at a time: which precedence
-	// step decided the recommendation with any overridden step beside the one
-	// that won, the pooled belief as counts with its seeded split, a standing
-	// correction with no belief, and the pooling opt-out with rows removed.
+	// The why view page. One belief at a time: the view shows what counts
+	// toward the belief, what was deliberately not counted and why, the
+	// correction beside it, and the trace placeholders. Below it, the pivot's
+	// reads for one shopper at a time: which precedence step decided the
+	// recommendation with any overridden step beside the one that won, the
+	// pooled belief as counts with its seeded split, a standing correction
+	// with no belief, and the pooling opt-out with rows removed.
+	//
+	// A link carrying the shopper's token (?t=<token>) reads all of it from
+	// the live layer through the edge; a page without one replays the demo
+	// story from fixtures and says so. A failed live read is labelled as a
+	// failure and leaves no earlier answer on screen, so nothing here can be
+	// mistaken for live data.
 
 	import { browser } from '$app/environment';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import {
 		createFixtureTransport,
+		createLiveTransport,
 		finalFixtureStep,
 		fixtureShopperId,
 		fixtureStepLabels,
 		LedgerClient,
+		liveLinkFrom,
 		type LedgerBeliefRow,
 		type LedgerFixtureStep
 	} from '$lib/api';
@@ -35,6 +42,8 @@
 		linkedBeliefId,
 		pickBeliefId,
 		PoolCounts,
+		PoolingClient,
+		PoolingState,
 		PoolingToggle,
 		recallCaseLabels,
 		recallCaseShopper,
@@ -42,7 +51,8 @@
 		StandingCorrection,
 		type OverriddenStep,
 		type RecallCase,
-		type RecallResponse
+		type RecallResponse,
+		type RecallTransport
 	} from '$lib/ledger';
 	import { toLedgerGridRow } from '$lib/ledger/rows';
 	import { buildWhyView, tracesForBelief, WhyView, type WhyViewData } from '$lib/why';
@@ -57,13 +67,24 @@
 
 	const preferredBeliefId = 'blf_8f2c41';
 
+	// A link with the shopper's token reads the live layer; no token replays
+	// the demo story. The browser guard keeps the request-bound URL off the
+	// server, where the page is prerendered without a query.
+	const liveLink = $derived(browser ? liveLinkFrom(page.url) : null);
+
 	let step = $state<LedgerFixtureStep>(finalFixtureStep);
 	let beliefId = $state<string | null>(null);
 	// A link from the ledger names the belief to explain. The query wins on
-	// arrival and the picker works from there. The browser guard keeps the
-	// request-bound URL off the server, where the page is prerendered without
-	// a query.
+	// arrival and the picker works from there.
 	const linkedId = $derived(browser ? linkedBeliefId(page.url) : null);
+
+	// The way back to the ledger keeps the shopper link, so a live why view
+	// returns to the live ledger instead of the fixture replay.
+	const ledgerHref = $derived(
+		liveLink === null
+			? resolve('/ledger')
+			: `${resolve('/ledger')}?t=${encodeURIComponent(liveLink.token)}&s=${encodeURIComponent(liveLink.shopperId)}`
+	);
 
 	$effect(() => {
 		if (linkedId !== null) {
@@ -81,19 +102,32 @@
 	let recallError = $state<string | null>(null);
 	let recallLoading = $state(true);
 
-	const caseShopper = $derived(recallCaseShopper[recallCase]);
-	// One correction transport per case: the fixture answers the shopper the
-	// case names, so a standing correction can never be recorded under
-	// another shopper's name. The editor is keyed by that shopper below, so a
-	// case change remounts it with no earlier words or answer on screen.
+	// The shopper the pivot's surfaces act for. A live link names one
+	// shopper; a replay names the shopper its case replays.
+	const caseShopper = $derived(
+		liveLink !== null ? liveLink.shopperId : recallCaseShopper[recallCase]
+	);
+	// One correction transport per shopper: a live link's corrects for that
+	// shopper through the edge, and a replay's answers the shopper its case
+	// names, so a standing correction can never be recorded under another
+	// shopper's name. The editor is keyed by that shopper below, so a change
+	// remounts it with no earlier words or answer on screen.
 	const contestState = $derived(
 		new ContestState(
-			new CorrectionClient(createFixtureCorrectionTransport(caseShopper)),
+			new CorrectionClient(
+				liveLink !== null
+					? createLiveTransport(liveLink)
+					: createFixtureCorrectionTransport(caseShopper)
+			),
 			caseShopper,
 			[]
 		)
 	);
-	const poolingState = $derived(createFixturePoolingState(caseShopper));
+	const poolingState = $derived(
+		liveLink !== null
+			? new PoolingState(new PoolingClient(createLiveTransport(liveLink)), caseShopper)
+			: createFixturePoolingState(caseShopper)
+	);
 	let standingList = $state<ContestCorrectionView[]>([]);
 
 	const overridden = $derived.by((): OverriddenStep[] => {
@@ -123,6 +157,7 @@
 	});
 
 	$effect(() => {
+		const link = liveLink;
 		const currentStep = step;
 		const wanted = beliefId;
 		let live = true;
@@ -130,9 +165,13 @@
 		loadError = null;
 		void (async () => {
 			try {
-				const client = new LedgerClient(createFixtureTransport(currentStep));
+				const client =
+					link === null
+						? new LedgerClient(createFixtureTransport(currentStep))
+						: new LedgerClient(createLiveTransport(link));
+				const shopper = link === null ? fixtureShopperId : link.shopperId;
 				const listed = await client.listBeliefs({
-					shopper_id: fixtureShopperId,
+					shopper_id: shopper,
 					include_seeded: true
 				});
 				if (!live) return;
@@ -147,9 +186,9 @@
 					beliefId = chosen;
 				}
 				const [one, evidence, pending] = await Promise.all([
-					client.getBelief({ shopper_id: fixtureShopperId, belief_id: chosen }),
-					client.listEvidence({ shopper_id: fixtureShopperId }),
-					client.listPendingQuestions({ shopper_id: fixtureShopperId })
+					client.getBelief({ shopper_id: shopper, belief_id: chosen }),
+					client.listEvidence({ shopper_id: shopper }),
+					client.listPendingQuestions({ shopper_id: shopper })
 				]);
 				if (!live) return;
 				detail = buildWhyView(
@@ -174,15 +213,18 @@
 	});
 
 	$effect(() => {
+		const link = liveLink;
 		const current = recallCase;
 		let live = true;
 		recallLoading = true;
 		recallError = null;
 		void (async () => {
 			try {
-				const transport = createFixtureRecallTransport(current);
+				const transport: RecallTransport =
+					link === null ? createFixtureRecallTransport(current) : createLiveTransport(link);
+				const shopper = link === null ? recallCaseShopper[current] : link.shopperId;
 				const raw = await transport.call('recall_for_purchase', {
-					shopper_id: recallCaseShopper[current]
+					shopper_id: shopper
 				});
 				if (!live) return;
 				recall = decodeRecallResponse(raw);
@@ -231,15 +273,31 @@
 	One belief with its evidence: what counts toward it, what was deliberately not
 	counted and why, and the correction beside it.
 </p>
-<p class="why-back"><a href={resolve('/ledger')}>Back to the ledger table</a></p>
+<p class="why-back">
+	<!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the live query is dynamic; the path is resolve()d -->
+	<a href={ledgerHref}>Back to the ledger table</a>
+</p>
+
+{#if liveLink === null}
+	<p class="why-replay" data-why-source="replay">
+		Fixture replay: the demo story, not a live ledger. Open this page with a shopper
+		link to read the live layer.
+	</p>
+{:else}
+	<p class="why-live" data-why-source="live">
+		Live: the layer's own answer for shopper {liveLink.shopperId}.
+	</p>
+{/if}
 
 <div class="why-controls">
-	<label for="why-step">Story step</label>
-	<select id="why-step" value={step} onchange={pickStep}>
-		{#each stepOptions as option (option.step)}
-			<option value={option.step}>{option.step}: {option.label}</option>
-		{/each}
-	</select>
+	{#if liveLink === null}
+		<label for="why-step">Story step</label>
+		<select id="why-step" value={step} onchange={pickStep}>
+			{#each stepOptions as option (option.step)}
+				<option value={option.step}>{option.step}: {option.label}</option>
+			{/each}
+		</select>
+	{/if}
 	<label for="why-belief">Belief</label>
 	<select id="why-belief" value={beliefId ?? ''} onchange={pickBelief}>
 		{#each pickerRows as row (row.belief.belief_id)}
@@ -249,9 +307,17 @@
 </div>
 
 {#if loadError !== null}
-	<p role="alert" class="why-error">The why view failed to load: {loadError}</p>
-{:else if loading || detail === null}
+	<p role="alert" class="why-error">
+		{#if liveLink !== null}
+			The live why view read failed: {loadError}. Nothing on this page is live data.
+		{:else}
+			The why view failed to load: {loadError}
+		{/if}
+	</p>
+{:else if loading}
 	<p class="why-loading">Loading the why view…</p>
+{:else if detail === null}
+	<p class="why-empty">No belief to explain yet: the layer holds none for this shopper.</p>
 {:else}
 	<WhyView view={detail} />
 {/if}
@@ -259,21 +325,35 @@
 <h2>What the layer recommends</h2>
 <p class="lede">
 	Which precedence step decided, with any overridden step beside the one that won.
-	One shopper at a time: each case replays a single shopper's rows, and any other
-	shopper fails instead of mixing in.
+	{#if liveLink === null}
+		One shopper at a time: each case replays a single shopper's rows, and any other
+		shopper fails instead of mixing in.
+	{:else}
+		Live for shopper {liveLink.shopperId}: the layer answers for that shopper alone.
+	{/if}
 </p>
 
-<div class="why-controls">
-	<label for="why-case">Recommendation case</label>
-	<select id="why-case" value={recallCase} onchange={pickCase}>
-		{#each caseOptions as option (option.recallCase)}
-			<option value={option.recallCase}>{option.label} · {recallCaseShopper[option.recallCase]}</option>
-		{/each}
-	</select>
-</div>
+{#if liveLink === null}
+	<div class="why-controls">
+		<label for="why-case">Recommendation case</label>
+		<select id="why-case" value={recallCase} onchange={pickCase}>
+			{#each caseOptions as option (option.recallCase)}
+				<option value={option.recallCase}
+					>{option.label} · {recallCaseShopper[option.recallCase]}</option
+				>
+			{/each}
+		</select>
+	</div>
+{/if}
 
 {#if recallError !== null}
-	<p role="alert" class="why-error">The recommendation failed to load: {recallError}</p>
+	<p role="alert" class="why-error">
+		{#if liveLink !== null}
+			The live recommendation read failed: {recallError}. No recommendation is shown.
+		{:else}
+			The recommendation failed to load: {recallError}
+		{/if}
+	</p>
 {:else if recallLoading || recall === null}
 	<p class="why-loading">Loading the recommendation…</p>
 {:else}
@@ -336,7 +416,27 @@
 		color: var(--dim);
 	}
 
+	.why-empty {
+		border: 1px dashed var(--dim);
+		border-radius: var(--radius-panel);
+		padding: 1rem 1.25rem;
+		color: var(--dim);
+	}
+
 	.why-back {
+		margin: 0 0 1.5rem;
+	}
+
+	.why-replay {
+		border: 1px dashed var(--dim);
+		border-radius: var(--radius-panel);
+		padding: 0.6rem 0.9rem;
+		color: var(--dim);
+		margin: 0 0 1.5rem;
+	}
+
+	.why-live {
+		font-weight: 600;
 		margin: 0 0 1.5rem;
 	}
 

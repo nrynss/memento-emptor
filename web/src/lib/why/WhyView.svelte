@@ -223,11 +223,12 @@
 	<section class="why-traces" aria-label="Agent turns behind the recommendations">
 		<h3>Agent turns behind the recommendations</h3>
 		<p class="why-fixture-note">
-			This is a fixture replay: each link is a placeholder on this page, not a trace viewer.
-			A live transport for the trace links is still to come.
+			These trace links are placeholders on this page, not a trace viewer: the layer serves
+			no per-belief trace list, so the links come from the recorded demo run and none of
+			them opens.
 		</p>
 		{#if view.traces.length === 0}
-			<p class="why-empty">No recorded turn touches this belief in the fixture replay.</p>
+			<p class="why-empty">No agent turn is listed for this belief.</p>
 		{:else}
 			<ul class="why-trace-list">
 				{#each view.traces as trace (trace.trace_id)}

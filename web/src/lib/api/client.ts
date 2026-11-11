@@ -1,7 +1,7 @@
 // A typed client for the ledger's read endpoints. The client takes a
 // transport so the ledger page uses one call shape in both modes: the
-// fixture transport replays the demo story offline, and a later task can
-// add a transport that calls the MCP surface without touching call sites.
+// fixture transport replays the demo story offline, and the HTTP transport
+// calls the live layer through the edge with the shopper's link token.
 
 import {
 	decodeLedgerBeliefResponse,

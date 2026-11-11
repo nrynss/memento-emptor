@@ -27,11 +27,17 @@ describe('why view simplicity guards', () => {
 		expect(componentSource).toContain('SEEDED_MARK_TOOLTIP');
 	});
 
-	it('searches, links traces as placeholders, and says what the replay is', () => {
+	it('searches, links traces as placeholders, and says what the links are', () => {
 		expect(componentSource).toContain('id="why-search-box"');
 		expect(componentSource).toContain('trace.href');
-		expect(componentSource).toContain('This is a fixture replay');
+		expect(componentSource).toContain('trace links are placeholders on this page');
+		expect(componentSource).toContain('no per-belief trace list');
 		expect(componentSource).not.toMatch(/live mode/i);
+		// The note describes the links, not the data: a live read is not a
+		// fixture replay, and a promise of a coming trace viewer would be
+		// claiming a transport that does not exist.
+		expect(componentSource).not.toMatch(/fixture replay/i);
+		expect(componentSource).not.toMatch(/still to come/i);
 	});
 
 	it('leads each card with the shopper words, never a raw reason code', () => {

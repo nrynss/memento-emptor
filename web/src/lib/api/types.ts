@@ -20,7 +20,7 @@ export type GraphStanding = 'None' | 'Candidate' | 'Venerable';
 /** What happened to the money. */
 export type OutcomeKind = 'refund' | 'dispute' | 'capture' | 'kept';
 
-/** Why an outcome happened, or none for a fits-well verdict. */
+/** Why an outcome happened. None is the zero value: no classified reason. */
 export type ReasonCategory =
 	| 'fit_too_small'
 	| 'fit_too_large'
