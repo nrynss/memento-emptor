@@ -68,9 +68,9 @@ Editable rows: a shopper's edit goes through `record_correction`, so it follows 
 
 ## Exit Criteria
 
-- [ ] The ledger reads through a typed client (T4.1).
-- [ ] The four statuses render, seeded rows marked (T4.2).
-- [ ] Every belief can be explained, including what wasn't counted (T4.3).
+- [x] The ledger reads through a typed client (T4.1).
+- [x] The four statuses render, seeded rows marked (T4.2).
+- [x] Every belief can be explained, including what wasn't counted (T4.3).
 - [ ] A shopper can contest a belief (T4.4).
 
 ---

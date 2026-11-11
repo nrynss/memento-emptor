@@ -163,7 +163,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P1 | 5 / 6 | In progress (T1.1b) |
 | P2 | 15 / 16 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
-| P4 | 4 / 4 | Done |
+| P4 | 4 / 7 | In progress (T4.5, T4.6, T4.7) |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 6 / 7 | In progress (T7.7) |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P4 E2E review: FINDINGS, fixes landed
+
+**What exists.** The P4 review verified the ledger's data layer, table, why view and contest machinery, mutation-checked the contest's `against` citation and the no-leak rule, and landed fixes on `33dd9e8`: the four P4 Svelte files' `//` headers were visible page text (the build contained them), so they moved inside `<script>` and new guards cover every web and merchant component; every grid step now renders in both themes; the column set, row key set, rendered text and transaction links are pinned against shopper ids; and the data-layer test header no longer claims an assignment it does not make. Web is 163 tests, merchant 47. All gate checks pass.
+
+**What surprised.** The High finding: the contest path has no route. `/ledger` is read-only, `/belief` renders only the standing editor, `contestEditColumnDefs` is never used and the built ledger contains no "Contest" string — so a shopper cannot contest a belief in the app, and T4.4's exit criterion is unmet. The pivot's pooling and standing fixtures also answer only the demo shopper while the page builds them per case, so `shopper_02` sees `shopper_01`'s pooling result.
+
+**Findings with owners.** (High) no contest route → **T4.5** (also owns the ledger→belief link and T9.2's stale task line). (Medium) belief page mixes shoppers on pooling and standing correction → **T4.6**. (Low) raw reason categories and a "live mode" promise in the why cards → **T4.7**. Exit criteria 1–3 tick; 4 stays unticked until T4.5 lands. R4's findings are adopted by T4.5–T4.7.
 
 ### T2.2d: Live reasons driver on thirteen phrases (done)
 
