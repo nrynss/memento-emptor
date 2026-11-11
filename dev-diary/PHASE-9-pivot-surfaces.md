@@ -241,6 +241,20 @@ Wire the merchant page from the fixture transport to same-origin `/tools/product
 
 **Live proof (local edge + served layer, not the public layer).** Seeded the T9.1 population into scratch index `t93e-proof` (`deploy/seed -fit-only`, all six verdicts verified back), served it with the unmodified pivoted layer on its loopback port (pool and fit wired; hub address dummy — `product_fit` serves from the default service and never dials it), and pointed the unmodified merchant edge at it with a locally minted merchant key. Through the proxy with no caller credential, all six lines read Earned/Building/Building/Building/Claimed/Out-of-true with seeded-only counts (demo oxford Earned small, settled 22, seeded 22, live 0 — the live shape, distinct from the bundled 60/48 snapshot); any other `/tools/` path 404s at the edge untouched. With the layer stopped the proxy answers 502 `layer-unreachable` and the page falls back to the snapshot (unit-proved). Index deleted afterwards (`t93e-proof*` listing `[]`); production `fit-rows` untouched. Spend $0.00 (no model call; Elastic test-prefix churn only).
 
+---
+
+### T9.3f: Merchant reads the tightened contract
+```yaml
+requires:   [T7.4]
+fixture-ok: yes
+size:       XS · mid
+owns:       merchant/
+status:     claimed:t93f-merchant-tighten
+```
+T7.4 requires the pivot pool `precedence`, but `merchant/src/lib/pool/decode.ts` drops it, so the decoded Earned fixture no longer equals the frozen example. Carry the required pool `precedence` through `decode.ts` + `types.ts` the way T9.2b did for web (`precedence: PoolPrecedenceView | null`, required, null on `product_fit`).
+
+**Done when:** `serves the Earned demo oxford equal to the frozen snapshot` passes; the gate passes.
+
 Three things the next agent should not have to rediscover:
 
 - The same-origin transport sends no key by construction, so the no-elastic proof test's env-var pin (`MEMENTO_LAYER_URL`, `MEMENTO_MERCHANT_KEY`) is untouched: those names now belong to the direct-layer transport and the deploy, not the page.
