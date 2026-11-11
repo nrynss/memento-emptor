@@ -965,11 +965,30 @@ requires:   [T8.5m]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/hub/, internal/api/server/, dev-diary/PHASE-8-pivot-layer.md
-status:     claimed:t85s-boot
+status:     in-review
 ```
 The T8.5m review found `LoadSeed` calls `memory.RecordCorrection` before `takeCorrection` decides the id is already restored, so every boot re-issues that correction's graph write even when the journal holds it. No served-state effect offline; prove it against the live hub and either make the boot skip the write for a restored id or record that the repeat is harmless and why.
 
 **Done when:** a live boot replay shows whether the correction's graph write is duplicated, and the boot either skips it or the harmlessness is recorded; the gate passes.
+
+**Notes (in-review).** The boot replay no longer declares a correction the partition already restored. `LoadSeed`'s correction loop keeps its earliest-first order and every error path: the cited belief is resolved first, so an unknown citation still fails with `ErrUnknownBelief`; then a correction id already in the shopper's partition is taken as restored and the loop moves on without `memory.RecordCorrection`. Every id that is new takes the old path unchanged: the graph write, then `takeCorrection`'s insert, arrival-order append and number reservation. The restored id keeps the view, the place and the row it already had, with no second write.
+
+Offline proof, in `internal/api/server/correction_boot_test.go`. `TestBootReplayDoesNotRewriteARestoredCorrection` runs two services over one standing directory and one spy over the recording graph; the spy counts every structural write naming the seed's correction against a belief. The first boot over the empty directory writes it once. The journal is then saved holding the seed's correction view, and the second boot over the same directory and the same graph — the hub outlives the layer's process — leaves the count at one: it adds none. Reverting the skip fails at "the second boot re-wrote the restored correction: 2 graph writes, want the first boot's one". Both boots serve the same `explain_belief` corrections, one row for `corr_3b7e52`, the ledger serves the same row, and the arrival order holds the id once.
+
+One write path remains, and the live replay will see it. A journal written by `persistStanding` also carries a cover entry for each declared view; `restoreStanding` re-records it as a standing correction, and `EnsureBeliefDeclaring` declares it once when the seed rewrites the belief. That is T8.5d's repair path (it re-asserts the contradiction against the rebuilt belief), untouched here. Measured over that shape with the fix in place, a second boot adds one correction write, not two; over the views-only journal the test uses it adds none. A boot's total is therefore at most one per restart, never two.
+
+Live proof, still pending. The deployed layer replays the seed into its durable hub on every boot (`deploy/start.sh` starts `memento -seed` with the standing directory on the disk), so a restart is the boot replay. It cannot run yet: T10.4's round-2 paid run holds the deployed layer, and the proof needs that service restarted twice. After that run finishes and this branch is deployed, in the deployed service's shell (the reader is loopback-only, and the image carries no HTTP client, so borrow one for the shell session):
+
+```sh
+apt-get update -qq && apt-get install -y -qq --no-install-recommends curl
+curl -sG --data-urlencode 'focus=memento fit brand brand-x-001 runs small, take size L' \
+  'http://localhost:7723/api/inspect' |
+grep -o '"warnings":\[[^]]*\]' | grep -o "lost weight, use M" | wc -l
+```
+
+The last line counts the correction's entries in the sizing belief's warning list. Run it, restart the service from the dashboard, wait until the layer's log says `memento: seed holds for shopper`, and run it again: the count must grow by one (the journal's declaration) or stay flat (a journal with no cover), never by two. The layer's own reads cannot show the difference — the served contradiction comes from its correction views, not the hub's warning — so the hub's inspect is the observation. If the live run shows two, the journal path above is the second write; report the two counts and the command with the task and let the orchestrator open its owner, because nothing else in this boot writes the correction.
+
+Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree), ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 

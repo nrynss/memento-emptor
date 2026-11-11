@@ -155,8 +155,9 @@ func domainRow(view contract.EvidenceView) (domain.Evidence, error) {
 // LoadSeed replays one shopper's history through the real write path:
 // beliefs derive, evidence indexes with its doc id in the graph stub,
 // corrections declare against, and timelines and notices load verbatim.
-// Readings then come from the graph, so seeded and live rows obey the
-// same bars.
+// A correction the partition already restored stays the correction the
+// journal holds: the replay does not write it again. Readings then come
+// from the graph, so seeded and live rows obey the same bars.
 func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 	if seed.ShopperID == "" {
 		return fmt.Errorf("server: load seed: %w", ErrMissingShopper)
@@ -336,6 +337,12 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 		belief, ok := st.beliefs[corr.view.ContradictsBeliefID]
 		if !ok {
 			return fmt.Errorf("server: load seed: %w %q", ErrUnknownBelief, corr.view.ContradictsBeliefID)
+		}
+		// A restored correction is the correction the boot that wrote it
+		// already declared: the journal keeps its view, so the replay
+		// takes it once instead of writing the same declaration again.
+		if _, restored := st.corrections[corr.view.CorrectionID]; restored {
+			continue
 		}
 		if err := memory.RecordCorrection(ctx, s.graph, corr.view.Text, belief.content, corr.at); err != nil {
 			return fmt.Errorf("server: load seed: record correction: %w", err)
