@@ -25,7 +25,11 @@ RUN CGO_ENABLED=0 go build -trimpath -o /out/memento ./cmd/memento && \
 	CGO_ENABLED=0 go build -trimpath -o /out/seed ./deploy/seed
 
 # --- Web: the ledger app (static build) ---
-FROM node:22-bookworm AS web-build
+# Node 26 is the pinned major (T0.2's stack, .github/workflows/ci.yml's
+# setup-node, and deploy/README.md's toolchain table). The image builds
+# on the same major as CI so a frontend build cannot pass in one and
+# fail in the other.
+FROM node:26-bookworm AS web-build
 WORKDIR /src/web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci

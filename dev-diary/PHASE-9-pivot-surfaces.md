@@ -288,11 +288,21 @@ requires:   [T9.3d]
 fixture-ok: no
 size:       XS · mid
 owns:       deploy/Dockerfile, deploy/README.md
-status:     claimed:t93g-node-pin
+status:     in-review
 ```
 The demo image builds `web/` on Node 22 while T0.2's contract and CI pin Node 26. The deployed build works, but the pin has drifted, so a future frontend build could pass locally and CI and fail in the image (or the reverse). Align the image's build stage with the pinned Node version, prove the image builds and serves the app, and record the pin so it is checked with the rest of the toolchain.
 
 **Done when:** the Dockerfile's frontend build uses the pinned Node major; the image builds and serves `/` and `/healthz`; the pin is named where the other toolchain pins are recorded; the gate passes.
+
+**Notes (worker).** `deploy/Dockerfile`'s `web-build` stage moves from `node:22-bookworm` to `node:26-bookworm`, the major T0.2's stack records (Go `1.27.1`, Node `26`), CI's `setup-node` pins, and the new table in `deploy/README.md` names. Nothing else in the file needed the pin: `deploy/Dockerfile` builds `web/` only, and the merchant app is a separate image (`deploy/merchant/Dockerfile`). `deploy/README.md` gains a **Toolchain pins** section — Go 1.27, Node 26, Lambo 0.10.1, each with the image line and the CI check that pins it — plus the fact that neither `web/package.json` nor `merchant/package.json` declares `engines`, so the image base and CI's `setup-node` are the whole frontend pin.
+
+Proof, local docker 29.9.3: `docker build -f deploy/Dockerfile -t memento-t93g:local .` succeeds; a second build at `--target web-build` answers `v26.13.0` to `node --version` inside the stage and leaves `index.html`, `200.html` and `_app` in `/src/web/build`, so the app is built on the pinned major, not on a cached older base. The runtime image serves `/healthz` with `{"ok":true}` (200) and `/` with the ledger app (200, `Memento Emptor` title, `_app` chunk references), and `/belief` and `/ledger` answer 200 through the `200.html` fallback. Booted with the fixture embedder, `LAMBO_SEED=0` and a throwaway identity salt minted per run, so no live index and no key was touched.
+
+Three things the next agent should not have to rediscover:
+
+- `MEMENTO_IDENTITY_SALT` is not optional in any run of the image or of `start.sh`: the supervisor always exports `LAMBO_MCP_URL` and `LAMBO_MCP_TOKEN`, and the layer refuses those without the salt that names its sessions, so a boot without one stops with `LAMBO_MCP_URL and LAMBO_MCP_TOKEN need MEMENTO_IDENTITY_SALT`. The documented local loop was stale on this point; fixed here by adding a per-run salt to its command, since that section is how the image is proved.
+- The merchant image is still on `node:22-bookworm` (`deploy/merchant/Dockerfile`), a second image this task's `owns` excludes. Finding (Low), owner: a follow-up task on `deploy/merchant/Dockerfile`; the drift is recorded in `deploy/README.md`'s toolchain section until it lands, so it is not silently forgotten.
+- A `web-build` cache hit after a base-image change is the failure mode to watch when re-proving this task: the pin lives in a `FROM` line, and only `--target web-build` plus `node --version` inside the stage shows the major the app was actually built on.
 
 ---
 
