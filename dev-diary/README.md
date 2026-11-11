@@ -166,7 +166,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P4 | 4 / 4 | Done |
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
-| P7 | 5 / 6 | In progress (T7.6) |
+| P7 | 6 / 7 | In progress (T7.7) |
 | P8 | 19 / 21 | In progress (T8.5i, T8.5j) |
 | P9 | 15 / 19 | In progress (T9.7, T9.9, T9.11, T9.12) |
 | P10 | 3 / 6 | In progress |

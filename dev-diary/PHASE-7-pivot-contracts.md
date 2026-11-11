@@ -136,11 +136,24 @@ requires:   [T7.1]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/domain/, internal/api/server/, internal/fakes/, internal/api/contract/contract_test.go
-status:     claimed:t76-json-tags
+status:     done
 ```
 `domain.Subject` has no JSON tags, so marshaling any contract type emits `Kind`/`ID`/`Name`, which every belief schema rejects under `additionalProperties: false`. The wire shape is correct today only because the server and the fakes' comparison each carry a rename workaround. Put the tags on the domain type (`json:"kind"`, `json:"id"`, `json:"name"`), delete both workarounds, and make `TestExamplesMarshalBackToSchema` stop forgiving the three frozen keys.
 
 **Done when:** the three keys serialize as the schema expects with no rename workaround anywhere; the round-trip test forbids them; the wire shape of every fixture is unchanged; the gate passes.
+
+**Notes (in-review).** `domain.Subject` now carries `json:"kind"`, `json:"id"` and `json:"name"`, and both renames are gone: `internal/api/server/dispatch.go` lost `marshalResponse`'s decode-rename-reencode walk (`fixSubjectKeys`, `renameKey`) and encodes with a plain `json.Marshal`, and `internal/fakes/replay_test.go` lost `normalizeWire` and compares the replay's final state straight against `p4-ledger.json`. `TestSubjectSerializesAsTheContract` pins the three keys and that the object holds nothing else.
+
+The round-trip gate now forbids the old keys. `TestExamplesMarshalBackToSchema` lost `wireSubjectKeys` and validates the marshaled document against the schema untouched. Negative control, run by stripping the tags again: the test fails on every belief example, naming `missing required property "kind"`, `"id"`, `"name"` and `undeclared property "Kind"`, `"ID"`, `"Name"`. The gate is green with the tags in place.
+
+No fixture moved. `testdata/` is untouched in both commits, and a throwaway check (since deleted) decoded and re-marshaled every `testdata/api` example through its Go type and compared it deep-equal to the file: all matched, so every fixture's wire shape is what the code emits, not only schema-valid.
+
+Two things the next agent should not have to rediscover:
+
+- `bench/runs/cmd/t55`, `t58` and `t59` marshal contract values directly (`json.Marshal(served.recallResp)`) instead of going through the service's encode path, so the committed round 1 run files under `bench/runs/t59/` carry the subject under the Go field names (`Kind`, `ID`, `Name`). Nothing compares those files in the gate, they are frozen history, and `bench/freeze_check.sh` is green; a future re-run would emit the lowercase keys and differ from them. `dev-diary/PHASE-2-layer.md` still describes the encode-boundary rename as built then, which is history, not a claim about the code now.
+- Decoding was never affected and still is not: `encoding/json` matches a tagged field case-insensitively, so a document written before the tags, or a request that spells the keys `Kind`/`ID`/`Name`, still decodes. Only marshaling changed, and only for the better.
+
+One instruction gap, reported rather than settled quietly: the contract test lives in `internal/api/contract/`, which is not on this task's `owns` line, while both the task text and the brief require its forgiveness list removed. The removal is commit `bfbecd0`, separate from the in-`owns` work in `2fe3e2a`, so the orchestrator can amend the `owns` line or drop that commit. The gate passes either way.
 
 ---
 
@@ -149,7 +162,7 @@ status:     claimed:t76-json-tags
 requires:   [T7.6]
 fixture-ok: yes
 size:       XS · mid
-owns:       bench/runs/cmd/
+owns:       bench/runs/cmd/, bench/README.md, dev-diary/PHASE-5-comparison.md, dev-diary/PHASE-2-layer.md
 status:     not-started
 ```
 `bench/runs/cmd/t55`, `t58` and `t59` marshal contract values directly (`json.Marshal`), bypassing the service's encode path, so their committed recordings under `bench/runs/t59/` show the subject as `Kind`/`ID`/`Name`. T7.6's tags make a re-run emit `kind`/`id`/`name`, so a future re-run would differ from the frozen recordings. Nothing in the gate compares them and the freeze check is green. Decide: leave round 1 as frozen history and state that its recordings predate the tags wherever the commands are documented, or make the commands emit the tagged shape and record that a re-run now differs.
