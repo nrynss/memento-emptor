@@ -837,7 +837,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     in-review
+status:     done
 ```
 The P7 review found `tools.go` sets `presence.Pool` from the pool view alone, so a Building pool with no leading direction wins precedence step 3 and `guidanceForPool` reads "no direction" as "runs large": four distinct fits-well shoppers with no returns and a shopper with no history produce "Size down to S for brand-x-001: 0 of the 4 fit-classified settled purchases at size M came back too large, against 0 too small." A level Building pool (2/2) takes the same path. product.md says the pool decides only when it says the product runs off-size.
 

@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 27 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5q, T8.5r, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
+| P8 | 28 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5q, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5r: A pool with no direction never decides recall (done)
+
+**What exists.** `lookupPool` returns a step only when the pool read names a direction, so a Claimed pool, a level Building pool and a fits-well-only Building pool are consulted with `pool: null` and take no precedence step. Presence and guidance read one value; `guidanceForPool` answers the nothing-applies text when the direction is none, so no path can read a missing direction as runs-large. `pool_step_test.go` pins the four fits-well shoppers (0/4), the level 2/2 pool, a Building small pool that still sizes up to L, own evidence with no "ahead of the pool" clause, and the builder's guard. The review re-derived every producer of a pool verdict and confirmed no reachable state with a real direction is dropped; it pinned `product_fit`'s directionless Building answer and corrected `precedence.Presence`'s comment.
+
+**What surprised.** `product_fit` still serves a Building pool with `direction: null` on purpose: the merchant read reports the counts, and only recall's precedence step needs a direction. A recall with `pool_lookup: consulted` and `pool: null` is now both the empty-line and the directionless-pool answer.
+
+**The next agent should not have to work out.** Presence is the direction, not the label. A future rule that produced a Claimed pool with a direction would still be dropped, which is what product.md asks. No frozen example carries a directionless pool, so nothing moved.
 
 ### T10.6: The reasoner's ladder is pinned to the layer's (done)
 
