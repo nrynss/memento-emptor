@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 26 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
+| P8 | 27 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5q, T8.5r, T8.5s, T8.5u, T8.5v, T8.5x, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 5 / 8 | In progress (T10.4, T10.5, T10.6) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5p: The live-origin ledger rows stay unmarked (done)
+
+**What exists.** The decision, with a row-by-row audit, is in the phase note; `testdata/api/` is unchanged because every frozen ledger row already carries the mark its origin gives it. `seeded: false` on `blf_2b9d60`/`ev_51c2d8` and `blf_1a5e09`/`ev_9d4c22` records that both events were lived in the sandbox; the mark means generated history, not "arrived through the boot seed". `LoadSeed` copies each row's recorded mark. T8.5l's finding names this task.
+
+**What surprised.** The review found the notes overclaimed twice: `explain_belief` has no seeded notice (only `ledger_belief` does), and flipping the four marks leaves `TestContractExamplesAgainstService` green because it compares the seed to the same fixture — what actually pins the value is `TestLedgerReadsNarrow`, the doc pin, `internal/fakes`' replay test and the web mirror. The mark is copied in four places: api fixtures, `testdata/replay/p4-ledger.json`, `internal/fakes/final.go`, and `web/src/lib/api/fixture.ts`.
+
+**The next agent should not have to work out.** A mark change moves four places at once and is a change to the mark's meaning, needing a contract task. Do not "fix" a lived row to `seeded: true`.
 
 ### T9.23 / T9.20: Step 2 re-recorded, both clauses (done)
 

@@ -776,7 +776,7 @@ requires:   [T8.5h]
 fixture-ok: yes
 size:       XS · mid
 owns:       testdata/api/, dev-diary/PHASE-8-pivot-layer.md
-status:     in-review
+status:     done
 ```
 The T8.5h review note says the boot seed "marks every row it carries", but `blf_2b9d60`/`ev_51c2d8` and `blf_1a5e09`/`ev_9d4c22` are `seeded: false` in the frozen ledger fixtures, and `LoadSeed` copies the mark. Decide whether those live-origin rows should be marked (rule 7 says seeded means marked) or whether `seeded: false` is the deliberate record of their origin, correct the fixtures and the note accordingly, and keep the doc pin byte-exact.
 
