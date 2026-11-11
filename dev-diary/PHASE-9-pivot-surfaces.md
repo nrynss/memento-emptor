@@ -834,7 +834,7 @@ requires:   [T9.19]
 fixture-ok: yes
 size:       XS · mid
 owns:       tools/check.sh
-status:     not-started
+status:     claimed:t921-agent-tsc
 ```
 Neither agent package is type-checked anywhere: both carry a `tsconfig.json` and `typescript` as a devDependency but no `typecheck` script, and the gate runs them through Bun, which transpiles without checking. `./node_modules/.bin/tsc --noEmit -p tsconfig.json` exits 0 in both today, so the step is green to add inside `check_agent`'s modules guard.
 
