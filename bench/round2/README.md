@@ -44,8 +44,9 @@ on every future shopper". Nothing here transfers to real shoppers, another catal
 
 The frozen size rule is round 1's, unchanged (`bench/pilot/pilot.go`): the first `size X` mention
 in the reply, then the first standalone size token, then none. Six Memento replies open with the
-recommendation but later quote the size that came back ("returned the … Shirt in size M"), so the
-rule reads the returned size instead of the recommendation. All six are first turns:
+recommendation but later name another size — the size that came back ("returned the … Shirt in
+size M") or the size the pool reports — so the rule reads that size instead of the recommendation.
+All six are first turns:
 
 | Run | Reply opens with | Frozen rule read | Hidden answer |
 |---|---|---|---|
@@ -116,7 +117,8 @@ stays 0/4 under either reading.
 ## The live recall against the frozen expectation
 
 **28 of 56 Memento turns differ from the freeze's expected `recall_for_purchase` response, in
-status labels and contradiction marks; the answers and the deciding precedence step agree.** The
+belief status and standing labels, contradiction marks, and which of the rival's returns the
+belief carries; the answers and the deciding precedence step agree.** The
 other 28 match field for field, including every turn of `r2-new-plain`, `r2-new-otherbrand`,
 `r2-crowd-plain`, `r2-noisy-up`, `r2-noisy-down`, and the first turns of `r2-corr-belief` and
 `r2-corr-standing` — all of it in `bench/round2/runs/r2-recall-compare.json`
@@ -180,8 +182,9 @@ A hand reading of the same 64 replies, kept beside the scores and not substitute
 
 What the counts carry:
 
-- **Arm 1 named no size at all in 16 of 16 first turns.** Its 0/16 is 16 refusals ("no sizing
-  information … was provided"), not 16 wrong sizes: `bench/round2/runs/r2-a1-*-first.json`.
+- **Arm 1 named no size at all in 16 of 16 first turns.** Its 0/16 is 16 refusals — the commonest
+  opening is "no sizing information … was provided" — not 16 wrong sizes:
+  `bench/round2/runs/r2-a1-*-first.json`.
 - **Arm 2 named a size in 16 of 16 first turns**, M on 14 and S on 2; 4 of the 16 are right
   (`bench/round2/runs/r2-a2-*-first.json`). The 4 are two things, two repeats each:
   `r2-corr-standing`'s first answer M, the one shopper whose answer is in PayPal's records alone
@@ -249,10 +252,10 @@ record the same live response, so the column is the same for both):
 
 | Case | Recorded rung | Turns | Right by committed score | Right by hand |
 |---|---|---|---|---|
-| New to the brand | pool | 8 (4 per arm) | 3 | 4 |
-| Unlike the crowd | own evidence | 8 (4 per arm) | 6 | 8 |
-| Noisy refunds | own evidence | 8 (4 per arm) | 6 | 8 |
-| Correction, first turn | own evidence 4, statement 4 | 8 | 7 | 8 |
+| New to the brand | `pool` | 8 (4 per arm) | 3 | 4 |
+| Unlike the crowd | `own_evidence` | 8 (4 per arm) | 6 | 8 |
+| Noisy refunds | `own_evidence` | 8 (4 per arm) | 6 | 8 |
+| Correction, first turn | `own_evidence` 4, `statement` 4 | 8 | 7 | 8 |
 
 Read by step:
 
@@ -318,12 +321,14 @@ case's four turns; the last column is the platform trace spend (`r2-summary.json
 | 1 no memory | 28 | 2589 | 92.5 | 343 / 342 / 341 / 338 | $0.031134 |
 | 2 PayPal history | 28 | 28197 | 1007.0 | 1636 / 7162 / 7738 / 2864 | $0.460746 |
 | 3 shopper only | 28 | 9482 | 338.6 | 595 / 1983 / 1695 / 1124 | $0.137073 |
-| 4 full | 28 | 11263 | 402.2 | 1495 / 2805 / 1690 / 1144 | $0.160356 |
+| 4 full | 28 | 11263 | 402.3 | 1495 / 2805 / 1690 / 1144 | $0.160356 |
 
-Arm 2's prompt is dominated by the extracted records, and its largest memory block is
-`r2-crowd-rival`'s 2228-word extraction (RUN-NOTE, "Spend"). Arm 4's added pool block is the
-difference between it and arm 3 in case 1 and case 2; in cases 3 and 4 the live response carries
-no pool (`"pool": null` in those prompts), so the two arms' prompts differ by nothing there.
+Arm 2's prompt is dominated by the extracted records: `r2-crowd-rival`'s 2152-word extraction is
+the largest in the set, and that turn's prompt is the largest at 2228 words
+(`bench/round2/runs/r2-a2-crowd-rival-r1-first.json`, `prompt_words`). Arm 4's prompt adds the
+pool block to arm 3's in case 1 and case 2. In cases 3 and 4 the live response carries no pool
+(`"pool": null` in those prompts), so the two arms' memory JSON is identical there; the header
+line above it states the arm's condition and differs in every case (`bench/round2/prompt.go`).
 Token figures are words, not model tokens; spend is the platform's own trace cost, reported beside
 them and never mixed in.
 
@@ -336,10 +341,12 @@ Stated as plainly as the differences. Counts in this section are from
   arms on these cases.
 - **The correction turn is 4/4 in every arm**, because every arm has the correction in the
   conversation on that turn.
-- **Arms 3 and 4 match on every case but new-to-brand.** They give the same first-turn size in 8 of
-  16 cells by the committed extraction and 12 of 16 by hand; the four that differ by hand are all
-  in case 1, the one case the pool answers. Both are 12/12 on the three later turns, 0 cited, 0
-  wrong-cause, and they record the identical live memory in all 28 cells.
+- **Arms 3 and 4 agree by hand on every case but new-to-brand; by the committed scores they differ
+  in every case.** They give the same first-turn size in 12 of 16 cells by hand and 8 of 16 by the
+  committed extraction. The four hand differences are all in case 1, the one case the pool answers;
+  five more cells differ by the extraction alone, all artifact runs in cases 2, 3 and 4. Both are
+  12/12 on the three later turns, 0 cited, 0 wrong-cause, and they record the identical live memory
+  in all 28 cells.
 - **Arms 1 and 2 match on new-to-brand and noisy refunds**, both 0/4 first turns, and both 4/4 on
   the correction turn. They differ in unlike-the-crowd and in the correction case, where PayPal's
   records carry something the reference reasoner can read as an answer (corr-standing's kept M) or
@@ -432,7 +439,8 @@ the flag because `bench/round2/runs/FREEZE.json` exists.
 ## The run files
 
 Every turn is one file named `r2-a<arm>-<shopper>-r<repeat>-<turn>.json`, with the full prompt, the
-memory fetch's verbatim response, the reply, the extraction, the trace cost and the frozen score.
+memory the arm fetched (empty for arm 1), the reply, the extraction, the trace cost and the frozen
+score.
 The aggregate files are `r2-scores.json`, `r2-summary.json`, `r2-recall-compare.json`,
 `r2-corrections.json`, `r2-seed-log.json` and the `FREEZE.json` run marker, all listed at the top
 with `RUN-NOTE.md`. The driver is `bench/round2/runs/cmd/`; the protocol for opening the directory
