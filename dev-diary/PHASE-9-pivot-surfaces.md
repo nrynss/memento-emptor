@@ -952,6 +952,20 @@ The P9 review found product.md's step 5 has no live agent path: `recallBeliefs` 
 
 ---
 
+### T9.25: The exclusion lever, and no silent drop
+```yaml
+requires:   [T9.22]
+fixture-ok: yes
+size:       XS · mid
+owns:       agent/runtime/
+status:     not-started
+```
+T9.23's live turn obeyed the sequencing but defeated the exclusion: with the returned SKUs excluded the search came back empty, the model dropped the filter and named a memory-carried SKU (`PSW8GeK`), and it made three Channel3 searches, overrunning both its credit and spend budgets. The instruction is not enough. Change `search_catalog`'s description so `exclude_skus` names recall's evidence rows as its source, and add to the instruction: when the search returns nothing with the exclusions, report that no new candidate was found rather than retrying without them, and never name a SKU from memory as the candidate. Add offline checks for both clauses.
+
+**Done when:** the description and the instruction make the exclusion source and the empty-answer rule explicit; offline checks pin them and fail on a removal; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
