@@ -25,12 +25,13 @@ var (
 
 // fitPurchase resolves the purchase one fit row is about: the product
 // line from the one catalog source, the transaction id from the row's
-// own link, and the size and seeded mark from the row. Every writer call
-// — the ingest-time capture and refund, the reason classification, the
-// feedback — goes through here, so the writer's Record and the explicit
-// Classified, Feedback and Contested calls agree on the same line for the
-// same purchase. A correction never reaches the writer: it is about the
-// shopper, not the product, and it names no reason category to pool.
+// own link, and the size and seeded mark from the row. Every served fit
+// write — the ingest-time capture and refund, the reason classification,
+// the feedback — goes through here, so the explicit Captured, Refunded,
+// Classified and Feedback calls agree on the same line for the same
+// purchase. A correction never reaches the writer: it is about the
+// shopper, not the product, and it names no reason category to pool. No
+// served call reaches the writer's Contested state.
 func (s *Service) fitPurchase(ctx context.Context, row domain.Evidence) (fitindex.Purchase, error) {
 	if s.lines == nil {
 		return fitindex.Purchase{}, fmt.Errorf("server: fit purchase: %w", ErrPoolUnwired)
@@ -62,7 +63,9 @@ func (s *Service) fitPurchase(ctx context.Context, row domain.Evidence) (fitinde
 // both legs of one purchase carry the same link, so they key the same
 // row. When the records disagree about the capture id the two legs key
 // two rows, which is the writer's documented two-row hazard, not a
-// server decision.
+// server decision. No delivery settles a row as kept or contested: the
+// payment source emits captures, refunds and disputes only, and no served
+// call reaches the writer's Kept or Contested state.
 func (s *Service) recordFitRows(ctx context.Context, st *shopperState, rows []domain.Evidence) error {
 	if st.writer == nil {
 		return nil

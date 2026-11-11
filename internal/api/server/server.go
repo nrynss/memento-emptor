@@ -29,8 +29,11 @@ var (
 	ErrUnknownBelief = errors.New("server: unknown belief")
 	// ErrUnknownQuestion answers a question id with no open pending question.
 	ErrUnknownQuestion = errors.New("server: unknown question")
-	// ErrQuestionClosed answers a record_reason for a question that is
-	// already answered. The answer counted once; it counts only once.
+	// ErrQuestionClosed is reserved for a record_reason that re-answers a
+	// question already answered. No served path returns it today:
+	// record_reason answers only a question in the shopper's pending set,
+	// and a clear answer removes the question from that set, so a second
+	// answer is ErrUnknownQuestion.
 	ErrQuestionClosed = errors.New("server: question is already answered")
 	// ErrUnknownPurchase answers feedback for a transaction the layer
 	// never saw. Feedback joins on the capture it concerns, never floats.

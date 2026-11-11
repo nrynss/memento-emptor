@@ -1093,11 +1093,25 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, internal/ingest/, product.md
-status:     claimed:t85x-limits
+status:     in-review
 ```
 The P8 review found two pool-row transitions product.md names have no served producer: no served path emits `OutcomeKept` (`Writer.Kept` runs only from the seed and tests), so a live purchase never settles as kept past the window; and `Writer.Contested` has no caller outside tests while `record_reason` cannot re-answer a closed question, so a contested reason never changes a row. Implement the served paths or record the limitations in product.md with their reasons.
 
 **Done when:** each transition has a served producer or a recorded limitation; a test pins whichever was chosen; the gate passes.
+
+**Notes (in-review).** The orchestrator chose the recorded limitation, so no served path was invented. `product.md` "How a fit row is written" now states both: a live purchase never settles as kept past its return window because that needs the window's length and a clock- or delivery-driven decision that it has closed, and the layer models neither; a contested reason never changes a row because contesting it means re-answering the same refund's question and `record_reason` accepts only an open question, so it would take a change to a frozen tool's shape. The paragraph and the bullets above it say what exists instead: the seeded population declares kept rows through the fit writer, each carries the seeded mark and lands in the pool's settled and kept counts; a reason is recorded once, a refund's through one `record_reason` answer and a dispute's from PayPal's code at ingest; the shopper's `record_correction` overrides a belief for the recommendation and never enters the pool. The evidence-model table's kept row points at that paragraph. No live passage of a window is claimed anywhere.
+
+The code evidence: `internal/api/server/pool.go`'s `recordFitRows` handles a capture and a refund and continues for every other kind; `ingest.Service.Handle` accepts capture, refund and dispute only and refuses `domain.OutcomeKept` with `ErrUnknownEvent` before `recordFit` runs, so not even a synthetic kept delivery reaches the fit writer; `Writer.Contested` has no caller outside tests (`internal/fitindex` tests and `pool_reasons_test.go`); `RecordReason` deletes a question from the pending set on a clear answer, so a second call naming it answers `ErrUnknownQuestion` with the fit row unchanged. One surprise: `ErrQuestionClosed` is declared and mapped to the wire but no code path returns it, and its comment claimed the check existed; the comment now says it is reserved for the re-answer path.
+
+Two tests pin the limitations, one per transition: `internal/ingest/kept_test.go`'s `TestKeptDeliveryIsRefusedAndWritesNoFitRow` gives `Handle` a verified kept delivery and proves the recorder receives nothing; `internal/api/server/pool_transitions_test.go`'s `TestRecordReasonCannotReanswerAClosedQuestion` answers a refund question once, proves the fit row settled at `reason_classified`, then proves a second answer is refused as unknown and leaves the row and the pending set unchanged. No wire shape, schema, fixture or non-comment code path changed; the only other edits are comments in `internal/api/server/pool.go`, `internal/api/server/server.go` and `internal/ingest/ingest.go` that named a kept or Contested served call the code does not have.
+
+Other claims found, each with an owner:
+
+- `docs/interface.md` "How a signal is written" lists "Kept past the window, no feedback | observe | never" beside the served writes, and the paragraph under it gives the seed-only note for general statements but not for kept. It needs the same sentence: no delivered outcome or tool records a kept signal, so the `kept` count in `product_fit` is the seeded population's today. The same file's `product_fit` example shows `live.kept: 1`, which no served path can produce; the live count should be 0 and the total `kept` 5 (the recent block's 5 already agrees), so the seeded-live split does not show a live kept row. Owner: a proposed docs task the orchestrator numbers, `owns: docs/interface.md`; this branch does not own that file.
+- `docs/architecture.md` "The rank's limit is documented, not moved" says "the kept path fires only for purchases never refunded", and "Only settled rows count" states the kept settle as built; neither says the kept leg has no served producer. Owner: the same proposed docs task, `owns: docs/architecture.md`.
+- The diary's older task lines name the transitions as served: T8.2's brief says "fit feedback and kept-past-the-window settle it, and a contested reason updates it"; T8.2's notes say T8.5 resolves "the explicit `Classified`/`Feedback`/`Contested` calls"; T7.1's notes say "kept and refund are two arms of one outcome switch". Each overstates the served path, and T8.2's own notes elsewhere narrow ingest to capture and refund. Owner: the orchestrator's edits on those diary lines, which this branch does not own.
+
+The gate is green in the worktree.
 
 ---
 

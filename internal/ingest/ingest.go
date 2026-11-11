@@ -47,8 +47,10 @@ type Result struct {
 // FitRecorder is the second write path: the fit row one delivery writes
 // beside its evidence rows, from the same event. The fit index itself sits
 // behind it, so ingest names no store. A capture creates the row, a refund
-// marks it returned, a kept outcome settles it, and a dispute writes
-// nothing because it is about the seller, not the purchase.
+// marks it returned, and a dispute writes nothing because it is about the
+// seller, not the purchase. A kept outcome would settle the row, but no
+// delivery emits one: Handle accepts capture, refund and dispute only, so
+// no served path decides that a return window has passed.
 type FitRecorder interface {
 	// Record writes the fit row for one evidence row. It is idempotent on
 	// the purchase's state: a redelivered event rewrites the same row.
