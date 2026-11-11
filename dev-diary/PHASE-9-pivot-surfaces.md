@@ -288,7 +288,7 @@ requires:   [T9.3d]
 fixture-ok: no
 size:       XS · mid
 owns:       deploy/Dockerfile, deploy/README.md
-status:     in-review
+status:     done
 ```
 The demo image builds `web/` on Node 22 while T0.2's contract and CI pin Node 26. The deployed build works, but the pin has drifted, so a future frontend build could pass locally and CI and fail in the image (or the reverse). Align the image's build stage with the pinned Node version, prove the image builds and serves the app, and record the pin so it is checked with the rest of the toolchain.
 
@@ -310,7 +310,7 @@ Three things the next agent should not have to rediscover:
 
 ### T9.3h: Align the merchant image's Node pin
 ```yaml
-requires:   [T9.3d]
+requires:   [T9.3d, T9.3g]
 fixture-ok: no
 size:       XS · mid
 owns:       deploy/merchant/Dockerfile, deploy/README.md
@@ -319,6 +319,20 @@ status:     not-started
 T9.3g aligned the demo image's frontend build to the pinned Node 26, but `deploy/merchant/Dockerfile` still builds `merchant/` on `node:22-bookworm`. It is a separate image, so the pin drifted independently; align it the same way, prove the merchant image builds and serves `/` and `/healthz`, and record the pin beside the others.
 
 **Done when:** the merchant image's build stage uses Node 26; the image builds and serves `/` and `/healthz`; the pin table covers it; the gate passes.
+
+---
+
+### T9.3i: Check the toolchain pins mechanically
+```yaml
+requires:   [T9.3g, T9.3h]
+fixture-ok: yes
+size:       XS · mid
+owns:       tools/check.sh, .github/workflows/ci.yml
+status:     not-started
+```
+The image toolchain pins live in Dockerfiles and in a README table; no check compares them with `ci.yml`'s `setup-node` and `setup-go`, so the Node 22 drift could recur silently. Add a gate step that reads every Dockerfile's build stages and the CI versions and fails when a frontend build stage's Node major or a Go build stage's Go version disagrees with its pin.
+
+**Done when:** a table test proves the check fails on a mismatched Node or Go stage and passes on the current tree; the gate runs it; the gate passes.
 
 ---
 

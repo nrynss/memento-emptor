@@ -450,7 +450,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       cmd/memento/
-status:     in-review
+status:     done
 ```
 P0's review found two gaps in `cmd/memento/`. First, the hub client does not honour T0.11's attach-bound refusal: `postLocked` turns any non-200 into an error, and `call`'s single retry re-initialises, which cannot relieve a hub whose `max_attached` places are all full — so a burst of more than fifteen concurrent shoppers surfaces errors where the documented behaviour is 503 plus `Retry-After` and a retry after that delay. Second, the MCP reply shapes the client depends on (receipts, admission checks, warnings, blast radius) have no offline test: no test reads `testdata/lambo/`, so shape drift is caught only live.
 
@@ -478,7 +478,7 @@ requires:   [T8.1]
 fixture-ok: no
 size:       XS · mid
 owns:       deploy/start.sh, deploy/README.md, dev-diary/research/elastic.md
-status:     in-review
+status:     done
 ```
 `deploy/start.sh` never writes a `[recall]` section, so the deployed hub runs store-only, while T0.11's check 4 and `research/elastic.md` describe the deployment as Lambo's Elastic recall tier. Decide one of two: configure `[recall]` with the Elastic backend (and record what it costs per write and what changes in recall), or record store-only as the deliberate deployment decision and correct the two documents that claim otherwise. If configuring needs embedding spend or a new secret beyond the standing budget, stop and ask the user first.
 
@@ -500,6 +500,20 @@ Two things the next agent should not have to rediscover:
 The decision is sound, and its strongest reason does not depend on cost: the served read path never asks the hub for a vector search. `Service.Recall` ranks from the layer's own beliefs, the pool and the correction, and `hubGraph.Recall` exists only so the client satisfies the seam, so the tier would put a lagging approximate mirror on a leg the demo does not query per request, while the hub's one real vector use — a hybrid derive on the holder — is already answered exactly in process. Even free, the tier would not be better at this size.
 
 Two inaccuracies fixed here. The note claimed `AGENTS.md` still carried the stale line; the parent commit had already fixed it. The README's "What it cannot do" ended by saying a hub "cannot share a vector index between processes" and justified it with "one process holds every session", which the paragraph above it contradicts: `serve-web` is a second process and runs the same exact scan against SQLite. The remaining stale claims are out of `owns` and are named in the two-things list. Gate green (`npm ci` in `web/` and `merchant/` first; both were unpopulated in this worktree). Spend $0.00: no live call, no key.
+
+---
+
+### T8.1d: Retire the recall-tier claim in the product docs
+```yaml
+requires:   [T8.1c]
+fixture-ok: yes
+size:       XS · mid
+owns:       product.md, docs/architecture.md, dev-diary/research/README.md, dev-diary/PHASE-0-ground.md
+status:     not-started
+```
+T8.1c recorded the hub as store-only and corrected `research/elastic.md`, but present-tense claims that Elastic is the graph's or Lambo's recall tier remain in `product.md` (the consumption section and the stack table), `docs/architecture.md`, `dev-diary/research/README.md` and T0.11's check 4 ("as the deploy runs it"). `product.md` is the first file a reader opens, so it must not assert the retired shape.
+
+**Done when:** each listed passage either states the store-only decision with its reason or is marked historical; no product doc asserts the tier as the deployed shape; the gate passes.
 
 ---
 

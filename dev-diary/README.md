@@ -167,8 +167,8 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 10 | Done |
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 5 | Done |
-| P8 | 15 / 16 | In progress (T8.1c, T8.5f) |
-| P9 | 9 / 12 | In progress (T9.3g, T9.3h, T9.7) |
+| P8 | 17 / 18 | In progress (T8.1d) |
+| P9 | 12 / 15 | In progress (T9.3h, T9.3i, T9.7) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P0 remediation: T8.5f, T8.1c, T9.3g (done)
+
+**What exists.** Three findings from the P0 review are fixed and landed. **T8.5f**: the hub client treats HTTP 503 as the attach bound (`*attachBoundError` wrapping the `errAttachBound` sentinel, `Retry-After` parsed as whole seconds with a 1s fallback for absent/date/fraction/negative, retry after that delay at most 3 attempts, ctx-bounded, typed error when it persists; 500 keeps the old single re-open retry). Offline tests replay `testdata/lambo/{01,02,03}` through the real client over `httptest` and pin receipts (string) vs stats receipt (object), applied, admission status/checks, blast radius, warning text, ranked recall labels, empty recall and no-match → None. The task also fixed a real defect: `Inspect`'s no-match branches returned the zero `GraphState` (`""`), which `StatusForGraph` rejects, so an unpromoted belief reached the layer as an invalid state; both now return `domain.GraphNone`. **T8.1c**: store-only is the recorded, deliberate hub recall-tier decision, with the reasoning that the served read path never asks the hub for vector search (the one real vector use, a hybrid derive, is answered exactly in process), so an approximate lagging mirror would be no better even free; the config-only path, its Elastic ingest cost and the separate `fit-rows` pool are documented, `research/elastic.md` corrected, and the local-run recipe's required 64-hex salt fixed. **T9.3g**: the demo image's `web-build` stage is `node:26-bookworm` matching CI, proved by `node --version` inside the stage (`v26.13.0`) and a full image serving `/healthz` and `/`; `deploy/README.md` gained a toolchain-pins table.
+
+**What surprised.** The review found two vacuous assertions worth remembering: `Retry-After: 1.5` truncated to 1s equal to the fallback, so a fraction-accepting implementation passed (now pinned with `2.5`); and the inspect state test could not tell the structured status from its text fallback (now pinned with a reply whose two sources disagree). Both tasks' happy paths were pinned unchanged (one open, one call).
+
+**Findings with owners.** (F1, Low) present-tense "Elastic is the graph's/Lambo's recall tier" claims remain in `product.md`, `docs/architecture.md`, `research/README.md` and T0.11 → **T8.1d**. (F1, Low) no CI step compares image toolchain tags with `ci.yml`, so the pin table is documentation only → **T9.3i**. (F2, Low) T9.3h's `requires` now includes T9.3g. All fixes are in the tasks; every finding has an owner.
 
 ### P0 E2E review: FINDINGS, remediation opened
 
