@@ -179,7 +179,7 @@ requires:   [T4.8]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/belief/, internal/api/server/
-status:     not-started
+status:     claimed:t411-pool
 ```
 The P9 review found the live why view cannot show the pool: on a linked page it sends `recall_for_purchase` with `{shopper_id}` only, while the frozen schema requires `brand_id`, and the pool needs brand, category and fit handle. Live, no brand → `pool: null`, `pool_lookup: unavailable`; with `brand-x-001/shirts/regular` → pool Earned small 23/22/1. The page therefore renders "No pooled belief applies here" for the shopper whose demo pool is Earned. A belief cannot scope it (subject is the brand; evidence rows carry category and size, never a fit handle). Decide: store or derive the line for each case before recall, or have the layer validate and answer the shortfall loudly.
 
