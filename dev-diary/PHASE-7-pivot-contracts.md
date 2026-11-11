@@ -135,12 +135,26 @@ T7.4 requires the pivot's pool and precedence fields, but the replay builds cont
 requires:   [T7.1]
 fixture-ok: yes
 size:       XS · mid
-owns:       internal/domain/, internal/api/server/, internal/fakes/
+owns:       internal/domain/, internal/api/server/, internal/fakes/, internal/api/contract/contract_test.go
 status:     claimed:t76-json-tags
 ```
 `domain.Subject` has no JSON tags, so marshaling any contract type emits `Kind`/`ID`/`Name`, which every belief schema rejects under `additionalProperties: false`. The wire shape is correct today only because the server and the fakes' comparison each carry a rename workaround. Put the tags on the domain type (`json:"kind"`, `json:"id"`, `json:"name"`), delete both workarounds, and make `TestExamplesMarshalBackToSchema` stop forgiving the three frozen keys.
 
 **Done when:** the three keys serialize as the schema expects with no rename workaround anywhere; the round-trip test forbids them; the wire shape of every fixture is unchanged; the gate passes.
+
+---
+
+### T7.7: The round-1 commands and the tagged wire shape
+```yaml
+requires:   [T7.6]
+fixture-ok: yes
+size:       XS · mid
+owns:       bench/runs/cmd/
+status:     not-started
+```
+`bench/runs/cmd/t55`, `t58` and `t59` marshal contract values directly (`json.Marshal`), bypassing the service's encode path, so their committed recordings under `bench/runs/t59/` show the subject as `Kind`/`ID`/`Name`. T7.6's tags make a re-run emit `kind`/`id`/`name`, so a future re-run would differ from the frozen recordings. Nothing in the gate compares them and the freeze check is green. Decide: leave round 1 as frozen history and state that its recordings predate the tags wherever the commands are documented, or make the commands emit the tagged shape and record that a re-run now differs.
+
+**Done when:** the decision is recorded with its reason where the commands are documented, and no committed round-1 run file is altered; the gate passes.
 
 ---
 
