@@ -103,7 +103,7 @@ requires:   [T4.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       web/src/lib/why/
-status:     not-started
+status:     claimed:t47-why
 ```
 The P4 review found the why cards print the raw reason category (`fit_too_small`) above the shopper's words, and the trace note promises a "live mode" the fixture-only ledger does not have.
 
