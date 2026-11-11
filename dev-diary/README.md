@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 34 / 37 | In progress (T8.5q, T8.5u, T8.7b) |
+| P8 | 35 / 37 | In progress (T8.5u, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5q: The precedence driver ran live with the mark assertion (done)
+
+**What exists.** One live run of `tests/live/precedence/run.sh` against a hub built from the pinned Lambo 0.10.1 release asset and the T0.12 Elastic deployment, with the run's own hub writing test-prefixed `t85b-*` indices. The statement step passed with the mark assertion active: exactly one served belief `seed_stmt_001`, `seeded=true`, the exact guidance "Take size M for Brand S: the shopper's usual size." Every other leg passed too (pool, own evidence, correction, cross-session, restart, nothing, consulted-empty, re-link). Three indices were created and deleted; both listings read `[]`. Spend $0.00 embedding and $0.00 model.
+
+**What surprised.** The `LAMBO_BIN` path the brief named is a cargo build reporting 0.10.1 but hashing differently from the release asset the deploy pins; the run used the downloaded asset verified against its published sha256. The reviewer also corrected the note: this run's hub is not store-only (it writes the test-prefixed recall indices), and the transcript excerpt's provenance is stated exactly.
+
+**The next agent should not have to work out.** This driver has no one-return step; that tripwire is `tests/live/layer`'s and T8.5u's. Re-running needs the release asset, the Elastic and identity keys, and about two minutes.
 
 ### T8.5s: A boot replay's repeated correction write is harmless (done)
 
