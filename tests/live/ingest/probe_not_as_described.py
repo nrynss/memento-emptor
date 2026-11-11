@@ -9,8 +9,8 @@ transaction and records the refusal. It creates nothing: the create call
 is refused, and every other call is a read.
 
 It prints no credential and no id: transaction ids appear as their last
-six characters, and the response's debug id is replaced with a
-placeholder, which is the shape the recording in testdata/paypal/ keeps.
+six characters, and the response's debug id is dropped. The recording in
+testdata/paypal/ keeps that key with a placeholder in its place.
 Read the token from the environment (source tools/env.sh).
 
     source tools/env.sh

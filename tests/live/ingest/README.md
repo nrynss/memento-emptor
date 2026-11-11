@@ -21,7 +21,9 @@ gate's `go test -race` finds no tests and `go vet` sees only `main.go`.
 - A code the table does not name is stored the way served ingest stores
   it: the code stays as the reason's text, the category is `none`, and
   the row counts toward nothing. The driver no longer aborts the read
-  on such a code.
+  on such a code. No live sandbox case carries such a code, so this
+  path rests on the served ingest's table test and on the driver
+  restating the same mapping; no live run has taken it.
 - Redelivering either event returns the stored rows with `Duplicate`
   set and writes nothing new.
 
@@ -75,13 +77,21 @@ source tools/env.sh
 python3 tests/live/ingest/probe_not_as_described.py
 ```
 
-Three request shapes were tried, all refused:
+Three request shapes were tried, all refused. The script sends the
+second shape below and prints its response; the other two were tried by
+hand and are quoted here, with no recording of their own.
 
 | Shape | Response |
 |---|---|
 | reason only | 400, `details[].issue` = `MISSING_ISSUE_TYPE`: the item array is required before eligibility is looked at |
 | reason plus one `items[]` entry | 400, `details[].issue` = `TRANSACTION_NOT_ELIGIBLE`; recorded in `testdata/paypal/dispute-create-not-as-described-not-eligible.json` |
 | the capture as `seller_transaction_id` | 500 `INTERNAL_SERVER_ERROR` with no details |
+
+The recorded body is identical to
+`dispute-create-transaction-not-eligible.json`, which an earlier attempt
+on an uncaptured order drew, but for a trailing newline. The API answers
+the same issue either way, so the file records the refusal, and the
+request it answers is the shape above plus the body in the script.
 
 This matches the T0.4 finding for the non-arrival reason: seller-side
 dispute creation through `POST /v1/customer/disputes` is gated beyond a
