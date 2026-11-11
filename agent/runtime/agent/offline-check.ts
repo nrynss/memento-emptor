@@ -471,7 +471,7 @@ for (const shopperOnly of ["ledger_beliefs", "ledger_belief", "ledger_evidence"]
 // Each binding, against the contract's own request schema and example.
 type ZodField = {
   isOptional(): boolean;
-  _def?: { typeName?: string; innerType?: ZodField };
+  _def?: { typeName?: string; innerType?: ZodField; description?: string };
 };
 type ToolLike = {
   id?: string;
@@ -841,6 +841,34 @@ check(
 check(
   "the instructions pass no exclusion when recall served no rows",
   instructions.includes("When recall returned no evidence rows, pass no exclude_skus"),
+);
+// T9.25: T9.23's live turn obeyed the sequencing but dropped the filter when
+// the exclusions emptied the shelf, then named a memory-carried SKU after
+// three searches. The exclusion's source is now named on both levers, and an
+// empty answer is the answer.
+const excludeDescription = String(searchTool?.inputSchema?.shape?.exclude_skus?._def?.description ?? "");
+check(
+  "search_catalog's exclude_skus names recall's evidence rows as its source",
+  /\brecall\b/.test(excludeDescription) && excludeDescription.includes("item.sku") && /evidence/.test(excludeDescription),
+  `description ${JSON.stringify(excludeDescription)}`,
+);
+check(
+  "search_catalog's description names recall as the exclusion's source",
+  /returned items in the beliefs recall served/.test(String(searchTool?.description ?? "")),
+  `description ${JSON.stringify(searchTool?.description)}`,
+);
+check(
+  "the instructions report no new candidate when the exclusions empty the shelf",
+  /report that no new candidate was found/.test(instructions) &&
+    /rather than searching without them/.test(instructions),
+);
+check(
+  "the instructions never name a SKU from memory as the candidate",
+  /never name a SKU from memory as the catalog candidate/.test(instructions),
+);
+check(
+  "the instructions allow one search per turn unless the first returns no products",
+  /One search per turn unless the first returns no products/.test(instructions) && /never a third/.test(instructions),
 );
 
 // --- The HTTP path: the request the deployment sends, against a local stub ---

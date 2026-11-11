@@ -968,11 +968,31 @@ requires:   [T9.22]
 fixture-ok: yes
 size:       XS · mid
 owns:       agent/runtime/
-status:     claimed:t925-exclusion
+status:     in-review
 ```
 T9.23's live turn obeyed the sequencing but defeated the exclusion: with the returned SKUs excluded the search came back empty, the model dropped the filter and named a memory-carried SKU (`PSW8GeK`), and it made three Channel3 searches, overrunning both its credit and spend budgets. The instruction is not enough. Change `search_catalog`'s description so `exclude_skus` names recall's evidence rows as its source, and add to the instruction: when the search returns nothing with the exclusions, report that no new candidate was found rather than retrying without them, and never name a SKU from memory as the candidate. Add offline checks for both clauses.
 
 **Done when:** the description and the instruction make the exclusion source and the empty-answer rule explicit; offline checks pin them and fail on a removal; the gate passes.
+
+**Notes (in-review).** `search_catalog`'s description and the step-2 instruction now name both the exclusion's source and the empty-answer rule, and five offline checks pin them beside T9.22's five.
+
+What the live turn showed. T9.23's re-recorded turn (its evidence, `03-catalog-candidate-rerecorded.json`, sits on `task/t923`, not on this branch's base) has `search_after_recall: true` and `recall.answered_before_search: true`, so the sequencing held. It then made three `search_catalog` calls — three Channel3 credits, turn cost $0.111171 — and its reply says the search with the evidence SKUs excluded "returned no results", so it would "try without the exclusion filter"; the reply then named `PSW8GeK`, whose own note says it is "one the shopper's memory already carries". The trace records span names and times, not tool arguments, so the reply is the evidence for what each search carried. Nothing under `agent/runtime` decides what an empty answer means, and nothing in the tool's description said where `exclude_skus` comes from.
+
+The levers. `search_catalog`'s description now says `exclude_skus` is recall's own evidence: the SKUs of the returned items in the beliefs recall served, so a SKU a belief already rests on is never named again. The parameter carries the same source in its own description — the `item.sku` of every returned item in the beliefs `recall_for_purchase` served — because that is the text the model reads at the field. Step 2 keeps T9.22's sentences and adds three: one search per turn unless the first returns no products, and only then a second, keeping the same `exclude_skus`, never a third; a search that returns nothing with the returned SKUs excluded is reported as "no new candidate was found" rather than rerun without them; and a SKU from memory — an earlier turn's or one recall's rows carry — is never named as the catalog candidate. Step 1, the tool schemas and every layer call are untouched. T9.22's note that this description lever stays unused is superseded: T9.23's turn showed the instruction alone is not enough, so this task uses it.
+
+The checks. Five: the `exclude_skus` parameter names recall's evidence rows (it reads the zod field description the model sees, not the source text), the tool description names the same source, the empty-answer rule in both halves, never-a-memory-SKU, and one-search-per-turn. `bun agent/runtime/agent/offline-check.ts` is 189 checks (184 before), and `tsc --noEmit` in `agent/runtime` is clean. Mutation-checked, each restored from a byte-for-byte copy and re-run: the parameter's source sentence, the tool description's sentence, the empty-answer sentence, the memory clause and the one-search sentence each fail exactly one check — the one that pins it.
+
+Not done here, on purpose. No live turn and no spend in this task's brief, so the deployment still runs the old description and instruction. The redeploy command, from this commit:
+
+```sh
+cd agent/runtime && bun agent/offline-check.ts && ast spec validate && ast push -V private -y && ast agent redeploy --id <deployment-id> --latest --var MEMENTO_AGENT_KEY=@MEMENTO_AGENT_KEY --var CHANNEL3_API_KEY=@CHANNEL3_API_KEY --wait
+```
+
+The live proof that the model obeys both levers is a fresh step-2 turn under its own budget, not a re-read of T9.23's record; that turn and the redeploy are the orchestrator's call.
+
+Limit, stated. The checks read text and the tool's own description: they prove the levers say this, and that a removal is caught. They cannot make a model report an empty shelf instead of searching again, so one live turn remains the only evidence that the fix holds.
+
+Surprise. The evidence file this brief cites was not on this branch's base, `8032181`: T9.23's re-record was on `task/t923` then, so the turn was read with `git show` from there. `main` moved while this branch was open — T9.23's landing and three claim commits, landing that evidence at `9c17d97` — changing `demo/` and T9.23's own block and nothing under `agent/runtime/`, so this branch merges without a conflict. This worktree also had no `node_modules` in `web/`, `merchant/`, `agent/runtime` or `agent/second`, so the gate needed `npm ci` in the first two and `bun install --frozen-lockfile` in the last two before it could take every branch.
 
 ---
 

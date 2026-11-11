@@ -153,7 +153,7 @@ export function createTools(layer: Layer, catalog: Catalog) {
   const searchCatalogTool = createTool({
     id: "search_catalog",
     description:
-      "Search the product catalog for a candidate that shares the cut of what the shopper returned: same brand, same category, equal category-specific fit label. Pass the catalog's own ids, which differ from the layer's: brand_id, category and fit_attribute are Channel3's (for Brand X's oxford line, SMwk, dress-shirts and top-fit with Regular). Returns Channel3's own product records unchanged: id is the SKU, title is the line, and every field is one Channel3 returned. No size chart exists there, so do not infer one: on apparel variants is null and the size is chosen at the retailer's offer URL; where variants lists sizes, quote only the listed values. Offer links are real retailer links and fulfilment through them is simulated. This call reads the catalog only; it never moves money.",
+      "Search the product catalog for a candidate that shares the cut of what the shopper returned: same brand, same category, equal category-specific fit label. Pass the catalog's own ids, which differ from the layer's: brand_id, category and fit_attribute are Channel3's (for Brand X's oxford line, SMwk, dress-shirts and top-fit with Regular). exclude_skus takes recall's own evidence: the SKUs of the returned items in the beliefs recall served, so a SKU a belief already rests on is never named again. Returns Channel3's own product records unchanged: id is the SKU, title is the line, and every field is one Channel3 returned. No size chart exists there, so do not infer one: on apparel variants is null and the size is chosen at the retailer's offer URL; where variants lists sizes, quote only the listed values. Offer links are real retailer links and fulfilment through them is simulated. This call reads the catalog only; it never moves money.",
     inputSchema: z.object({
       query: z.string().describe("What to search for, such as mens oxford button-down shirt"),
       limit: z.number().optional().describe("How many products to search, default 10"),
@@ -164,7 +164,9 @@ export function createTools(layer: Layer, catalog: Catalog) {
       exclude_skus: z
         .array(z.string())
         .optional()
-        .describe("Catalog ids the shopper already returned, so the candidate is a new SKU"),
+        .describe(
+          "The SKUs recall's own evidence rows carry: the item.sku of every returned item in the beliefs recall_for_purchase served, so a SKU a belief already rests on is never named again",
+        ),
     }),
     outputSchema: z.object({ products: z.array(z.object({}).passthrough()) }),
     execute: async (input) => catalog.search(input),
