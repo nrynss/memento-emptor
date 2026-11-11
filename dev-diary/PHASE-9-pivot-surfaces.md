@@ -892,6 +892,20 @@ T9.20's live turn proved the mechanism but named `tbnrl46`, a SKU the three seed
 
 ---
 
+### T9.23: Re-record step 2 after the sequencing fix
+```yaml
+requires:   [T9.22, T9.20]
+fixture-ok: no
+size:       XS · mid
+owns:       demo/
+status:     not-started
+```
+T9.22 changed the reference agent's instruction so recall answers before `search_catalog`, with the returned SKUs passed as `exclude_skus`. Only a live turn proves the model obeys: re-run the step-2 turn after the redeploy, record it, and confirm the reply names a SKU the search returned that the seeded returns do not carry. Budget: one Channel3 credit and under $0.10 of agent spend.
+
+**Done when:** the re-recorded turn shows recall first, the search after it, and a named candidate SKU that is not a returned one; the evidence and spend are recorded; T9.20 and T9.17 can then close.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
