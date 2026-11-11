@@ -82,7 +82,7 @@ T0.3 is the gate on the whole product: if a seeded belief can't reach Venerable 
 | **D: Comparison** | P5 | 10 / 11 | In progress (T5.8b) |
 | **E: Pivot layer** | P7, P8 | `b` tasks only | T7.1 | Recall never refuses; the pool is written at ingest and read back |
 | **F: Pivot surfaces** | P9 | 30 / 32 | In progress (T9.15, T9.24) |
-| **G: Round 2** | P10 | 6 / 8 | In progress (T10.4, T10.5) |
+| **G: Round 2** | P10 | 7 / 8 | In progress (T10.5) |
 
 If capacity is short, run A first and then B: the demo needs both, and the ledger can follow on fixtures.
 
@@ -169,13 +169,21 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P7 | 7 / 7 | Done |
 | P8 | 36 / 37 | In progress (T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
-| P10 | 6 / 8 | In progress (T10.4, T10.5) |
+| P10 | 7 / 8 | In progress (T10.5) |
 
 ---
 
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T10.4: All four arms ran (done)
+
+**What exists.** 112 graded turns in `bench/round2/runs/`: 64 first turns (8 shoppers x 4 arms x 2 repeats) and 48 case-4 later turns (correction, next-session, other-agent). First-turn right size: arm 1 0/16, arm 2 4/16, arm 3 10/16, arm 4 12/16; every correction 4/4 in every arm, next-session and other-agent 4/4 for both Memento arms, 2/4 for arm 2, 0/4 for arm 1. Wrong-cause 0 everywhere. Spend $0.789309 against the $5.00 cap, one cell first ($0.057150, projection $1.60-$4.11). The freeze check was green before the first paid turn and after the last; the marker names the commit that added FROZEN.md and pins the amended file's hash.
+
+**What surprised.** The run spans four driver invocations plus the one-cell (two 502s and one late trace stopped the batch); each restart reseeded and reused committed turns, so no correction crossed an invocation. The frozen extraction rule under-reads six Memento replies that open with the size and later quote another: by hand arm 3 would be 12/16 and arm 4 16/16, and no score was overridden. Half the Memento turns differ from the freeze's expected recall in labels or contradiction marks (the layer marks a contradicted belief Out of true, the fixture keeps Earned; one rival serves three rows, not five); answers and precedence agree. The frozen anchor's event times are in the future, so the driver seeds relative days in real past time.
+
+**The next agent should not have to work out.** T10.5 owns how the extraction artifact is presented. The other-agent turn is a fresh neutral-instrument conversation, not the deployed second agent (its key is scoped to `shopper_01`). Do not seed histories from the frozen anchor, and do not edit a run file's measured content.
 
 ### T8.5u: The layer driver ran live with thin evidence served (done)
 
