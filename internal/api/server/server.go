@@ -158,6 +158,22 @@ type evidenceRecord struct {
 	writeOp   domain.WriteOp
 	docID     string
 	beliefIDs []string
+	// feedback names the feedback this row was recorded as, or is nil
+	// while the row carries none. It carries the purchase's feedback
+	// identity, so a repeat delivery for the same purchase is told apart
+	// from that purchase's first feedback without reading the words.
+	feedback *recordedFeedback
+}
+
+// recordedFeedback is one purchase's recorded feedback: the id it was
+// recorded under, the verdict that recorded it, and the belief it counts
+// toward. A repeat delivery answers with these rather than writing again,
+// so the purchase's evidence stays one row and its belief's status cannot
+// move. A seeded row whose history names no id carries an empty id.
+type recordedFeedback struct {
+	id       string
+	verdict  contract.FeedbackVerdict
+	beliefID string
 }
 
 // beliefRecord is one stored belief: its identity, its graph content, the

@@ -640,11 +640,29 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, internal/memory/
-status:     claimed:t85l-feedback
+status:     in-review
 ```
 The T9.7 live run found `record_feedback` is not idempotent per purchase in the shopper's belief: repeated feedback appended the same capture's evidence (`ev_51c2d8`) three times to `blf_2b9d60` and lifted it Claimed → Building, while the pool row stayed one. A retried or duplicated feedback delivery must not multiply that purchase's evidence or move the belief's status.
 
 **Done when:** feedback for a purchase already carrying that capture's evidence is a no-op that reports the duplicate; a table test proves three sends leave one evidence row and the same status; the gate passes.
+
+**Notes (in-review).** Feedback is now recorded once per purchase, joined on the purchase's own evidence row rather than on the shopper's words. `evidenceRecord` carries the feedback it was recorded as (`recordedFeedback`: its id, its verdict and the belief it counts toward), so the second and third delivery for the same purchase are recognised before anything is minted or written.
+
+What a repeat does: nothing to the belief. No `fb_` id is minted, no evidence row is appended, nothing reaches the graph, and the belief's status cannot move — the `Claimed → Building` lift came from the extra graph actions, so no write is the whole of that fix. The answer is the one already on record: the same `feedback_id`, verdict, `counts_toward` and `belief_id`. That is the contract-consistent option the brief allowed ("a benign no-op with the same answer as the first"), and the frozen fixtures already read it that way: `record_feedback.response.example.json` answers `accepted: true` for the seeded purchase, which is a repeat of the history's copy, so a duplicate marker would have had to disagree with the contract. No field was added to a shared type: the response shape is frozen and outside `owns` (rule 1).
+
+The seeded arc's copy is recognised, not double-counted. `LoadSeed` marks each seeded feedback row with the verdict and the id the history records, and `SeedFromExamples` takes that id from the fixture pair that names it: `record_feedback.request.example.json` names the purchase (`custom_id`, SKU, size) and the response names `fb_51c2d8`, the id `explain_belief.response.example.json`'s timeline repeats for the same feedback. One purchase's feedback therefore has one identity across the fixture set, and the served layer answers `fb_51c2d8` for it rather than an id it invented. `Seed` gained `FeedbackIDs` (evidence id → feedback id); a seed built by a harness that names no id carries none, and a repeat answers with an empty id rather than a false one.
+
+The repeat still settles the purchase-keyed fit row from the verdict on record, which is idempotent per purchase by design. That keeps the pool's behaviour exactly as today (the T9.7 gap itself recorded "the pool row stayed one"): a first delivery that repeats the seeded copy still counts its purchase once, so the demo's 22 → 23 settled and 0 → 1 live stand.
+
+Tests, in `internal/api/server/feedback_test.go`: a table of three sends (the first, an exact retry, and the same feedback in other words) against a fresh purchase proves after *every* send that the belief lists one evidence row with the purchase's id, that the status has not moved, and that the three answers carry one feedback id; it also pins one graph action and one minted id. A second test drives the same three sends against the seeded service and proves the belief keeps its one seeded `ev_51c2d8`, stays `Claimed`, keeps its own reason words, and that no graph action and no mint were added. Both fail on the parent commit at exactly those assertions (two evidence rows after the retry; two `ev_51c2d8` rows on the seeded belief after the first send).
+
+`internal/memory` is untouched, deliberately: the writer sees only the graph content and the stub, never the purchase, so the purchase's identity cannot be checked there. The rule lives where the purchase is joined.
+
+Three things outside `owns` for the orchestrator: `docs/interface.md`'s `record_feedback` section does not yet say a repeat answers with what is on record and changes nothing (a documentation task, or the landing commit); T9.7's gap 5 in `PHASE-9-pivot-surfaces.md` and `demo/RUN-6.md` now describe a closed defect, and a re-run of step 4 would show the belief staying `Claimed` with its one evidence row while the pool still moves 22 → 23; and `tests/live/layer/main.go`'s feedback step is a live harness no gate runs, so check it against the new answer before the next live pass.
+
+One behaviour a reviewer should know: the duplicate check runs before the new words are read for what they count toward, because the purchase decides, not the wording. A repeat delivery whose new words would read as a seller verdict (damaged, not arrived) therefore answers with the recorded fit feedback instead of the `ErrKindMismatch` a second write used to raise. A first delivery of either kind is unchanged.
+
+Gate green after `npm ci` in `web/` and `merchant/` (neither was populated in this worktree): `gofmt`, `go vet`, `go test -race` over every Go package, both lockfile checks, both Svelte checks, both lints, both test runs and both builds, ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 

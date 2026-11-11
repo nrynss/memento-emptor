@@ -885,6 +885,14 @@ func (s *Service) beliefForReason(ctx context.Context, st *shopperState, questio
 // purchase, joined on the transaction's custom id. A fits-well verdict
 // counts toward fit as supporting evidence for the worn size; an unclear
 // verdict counts toward nothing.
+//
+// A purchase's feedback is recorded once, by the purchase's own identity:
+// the evidence row the capture carries. A repeat delivery for the same
+// purchase — a retry, a duplicated turn, or a feedback the seeded history
+// already holds — changes nothing in the belief: no evidence is added a
+// second time, no id is minted, and its status cannot move. The answer is
+// the one already on record, so the caller is told what the layer holds
+// rather than what a second write would have made.
 func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbackRequest) (contract.RecordFeedbackResponse, error) {
 	if strings.TrimSpace(req.ShopperID) == "" {
 		return contract.RecordFeedbackResponse{}, fmt.Errorf("server: record feedback: %w", ErrMissingShopper)
@@ -918,6 +926,9 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 	counts, err := memory.VerdictCountsToward(verdict)
 	if err != nil {
 		return contract.RecordFeedbackResponse{}, fmt.Errorf("server: record feedback: %w", err)
+	}
+	if prior := matched.feedback; prior != nil {
+		return s.repeatFeedback(ctx, st, matched, req, prior)
 	}
 	id := st.mint("fb")
 	if counts == domain.BeliefKindNone {
@@ -965,6 +976,7 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 	matched.docID = docID
 	matched.writeOp = domain.WriteRecordAction
 	matched.beliefIDs = append(matched.beliefIDs, belief.id)
+	matched.feedback = &recordedFeedback{id: id, verdict: verdict, beliefID: belief.id}
 	belief.evIDs = append(belief.evIDs, matched.id)
 	belief.touch(now)
 	st.timeline(belief.id, contract.TimelineEvent{
@@ -982,6 +994,42 @@ func (s *Service) RecordFeedback(ctx context.Context, req contract.RecordFeedbac
 		Verdict:      verdict,
 		CountsToward: countsTowardView(counts),
 		BeliefID:     &beliefID,
+		Accepted:     true,
+		TraceID:      traceOf(req.TraceID),
+	}, nil
+}
+
+// repeatFeedback answers a delivery for a purchase whose feedback is
+// already on record. Nothing about the belief changes: the evidence row
+// stays one row, no id is minted for the repeat, and no write reaches the
+// graph, so the status the belief holds now is the status it keeps. The
+// purchase-keyed fit row still settles from the verdict on record, which
+// is idempotent per purchase and is what counts the purchase once in the
+// pool. The answer is the first feedback's answer, so the caller reads
+// what the layer holds rather than what the repeat would have written.
+func (s *Service) repeatFeedback(ctx context.Context, st *shopperState, matched *evidenceRecord, req contract.RecordFeedbackRequest, prior *recordedFeedback) (contract.RecordFeedbackResponse, error) {
+	now := s.deps.Clock()
+	if err := s.feedbackFitRow(ctx, st, matched, prior.verdict, now); err != nil {
+		return contract.RecordFeedbackResponse{}, err
+	}
+	if strings.TrimSpace(matched.row.Item.BrandID) != "" {
+		item := matched.row.Item
+		st.lastBrand = domain.Subject{Kind: domain.SubjectBrand, ID: item.BrandID, Name: item.BrandName}
+	}
+	counts, err := memory.VerdictCountsToward(prior.verdict)
+	if err != nil {
+		return contract.RecordFeedbackResponse{}, fmt.Errorf("server: repeat feedback: %w", err)
+	}
+	var beliefID *string
+	if prior.beliefID != "" {
+		id := prior.beliefID
+		beliefID = &id
+	}
+	return contract.RecordFeedbackResponse{
+		FeedbackID:   prior.id,
+		Verdict:      prior.verdict,
+		CountsToward: countsTowardView(counts),
+		BeliefID:     beliefID,
 		Accepted:     true,
 		TraceID:      traceOf(req.TraceID),
 	}, nil

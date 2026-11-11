@@ -94,6 +94,11 @@ type Seed struct {
 	// evidence id. Feedback has no reason category; the verdict decides
 	// what it counts toward.
 	FeedbackVerdicts map[string]contract.FeedbackVerdict
+	// FeedbackIDs carries the id the history recorded each feedback row
+	// under, by evidence id. A seeded feedback row whose history names no
+	// id has none, and a repeat delivery for its purchase then answers
+	// with no id rather than one the layer invented.
+	FeedbackIDs map[string]string
 }
 
 // parseTime parses one RFC 3339 time or fails the seed.
@@ -275,6 +280,15 @@ func (s *Service) LoadSeed(ctx context.Context, seed Seed) error {
 				if _, err := memory.WriteFeedback(ctx, s.graph, item.belief.content, item.belief.kind, stub, verdict, item.rec.row.OccurredAt); err != nil {
 					return fmt.Errorf("server: load seed: write feedback: %w", err)
 				}
+				// The history holds this purchase's feedback already, so
+				// the row carries its identity: a later delivery for the
+				// purchase is a repeat, not that purchase's first
+				// feedback.
+				item.rec.feedback = &recordedFeedback{
+					id:       seed.FeedbackIDs[item.rec.id],
+					verdict:  verdict,
+					beliefID: item.belief.id,
+				}
 			}
 			continue
 		}
@@ -379,7 +393,10 @@ func readExample(apiDir, name string) (json.RawMessage, error) {
 // ledger rows, their evidence links, the open questions, the explained
 // timeline, and the seeded notice. Feedback rows carry the fits-well
 // verdict behind the fixture's shape: a capture counting toward fit is
-// the worn size working out.
+// the worn size working out. A feedback row also takes the id the
+// fixtures record for it: the record_feedback example pair names the
+// purchase and the feedback id, and the explained timeline repeats that
+// id, so one purchase's feedback has one identity across the set.
 func SeedFromExamples(apiDir string) (Seed, error) {
 	var seed Seed
 	decode := func(name string, target any) error {
@@ -412,6 +429,14 @@ func SeedFromExamples(apiDir string) (Seed, error) {
 	if err := decode("ledger_belief.response.example.json", &ledgerBelief); err != nil {
 		return Seed{}, err
 	}
+	var feedbackReq contract.RecordFeedbackRequest
+	if err := decode("record_feedback.request.example.json", &feedbackReq); err != nil {
+		return Seed{}, err
+	}
+	var feedbackRes contract.RecordFeedbackResponse
+	if err := decode("record_feedback.response.example.json", &feedbackRes); err != nil {
+		return Seed{}, err
+	}
 	seed.ShopperID = beliefs.ShopperID
 	seed.Beliefs = make([]contract.BeliefView, 0, len(beliefs.Beliefs))
 	for _, row := range beliefs.Beliefs {
@@ -430,12 +455,28 @@ func SeedFromExamples(apiDir string) (Seed, error) {
 		seed.Notices[ledgerBelief.Belief.BeliefID] = *ledgerBelief.SeededNotice
 	}
 	seed.FeedbackVerdicts = map[string]contract.FeedbackVerdict{}
+	seed.FeedbackIDs = map[string]string{}
 	for _, belief := range seed.Beliefs {
 		for _, ev := range belief.Evidence {
-			if ev.Outcome.Kind == domain.OutcomeCapture && ev.CountsToward != nil && *ev.CountsToward == domain.BeliefKindFit {
-				seed.FeedbackVerdicts[ev.EvidenceID] = contract.FeedbackFitsWell
+			if ev.Outcome.Kind != domain.OutcomeCapture || ev.CountsToward == nil || *ev.CountsToward != domain.BeliefKindFit {
+				continue
+			}
+			seed.FeedbackVerdicts[ev.EvidenceID] = contract.FeedbackFitsWell
+			if feedbackNames(feedbackReq, seed.ShopperID, ev) {
+				seed.FeedbackIDs[ev.EvidenceID] = feedbackRes.FeedbackID
 			}
 		}
 	}
 	return seed, nil
+}
+
+// feedbackNames reports whether the record_feedback example is about one
+// seeded evidence row: the same shopper, the same purchase and the same
+// worn size. It is the same join record_feedback itself makes, so the
+// fixture names the feedback of the row its request describes.
+func feedbackNames(req contract.RecordFeedbackRequest, shopper string, ev contract.EvidenceView) bool {
+	return req.ShopperID == shopper &&
+		req.CustomID == ev.Link.CustomID &&
+		req.SKU == ev.Item.SKU &&
+		req.Size == ev.Item.Size
 }
