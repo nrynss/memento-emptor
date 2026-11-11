@@ -177,6 +177,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
 
+### T9.14: The relay's status mapping is tested (done)
+
+**What exists.** `agent/frontend/server/status.ts` owns the `/api/chat` mapping (400 invalid, including malformed JSON; 429 exhausted; 502 relay failure with `turn_id`), and `index.ts` answers refusal/failure paths only through it, with a source guard against a literal status handed to `json()`. The cases ride the gate's existing node step because extracting the import-free module removed the `Bun.serve` import; the same file is 22/22 under bun. Review verified every status off the wire with a closed-port gateway (400 both flavours, 429, 502's exact body) and fixed two header/note claims (the 200 reply and the 404 splat are not chat outcomes).
+
+**What surprised.** The unparseable-body 400 was a fourth inline status outside the kinds; it moved too. `status.ts` must stay import-free or the node step loses it.
+
+**The next agent should not have to work out.** The source guard reads `json(` call sites only; a `new Response(..., { status: 5xx })` in the chat handler would slip it.
+
 ### T9.18: The deploy README's pins cover bun (done)
 
 **What exists.** `deploy/README.md`'s toolchain table lists Go, Node and Bun with their sources and says what the check reads (18 declarations); the Bun row is a required source in `tools/pincheck`, so a drifted or missing row fails the gate naming the file. The table test covers both new cases. Review corrected two prose claims (the quoted output line and "the four agent images"), and confirmed that a patch-stating row (`1.3.0`) is compared exactly against CI while a major-only row (`1.3`) is not.

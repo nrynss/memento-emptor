@@ -580,7 +580,7 @@ requires:   [T9.13]
 fixture-ok: yes
 size:       XS · mid
 owns:       agent/frontend/
-status:     in-review
+status:     done
 ```
 `agent/frontend/server/index.ts` maps kinds to statuses (400 for an invalid body, 429 for an exhausted budget, 502 for a relay failure), and no test pins that mapping: a future edit could answer 500 for an exhausted budget with the gate green. The file starts `Bun.serve` and cannot be imported under `node --test`, so the test needs the bun runner T9.13 adds to CI.
 
