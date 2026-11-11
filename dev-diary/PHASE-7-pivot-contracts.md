@@ -136,7 +136,7 @@ requires:   [T7.1]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/domain/, internal/api/server/, internal/fakes/
-status:     not-started
+status:     claimed:t76-json-tags
 ```
 `domain.Subject` has no JSON tags, so marshaling any contract type emits `Kind`/`ID`/`Name`, which every belief schema rejects under `additionalProperties: false`. The wire shape is correct today only because the server and the fakes' comparison each carry a rename workaround. Put the tags on the domain type (`json:"kind"`, `json:"id"`, `json:"name"`), delete both workarounds, and make `TestExamplesMarshalBackToSchema` stop forgiving the three frozen keys.
 
