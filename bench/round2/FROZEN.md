@@ -489,3 +489,14 @@ before `record_correction`.
   the frozen histories in the shape T10.1 recorded; T10.1's recordings remain
   the evidence for that shape.
 - `bench/round2/arm2/` is read, hashed and called, never edited.
+- **The size ladder is restated offline, and a test keeps it in step (P10
+  review, Low).** `bench/round2/reason.go` carries its own copy of the rung
+  order the layer holds unexported in `internal/api/server/content.go`, so
+  the reference reasoner runs with no layer beside it. `TestLadderMatchesTheLayer`
+  drives the layer's own service path for every rung and both directions — a
+  refund webhook through `IngestWebhook`, the shopper's classified answer
+  through `RecordReason`, and the composed size through `LedgerBeliefs` — and
+  requires it to equal `SizeForDirection`'s. A layer ladder reordered,
+  extended, shortened or recased without `reason.go` following fails that
+  test. The test is not a frozen input, and no hashed file changed, so the
+  manifest stays at 116 rows.

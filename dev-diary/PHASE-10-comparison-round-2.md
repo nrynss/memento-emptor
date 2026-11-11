@@ -136,11 +136,15 @@ requires:   [T10.3]
 fixture-ok: yes
 size:       XS · mid
 owns:       bench/round2/
-status:     claimed:t106-ladder
+status:     in-review
 ```
 `bench/round2/reason.go` restates the layer's size ladder (unexported in `internal/api/server/content.go`), as round 1's driver does. A ladder change in the layer would drift the reference reasoner silently, and the freeze would keep the old order.
 
 **Done when:** the reference reasoner's ladder is checked against the layer's (an exported constant, a behaviour test through the served path, or a recorded reason), and a mismatch fails a test; the gate passes.
+
+Worker notes (in-review): the ladder is pinned by behaviour, not by a second copy anyone must remember to update. `bench/round2/ladder_test.go` adds `TestLadderMatchesTheLayer`: for every rung in `reason.go`'s `sizeLadder` and both directions it ingests one refund webhook at that size, answers its pending question with a classified fit category, and reads the size the layer composed into the fit belief through `LedgerBeliefs`, requiring it to equal `SizeForDirection`'s. It runs the layer's own service path end to end (`server.NewService` over the fakes, then `IngestWebhook`, `RecordReason`, `LedgerBeliefs`), offline, with no model call and no hashed file edited, so the manifest stays at 116 rows. Mutations, each reverted: swapping M and L in `reason.go`'s ladder fails five cells; the same swap in `internal/api/server/content.go` fails the mirror cells; each failure names the worn size, the direction, the layer's size and the reasoner's. FROZEN section 11 records the test. No `bench/round2/runs/` directory and no marker exists, and the branch edits `bench/round2/` and this block only.
+
+Surprises for the next agent. (1) The layer composes the recommendation into the belief value (`"runs small, take size L"`), so `fitBeliefValue` is the observable to read; the test takes the value's last token instead of matching the prose, so a wording change is not mistaken for a ladder change, and a value naming no size fails rather than passing. (2) The drive needs no pool, no fit index and no identity salt: `Deps` carries the four fakes and `testdata/api`, and the graph fake is permissive on purpose, because an allowlist built from the expected values would fail as a graph error and hide which size drifted. (3) `internal/api/server`, `internal/evidence` and `internal/fakes` are imported by the test file only; the package's non-test code still imports none of them. (4) `neighbourSize` also feeds `guidanceForPool`, so the same rule is exercised on the pool path; this test pins the composed fit belief, not the pool's wording, and a change to the pool's arithmetic would be a different check.
 
 ---
 
