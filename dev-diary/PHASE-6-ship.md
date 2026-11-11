@@ -34,7 +34,7 @@ requires:   [T4.3, T6.1, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/judges/
-status:     not-started
+status:     claimed:t62-judges
 ```
 The first screen is a "For judges: start here" table: the demo, the evidence ledger, the merchant app, the traces, both comparison rounds, and the seeded rows clearly marked. Test credentials for the sandbox, if a judge needs them, are safe to publish and are sandbox-only.
 
@@ -118,7 +118,7 @@ requires:   [T6.3]
 fixture-ok: yes
 size:       S · mid
 owns:       docs-site/
-status:     not-started
+status:     claimed:t68-docs
 ```
 An Astro Starlight site publishing the builder documentation: what the layer is, the interface reference from `docs/interface.md`, the architecture from `docs/architecture.md`, the submission summary, and links to the demo, ledger, and repo. Separate from the ledger web app; static build.
 
