@@ -910,7 +910,7 @@ requires:   [T8.2b]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/fitindex/
-status:     in-review
+status:     done
 ```
 The P8 review found T8.2b's step-3 transcript line (`version=3001794233529 state=refunded settled=false`) cannot come from the committed driver: it prints a form `docSource.String` never emits, and a refunded document at the reason-classified rank, which no refund write can carry. The three versions the notes rest on do re-derive; only provenance is wrong. Re-run the driver so the transcript is real, or record the correction in the handoff if a run is not worth the churn.
 

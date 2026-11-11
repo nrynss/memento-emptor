@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 24 / 35 | In progress (T8.2c, T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.5x, T8.7b) |
+| P8 | 25 / 35 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.5x, T8.7b) |
 | P9 | 27 / 31 | In progress (T9.15, T9.17, T9.20, T9.23, T9.24) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
