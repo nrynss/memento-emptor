@@ -647,6 +647,20 @@ The T9.16 review found the row that task adds would be a pin nothing compares: `
 
 ---
 
+### T9.19: The gate runs the agents' offline checks
+```yaml
+requires:   [T9.9, T9.13]
+fixture-ok: yes
+size:       XS · mid
+owns:       tools/check.sh
+status:     not-started
+```
+T9.9 gave both agents' tool bindings offline coverage, but `tools/check.sh` does not invoke it: `bun agent/offline-check.ts` and `bun agent/check.ts` run only when someone runs them by hand, so a tool-surface drift passes the gate. Add both checks to the gate behind the same bun guard the frontend step uses.
+
+**Done when:** the gate runs both agent checks where bun is present and states the fallback where it is not; a broken tool id fails the gate; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).

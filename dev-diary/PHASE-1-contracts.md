@@ -167,6 +167,20 @@ T1.1b made served ingest store an unknown dispute code instead of failing, but `
 
 ---
 
+### T1.1d: One unknown-code rule for ingest and the live driver
+```yaml
+requires:   [T1.1b]
+fixture-ok: yes
+size:       XS · mid
+owns:       internal/domain/, tests/live/ingest/
+status:     not-started
+```
+The T1.1c review found the unknown-dispute-code disposition now exists in two places: `internal/ingest.handleDispute` and the live driver's `disputeCategory`. A rule change would drift (loudly, via an assertion mismatch, but drift). Export the disposition from `internal/domain` (or a shared helper) and have both call it.
+
+**Done when:** one function decides an unknown code's category and error, and ingest and the driver both use it; the existing tests pass unchanged; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] Domain model, write rule and architecture in place (T1.1).
