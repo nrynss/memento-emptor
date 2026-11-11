@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 23 / 34 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.7b) |
-| P9 | 26 / 29 | In progress (T9.15, T9.17, T9.20) |
+| P9 | 27 / 31 | In progress (T9.15, T9.17, T9.20, T9.23, T9.24) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.22: Catalog search after recall (done)
+
+**What exists.** The reference agent's step-2 instruction now waits for recall's answer, builds `exclude_skus` from the returned beliefs' `item.sku` values, passes none when no rows came back, and names only a SKU the search returned. Five offline checks pin the clauses (184 checks, was 179); `tsc` and the gate are green. Review mutation-checked all five and corrected a false fact in the note (the search overlapped recall and ended 1.1 s after it answered, rather than ending before).
+
+**What surprised.** The sequencing is model behaviour: the text is proven, not the model. T9.23 owns the redeploy and one live re-record. If the turn still parallelises, the tool description (which does not name recall as the source of `exclude_skus`) is the next lever and T9.22 reopens.
+
+**The next agent should not have to work out.** The exclusion removes `tbnrl46` specifically, leaving `VyAkjCA`/`PSW8GeK` in the recording.
 
 ### T2.5b: Keel pin and seller subject (done)
 

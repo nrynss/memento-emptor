@@ -694,7 +694,7 @@ requires:   [T9.8]
 fixture-ok: yes
 size:       S · mid
 owns:       agent/runtime/
-status:     in-review
+status:     done
 ```
 The T9.7 run found product.md's demo step 2 has no live path: the reference agent exposes no product-search tool, so the Channel3 candidate never appears in a turn and the SKU exists only in step 4's capture. Add a catalog search tool (backed by `agent/catalog`, which already replays the Channel3 recordings) to the reference agent, bind it to the live layer's edge as the other tools are, and prove one live turn that names a real candidate line and SKU before recall.
 
@@ -884,7 +884,7 @@ requires:   [T9.17]
 fixture-ok: yes
 size:       XS · mid
 owns:       agent/runtime/
-status:     in-review
+status:     done
 ```
 T9.20's live turn proved the mechanism but named `tbnrl46`, a SKU the three seeded returns carry: the agent issued `search_catalog` 3 ms after recall started and before recall answered, so it had no returned SKUs to exclude, and its step-2 instruction never asks for sequencing or exclusion (the tool description offers `exclude_skus`; the instruction does not). product.md's step 2 wants a *different* SKU sharing the cut. Change the instruction: recall answers first, then `search_catalog` with `exclude_skus` from the returned rows' `item.sku`, and name only a SKU the search returned.
 
