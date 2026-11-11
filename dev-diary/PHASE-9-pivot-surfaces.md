@@ -314,11 +314,21 @@ requires:   [T9.3d, T9.3g]
 fixture-ok: no
 size:       XS · mid
 owns:       deploy/merchant/Dockerfile, deploy/README.md
-status:     claimed:t93h-merchant-node
+status:     in-review
 ```
 T9.3g aligned the demo image's frontend build to the pinned Node 26, but `deploy/merchant/Dockerfile` still builds `merchant/` on `node:22-bookworm`. It is a separate image, so the pin drifted independently; align it the same way, prove the merchant image builds and serves `/` and `/healthz`, and record the pin beside the others.
 
 **Done when:** the merchant image's build stage uses Node 26; the image builds and serves `/` and `/healthz`; the pin table covers it; the gate passes.
+
+**Notes (worker).** `deploy/merchant/Dockerfile`'s `web-build` stage moves from `node:22-bookworm` to `node:26-bookworm`, with a comment naming the pin the way `deploy/Dockerfile`'s web stage does. Nothing else in the file needed it: the `go-build` stage is already `golang:1.27-bookworm` (the same tag and the same 1.27.1 as `go.mod` and CI), and the runtime stage is `debian:trixie-slim`, which the pin does not cover. `deploy/README.md`'s **Toolchain pins** section now speaks for both images: the table's "Where the images pin it" column names `Dockerfile` and `merchant/Dockerfile` for Go and Node, and the Node paragraph says both `web-build` stages run the gate's `npm ci` and `npm run build` on the same major. T9.3g's known-drift paragraph is gone, since the drift it named is fixed.
+
+Proof, local docker 29.9.3: `docker build --no-cache -f deploy/merchant/Dockerfile --target web-build` answers `v26.13.0` to `node --version` inside the stage and leaves `index.html`, `200.html` and `_app` in `/src/merchant/build`, so the merchant app is built on the pinned major rather than a cached older base. The full image starts with `MEMENTO_LAYER_URL` pointed at a dead loopback port (nothing outward), serves `/healthz` with `{"ok":true}` (200), `/` with the `Memento Merchant` title and its `_app` chunk (200s), answers any other `/tools/` path with the edge's 404 `unknown_tool`, and answers `POST /tools/product_fit` with 503 `layer-unreachable` instead of dialling anything. The container and both image tags were removed afterwards; the gate passes (Go vet and tests, both lockfiles, both svelte-checks, both lints, both vitest suites, both builds).
+
+Three things the next agent should not have to rediscover:
+
+- The merchant image is a second `web-build` stage, not a second copy of the pin: `deploy/Dockerfile` and `deploy/merchant/Dockerfile` each carry `node:26-bookworm` in their own `FROM`, so a future Node move is two lines, and T9.3i is the task that makes a disagreement fail mechanically.
+- The `--no-cache` is the point: the pin lives in a `FROM` line, and a cache hit after a base change reuses the stage built on the old major. `--target web-build` plus `node --version` inside it is the check.
+- The merchant edge needs no layer to answer `/` and `/healthz` (the key and the layer URL are read only on the proxy path), so the image is proved with a dead loopback layer URL; a proxy read against a real layer is proved in T9.3e, which owns its live vintage.
 
 ---
 

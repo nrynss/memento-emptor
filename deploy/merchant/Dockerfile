@@ -12,10 +12,14 @@ COPY deploy/merchant/ ./deploy/merchant/
 RUN CGO_ENABLED=0 go build -trimpath -o /out/merchant-edge ./deploy/merchant
 
 # --- Web: the merchant app (static build) ---
+# Node 26 is the pinned major (T0.2's stack, .github/workflows/ci.yml's
+# setup-node, and deploy/README.md's toolchain table), the same base the
+# main image's web stage builds on, so both apps build on the major CI
+# uses.
 # The pool fixtures live in testdata/api at the repo root (the app's
 # fixture transport imports the frozen product_fit example), so the root
 # testdata tree is part of this stage's context, like the main image.
-FROM node:22-bookworm AS web-build
+FROM node:26-bookworm AS web-build
 WORKDIR /src/merchant
 COPY merchant/package.json merchant/package-lock.json ./
 RUN npm ci

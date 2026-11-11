@@ -18,14 +18,14 @@ region and cost are unchanged: $0 delta.
 
 ## Toolchain pins
 
-The image chooses three toolchain versions, and each must match the one
-the contract (T0.2) and CI name, so a build cannot pass in one place and
-fail in another:
+The two images choose three toolchain versions between them, and each
+must match the one the contract (T0.2) and CI name, so a build cannot
+pass in one place and fail in another:
 
-| Tool | Pin | Where the image pins it | Where the pin is checked |
+| Tool | Pin | Where the images pin it | Where the pin is checked |
 |---|---|---|---|
-| Go | 1.27 | `Dockerfile`: `golang:1.27-bookworm` | `go.mod` (`go 1.27.1`) and `ci.yml`'s `setup-go` 1.27.1 |
-| Node | 26 | `Dockerfile`: `node:26-bookworm`, the `web-build` stage | `ci.yml`'s `setup-node` 26 |
+| Go | 1.27 | `Dockerfile` and `merchant/Dockerfile`: `golang:1.27-bookworm` | `go.mod` (`go 1.27.1`) and `ci.yml`'s `setup-go` 1.27.1 |
+| Node | 26 | `Dockerfile`'s `web-build` and `merchant/Dockerfile`'s `web-build`: `node:26-bookworm` | `ci.yml`'s `setup-node` 26 |
 | Lambo | 0.10.1 | `Dockerfile`: the release download, sha256-pinned | the image build's own `sha256sum -c`; no CI step pins it |
 
 One asymmetry and one limit, both intended: the Go tag floats the
@@ -35,15 +35,9 @@ guard.
 
 The Node major is the whole frontend pin: neither `web/package.json` nor
 `merchant/package.json` declares an `engines` field, so nothing but the
-base image and CI's `setup-node` decides which Node builds the app. The
-`web-build` stage runs the same `npm ci` and `npm run build` as the gate,
-on the same major.
-
-Known drift, one file, owned by the follow-up task T9.3h:
-`deploy/merchant/Dockerfile` still builds `merchant/` on
-`node:22-bookworm`. It is a second, separate image, so aligning it is a
-change to that file, not to this one; until it lands, the merchant image
-builds on a Node major CI does not use.
+base image and CI's `setup-node` decides which Node builds the app. Both
+`web-build` stages, the demo image's and the merchant image's, run the
+same `npm ci` and `npm run build` as the gate, on the same major.
 
 ## Provision (operator, after this lands on main)
 
