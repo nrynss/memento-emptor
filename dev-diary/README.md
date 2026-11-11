@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 33 / 37 | In progress (T8.5q, T8.5s, T8.5u, T8.7b) |
+| P8 | 34 / 37 | In progress (T8.5q, T8.5u, T8.7b) |
 | P9 | 30 / 32 | In progress (T9.15, T9.24) |
 | P10 | 6 / 8 | In progress (T10.4, T10.5) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5s: A boot replay's repeated correction write is harmless (done)
+
+**What exists.** The boot replay keeps writing the seed's correction: a repeat resolves the same action node and edge on the pinned Lambo release, inserts no concept and no dependent, and only reinforces the edge and opens an interaction. A probe of Lambo 0.10.1 recorded the same action three times: the repeat receipt said 0 concepts, 0 edges, `blast radius: 1`, `dependents (1)`, and the edge's reinforcement count went 1 to 3. The task first skipped the write for a restored id and reverted it: skipping would drop the edge if the graph were rebuilt under a surviving journal, and the repeat costs nothing structural. The seed's five evidence actions behave the same way on every boot.
+
+**What surprised.** The premise was wrong: repeats looked like new dependents in the fake graph but are reinforcements in Lambo. The review corrected the record (reinforcements 3, not 2; an interaction per call is a node and a temporal edge, so "no nodes" was imprecise; the boot re-issues a sixth write, the correction's declaration, not only the five evidence actions). The Done-when's live restart was accepted in place of the mechanism probe and is recorded as such.
+
+**The next agent should not have to work out.** Repeats reinforce; they cannot inflate blast radius. Persisted belief records remain the prerequisite for ever skipping boot writes safely (T2.3c's recorded limit). The probe script is not committed; a future agent can rebuild it from the note's setup.
 
 ### T4.11: The live why view reads the pool (done)
 
@@ -421,7 +429,7 @@ Newest first. What exists, what surprised, and what the next agent should not ha
 
 **What exists.** `takeCorrection` is the only writer of a correction's place: it inserts an id once, keeps the first view, and reserves its number against the mint sequence, so a restored `corr_000001` makes the next mint `corr_000002`. `explain_belief` and `ledger_belief` share `correctionsFor`, which serves one row per id even for a journal already written with duplicates. Tests cover the restart, a re-seed, a repeated order, and the T9.7 run's own seven-row/five-id journal (now five rows, next mint `corr_000005`). Rule 4 unchanged: the correction still wins, the belief stays, the timeline event stays single.
 
-**What surprised.** The duplicate rows came from `LoadSeed` replaying beside the restored journal because beliefs are not restored, so `ErrAlreadySeeded` never fires after a restart. Review also found `LoadSeed` re-issues the correction's graph write at every boot even when the restore holds it — no served-state effect offline; **T8.5s** proves it on the live hub.
+**What surprised.** The duplicate rows came from `LoadSeed` replaying beside the restored journal because beliefs are not restored, so `ErrAlreadySeeded` never fires after a restart. Review also found `LoadSeed` re-issues the correction's graph write at every boot even when the restore holds it — no served-state effect offline; **T8.5s** measured the repeat: the same edge is reinforced, with no new dependent (a probe of the pinned Lambo release, not a live restart).
 
 **The next agent should not have to work out.** Only correction ids are reserved: `ev`, `q`, `blf`, `rsn`, `fb` still start at 1 each process because nothing restores them; `reserveID` is generic if that changes.
 

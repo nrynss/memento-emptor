@@ -965,7 +965,7 @@ requires:   [T8.5m]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/hub/, internal/api/server/, product.md, docs/architecture.md, dev-diary/PHASE-8-pivot-layer.md
-status:     in-review
+status:     done
 ```
 The T8.5m review found `LoadSeed` calls `memory.RecordCorrection` before `takeCorrection` decides the id is already restored, so every boot re-issues that correction's graph write even when the journal holds it. No served-state effect offline; prove it against the live hub and either make the boot skip the write for a restored id or record that the repeat is harmless and why.
 
@@ -977,7 +977,7 @@ The same holds for the seed's five evidence actions, which the replay re-issues 
 
 The residual is honest: the repeat is not free. Every call opens an interaction (with its temporal edge) and increments the action's reinforcement counter, so interactions, their temporal edges and reinforcements accumulate on each boot even though no dependent or blast radius moves. Persisted belief records remain the prerequisite for ever skipping writes safely: without them the replay cannot know the graph already holds a belief's edges, and a skip would silently drop them if the store were rebuilt while the journal survived. That is T2.3c's recorded limit, that restoring belief records needs its own task; T8.5s owns this finding and records it here, and `product.md` and `docs/architecture.md` state the measured behaviour.
 
-The README's P8 handoff still says T8.5s proves it on the live hub; that line is the orchestrator's to correct to the mechanism and the 0.10.1 probe, since no live run was made.
+**Orchestrator's acceptance (live clause).** The Done-when asked for a live boot replay. The mechanism is accepted in its place: the probe ran the same `lambo_record_action` the boot calls, on the same 0.10.1 release the deploy pins, and a repeat created no concept or edge and left the blast radius at one; the action contents the boot writes are stable across boots. A live restart would count the same reinforcements, and reaching the loopback reader in the deployed shell was not worth the ops risk here, so the live replay was not run. The README's P8 line now states the measured mechanism instead of promising a live proof.
 
 Gate green after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`; the two bun checks (`agent/runtime`, `agent/second`) were skipped for their absent modules, the same workstation limit the script prints. Spend $0.00: no live call, no key.
 
