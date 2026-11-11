@@ -424,11 +424,19 @@ requires:   [T8.5d]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/precedence/
-status:     claimed:t85e-tripwires
+status:     in-review
 ```
 The T8.5b driver pins the defect shapes (loss of force after restart; `pool absent with lookup` rejection). After T8.5d lands, flip both tripwires to pin the fix, live against the hub. Budget: under $0.20 of embedding spend.
 
 **Done when:** both tripwires assert the fixed behaviour live; test indices and sessions erased; spend recorded.
+
+**Notes (in-review).** The driver's two defect pins are flipped to pin the fixes T8.5d landed, and both pass live against the same 0.10.1 hub and Elastic deployment (fixture embedder, recording classifier). The proof-table rows, the tripwire prose and the driver's own header and budget lines are updated with them.
+
+- Consulted-empty: a full-line recall on a line with no settled rows serves the frozen `example-none` shape — pool null, `pool_lookup: consulted`, `GuidanceNone`, no beliefs and no correction — matching `TestRecallConsultedEmptyPoolServes`. The old `pool absent with lookup` refusal pin is gone.
+- Declared view: after the restart the correction still decides (same correction id, the stale belief id kept in the payload, `guidance.belief_id` null, the guidance text unchanged, the Earned-small pool riding along overridden by `correction`); after a deliberately divergent rebuild it re-links to the rewritten belief. The rebuild ingests a dispute first, so the seller belief takes `blf_000001` and the fit belief cannot reuse the pre-restart id: live it was `blf_000002`. The driver asserts the new id differs, the rewritten belief carries the warning from the same correction, the override cites the new id, and recall answers instead of returning `ErrOverrideMissing`.
+- The seven pre-existing steps still pass unchanged (standing correction, the fresh-session copy, the restart, pool, own evidence, statement, nothing), with the exact guidance texts and seeded/live splits.
+
+Spend: $0.00 of the $0.20 embedding budget (the fixture embedder computes vectors in process; no model call). The one-case-first gate printed its $0.00 line before the remaining steps. Elastic usage was test-prefixed index churn: 3 `t85b-*` indices deleted, the after listing `[]`, and the run dir removed. The hub was the existing 0.10.1 release binary earlier runs kept (it reports `lambo 0.10.1`); the release checksum could not be re-fetched because the machine was offline, so the deploy's pinned sha was not re-verified this run.
 
 ---
 

@@ -21,17 +21,15 @@
 //   - statement: a seeded general statement decides for a shopper with no
 //     other memory;
 //   - nothing: a fresh shopper on a lineless recall gets GuidanceNone,
-//     never a refusal; a full-line recall on the empty line is attempted
-//     too, pinning the consulted-but-empty failure the T8.5 review left
-//     in the assembler.
+//     never a refusal; a full-line recall on the same empty line serves
+//     the consulted-but-empty pool the frozen contract calls for (null
+//     pool, consulted lookup, no guidance).
 //
-// A sixth shopper pins the dangling-view behaviour the T8.5 review found:
-// a declared correction survives a layer restart with its stale belief id
-// and matches nothing afterwards, so the correction drops out of recall
-// entirely; rebuilding the belief declares nothing and only coincides by
-// id. The fix (re-linking by content match) needs internal/api/server/,
-// outside this task's owns, so the driver pins the behaviour and names
-// T8.5 as the owner.
+// A sixth shopper pins the declared-view re-link T8.5d landed: a
+// correction declared against a belief keeps deciding across a layer
+// restart, honoured by its persisted view-to-entry pairing while the
+// belief is not rewritten yet, and a divergent rebuild re-links it to the
+// rewritten belief. No recall hard-fails ErrOverrideMissing.
 //
 // This is a main program, never a test: no *_test.go lives under
 // tests/live/, so CI builds this package but never runs it. Run it by hand
@@ -472,14 +470,6 @@ func excerpt(raw []byte) string {
 		return string(raw)
 	}
 	return string(raw[:width]) + fmt.Sprintf("… (%d bytes)", len(raw))
-}
-
-func excerptStr(text string) string {
-	const width = 300
-	if len(text) <= width {
-		return text
-	}
-	return text[:width] + "…"
 }
 
 var receiptRE = regexp.MustCompile(`receipt (lwr[0-9a-z.]+)`)
@@ -959,7 +949,7 @@ func run(ctx context.Context) (err error) {
 	d.printf("deployment: <deployment> (elastic, T0.12's project)")
 	d.printf("embedder: fixture (in-process vectors; no embedding endpoint called)")
 	d.printf("classifier: recording replay (no model call)")
-	d.printf("budget: under $0.50 of model spend; test sessions and indices removed afterwards")
+	d.printf("budget: under $0.20 of embedding spend; test sessions and indices removed afterwards")
 
 	raw := make([]byte, 3)
 	if _, err := rand.Read(raw); err != nil {
@@ -1093,8 +1083,8 @@ func run(ctx context.Context) (err error) {
 		return &fail{fmt.Sprintf("correction guidance %q, want %q", decided.Guidance.Text, "Take size M for Brand X")}
 	}
 	d.printf("-- correction decides: guidance %q", decided.Guidance.Text)
-	d.printf("-- spend after one case: $0.00 of model spend (recording replay; fixture embedder); elastic is test-prefixed churn only")
-	d.printf("-- under the $0.50 budget; continuing with the other steps")
+	d.printf("-- spend after one case: $0.00 of embedding spend (fixture embedder: vectors in process); elastic is test-prefixed churn only")
+	d.printf("-- under the $0.20 budget; continuing with the other steps")
 
 	d.printf("\n== 3. the cross-session correction holds")
 	freshClient, err := d.attach("shopper-t85b-correction")
@@ -1244,24 +1234,34 @@ func run(ctx context.Context) (err error) {
 	}
 	d.printf("-- nothing decides: GuidanceNone, no refusal: %q", empty.Guidance.Text)
 
-	// A wired pool consulted on an empty line returns Claimed, which the
+	// A wired pool consulted on an empty line answers Claimed, which the
 	// lookup reports as consulted-but-absent — the frozen contract's
-	// example-none shape. The served assembler rejects exactly that pair,
-	// so the recall fails instead of serving the empty pool. Pinned live:
-	// the fix is the guard in internal/api/server/recall.go, owner T8.5.
-	d.printf("\n-- probe: the consulted-but-empty pool, pinned")
-	_, probeErr := nothingSvc.Recall(ctx, contract.RecallRequest{ShopperID: "t85b-nothing",
+	// example-none shape. The served assembler accepts that pair and
+	// serves the empty pool: no pool object, a consulted lookup, and no
+	// guidance. A refusal here means the old guard came back.
+	d.printf("\n-- probe: the consulted-but-empty pool serves")
+	emptyLine, err := nothingSvc.Recall(ctx, contract.RecallRequest{ShopperID: "t85b-nothing",
 		BrandID: "brand-n-001", Category: "shirts", FitHandle: "regular", SizeConsidered: "M"})
-	if probeErr == nil {
-		return &fail{"the consulted-empty-pool pin is stale: the guard now serves the empty pool; update the driver (owner T8.5)"}
+	if err != nil {
+		return fmt.Errorf("full-line recall on the empty line: %w", err)
 	}
-	if !strings.Contains(probeErr.Error(), "pool absent with lookup") {
-		return fmt.Errorf("empty-line recall failed differently: %w", probeErr)
+	if emptyLine.Pool != nil {
+		return &fail{fmt.Sprintf("the empty line serves pool %+v, want no pool object", emptyLine.Pool)}
 	}
-	d.say("-- full-line recall on the empty line fails as pinned: %s", excerptStr(probeErr.Error()))
+	if emptyLine.PoolLookup != contract.PoolConsulted {
+		return &fail{fmt.Sprintf("the empty line's pool lookup is %q, want consulted with an empty pool", emptyLine.PoolLookup)}
+	}
+	if emptyLine.Guidance.Basis != contract.GuidanceNone {
+		return &fail{fmt.Sprintf("the empty line's guidance is %+v, want none deciding", emptyLine.Guidance)}
+	}
+	if len(emptyLine.Beliefs) != 0 || emptyLine.OverridingCorrection != nil {
+		return &fail{"the empty line serves a belief or a correction"}
+	}
+	d.say("-- full-line recall on the empty line serves the empty pool: pool null, lookup %q, guidance %q",
+		emptyLine.PoolLookup, emptyLine.Guidance.Text)
 
-	d.printf("\n== 8. the dangling view, pinned")
-	if err := d.danglingView(); err != nil {
+	d.printf("\n== 8. the declared view re-links across a restart and a divergent rebuild")
+	if err := d.relinkedDeclaredView(); err != nil {
 		return err
 	}
 
@@ -1285,12 +1285,17 @@ func (d *driver) openShopper(shopper string) (*server.Service, *mcp, error) {
 	return svc, client, nil
 }
 
-// danglingView reproduces the T8.5 review finding live and pins it: a
-// declared correction survives a layer restart with its stale belief id
-// and matches nothing afterwards, so the correction drops out of recall
-// entirely; rebuilding the belief does not re-link it. The fix is
-// re-linking by content match inside internal/api/server/, outside this
-// task's owns, so T8.5 owns it.
+// relinkedDeclaredView pins the declared-view re-link T8.5d landed: a
+// correction declared against a belief keeps its force across a layer
+// restart — honoured by its persisted view-to-entry pairing while the
+// belief is not rewritten yet — and a divergent rebuild re-links it to
+// the rewritten belief, so no recall hard-fails ErrOverrideMissing.
+//
+// The rebuild is divergent on purpose: the dispute lands first and mints
+// the seller belief under the id the fit belief held before the restart,
+// so the rewritten fit belief cannot reuse it. A view matched by id
+// coincidence, or by its words alone, would cite the wrong belief; the
+// pairing is what keeps it attached to its own.
 //
 // The declared shopper reuses the recorded purchases 01-03, whose fit
 // rows therefore share document ids with the evidence shopper's rows and
@@ -1298,7 +1303,7 @@ func (d *driver) openShopper(shopper string) (*server.Service, *mcp, error) {
 // belongs to one shopper). The pool step and the own-evidence step run
 // first and assert before this overwrite, and this step asserts no pool
 // counts.
-func (d *driver) danglingView() error {
+func (d *driver) relinkedDeclaredView() error {
 	ctx := d.ctx
 	svc, _, err := d.openShopper("t85b-declared")
 	if err != nil {
@@ -1342,14 +1347,17 @@ func (d *driver) danglingView() error {
 	if len(first.Beliefs) != 1 || !first.Beliefs[0].Contradicted {
 		return &fail{"the belief carries no contradiction before the restart"}
 	}
+	correctionID := first.OverridingCorrection.CorrectionID
 	d.say("-- before restart: correction %s declared against belief %s, guidance %q",
-		first.OverridingCorrection.CorrectionID, beliefID, first.Guidance.Text)
+		correctionID, beliefID, first.Guidance.Text)
 
 	// The restart: a rebuilt layer over the same standing directory and
 	// the same hub session. The hub keeps the graph; the layer mints
-	// fresh belief ids, so the restored view cites a belief that no
-	// longer exists and matches no precedence class. The correction
-	// loses all force: the Earned-small pool decides instead.
+	// fresh belief ids, so the restored view cites a belief no rebuilt
+	// partition holds yet. Its pairing names the subject, so recall
+	// still honours the correction — from the correction alone, with no
+	// stale belief id in the guidance — and the pool rides along
+	// overridden.
 	client, err := d.attach("shopper-t85b-declared")
 	if err != nil {
 		return err
@@ -1358,32 +1366,43 @@ func (d *driver) danglingView() error {
 	if err != nil {
 		return err
 	}
-	after, err := d.recallFor(restarted, req, contract.GuidancePool)
+	after, err := d.recallFor(restarted, req, contract.GuidanceCorrection)
 	if err != nil {
 		return fmt.Errorf("recall after restart: %w", err)
 	}
-	if after.OverridingCorrection != nil {
-		return &fail{"the declared correction still overrides after the restart: this pin is stale (owner T8.5)"}
+	if after.OverridingCorrection == nil || after.OverridingCorrection.CorrectionID != correctionID {
+		return &fail{"the declared correction lapsed across the restart"}
+	}
+	if after.OverridingCorrection.ContradictsBeliefID != beliefID {
+		return &fail{fmt.Sprintf("the restored view cites %q, want the stale %q kept until the belief is rewritten",
+			after.OverridingCorrection.ContradictsBeliefID, beliefID)}
+	}
+	if after.Guidance.BeliefID != nil {
+		return &fail{"the restart-window guidance points at a belief id, want the correction alone"}
+	}
+	if after.Guidance.Text != first.Guidance.Text {
+		return &fail{fmt.Sprintf("the restart-window guidance %q, want the pre-restart %q",
+			after.Guidance.Text, first.Guidance.Text)}
 	}
 	if len(after.Beliefs) != 0 {
-		return &fail{fmt.Sprintf("the restarted layer serves %d beliefs, want none (beliefs are rebuilt from new writes)", len(after.Beliefs))}
+		return &fail{fmt.Sprintf("the restarted layer serves %d beliefs, want none before the belief is rewritten", len(after.Beliefs))}
 	}
-	d.say("-- after restart: the declared view cites stale belief %s and matches nothing; the pool decides: %q",
-		first.OverridingCorrection.ContradictsBeliefID, after.Guidance.Text)
+	if after.Pool == nil || after.Pool.Precedence == nil || !after.Pool.Precedence.Overridden ||
+		after.Pool.Precedence.OverriddenBy == nil ||
+		*after.Pool.Precedence.OverriddenBy != contract.GuidanceCorrection {
+		return &fail{fmt.Sprintf("the pool precedence is %+v, want the correction overriding it", after.Pool)}
+	}
+	d.say("-- after restart: the declared view %s keeps its force by its paired subject; guidance %q",
+		correctionID, after.Guidance.Text)
 
-	// Rebuilding the belief does not re-link the view: the journal
-	// dropped the declared entry at persist time, so the new belief
-	// declares nothing. What the recall then shows depends on the mint
-	// order, which is the fragility. The rebuilt partition replays the
-	// same mint sequence, so the new belief reuses the old id and the
-	// stale view matches by id coincidence, not by content re-linking:
-	// the belief reads contradicted against a view that was never
-	// re-declared. Any divergence in mint order would leave the view
-	// dangling (or attached to an unrelated belief), and a hub that
-	// forgot the old against edge would surface the dangling
-	// declaration as a hard refusal instead. All three shapes are
-	// pinned as observed; the fix is re-linking by content match in
-	// internal/api/server/, owner T8.5.
+	// The divergent rebuild: the dispute mints the seller belief under
+	// the fit belief's old id, so the rewritten fit belief gets a new
+	// one. The paired view must follow its own entry to that new belief;
+	// a match by id or by words alone would cite the seller belief, and
+	// a lost mapping would make recall refuse instead of answering.
+	if _, err := restarted.IngestWebhook(ctx, "t85b-declared", "WH-2EV-04"); err != nil {
+		return fmt.Errorf("ingest the divergent dispute: %w", err)
+	}
 	for _, event := range []string{"WH-2EV-01", "WH-2EV-02", "WH-2EV-03"} {
 		if _, err := restarted.IngestWebhook(ctx, "t85b-declared", event); err != nil {
 			return fmt.Errorf("re-ingest %s: %w", event, err)
@@ -1394,30 +1413,30 @@ func (d *driver) danglingView() error {
 	}
 	rebuilt, err := restarted.Recall(ctx, req)
 	if err != nil {
-		if !strings.Contains(err.Error(), "contradicted belief has no overriding correction") {
-			return fmt.Errorf("rebuilt recall failed differently: %w", err)
-		}
-		d.say("-- after rebuild: recall fails as pinned (the graph remembers the declaration, the layer lost its mapping): %s",
-			excerptStr(d.scrub.clean(err.Error())))
-		return nil
+		return fmt.Errorf("recall after the divergent rebuild (recall must never refuse here): %w", err)
 	}
 	if len(rebuilt.Beliefs) != 1 {
-		return &fail{fmt.Sprintf("rebuilt recall serves %d beliefs, want the 1 rebuilt belief", len(rebuilt.Beliefs))}
+		return &fail{fmt.Sprintf("the rebuilt recall serves %d beliefs, want the 1 rewritten fit belief", len(rebuilt.Beliefs))}
 	}
-	if rebuilt.Beliefs[0].BeliefID != beliefID {
-		if rebuilt.Beliefs[0].Contradicted || rebuilt.OverridingCorrection != nil {
-			return &fail{"the divergent rebuild contradicts or overrides without a re-link: this pin is stale (owner T8.5)"}
-		}
-		d.say("-- after rebuild: new belief %s served uncontradicted, the stale view (id %s) silent: pinned, owner T8.5",
-			rebuilt.Beliefs[0].BeliefID, first.OverridingCorrection.ContradictsBeliefID)
-		return nil
+	rewritten := rebuilt.Beliefs[0]
+	if rewritten.BeliefID == beliefID {
+		return &fail{fmt.Sprintf("the rewritten fit belief reused the stale id %q: the divergence did not take hold", beliefID)}
 	}
-	if !rebuilt.Beliefs[0].Contradicted || rebuilt.Beliefs[0].ContradictedBy == nil ||
-		rebuilt.Beliefs[0].ContradictedBy.CorrectionID != first.OverridingCorrection.CorrectionID {
-		return &fail{"the id-coincident rebuild does not carry the stale declaration: this pin is stale (owner T8.5)"}
+	if !rewritten.Contradicted || rewritten.ContradictedBy == nil ||
+		rewritten.ContradictedBy.CorrectionID != correctionID {
+		return &fail{"the rewritten fit belief carries no warning from the declared correction"}
 	}
-	d.say("-- after rebuild: belief %s reuses the old id, so the stale view %s matches by id coincidence, not by re-linking: pinned, owner T8.5",
-		rebuilt.Beliefs[0].BeliefID, rebuilt.Beliefs[0].ContradictedBy.CorrectionID)
+	if rebuilt.OverridingCorrection == nil || rebuilt.OverridingCorrection.CorrectionID != correctionID ||
+		rebuilt.OverridingCorrection.ContradictsBeliefID != rewritten.BeliefID {
+		return &fail{fmt.Sprintf("the rebuilt override cites %+v, want the correction re-linked to the rewritten belief %s",
+			rebuilt.OverridingCorrection, rewritten.BeliefID)}
+	}
+	if rebuilt.Guidance.Basis != contract.GuidanceCorrection || rebuilt.Guidance.BeliefID == nil ||
+		*rebuilt.Guidance.BeliefID != rewritten.BeliefID {
+		return &fail{fmt.Sprintf("the rebuilt guidance is %+v, want the correction naming the rewritten belief", rebuilt.Guidance)}
+	}
+	d.say("-- after divergent rebuild: correction %s re-linked from stale belief %s to rewritten belief %s; guidance %q",
+		correctionID, beliefID, rewritten.BeliefID, rebuilt.Guidance.Text)
 	return nil
 }
 
@@ -1474,5 +1493,5 @@ func main() {
 		fmt.Fprintf(os.Stderr, "FAIL T8.5b live layer: %s\n", redacted)
 		os.Exit(1)
 	}
-	fmt.Println("\nPASS T8.5b live layer: every step decided, the cross-session correction holds, the dangle pinned, the namespace erased")
+	fmt.Println("\nPASS T8.5b live layer: every step decided, both re-link tripwires pin the fix, the namespace erased")
 }

@@ -8,10 +8,11 @@
 # writer on t85b-fit-rows, decides one purchase per precedence step
 # (correction, own evidence, pool, statement, nothing), shows the
 # cross-session correction holding over a fresh hub MCP session and a
-# layer restart, and pins the dangling-view behaviour the T8.5 review
-# found. It deletes every test index afterwards. This script adds the
-# cleanup check: the prefix listing must be empty afterwards, and no key
-# or deployment location may have entered a file.
+# layer restart, and pins the declared-view re-link T8.5d landed (after a
+# restart and after a divergent rebuild) plus the consulted-but-empty
+# pool serving. It deletes every test index afterwards. This script adds
+# the cleanup check: the prefix listing must be empty afterwards, and no
+# key or deployment location may have entered a file.
 #
 # Usage, from the repository root:
 #   source tools/env.sh
@@ -20,10 +21,10 @@
 # LAMBO_BIN must be the 0.10.1 release binary (the deploy pins its sha).
 # Nothing here runs in CI and nothing here gates a build: there are no
 # *_test.go files under tests/live/precedence/, so the gate builds the
-# driver but never executes it. Spend: $0.00 of model spend (every answer
-# replays a labelled recording; the fixture embedder computes vectors in
-# process), against the $0.50 budget. Elastic usage is test-prefixed
-# index churn only.
+# driver but never executes it. Spend: $0.00 of embedding spend (the
+# fixture embedder computes vectors in process; every answer replays a
+# labelled recording), against the $0.20 budget. Elastic usage is
+# test-prefixed index churn only.
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$HERE/../../.."

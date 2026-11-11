@@ -16,15 +16,15 @@ driver is a main program, run once by hand.
 
 | Step | Result |
 |---|---|
-| one case first, spend checked | standing correction decides; $0.00, under the $0.50 budget |
+| one case first, spend checked | standing correction decides; $0.00, under the $0.20 budget |
 | correction over a fresh hub MCP session | same correction still decides |
 | correction after a layer restart | undeclared standing re-recorded, still decides |
 | own evidence (three too-large returns) | belief beats the disagreeing Earned-small pool, which rides along overridden with the `ahead of the pool` text |
 | pool (new shopper, seeded Earned-small line) | `GuidancePool`, exact counts and seeded split, exact guidance text |
 | statement (seeded general statement only) | `GuidanceStatement`, the usual-size text |
 | nothing (fresh shopper, lineless recall) | `GuidanceNone`, never a refusal |
-| probe: consulted-but-empty pool | pinned: the served assembler rejects the frozen `example-none` shape; owner T8.5 |
-| dangling view (declared, restart, rebuild) | pinned: post-restart the view matches nothing and the pool decides; post-rebuild the id is coincidentally reused so the stale view matches by id, not by re-linking; owner T8.5 |
+| probe: consulted-but-empty pool | serves the frozen `example-none` shape: null pool, consulted lookup, `GuidanceNone` |
+| declared view across a restart and a divergent rebuild | the correction decides by its paired subject after the restart, re-links to the rewritten belief after the rebuild, and no recall refuses |
 | cleanup | every `t85b-*` index deleted, the listing empty, the run dir removed |
 
 ## What is live, what is recorded
@@ -81,31 +81,33 @@ daemon's promotion; a timeout there is a finding, not a cut.
   before printing; `run.sh` greps the whole directory for the URL, the
   key and the salt.
 
-## The pinned findings
+## The re-link tripwires
 
 Two behaviours are pinned live, each with a tripwire that fails loudly
-if the behaviour changes, both owned by T8.5
-(`internal/api/server/` is outside this task's `owns`).
+if the behaviour regresses, both fixed by T8.5d in
+`internal/api/server/`.
 
 - **Consulted-but-empty pool.** The contract's `example-none` shape is
   pool-absent with `pool_lookup: "consulted"`, which is what the lookup
-  returns for a wired pool on an empty line. The served assembler
-  rejects exactly that pair (`pool absent with lookup "consulted"`), so
-  a full-line recall on an empty line fails instead of serving the
-  empty pool. The driver attempts it and asserts the failure; a success
-  means the guard was fixed and the driver needs updating.
-- **Dangling declared views.** A correction declared against a belief
+  returns for a wired pool on an empty line. Recall serves that pair: a
+  null pool, a consulted lookup and `GuidanceNone`. The driver runs a
+  full-line recall on a line with no rows and asserts all three; a
+  refusal means the old guard came back.
+- **Declared views re-link.** A correction declared against a belief
   cites the belief by the layer's in-memory id. After a restart the
-  layer mints fresh ids while the restored view keeps the stale one, so
-  the view matches no precedence class and the correction drops out of
-  recall entirely (the Earned-small pool decides instead). Rebuilding
-  the belief through a re-ingest declares nothing — the journal dropped
-  the declared entry at persist time — and the rebuilt partition replays
-  the same mint order, so the new belief coincidentally reuses the old
-  id and the stale view matches by id, not by content re-linking. Any
-  divergence in mint order would leave the view dangling or attached to
-  an unrelated belief. The driver asserts the post-restart loss of
-  force and the coincidental post-rebuild match.
+  layer mints fresh ids, so the restored view cites a belief nothing
+  holds yet — but its persisted view-to-entry pairing names the subject,
+  so recall still honours the correction (guidance from the correction
+  alone, no stale id, the pool riding along overridden). Rebuilding the
+  belief through a re-ingest then re-links the view to the rewritten
+  belief by that pairing. The rebuild is divergent on purpose: the
+  driver ingests a dispute first, so the seller belief takes the fit
+  belief's old id and the rewritten fit belief cannot reuse it. A view
+  matched by id coincidence or by its words alone would cite the wrong
+  belief, and a lost mapping would make recall refuse instead of
+  answering; the driver asserts the correction cites the rewritten
+  belief, that belief carries its warning, and recall returns without
+  `ErrOverrideMissing`.
 
 ## The shared-transaction caveat
 
@@ -120,7 +122,9 @@ shopper's step asserts no pool counts.
 
 ## Spend
 
-No model spend. Elastic usage is test-prefixed index churn (creates,
-mirrored writes, reads, counts, deletes); no billable resource was
-created beyond the existing project. The indices are deleted and the
-empty listing shown.
+No model spend and no embedding spend: the fixture embedder computes
+vectors in process, and every answer replays a recording. Elastic usage
+is test-prefixed index churn (creates, mirrored writes, reads, counts,
+deletes); no billable resource was created beyond the existing project.
+The budget is under $0.20 of embedding spend. The indices are deleted
+and the empty listing shown.
