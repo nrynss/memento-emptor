@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 5 / 6 | In progress (T7.6) |
 | P8 | 19 / 21 | In progress (T8.5i, T8.5j) |
-| P9 | 15 / 19 | In progress (T9.7, T9.9, T9.10, T9.11) |
+| P9 | 15 / 19 | In progress (T9.7, T9.9, T9.11, T9.12) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### P3 E2E review: FINDINGS, fixes landed
+
+**What exists.** The P3 review verified all eight tasks from code, tests and records, mutation-checked every money-safety guard (approve-first on capture and webhook, double-buy, request-id idempotency, webhook idempotency, strict yes, catalog fit matching), and landed ten fixes on `6c5d31d`: correct test counts and stale claims in the phase notes, malformed YAML fences, the demo README's three-turn record, a previously unread Channel3 fixture now replayed, a dead test wrapper removed, and the paging limitation stated. All six P3 exit boxes now tick.
+
+**What surprised.** T3.4's live-loop evidence was fake-backed: at its close the deployed agent served a fake memory, so `corr_live01` and the "accepted" writes came from the fake, not the layer. The task was marked done on a clause it could not meet. T9.7's pivoted live run is now the substantive recording. Also: `source tools/env.sh` makes the gate red, because the offline tests' key guard fires on the exported keys (now stated in AGENTS.md).
+
+**Findings with owners.** (Medium) T3.4's fake-backed live evidence → **T9.7**. (Low) `recall_first` has no committed fail evidence and no prompt pin → **T10.3**. (Low) T3.8 has no transcript and the frontend has no gate typecheck → **T9.12**. (Low) the Astropods org id is committed in both drivers → **T9.11**. (Low) the README's T3.7 heading and T3.4 test count were wrong → fixed. (Low) R3's F4 has no owner → closed against the P9 decision, with the org-id scrub owned by T9.11. (Low) T6.4's narration must not present the agent as buying → recorded in T6.4's task text.
 
 ### T2.2c: The story's third classifier answer (done)
 
@@ -761,7 +769,7 @@ T3.6 full demo still running at review time. P3 gets its phase review after T3.6
 
 ### R3 review: P3 agent end-to-end (APPROVE, landed)
 
-Walked the whole arc as one story: recall-first → candidate+marks → ask/approve/correction/feedback → idempotent approve-first capture → evals → 6-step demo from reset → no-login frontend. Money safety proved in code + tests: no capture path without explicit-yes mirrored into the transport; deployed agent owns no purchase tool. Honesty fix landed (runtime README listed a fixture correction as "live"). Findings for follow-up: (F1) probe Dockerfile stayed root for :80 while the agent image runs as `bun` — T3.8 must confirm port binding; (F2) shopper page + `serve(agent)` composition unproven; (F3) `frontend:true` in the frozen runtime spec needs an owns decision; (F4) deployment id committed in demo/ files — move to env in a hygiene follow-up.
+Walked the whole arc as one story: recall-first → candidate+marks → ask/approve/correction/feedback → idempotent approve-first capture → evals → 6-step demo from reset → no-login frontend. Money safety proved in code + tests: no capture path without explicit-yes mirrored into the transport; deployed agent owns no purchase tool. Honesty fix landed (runtime README listed a fixture correction as "live"). Findings for follow-up: (F1) probe Dockerfile stayed root for :80 while the agent image runs as `bun` — T3.8 must confirm port binding; (F2) shopper page + `serve(agent)` composition unproven; (F3) `frontend:true` in the frozen runtime spec needs an owns decision; (F4) deployment id committed in demo/ files. Closed against the P9 decision (T9.5/T9.8): the reference deployment id is the operator's documented stand-in in `demo/drive.py`, not a secret — the org id's scrub is **T9.11**.
 
 ### R5 review: P5 comparison (APPROVE, landed)
 
@@ -953,7 +961,7 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 
 **What surprised.** The 30-turn cap increments before generation (a 502 burns budget too — conservative, left as-is); corrections live in container memory only (redeploy resets — the honest demo reset). Purchases provably unwired.
 
-### T3.7: Public reachability probe (done — negative: platform gap)
+### T3.7: Public reachability probe (done — reachable: anonymous 200 on the frontend host)
 
 **What exists.** `testdata/astropods/15-public-probe.txt` + research section: minimal page + chat endpoint on `probe-gw` port 80 with `frontend:true, messaging:true`. Anonymous GETs to BOTH the chat host and the dedicated frontend host 302 to the platform SSO login — before the flip, and twice after Public was switched ON (3-minute propagation waits, access-list unchanged, CLI shows no Public flag). Model turn via messaging proxy works ($0.0057, 17 obs, tool span) — the platform path is fine; only the front door ignores Public. Total $0.06 of $0.25.
 
@@ -977,7 +985,7 @@ Re-verified all five exit criteria against code, not handoffs. Freeze holds: no 
 
 ### T3.4: Asking the shopper (done) ★
 
-**What exists.** `agent/loops/` policy: ask-one-first-pending, strict explicit-yes gate, approve-then-mirror (local record and transport agree before capture), correction-wins recommendation, transaction-tied feedback; 9 tests incl. fail-closed capture and replay pin to `p3-turns.json`. Live: 6 deployed turns, one conversation — pending poll → reason (fit-too-small accepted) → correction (`corr_live01`, precedence) → honoured next turn → yes-approval (purchase honestly declined, no purchase tool) → fits-well feedback. Traces `879c8752/35598171/cef908ae/fad137db/839514c8/d6e19c5a`; spend $0.19 total (billing $0.08 → $0.27), max turn under the $0.10 guard.
+**What exists.** `agent/loops/` policy: ask-one-first-pending, strict explicit-yes gate, approve-then-mirror (local record and transport agree before capture), correction-wins recommendation, transaction-tied feedback; 7 tests incl. fail-closed capture and replay pin to `p3-turns.json`. Live: 6 deployed turns, one conversation — pending poll → reason (fit-too-small accepted) → correction (`corr_live01`, precedence) → honoured next turn → yes-approval (purchase honestly declined, no purchase tool) → fits-well feedback. Traces `879c8752/35598171/cef908ae/fad137db/839514c8/d6e19c5a`; spend $0.19 total (billing $0.08 → $0.27), max turn under the $0.10 guard.
 
 **What surprised.** Turn 2's answer reinforced the old L-direction belief while M takes precedence — correct per decision-vs-belief, agent stated both. Approval-to-capture is proved in code, not on a live order: the deployed agent owns no purchase tool, so T3.6 needs the orders wiring to close that gap.
 

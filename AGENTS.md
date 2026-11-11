@@ -51,8 +51,9 @@ It runs formatting, vet, the Go tests, a lockfile check, the Svelte check, lint,
 the web build. CI runs the same script on every push to `main` and every pull request. A commit
 that fails its own gate does not exist.
 
-Run it from the repository root. It reads the Go packages and then builds `web/`. Install the web
-dependencies once with `npm ci` inside `web/`.
+Run it from the repository root, in a clean shell: with a key exported (for example after
+`source tools/env.sh`), the offline tests' key guard fails by design. It reads the Go packages and
+then builds `web/`. Install the web dependencies once with `npm ci` inside `web/`.
 
 ## Keys
 

@@ -415,9 +415,9 @@ task's brief; the typecheck step needs a gate owner (T9.3i owns
 
 ## Exit Criteria
 
-- [ ] The agent runs on Astropods, recalling first (T3.1).
-- [ ] Real products from Channel3 (T3.2).
-- [ ] Purchases are idempotent and approved (T3.3).
-- [ ] Reasons, approvals, corrections and feedback all flow (T3.4).
-- [ ] Evaluators check the rules (T3.5).
-- [ ] The full demo runs, repeatably, from reset (T3.6).
+- [x] The agent runs on Astropods, recalling first (T3.1).
+- [x] Real products from Channel3 (T3.2).
+- [x] Purchases are idempotent and approved (T3.3).
+- [x] Reasons, approvals, corrections and feedback all flow (T3.4).
+- [x] Evaluators check the rules (T3.5).
+- [x] The full demo runs, repeatably, from reset (T3.6).

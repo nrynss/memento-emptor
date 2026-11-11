@@ -445,6 +445,34 @@ product.md's demo from step 0 to step 7, live, on the hosted service: the new sh
 
 ---
 
+### T9.11: Scrub the Astropods org id from the drivers
+```yaml
+requires:   [T9.7, T9.9]
+fixture-ok: yes
+size:       XS · mid
+owns:       demo/drive.py, agent/second/drive.py
+status:     not-started
+```
+The P3 review found the Astropods org id committed in `demo/drive.py` and `agent/second/drive.py` as a `secret-tool` attribute. It is an identifier, not a credential, but the diary's own rule excludes account detail and the scrub rule lists user ids as placeholders. Replace it with a placeholder and read the org from the environment or the CLI's own config.
+
+**Done when:** neither driver carries the org id; both read it from the environment or the CLI; a run still works; the gate passes.
+
+---
+
+### T9.12: Guard the public shopper page
+```yaml
+requires:   [T3.8]
+fixture-ok: yes
+size:       S · mid
+owns:       agent/frontend/, tools/check.sh
+status:     not-started
+```
+The P3 review found T3.8's live result has no committed transcript, nothing tests `validateMessages` or the 30-turn cap, and no gate step type-checks `agent/frontend/` (the gate checks `web/` and `merchant/` only), so a future edit there is unguarded. Add the transcript (redacted), tests for message validation and the cap, and a frontend typecheck step to the gate.
+
+**Done when:** the transcript is committed with no key or account detail; both behaviours have tests that fail when broken; the gate type-checks `agent/frontend/`; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] A seeded population where the demo oxford is Earned honestly, and other lines are Building or Out of true (T9.1).
