@@ -620,6 +620,20 @@ The T8.5h review found `tests/live/precedence/main.go` builds its statement beli
 
 ---
 
+### T8.5k: One spelling for not-as-described in the pool view
+```yaml
+requires:   [T8.5]
+fixture-ok: yes
+size:       XS · mid
+owns:       internal/api/server/
+status:     not-started
+```
+`internal/api/server/recall.go` folds a literal `"not_as_described"` reason category into `not_arrived` counts, a seam for the recorded Elastic population's labels. Since T1.1b, a not-as-described dispute counts under `damaged_or_defective`, so the same cause would read as non-arrival in one path and damage in the other if a classifier label ever reaches evidence. Disputes write no fit rows, so the pool never sees them today; decide and record whether the fold stays (with its reason) or maps to damage.
+
+**Done when:** the fold's mapping matches the domain's damage category or is recorded as a deliberate label-only seam with its reason; a test pins it; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).

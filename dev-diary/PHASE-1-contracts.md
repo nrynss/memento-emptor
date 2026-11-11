@@ -151,6 +151,20 @@ Decide: add the code (with its own category, since `not_arrived` would mislabel 
 
 ---
 
+### T1.1c: The live ingest driver and the unrecorded dispute code
+```yaml
+requires:   [T1.1b]
+fixture-ok: no
+size:       XS · mid
+owns:       tests/live/ingest/, testdata/paypal/
+status:     not-started
+```
+T1.1b made served ingest store an unknown dispute code instead of failing, but `tests/live/ingest`'s source read still returns the `CategoryForDispute` error, so a live run on an unrecognised code aborts where the served path now stores it. No recorded sandbox dispute carries `MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED` either, so the new mapping's spelling is documented, not observed. Align the driver with the served path and record one sandbox dispute with that code if the sandbox can produce one; if it cannot, record that limit.
+
+**Done when:** the live driver stores an unknown code the way served ingest does; the not-as-described mapping is either observed in a recording or its absence is recorded; the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] Domain model, write rule and architecture in place (T1.1).
