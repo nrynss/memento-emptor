@@ -646,7 +646,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/, internal/fitindex/
-status:     not-started
+status:     claimed:t85k-fold
 ```
 `internal/api/server/recall.go` folds a literal `"not_as_described"` reason category into `not_arrived` counts, a seam for the recorded Elastic population's labels. Since T1.1b, a not-as-described dispute counts under `damaged_or_defective`, so the same cause would read as non-arrival in one path and damage in the other if a classifier label ever reaches evidence. Disputes write no fit rows, so the pool never sees them today; decide and record whether the fold stays (with its reason) or maps to damage.
 
@@ -748,7 +748,7 @@ requires:   [T1.1b]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/
-status:     not-started
+status:     claimed:t85n-writeop
 ```
 The T1.1b review found an unknown-code dispute is stored, is kept in the ledger (its reason is non-nil), and is emitted with the zero `write_op`, which the frozen schema forbids (`record_action`, `derive` or `observe`) and the web decoder rejects, so `ledger_evidence` fails to decode for that shopper. `markUnattached` already sets `observe` for a changed-mind refund; the ingest store path does not. Also decide whether a code-less dispute (stored, no reason, skipped by the ledger) should appear unattached or remain audit-only, and make the comment match.
 
@@ -837,7 +837,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     not-started
+status:     claimed:t85r-poolstep
 ```
 The P7 review found `tools.go` sets `presence.Pool` from the pool view alone, so a Building pool with no leading direction wins precedence step 3 and `guidanceForPool` reads "no direction" as "runs large": four distinct fits-well shoppers with no returns and a shopper with no history produce "Size down to S for brand-x-001: 0 of the 4 fit-classified settled purchases at size M came back too large, against 0 too small." A level Building pool (2/2) takes the same path. product.md says the pool decides only when it says the product runs off-size.
 
@@ -913,7 +913,7 @@ requires:   [T8.5i]
 fixture-ok: yes
 size:       XS · mid
 owns:       internal/api/server/
-status:     not-started
+status:     claimed:t85v-guidance
 ```
 The T8.5i review found `guidanceForOwnEvidence` defaults the direction clause to "runs small" unless the belief's value reads large, and `poolDisagrees` means "a pool is present and own evidence overrode it", not "the pool recommends a different size". A lone fits-well return is served (T8.5i) with the sentence "Take size M for Brand X: your own one return says it runs small, ahead of the pool." — the size is right but the sentence misstates the evidence and self-contradicts, and the "ahead of the pool" clause fires when the pool merely agrees. Make the clause derive from the belief's own value (fits-well, too small, too large) and say whether the pool agrees, is overridden, or is absent.
 
