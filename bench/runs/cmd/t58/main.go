@@ -25,6 +25,13 @@
 // full response are recorded in the run file, and the response text is what
 // the prompt's memory block carries. The stub LayerContext is never used.
 //
+// The T5.8b re-run flags (-run-prefix, -recall-probe) add the settle-note
+// instrument the P5 review asked for: an arm-3 cell records the recall
+// reading taken right after the seed replay and the one taken after the
+// settle poll, each with the served belief's status, standing and evidence
+// count, so a withheld belief can be told from an absent one. The default
+// (no flags) is the T5.8 recording.
+//
 // Seeding maps each history row the way the live path would file it (each
 // rule cites the service function it mirrors; anything outside the frozen
 // set's shapes stops the run instead of inventing a filing):
@@ -807,45 +814,80 @@ type arm3Memory struct {
 	recallResp  contract.RecallResponse
 	pendingResp contract.PendingQuestionsResponse
 	settleNote  string
+	// probe is the pre-settle reading the T5.8b instrument takes, or nil
+	// when the instrument is off.
+	probe *recallProbe
+}
+
+// recallProbe is one arm-3 reading at a labelled point: the graph's
+// admission line for every seeded belief and the full response the layer
+// served. The pre-settle reading is taken right after the seed replay;
+// the post-settle one is the reading the prompt carries.
+type recallProbe struct {
+	// label names the point the reading was taken at.
+	label string
+	// graph is the compact state/dependents/coverage line the reading saw.
+	graph string
+	// recall is the full recall_for_purchase response.
+	recall contract.RecallResponse
+	// pending is the full pending_questions response.
+	pending contract.PendingQuestionsResponse
+}
+
+// beliefReader reports one belief's promotion reading. The live graph
+// client and the offline recording graph both satisfy it.
+type beliefReader interface {
+	Inspect(ctx context.Context, content string) (fakes.BeliefReport, error)
+}
+
+// inspectContents reads every seeded belief once and returns the settle
+// poll's compact line plus the per-content reading it was built from.
+func inspectContents(ctx context.Context, reader beliefReader, contents []string) (string, map[string]string, error) {
+	readings := make(map[string]string, len(contents))
+	if len(contents) == 0 {
+		return "no beliefs seeded; nothing to read", readings, nil
+	}
+	summary := make([]string, 0, len(contents))
+	for _, content := range contents {
+		report, err := reader.Inspect(ctx, content)
+		if err != nil {
+			return "", nil, fmt.Errorf("inspect %.40q: %w", content, err)
+		}
+		reading := fmt.Sprintf("%s=%s/%d/%.3f", shortContent(content), report.State, report.Dependents, report.Coverage)
+		summary = append(summary, reading)
+		readings[content] = reading
+	}
+	return strings.Join(summary, " "), readings, nil
 }
 
 // settleBeliefs polls the live graph until every seeded belief content
 // reads stable across two polls at least a minute after seeding, or the
 // deadline fails the run loudly. Promotion is eventual; a reading taken
 // before the daemon's evaluation would misstate the served standing.
-func settleBeliefs(graph *lamboGraph, contents []string) (string, error) {
+func settleBeliefs(reader beliefReader, contents []string) (string, error) {
 	if len(contents) == 0 {
 		return "no beliefs seeded; nothing to settle", nil
 	}
-	type reading struct {
-		state string
-		deps  int
-		cov   float64
-	}
-	last := map[string]reading{}
+	last := map[string]string{}
 	polls := 0
 	start := time.Now()
 	deadline := start.Add(5 * time.Minute)
 	for {
 		polls++
 		stable := time.Since(start) >= time.Minute
-		var summary []string
-		for _, content := range contents {
-			report, err := graph.Inspect(context.Background(), content)
-			if err != nil {
-				return "", fmt.Errorf("settle inspect %.40q: %w", content, err)
-			}
-			now := reading{state: string(report.State), deps: report.Dependents, cov: report.Coverage}
-			summary = append(summary, fmt.Sprintf("%s=%s/%d/%.3f", shortContent(content), now.state, now.deps, now.cov))
-			prev, ok := last[content]
-			if !ok || prev != now {
+		summary, readings, err := inspectContents(context.Background(), reader, contents)
+		if err != nil {
+			return "", fmt.Errorf("settle %w", err)
+		}
+		fmt.Printf("settle poll %d (%ds): %s\n", polls, int(time.Since(start).Seconds()), summary)
+		for content, reading := range readings {
+			if prev, ok := last[content]; !ok || prev != reading {
 				stable = false
 			}
-			last[content] = now
+			last[content] = reading
 		}
-		fmt.Printf("settle poll %d (%ds): %s\n", polls, int(time.Since(start).Seconds()), strings.Join(summary, " "))
 		if stable {
-			return fmt.Sprintf("%d polls over %ds: %s", polls, int(time.Since(start).Seconds()), strings.Join(summary, " ")), nil
+			return fmt.Sprintf("%d polls over %ds: %s", polls, int(time.Since(start).Seconds()), summary), nil
 		}
 		if time.Now().After(deadline) {
 			return "", fmt.Errorf("settle timed out after %d polls", polls)
@@ -871,6 +913,80 @@ func beliefContents(s server.Seed) []string {
 			string(belief.Kind), string(belief.Subject.Kind), belief.Subject.ID, belief.Value))
 	}
 	return out
+}
+
+// probeReading takes one T5.8b reading: the graph's admission line for
+// every seeded belief, then the full recall and pending responses the
+// layer serves at that point.
+func probeReading(ctx context.Context, svc *server.Service, history seed.History, reader beliefReader, contents []string, traceID, label string) (*recallProbe, error) {
+	graphNote, _, err := inspectContents(ctx, reader, contents)
+	if err != nil {
+		return nil, fmt.Errorf("t58: %s reading: %w", label, err)
+	}
+	served, err := serveOnce(svc, history, traceID)
+	if err != nil {
+		return nil, err
+	}
+	return &recallProbe{label: label, graph: graphNote, recall: served.recallResp, pending: served.pendingResp}, nil
+}
+
+// readingSummary states what one reading found, belief by belief: the id,
+// what it says, its status, standing and evidence count, and whether
+// recall served it at all. The T5.8b record needs all five to tell a
+// withheld belief from an absent one.
+func readingSummary(p recallProbe) string {
+	var parts []string
+	if p.graph != "" {
+		parts = append(parts, "graph ["+p.graph+"]")
+	}
+	if len(p.recall.Beliefs) == 0 {
+		parts = append(parts, fmt.Sprintf("served no belief; guidance %q", p.recall.Guidance.Text))
+		return strings.Join(parts, " ")
+	}
+	for _, belief := range p.recall.Beliefs {
+		parts = append(parts, fmt.Sprintf("served %s %s %s %q status %s standing %s evidence %d",
+			belief.BeliefID, belief.Kind, belief.Subject.ID, belief.Value,
+			belief.Status, belief.Standing, len(belief.Evidence)))
+	}
+	parts = append(parts, fmt.Sprintf("guidance %q", p.recall.Guidance.Text))
+	return strings.Join(parts, "; ")
+}
+
+// armResponse renders what the arm's memory fetch returned. With the
+// pre/post instrument on, the pre-settle reading rides beside the served
+// one, labelled, so the record holds both full responses; without it the
+// text is the T5.8 recording's.
+func armResponse(mem *arm3Memory) string {
+	recallJSON, _ := json.Marshal(mem.recallResp)
+	pendingJSON, _ := json.Marshal(mem.pendingResp)
+	if mem.probe == nil {
+		return "recall_for_purchase response:\n" + string(recallJSON) + "\npending_questions response:\n" + string(pendingJSON)
+	}
+	probeRecall, _ := json.Marshal(mem.probe.recall)
+	probePending, _ := json.Marshal(mem.probe.pending)
+	var out strings.Builder
+	out.WriteString("recall_for_purchase response (" + mem.probe.label + "):\n" + string(probeRecall) + "\n")
+	out.WriteString("pending_questions response (" + mem.probe.label + "):\n" + string(probePending) + "\n")
+	out.WriteString("recall_for_purchase response (post-settle, served in the prompt):\n" + string(recallJSON) + "\n")
+	out.WriteString("pending_questions response (post-settle, served in the prompt):\n" + string(pendingJSON))
+	return out.String()
+}
+
+// settleNotes renders the run note: the daemon settle report and, with the
+// pre/post instrument on, what each reading found. The post-settle
+// admission line is the settle report's last poll, so only the served
+// fields are repeated for it.
+func settleNotes(mem *arm3Memory) *string {
+	if mem == nil || mem.settleNote == "" {
+		return nil
+	}
+	note := "live layer seed, settled before recall: " + mem.settleNote
+	if mem.probe != nil {
+		note += " | " + mem.probe.label + " recall: " + readingSummary(*mem.probe)
+		post := recallProbe{label: "post-settle", recall: mem.recallResp, pending: mem.pendingResp}
+		note += " | post-settle recall: " + readingSummary(post)
+	}
+	return &note
 }
 
 // renderMemoryBlock renders the served memory as the prompt's memory
@@ -1242,6 +1358,11 @@ type options struct {
 	lamboBin     string
 	lamboWork    string
 	sessionTag   string
+	runPrefix    string
+	// recallProbe turns on the T5.8b pre/post-settle recall instrument:
+	// each arm-3 cell records the reading taken right after the seed
+	// replay and the one served in the prompt.
+	recallProbe bool
 }
 
 func parseList(raw string) []string {
@@ -1267,14 +1388,19 @@ func parseInts(raw string) ([]int, error) {
 }
 
 // committedSpend sums the trace costs of the run files already committed
-// (or staged): the T5.8 turns in the out dir plus the frozen T5.5 turns in
-// the parent runs dir, so the cumulative cap holds across driver
-// invocations and batches against the whole comparison spend.
+// (or staged): the T5.8 and T5.8b turns in the out dir plus the frozen
+// T5.5 turns in the parent runs dir, so the cumulative cap holds across
+// driver invocations and batches against the whole comparison spend.
 func committedSpend(outDir string) (float64, error) {
 	paths, err := filepath.Glob(filepath.Join(outDir, "t58-*.json"))
 	if err != nil {
 		return 0, err
 	}
+	rerun, err := filepath.Glob(filepath.Join(outDir, "t58b-*.json"))
+	if err != nil {
+		return 0, err
+	}
+	paths = append(paths, rerun...)
 	prior, err := filepath.Glob(filepath.Join(filepath.Dir(outDir), "t55-*.json"))
 	if err != nil {
 		return 0, err
@@ -1322,6 +1448,8 @@ func main() {
 	lamboBin := flag.String("lambo-bin", "", "lambo binary (default ~/work/lambo/target/release/lambo)")
 	lamboWork := flag.String("lambo-work", "", "lambo working dir for configs and stores (default fresh temp dir)")
 	sessionTag := flag.String("session-tag", "", "lambo session tag (default unix time)")
+	runPrefix := flag.String("run-prefix", "t58", "run id prefix, so a re-run writes its own file names")
+	recallProbe := flag.Bool("recall-probe", false, "record a pre-settle and post-settle recall for every arm-3 cell")
 	flag.Parse()
 
 	arms, err := parseInts(*armsFlag)
@@ -1331,6 +1459,9 @@ func main() {
 	repeats, err := parseInts(*repeatsFlag)
 	if err != nil {
 		fail(err)
+	}
+	if len(repeats) == 0 {
+		fail(errors.New("t58: -repeats names no repeat"))
 	}
 	opts := options{
 		historiesDir: *historiesDir,
@@ -1344,6 +1475,8 @@ func main() {
 		lamboBin:     *lamboBin,
 		lamboWork:    *lamboWork,
 		sessionTag:   *sessionTag,
+		runPrefix:    *runPrefix,
+		recallProbe:  *recallProbe,
 	}
 	if opts.deploymentID == "" {
 		fail(errors.New("t58: -deployment-id is required (the neutral instrument's deployment id)"))
@@ -1417,13 +1550,13 @@ func run(opts options) error {
 			var cleanup func()
 			if armNum == 3 {
 				var err error
-				mem, cleanup, err = seedShopperMemory(opts, history)
+				mem, cleanup, err = seedShopperMemory(opts, history, runIDFor(opts.runPrefix, armNum, shopperID, opts.repeats[0]))
 				if err != nil {
 					return err
 				}
 			}
 			for _, repeat := range opts.repeats {
-				runID := fmt.Sprintf("t58-a%d-%s-r%d", armNum, strings.TrimPrefix(shopperID, "cmp-"), repeat)
+				runID := runIDFor(opts.runPrefix, armNum, shopperID, repeat)
 				cost, err := driveTurn(ctx, opts, client, caps, history, arm, runID, mem)
 				if err != nil {
 					if cleanup != nil {
@@ -1450,10 +1583,18 @@ func run(opts options) error {
 	return nil
 }
 
+// runIDFor builds one turn's run id from the prefix, arm, shopper and
+// repeat. The T5.8 batch used "t58"; a re-run names its own files.
+func runIDFor(prefix string, arm int, shopperID string, repeat int) string {
+	return fmt.Sprintf("%s-a%d-%s-r%d", prefix, arm, strings.TrimPrefix(shopperID, "cmp-"), repeat)
+}
+
 // seedShopperMemory seeds a live Lambo session from one frozen history
 // through the real write path and settles the daemon. The caller erases
 // the session through the returned cleanup after the shopper's repeats.
-func seedShopperMemory(opts options, history seed.History) (*arm3Memory, func(), error) {
+// label names the first turn the session serves, so an instrument reading
+// taken before the settle is filed under that turn.
+func seedShopperMemory(opts options, history seed.History, label string) (*arm3Memory, func(), error) {
 	noop := func() {}
 	s, err := buildSeed(history)
 	if err != nil {
@@ -1516,6 +1657,15 @@ func seedShopperMemory(opts options, history seed.History) (*arm3Memory, func(),
 		cleanup()
 		return nil, noop, fmt.Errorf("t58: load seed for %s: %w", history.ShopperID, err)
 	}
+	var probe *recallProbe
+	if opts.recallProbe {
+		probe, err = probeReading(context.Background(), svc, history, graph, beliefContents(s), label+"-pre", "pre-settle")
+		if err != nil {
+			cleanup()
+			return nil, noop, err
+		}
+		fmt.Printf("seeded %s: %s recall: %s\n", history.ShopperID, probe.label, readingSummary(*probe))
+	}
 	note, err := settleBeliefs(graph, beliefContents(s))
 	if err != nil {
 		cleanup()
@@ -1524,7 +1674,7 @@ func seedShopperMemory(opts options, history seed.History) (*arm3Memory, func(),
 	fmt.Printf("seeded %s: %d beliefs, %d pending; %s\n",
 		history.ShopperID, len(s.Beliefs), len(s.Pending.Questions), note)
 	sessionRegistry.store(history.ShopperID, svc)
-	return &arm3Memory{settleNote: note}, cleanup, nil
+	return &arm3Memory{settleNote: note, probe: probe}, cleanup, nil
 }
 
 // serveOnce serves one recall + pending-questions pair from a seeded
@@ -1565,6 +1715,7 @@ func lamboWorkDir(opts options, shopper string) (string, error) {
 func driveTurn(ctx context.Context, opts options, client *proxyClient, caps harness.Caps, history seed.History, arm harness.Arm, runID string, mem *arm3Memory) (float64, error) {
 	var prompt string
 	var armTool, armResp string
+	var notes *string
 	if arm == harness.ArmMemento {
 		if mem == nil {
 			return 0, fmt.Errorf("t58: arm 3 turn %s has no seeded memory", runID)
@@ -1579,11 +1730,10 @@ func driveTurn(ctx context.Context, opts options, client *proxyClient, caps harn
 		}
 		block := renderMemoryBlock(history.ShopperID, brandID, *served)
 		prompt = harness.BaseSection(history) + "\n" + block
-		recallJSON, _ := json.Marshal(served.recallResp)
-		pendingJSON, _ := json.Marshal(served.pendingResp)
 		armTool = fmt.Sprintf("recall_for_purchase shopper_id=%s brand_id=%s trace_id=%s + pending_questions shopper_id=%s",
 			history.ShopperID, brandID, runID, history.ShopperID)
-		armResp = "recall_for_purchase response:\n" + string(recallJSON) + "\npending_questions response:\n" + string(pendingJSON)
+		armResp = armResponse(served)
+		notes = settleNotes(served)
 	} else {
 		built, toolCalls := harness.PromptFor(history, arm)
 		prompt = built
@@ -1599,7 +1749,7 @@ func driveTurn(ctx context.Context, opts options, client *proxyClient, caps harn
 	}
 	path := filepath.Join(opts.outDir, runID+".json")
 	if !caps.Allows(promptTokens) {
-		record := cappedRecord(runID, history, arm, prompt, armTool, armResp, promptTokens)
+		record := cappedRecord(runID, history, arm, prompt, armTool, armResp, notes, promptTokens)
 		if err := writeRecord(path, record); err != nil {
 			return 0, err
 		}
@@ -1639,7 +1789,7 @@ func driveTurn(ctx context.Context, opts options, client *proxyClient, caps harn
 		return trace.cost, fmt.Errorf("t58: turn %s cost $%.6f over the $%.2f single-turn guard: committed as marked, aborting",
 			runID, trace.cost, singleTurnGuardUSD)
 	}
-	record := completeRecord(runID, history, arm, prompt, armTool, armResp, memNotes(mem), trace, sentAt, opts.deploymentID, conversationID)
+	record := completeRecord(runID, history, arm, prompt, armTool, armResp, notes, trace, sentAt, opts.deploymentID, conversationID)
 	if err := writeRecord(path, record); err != nil {
 		return trace.cost, err
 	}
@@ -1662,6 +1812,7 @@ func serveFromSeed(_ options, history seed.History, runID string, mem *arm3Memor
 		return nil, err
 	}
 	served.settleNote = mem.settleNote
+	served.probe = mem.probe
 	return served, nil
 }
 
@@ -1686,19 +1837,10 @@ func (r *registry) drop(shopper string) {
 	delete(r.m, shopper)
 }
 
-// memNotes carries the arm-3 seed provenance into the run record.
-func memNotes(mem *arm3Memory) *string {
-	if mem == nil || mem.settleNote == "" {
-		return nil
-	}
-	note := "live layer seed, settled before recall: " + mem.settleNote
-	return &note
-}
-
 // cappedRecord commits a turn stopped by the per-run caps before any model
 // call: no reply, no spend, marked capped.
-func cappedRecord(runID string, history seed.History, arm harness.Arm, prompt, armTool, armResp string, promptTokens int) pilot.RunFile {
-	return pilot.RunFile{
+func cappedRecord(runID string, history seed.History, arm harness.Arm, prompt, armTool, armResp string, notes *string, promptTokens int) pilot.RunFile {
+	record := pilot.RunFile{
 		RunID:             runID,
 		ShopperID:         history.ShopperID,
 		Arm:               int(arm),
@@ -1721,6 +1863,10 @@ func cappedRecord(runID string, history seed.History, arm harness.Arm, prompt, a
 			SizeRule: pilot.SizeNone,
 		},
 	}
+	if notes != nil {
+		record.Extraction.Notes = *notes
+	}
+	return record
 }
 
 // completeRecord assembles the committed record of one live turn.

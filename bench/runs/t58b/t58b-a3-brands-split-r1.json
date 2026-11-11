@@ -1,0 +1,95 @@
+{
+  "run_id": "t58b-a3-brands-split-r1",
+  "shopper_id": "cmp-brands-split",
+  "arm": 3,
+  "arm_name": "memento",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-brands-split\nCandidate: a new Reef Oxford Shirt from Brand R (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: Memento layer. Live recall for this shopper and brand, served by the layer:\nRecall request: {\"brand_id\":\"BRR\",\"shopper_id\":\"cmp-brands-split\",\"trace_id\":\"t58b-a3-brands-split-r1\"}\nRecall response:\n{\n  \"shopper_id\": \"cmp-brands-split\",\n  \"beliefs\": [\n    {\n      \"belief_id\": \"blf_000001\",\n      \"kind\": \"fit\",\n      \"subject\": {\n        \"kind\": \"brand\",\n        \"id\": \"BRR\",\n        \"name\": \"Brand R\"\n      },\n      \"value\": \"runs large, take size S\",\n      \"status\": \"Building\",\n      \"standing\": \"Candidate\",\n      \"contradicted\": false,\n      \"contradicted_by\": null,\n      \"evidence\": [\n        {\n          \"evidence_id\": \"ev_000001\",\n          \"outcome\": {\n            \"kind\": \"refund\",\n            \"status\": \"COMPLETED\",\n            \"amount_minor\": 4700,\n            \"currency\": \"USD\"\n          },\n          \"item\": {\n            \"brand_id\": \"BRR\",\n            \"brand_name\": \"Brand R\",\n            \"line_name\": \"Reef Oxford Shirt\",\n            \"sku\": \"BRR-OXF-M\",\n            \"size\": \"M\",\n            \"category\": \"dress-shirts\"\n          },\n          \"reason\": {\n            \"category\": \"fit_too_large\",\n            \"text\": \"too loose across the chest\",\n            \"confidence\": 1\n          },\n          \"counts_toward\": \"fit\",\n          \"write_op\": \"record_action\",\n          \"link\": {\n            \"order_id\": \"ORD-seed-7-cmp-brands-split-048-b402\",\n            \"capture_id\": \"CAP-seed-7-cmp-brands-split-048-b402\",\n            \"refund_id\": \"RFD-seed-7-cmp-brands-split-048-b402\",\n            \"custom_id\": \"seed-7-cmp-brands-split-048\",\n            \"event_id\": \"EVT-seed-7-cmp-brands-split-048-b402\"\n          },\n          \"seeded\": true,\n          \"occurred_at\": \"2026-01-03T00:00:00Z\"\n        },\n        {\n          \"evidence_id\": \"ev_000004\",\n          \"outcome\": {\n            \"kind\": \"refund\",\n            \"status\": \"COMPLETED\",\n            \"amount_minor\": 4700,\n            \"currency\": \"USD\"\n          },\n          \"item\": {\n            \"brand_id\": \"BRR\",\n            \"brand_name\": \"Brand R\",\n            \"line_name\": \"Reef Oxford Shirt\",\n            \"sku\": \"BRR-OXF-M\",\n            \"size\": \"M\",\n            \"category\": \"dress-shirts\"\n          },\n          \"reason\": {\n            \"category\": \"fit_too_large\",\n            \"text\": \"sleeves too long in M\",\n            \"confidence\": 1\n          },\n          \"counts_toward\": \"fit\",\n          \"write_op\": \"record_action\",\n          \"link\": {\n            \"order_id\": \"ORD-seed-7-cmp-brands-split-051-2445\",\n            \"capture_id\": \"CAP-seed-7-cmp-brands-split-051-2445\",\n            \"refund_id\": \"RFD-seed-7-cmp-brands-split-051-2445\",\n            \"custom_id\": \"seed-7-cmp-brands-split-051\",\n            \"event_id\": \"EVT-seed-7-cmp-brands-split-051-2445\"\n          },\n          \"seeded\": true,\n          \"occurred_at\": \"2026-01-08T00:00:00Z\"\n        }\n      ],\n      \"precedence\": {\n        \"step\": \"own_evidence\",\n        \"overridden\": false,\n        \"overridden_by\": null\n      },\n      \"seeded\": true,\n      \"updated_at\": \"2026-01-08T00:00:00Z\"\n    }\n  ],\n  \"pool\": null,\n  \"pool_lookup\": \"unavailable\",\n  \"overriding_correction\": null,\n  \"guidance\": {\n    \"text\": \"Take size S for Brand R\",\n    \"basis\": \"own_evidence\",\n    \"correction_id\": null,\n    \"belief_id\": \"blf_000001\"\n  },\n  \"pending_count\": 0,\n  \"trace_id\": \"t58b-a3-brands-split-r1\"\n}\nPending questions request: {\"shopper_id\": \"cmp-brands-split\"}\nPending questions response:\n{\n  \"shopper_id\": \"cmp-brands-split\",\n  \"questions\": []\n}",
+  "arm_memory_tool": "recall_for_purchase shopper_id=cmp-brands-split brand_id=BRR trace_id=t58b-a3-brands-split-r1 + pending_questions shopper_id=cmp-brands-split",
+  "arm_memory_response": "recall_for_purchase response (pre-settle):\n{\"shopper_id\":\"cmp-brands-split\",\"beliefs\":[{\"belief_id\":\"blf_000001\",\"kind\":\"fit\",\"subject\":{\"kind\":\"brand\",\"id\":\"BRR\",\"name\":\"Brand R\"},\"value\":\"runs large, take size S\",\"status\":\"Building\",\"standing\":\"Candidate\",\"contradicted\":false,\"contradicted_by\":null,\"evidence\":[{\"evidence_id\":\"ev_000001\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":4700,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRR\",\"brand_name\":\"Brand R\",\"line_name\":\"Reef Oxford Shirt\",\"sku\":\"BRR-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"fit_too_large\",\"text\":\"too loose across the chest\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-brands-split-048-b402\",\"capture_id\":\"CAP-seed-7-cmp-brands-split-048-b402\",\"refund_id\":\"RFD-seed-7-cmp-brands-split-048-b402\",\"custom_id\":\"seed-7-cmp-brands-split-048\",\"event_id\":\"EVT-seed-7-cmp-brands-split-048-b402\"},\"seeded\":true,\"occurred_at\":\"2026-01-03T00:00:00Z\"},{\"evidence_id\":\"ev_000004\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":4700,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRR\",\"brand_name\":\"Brand R\",\"line_name\":\"Reef Oxford Shirt\",\"sku\":\"BRR-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"fit_too_large\",\"text\":\"sleeves too long in M\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-brands-split-051-2445\",\"capture_id\":\"CAP-seed-7-cmp-brands-split-051-2445\",\"refund_id\":\"RFD-seed-7-cmp-brands-split-051-2445\",\"custom_id\":\"seed-7-cmp-brands-split-051\",\"event_id\":\"EVT-seed-7-cmp-brands-split-051-2445\"},\"seeded\":true,\"occurred_at\":\"2026-01-08T00:00:00Z\"}],\"precedence\":{\"step\":\"own_evidence\",\"overridden\":false,\"overridden_by\":null},\"seeded\":true,\"updated_at\":\"2026-01-08T00:00:00Z\"}],\"pool\":null,\"pool_lookup\":\"unavailable\",\"overriding_correction\":null,\"guidance\":{\"text\":\"Take size S for Brand R\",\"basis\":\"own_evidence\",\"correction_id\":null,\"belief_id\":\"blf_000001\"},\"pending_count\":0,\"trace_id\":\"t58b-a3-brands-split-r1-pre\"}\npending_questions response (pre-settle):\n{\"shopper_id\":\"cmp-brands-split\",\"questions\":[]}\nrecall_for_purchase response (post-settle, served in the prompt):\n{\"shopper_id\":\"cmp-brands-split\",\"beliefs\":[{\"belief_id\":\"blf_000001\",\"kind\":\"fit\",\"subject\":{\"kind\":\"brand\",\"id\":\"BRR\",\"name\":\"Brand R\"},\"value\":\"runs large, take size S\",\"status\":\"Building\",\"standing\":\"Candidate\",\"contradicted\":false,\"contradicted_by\":null,\"evidence\":[{\"evidence_id\":\"ev_000001\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":4700,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRR\",\"brand_name\":\"Brand R\",\"line_name\":\"Reef Oxford Shirt\",\"sku\":\"BRR-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"fit_too_large\",\"text\":\"too loose across the chest\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-brands-split-048-b402\",\"capture_id\":\"CAP-seed-7-cmp-brands-split-048-b402\",\"refund_id\":\"RFD-seed-7-cmp-brands-split-048-b402\",\"custom_id\":\"seed-7-cmp-brands-split-048\",\"event_id\":\"EVT-seed-7-cmp-brands-split-048-b402\"},\"seeded\":true,\"occurred_at\":\"2026-01-03T00:00:00Z\"},{\"evidence_id\":\"ev_000004\",\"outcome\":{\"kind\":\"refund\",\"status\":\"COMPLETED\",\"amount_minor\":4700,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRR\",\"brand_name\":\"Brand R\",\"line_name\":\"Reef Oxford Shirt\",\"sku\":\"BRR-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"fit_too_large\",\"text\":\"sleeves too long in M\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-brands-split-051-2445\",\"capture_id\":\"CAP-seed-7-cmp-brands-split-051-2445\",\"refund_id\":\"RFD-seed-7-cmp-brands-split-051-2445\",\"custom_id\":\"seed-7-cmp-brands-split-051\",\"event_id\":\"EVT-seed-7-cmp-brands-split-051-2445\"},\"seeded\":true,\"occurred_at\":\"2026-01-08T00:00:00Z\"}],\"precedence\":{\"step\":\"own_evidence\",\"overridden\":false,\"overridden_by\":null},\"seeded\":true,\"updated_at\":\"2026-01-08T00:00:00Z\"}],\"pool\":null,\"pool_lookup\":\"unavailable\",\"overriding_correction\":null,\"guidance\":{\"text\":\"Take size S for Brand R\",\"basis\":\"own_evidence\",\"correction_id\":null,\"belief_id\":\"blf_000001\"},\"pending_count\":0,\"trace_id\":\"t58b-a3-brands-split-r1\"}\npending_questions response (post-settle, served in the prompt):\n{\"shopper_id\":\"cmp-brands-split\",\"questions\":[]}",
+  "agent_tool_spans": [
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1391
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1370
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 547
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1373
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1386
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**S** — You returned two Brand R Reef Oxford Shirts in size M for being too large (too loose across the chest; sleeves too long), so size S is recommended.",
+  "contaminated": false,
+  "trace_cost_usd": 0.004896,
+  "prompt_words": 296,
+  "reply_words": 30,
+  "capped": false,
+  "sent_at": "2026-11-11T21:02:31Z",
+  "trace_at": "2026-11-11T21:02:41Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "**S** — You returned two Brand R Reef Oxford Shirts in size M for being too large (too loose across the chest; sleeves too long), so size S is recommended.",
+    "human_size": "S",
+    "human_size_reason": "deterministic M names the returned items ('in size M for being too large'); the reply's recommendation is the bold S ('so size S is recommended')",
+    "id_refs": null,
+    "notes": "live layer seed, settled before recall: 7 polls over 60s: to fit brand BRR runs large, take size S=Candidate/2/0.714 to fit brand BRT runs small, take size L=None/1/0.000 -for-BRR ships reliably for this shopper=None/1/0.000 | pre-settle recall: graph [to fit brand BRR runs large, take size S=Candidate/2/0.714 to fit brand BRT runs small, take size L=None/1/0.000 -for-BRR ships reliably for this shopper=None/1/0.000]; served blf_000001 fit BRR \"runs large, take size S\" status Building standing Candidate evidence 2; guidance \"Take size S for Brand R\" | post-settle recall: served blf_000001 fit BRR \"runs large, take size S\" status Building standing Candidate evidence 2; guidance \"Take size S for Brand R\""
+  },
+  "score": {
+    "ShopperID": "cmp-brands-split",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 326,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}

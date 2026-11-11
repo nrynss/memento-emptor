@@ -1,0 +1,36 @@
+{
+  "runs": [
+    {
+      "run_id": "t58b-a3-brands-split-r1",
+      "shopper_id": "cmp-brands-split",
+      "arm": 3,
+      "answer_right_size": "S",
+      "recommended_size": "S",
+      "right_size_first": true,
+      "wrong_cause": 0,
+      "correction_honoured": null,
+      "supported_cites": 0,
+      "cited": 0,
+      "tokens_first": 326,
+      "over_cap": false,
+      "contaminated": false,
+      "trace_cost_usd": 0.004896
+    },
+    {
+      "run_id": "t58b-a3-brands-steady-r1",
+      "shopper_id": "cmp-brands-steady",
+      "arm": 3,
+      "answer_right_size": "M",
+      "recommended_size": "M",
+      "right_size_first": true,
+      "wrong_cause": 0,
+      "correction_honoured": null,
+      "supported_cites": 0,
+      "cited": 0,
+      "tokens_first": 263,
+      "over_cap": false,
+      "contaminated": false,
+      "trace_cost_usd": 0.003801
+    }
+  ]
+}

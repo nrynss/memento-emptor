@@ -1,0 +1,93 @@
+{
+  "run_id": "t58b-a3-brands-steady-r1",
+  "shopper_id": "cmp-brands-steady",
+  "arm": 3,
+  "arm_name": "memento",
+  "model": "claude-sonnet-4-6",
+  "deployment": "pilot-baseline",
+  "prompt": "Shopper: cmp-brands-steady\nCandidate: a new Quay Oxford Shirt from Brand Q (new SKU, size unchosen). The shopper wants another one.\nTask: recommend one size (a single token such as M or L) and one sentence of justification citing only what you were given. Do not invent purchases, reasons, or corrections.\nMemory: Memento layer. Live recall for this shopper and brand, served by the layer:\nRecall request: {\"brand_id\":\"BRQ\",\"shopper_id\":\"cmp-brands-steady\",\"trace_id\":\"t58b-a3-brands-steady-r1\"}\nRecall response:\n{\n  \"shopper_id\": \"cmp-brands-steady\",\n  \"beliefs\": [\n    {\n      \"belief_id\": \"blf_000002\",\n      \"kind\": \"fit\",\n      \"subject\": {\n        \"kind\": \"brand\",\n        \"id\": \"BRQ\",\n        \"name\": \"Brand Q\"\n      },\n      \"value\": \"size M fits this shopper now\",\n      \"status\": \"Claimed\",\n      \"standing\": \"None\",\n      \"contradicted\": false,\n      \"contradicted_by\": null,\n      \"evidence\": [\n        {\n          \"evidence_id\": \"ev_000003\",\n          \"outcome\": {\n            \"kind\": \"capture\",\n            \"status\": \"COMPLETED\",\n            \"amount_minor\": 4600,\n            \"currency\": \"USD\"\n          },\n          \"item\": {\n            \"brand_id\": \"BRQ\",\n            \"brand_name\": \"Brand Q\",\n            \"line_name\": \"Quay Oxford Shirt\",\n            \"sku\": \"BRQ-OXF-M\",\n            \"size\": \"M\",\n            \"category\": \"dress-shirts\"\n          },\n          \"reason\": {\n            \"category\": \"none\",\n            \"text\": \"Fit feedback: Brand Q quay oxford size M fits well, tied to this purchase\",\n            \"confidence\": 1\n          },\n          \"counts_toward\": \"fit\",\n          \"write_op\": \"record_action\",\n          \"link\": {\n            \"order_id\": \"ORD-seed-7-cmp-brands-steady-044-88e6\",\n            \"capture_id\": \"CAP-seed-7-cmp-brands-steady-044-88e6\",\n            \"custom_id\": \"seed-7-cmp-brands-steady-044\",\n            \"event_id\": \"EVT-seed-7-cmp-brands-steady-044-88e6\"\n          },\n          \"seeded\": true,\n          \"occurred_at\": \"2026-01-06T00:00:00Z\"\n        }\n      ],\n      \"precedence\": {\n        \"step\": \"own_evidence\",\n        \"overridden\": false,\n        \"overridden_by\": null\n      },\n      \"seeded\": true,\n      \"updated_at\": \"2026-01-06T00:00:00Z\"\n    }\n  ],\n  \"pool\": null,\n  \"pool_lookup\": \"unavailable\",\n  \"overriding_correction\": null,\n  \"guidance\": {\n    \"text\": \"Take size M for Brand Q\",\n    \"basis\": \"own_evidence\",\n    \"correction_id\": null,\n    \"belief_id\": \"blf_000002\"\n  },\n  \"pending_count\": 0,\n  \"trace_id\": \"t58b-a3-brands-steady-r1\"\n}\nPending questions request: {\"shopper_id\": \"cmp-brands-steady\"}\nPending questions response:\n{\n  \"shopper_id\": \"cmp-brands-steady\",\n  \"questions\": []\n}",
+  "arm_memory_tool": "recall_for_purchase shopper_id=cmp-brands-steady brand_id=BRQ trace_id=t58b-a3-brands-steady-r1 + pending_questions shopper_id=cmp-brands-steady",
+  "arm_memory_response": "recall_for_purchase response (pre-settle):\n{\"shopper_id\":\"cmp-brands-steady\",\"beliefs\":[{\"belief_id\":\"blf_000002\",\"kind\":\"fit\",\"subject\":{\"kind\":\"brand\",\"id\":\"BRQ\",\"name\":\"Brand Q\"},\"value\":\"size M fits this shopper now\",\"status\":\"Claimed\",\"standing\":\"None\",\"contradicted\":false,\"contradicted_by\":null,\"evidence\":[{\"evidence_id\":\"ev_000003\",\"outcome\":{\"kind\":\"capture\",\"status\":\"COMPLETED\",\"amount_minor\":4600,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRQ\",\"brand_name\":\"Brand Q\",\"line_name\":\"Quay Oxford Shirt\",\"sku\":\"BRQ-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"none\",\"text\":\"Fit feedback: Brand Q quay oxford size M fits well, tied to this purchase\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-brands-steady-044-88e6\",\"capture_id\":\"CAP-seed-7-cmp-brands-steady-044-88e6\",\"custom_id\":\"seed-7-cmp-brands-steady-044\",\"event_id\":\"EVT-seed-7-cmp-brands-steady-044-88e6\"},\"seeded\":true,\"occurred_at\":\"2026-01-06T00:00:00Z\"}],\"precedence\":{\"step\":\"own_evidence\",\"overridden\":false,\"overridden_by\":null},\"seeded\":true,\"updated_at\":\"2026-01-06T00:00:00Z\"}],\"pool\":null,\"pool_lookup\":\"unavailable\",\"overriding_correction\":null,\"guidance\":{\"text\":\"Take size M for Brand Q\",\"basis\":\"own_evidence\",\"correction_id\":null,\"belief_id\":\"blf_000002\"},\"pending_count\":0,\"trace_id\":\"t58b-a3-brands-steady-r1-pre\"}\npending_questions response (pre-settle):\n{\"shopper_id\":\"cmp-brands-steady\",\"questions\":[]}\nrecall_for_purchase response (post-settle, served in the prompt):\n{\"shopper_id\":\"cmp-brands-steady\",\"beliefs\":[{\"belief_id\":\"blf_000002\",\"kind\":\"fit\",\"subject\":{\"kind\":\"brand\",\"id\":\"BRQ\",\"name\":\"Brand Q\"},\"value\":\"size M fits this shopper now\",\"status\":\"Claimed\",\"standing\":\"None\",\"contradicted\":false,\"contradicted_by\":null,\"evidence\":[{\"evidence_id\":\"ev_000003\",\"outcome\":{\"kind\":\"capture\",\"status\":\"COMPLETED\",\"amount_minor\":4600,\"currency\":\"USD\"},\"item\":{\"brand_id\":\"BRQ\",\"brand_name\":\"Brand Q\",\"line_name\":\"Quay Oxford Shirt\",\"sku\":\"BRQ-OXF-M\",\"size\":\"M\",\"category\":\"dress-shirts\"},\"reason\":{\"category\":\"none\",\"text\":\"Fit feedback: Brand Q quay oxford size M fits well, tied to this purchase\",\"confidence\":1},\"counts_toward\":\"fit\",\"write_op\":\"record_action\",\"link\":{\"order_id\":\"ORD-seed-7-cmp-brands-steady-044-88e6\",\"capture_id\":\"CAP-seed-7-cmp-brands-steady-044-88e6\",\"custom_id\":\"seed-7-cmp-brands-steady-044\",\"event_id\":\"EVT-seed-7-cmp-brands-steady-044-88e6\"},\"seeded\":true,\"occurred_at\":\"2026-01-06T00:00:00Z\"}],\"precedence\":{\"step\":\"own_evidence\",\"overridden\":false,\"overridden_by\":null},\"seeded\":true,\"updated_at\":\"2026-01-06T00:00:00Z\"}],\"pool\":null,\"pool_lookup\":\"unavailable\",\"overriding_correction\":null,\"guidance\":{\"text\":\"Take size M for Brand Q\",\"basis\":\"own_evidence\",\"correction_id\":null,\"belief_id\":\"blf_000002\"},\"pending_count\":0,\"trace_id\":\"t58b-a3-brands-steady-r1\"}\npending_questions response (post-settle, served in the prompt):\n{\"shopper_id\":\"cmp-brands-steady\",\"questions\":[]}",
+  "agent_tool_spans": [
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 1
+    },
+    {
+      "name": "memory_operation MessageHistory",
+      "type": "span",
+      "latency_ms": 11
+    },
+    {
+      "name": "processor_run MemoryInputFilter",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "invoke_agent Pilot Baseline",
+      "type": "agent",
+      "latency_ms": 1274
+    },
+    {
+      "name": "processor_run Unsupported File Handler",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "chat claude-sonnet-4-6",
+      "type": "generation",
+      "latency_ms": 1254
+    },
+    {
+      "name": "processor_run Provider History Compat",
+      "type": "span",
+      "latency_ms": 0
+    },
+    {
+      "name": "agent_step Pilot Baseline",
+      "type": "span",
+      "latency_ms": 1257
+    },
+    {
+      "name": "model_generation claude-sonnet-4-6",
+      "type": "span",
+      "latency_ms": 1270
+    },
+    {
+      "name": "model_chunk Pilot Baseline",
+      "type": "span",
+      "latency_ms": 523
+    }
+  ],
+  "recall_observed": false,
+  "reply": "**M** — The shopper's completed purchase of the Quay Oxford Shirt in size M (BRQ-OXF-M) includes fit feedback confirming that Brand Q size M fits well.",
+  "contaminated": false,
+  "trace_cost_usd": 0.003801,
+  "prompt_words": 237,
+  "reply_words": 26,
+  "capped": false,
+  "sent_at": "2026-11-11T21:04:56Z",
+  "trace_at": "2026-11-11T21:05:06Z",
+  "extraction": {
+    "size": "M",
+    "size_rule": "explicit-size",
+    "size_quote": "**M** — The shopper's completed purchase of the Quay Oxford Shirt in size M (BRQ-OXF-M) includes fit feedback confirming that Brand Q size M fits well.",
+    "id_refs": null,
+    "notes": "live layer seed, settled before recall: 7 polls over 60s: to fit brand BRP runs small, take size L=Candidate/2/0.500 t brand BRQ size M fits this shopper now=None/1/0.000 -for-BRQ ships reliably for this shopper=None/1/0.000 | pre-settle recall: graph [to fit brand BRP runs small, take size L=Candidate/2/0.500 t brand BRQ size M fits this shopper now=None/1/0.000 -for-BRQ ships reliably for this shopper=None/1/0.000]; served blf_000002 fit BRQ \"size M fits this shopper now\" status Claimed standing None evidence 1; guidance \"Take size M for Brand Q\" | post-settle recall: served blf_000002 fit BRQ \"size M fits this shopper now\" status Claimed standing None evidence 1; guidance \"Take size M for Brand Q\""
+  },
+  "score": {
+    "ShopperID": "cmp-brands-steady",
+    "RightSize": true,
+    "WrongCause": 0,
+    "CorrectionHonoured": null,
+    "Supported": 0,
+    "Cited": 0,
+    "Cites": null,
+    "TokensFirst": 263,
+    "TokensSecond": 0,
+    "TokenBasis": "harness-words-v1: whitespace-separated words per harness.CountTokens",
+    "OverCap": false,
+    "Opinions": null
+  }
+}
