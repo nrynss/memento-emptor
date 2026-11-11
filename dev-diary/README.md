@@ -177,6 +177,12 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
 
+### CI: merchant dependencies (fixed)
+
+**What happened.** The first pushes after merchant joined the gate (`ff9c922`, `7d4719d`) went red in CI with `FAIL [merchant deps] merchant/node_modules is missing`. The gate itself was fine — CI's workflow only ran `npm ci` in `web/`, and T9.3 added merchant to `tools/check.sh` without touching `.github/workflows/ci.yml`. Fixed as `88292f2`: the workflow installs merchant dependencies and caches both lockfiles; the run after it is green.
+
+**The next agent should not have to work out.** Whenever `tools/check.sh` gains a frontend or a build step, the CI workflow gains its install in the same change. The local gate passing does not prove CI: run a push or diff the workflow's installs against the gate's `check_frontend` calls. This class of failure reads as a code failure but is a missing install.
+
 ### T9.6: The pivoted layer live on Render (done)
 
 **What exists.** `main` is pushed (`ff9c922`) and both Render services redeployed `live` from it. The public layer now serves the pivot end to end: `recall_for_purchase` for `shopper_01` reads `pool_lookup: consulted`, pool Earned small (22 settled, 22 seeded, 0 live) overridden by correction `corr_3b7e52`, guidance basis `correction`; `product_fit` for the demo oxford reads Earned small; the merchant proxy answers the same shape with no caller credential. `deploy/guard.sh --check` green at 2 services / 1 GB disk / $14.25/mo against $16.00. Spend $0.00 of model.
