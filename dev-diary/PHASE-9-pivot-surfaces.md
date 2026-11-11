@@ -930,7 +930,7 @@ requires:   [T9.22, T9.20]
 fixture-ok: no
 size:       XS · mid
 owns:       demo/
-status:     not-started
+status:     claimed:t923-re-record
 ```
 T9.22 changed the reference agent's instruction so recall answers before `search_catalog`, with the returned SKUs passed as `exclude_skus`. Only a live turn proves the model obeys: re-run the step-2 turn after the redeploy, record it, and confirm the reply names a SKU the search returned that the seeded returns do not carry. Budget: one Channel3 credit and under $0.10 of agent spend.
 
