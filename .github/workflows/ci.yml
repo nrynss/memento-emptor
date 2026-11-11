@@ -19,11 +19,17 @@ jobs:
         with:
           node-version: '26'
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: |
+            web/package-lock.json
+            merchant/package-lock.json
 
       - name: Install web dependencies
         run: npm ci
         working-directory: web
+
+      - name: Install merchant dependencies
+        run: npm ci
+        working-directory: merchant
 
       - name: Run the gate
         run: ./tools/check.sh
