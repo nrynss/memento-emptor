@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | Held: no P6 tasks run (user order) |
 | P7 | 5 / 6 | In progress (T7.6) |
 | P8 | 18 / 19 | In progress (T8.5h) |
-| P9 | 13 / 16 | In progress (T9.3i, T9.7, T9.8) |
+| P9 | 14 / 17 | In progress (T9.3i, T9.7, T9.9) |
 | P10 | 3 / 6 | In progress |
 
 ---
@@ -176,6 +176,16 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent must not have to work out again.
+
+### T9.8: Agents read the served layer (done)
+
+**What exists.** Both deployed agents now call the live layer through its edge (`POST https://memento-emptor.onrender.com/tools/{tool}` with an agent key), with the fake memory/store deleted. The key is declared as an `agent.inputs` secret in both blueprints and resolved at deploy from the account vault. Live proof: reference trace `ed617f32e79fb8d20fde1e1174bc1ef0` — `recall_for_purchase` then `record_correction`, minting `corr_000001`; second-agent trace `6d764a788aba072bcaabb043e2551448` — asked only for a size, recalls first, recommends M from `corr_000001` over `blf_8f2c41` with the 22-settled seeded pool overridden. The second agent's prompt cannot produce that text; it can only come from the shared layer. Spend $0.14 of $2.00. Review APPROVE with one prose fix (the reference agent's tool descriptions are the layer's words plus its own guidance, not verbatim).
+
+**What surprised.** A `--var` against an undeclared `agent.inputs` entry is accepted and silently drops the secret; only a declared input is validated. The first attempt failed honestly because of it (the agent said its key was not set). Two livability notes: messaging history can return an empty assistant message (read replies from the trace), and `ast secrets create` accepts values only via argv.
+
+**Key-handling incident, accepted by the user.** A worker's `secret-tool search --all` printed all three token values into its local session transcript (never into a repo file, commit or application log). The user chose to accept the local exposure rather than rotate; the incident is recorded here so the next agent knows the transcript is sensitive if it is ever shared. SC4 name: T9.9 covers the three low findings (dead ledger tools, no tool-binding coverage, retry-on-write).
+
+### P2 E2E review: FINDINGS (fixes landed, owners opened)
 
 ### P1 E2E review: FINDINGS, fixes landed
 

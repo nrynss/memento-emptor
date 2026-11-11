@@ -354,7 +354,7 @@ requires:   [T9.4, T9.5, T9.6]
 fixture-ok: no
 size:       M · frontier
 owns:       agent/runtime/, agent/second/
-status:     in-review
+status:     done
 ```
 Both deployed agents are fake-backed: `agent/runtime/agent/memory.ts` and `agent/second/agent/store.ts` serve a standing copy of the pivot shapes, so a demo turn never reaches the live layer. T9.7's central claim — a correction made through the reference agent is honoured by the second agent from the shared layer — cannot be shown while the tools are stand-ins. Replace the fake tools with HTTP calls to the layer's edge (`/tools/{tool}`) carrying an agent key in `Authorization: Bearer` and the shopper id in the body, wire the key through the deployment's secret store (never a file, never printed), redeploy both agents, and prove one live turn per agent: recall first, correction recorded, the other agent honouring it. Budget: under $2.00 of agent spend; run one turn first and check its cost. If a live turn cannot be made to work, record precisely what fails and hand the decision back to the orchestrator rather than faking it.
 
@@ -384,6 +384,20 @@ Three things the next agent should not have to rediscover:
 
 Two review fixes, both prose, no behaviour change: `agent/runtime/agent/tools.ts` and its README said the tool descriptions were the layer's own frozen words. That holds for the second agent and for six of the reference agent's eleven; the descriptions are the layer's words plus this agent's recall-first guidance, and both now say names and input shapes are the frozen contract.
 
+
+---
+
+### T9.9: Agent tool surface and retry discipline
+```yaml
+requires:   [T9.8]
+fixture-ok: yes
+size:       S · mid
+owns:       agent/runtime/, agent/second/
+status:     not-started
+```
+The T9.8 review found three low defects in the live agent surface. Both agents expose `ledger_beliefs`, `ledger_belief` and `ledger_evidence`, which the edge admits for `CallerShopper` only, so an agent key gets a 403 on each. `tools.ts` has no offline coverage: the checks inject the transport below it, so tool ids, schemas and execute bindings are exercised only by a live build. And the reference prompt tells the agent to retry any failed tool call once, so a `record_correction` that landed and then timed out could be written twice; retries must be for reads only, or a write must recall before retrying.
+
+**Done when:** each agent's exposed tools match the edge's access table (or the table is widened deliberately, recorded), a check exercises the tool bindings themselves against the frozen contract, and the retry instruction cannot duplicate a write; the gate passes and the deployed builds match the committed code.
 
 ---
 
