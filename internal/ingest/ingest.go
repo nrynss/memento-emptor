@@ -2,7 +2,6 @@ package ingest
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sort"
 	"sync"
@@ -229,10 +228,10 @@ func (s *Service) handleRefund(ctx context.Context, event fakes.WebhookEvent) (R
 // read; the dispute record's item is the fallback when the order read
 // carries none.
 //
-// A code the table does not name stores the row with no category: the
-// outcome exists, the code it carried stays on the row, and nothing is
-// classified, so the delivery is stored instead of dropped and no belief
-// is earned from it.
+// A code the table does not name stores the row with no classified
+// reason: the disposition comes from domain.StoredCategoryForDispute, so
+// the outcome is stored instead of dropped and no belief is earned from
+// it.
 func (s *Service) handleDispute(ctx context.Context, event fakes.WebhookEvent) (Result, error) {
 	if event.Link.DisputeID == "" {
 		return Result{}, fmt.Errorf("ingest: dispute event %q: %w", event.EventID, ErrMalformedEvent)
@@ -241,12 +240,9 @@ func (s *Service) handleDispute(ctx context.Context, event fakes.WebhookEvent) (
 	if err != nil {
 		return Result{}, fmt.Errorf("ingest: read dispute %q: %w", event.Link.DisputeID, err)
 	}
-	category, err := domain.CategoryForDispute(dispute.Code)
-	if err != nil && !errors.Is(err, domain.ErrUnknownDisputeCode) {
-		return Result{}, fmt.Errorf("ingest: dispute event %q: %w", event.EventID, err)
-	}
+	category, err := domain.StoredCategoryForDispute(dispute.Code)
 	if err != nil {
-		category = domain.CategoryNone
+		return Result{}, fmt.Errorf("ingest: dispute event %q: %w", event.EventID, err)
 	}
 	items := []domain.Item{}
 	if event.Link.OrderID != "" {

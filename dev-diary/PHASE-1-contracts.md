@@ -190,16 +190,16 @@ file one. Spend: sandbox calls only, $0; no new sandbox records.
 requires:   [T1.1b]
 fixture-ok: yes
 size:       XS · mid
-owns:       internal/domain/, tests/live/ingest/
-status:     blocked
+owns:       internal/domain/, internal/ingest/, tests/live/ingest/
+status:     in-review
 ```
 The T1.1c review found the unknown-dispute-code disposition now exists in two places: `internal/ingest.handleDispute` and the live driver's `disputeCategory`. A rule change would drift (loudly, via an assertion mismatch, but drift). Export the disposition from `internal/domain` (or a shared helper) and have both call it.
 
 **Done when:** one function decides an unknown code's category and error, and ingest and the driver both use it; the existing tests pass unchanged; the gate passes.
 
-Notes (T1.1d, blocked): `domain.StoredCategoryForDispute` holds the rule: a code outside the frozen table yields `CategoryNone` and no error, so the outcome stores with no classified reason and counts toward nothing; any other mapping error returns. `CategoryForDispute` keeps refusing an unknown code, so its tests stand unchanged, and `TestStoredCategoryForDispute` pins the disposition and that every table code passes through unchanged. The live driver's private `disputeCategory` is gone and both of its call sites use the domain function; its README's claim that the driver restated the mapping is corrected.
+Notes (T1.1d, in-review): `domain.StoredCategoryForDispute` holds the rule: a code outside the frozen table yields `CategoryNone` and no error, so the outcome stores with no classified reason and counts toward nothing; any other mapping error returns. `CategoryForDispute` keeps refusing an unknown code, so its tests stand unchanged, and `TestStoredCategoryForDispute` pins the disposition and that every table code passes through unchanged. Both callers now take the rule from there: `internal/ingest.handleDispute` calls it and returns its error directly (the local `ErrUnknownDisputeCode` override and the `errors` import are gone), and the live driver's private `disputeCategory` is deleted with both of its call sites calling the domain function. The driver's README no longer claims it restates the mapping.
 
-Half the task is unmet and cannot be met inside this task's `owns`: `internal/ingest.handleDispute` still decides the disposition itself (`CategoryForDispute`, then its own `errors.Is(..., domain.ErrUnknownDisputeCode)` override), because `owns` here is `internal/domain/` and `tests/live/ingest/` only. T1.1b and T1.1c both owned `internal/ingest/`; this task's `owns` line dropped it while its Done-when still needs it. Unblock: widen `owns` to `internal/domain/, internal/ingest/, tests/live/ingest/` (or file a follow-up owning `internal/ingest/`) and replace the two-branch mapping with `category, err := domain.StoredCategoryForDispute(dispute.Code); if err != nil { return Result{}, fmt.Errorf("ingest: dispute event %q: %w", event.EventID, err) }`, which drops the `errors` import from `internal/ingest/ingest.go` and leaves the served behaviour and every existing test byte-identical. Nothing else about the rule is left to work out.
+The task first landed as `blocked` because `owns` then read `internal/domain/, tests/live/ingest/` while the Done-when needed `internal/ingest/`; the orchestrator widened `owns` rather than cut the rule in half, and the remaining hunk was this task's own. Behaviour is unchanged in both callers, so no existing test moved.
 
 ---
 

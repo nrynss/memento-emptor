@@ -127,8 +127,9 @@ func CategoryForDispute(code DisputeCode) (Category, error) {
 // and counts toward nothing instead of being dropped. Any other mapping
 // error is returned.
 //
-// This is the one place the unknown-code disposition is decided: a caller
-// that stores the outcome takes it from here instead of restating the rule.
+// This is the one place the unknown-code disposition is decided. Served
+// ingest and the live driver both take it from here, so a change to the
+// disposition cannot reach one and miss the other.
 func StoredCategoryForDispute(code DisputeCode) (Category, error) {
 	category, err := CategoryForDispute(code)
 	switch {
