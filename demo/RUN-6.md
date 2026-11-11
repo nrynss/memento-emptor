@@ -63,39 +63,39 @@ earlier attempt (the shopper's `set_pooling` opt-out and back in), and the
 step-0 pool read came back 22 settled / 22 seeded / 0 live: the starting
 state in the evidence is the reset's answer, not a remembered one.
 
-## Gaps, with proposed owners
+## Gaps, with owners
 
-1. **Day-one shopper recall refused** (401, `shopper_02`). Owner: the
-   orchestrator/operator widens `MEMENTO_AGENT_KEYS`'s shopper binding, or a
-   new task mints a second agent key; the demo cannot change a Render secret.
+Fixed since this run: 3, 5, 6, 8 and 9 are closed in the tree (8 also on the
+served page after its next deploy); 7 is covered by T9.22's sequencing rule,
+proved by T9.23's re-record; 10's catalog tool is live (T9.20) and its
+candidate gap is T9.22/T9.23. Open: 1, 2 and 4.
+
+1. **Day-one shopper recall refused** (401, `shopper_02`). Owner: **T9.15**
+   (second shopper key); the demo cannot change a Render secret.
 2. **No live purchase or dispute ingest.** The PayPal app's only webhook
    subscription points at an external test receiver, not the layer, and the
    served layer reads verified events through `fakes.NewRecordingPaymentSource`
-   in `cmd/memento`. Owner: a layer/deploy task (T8.7b) wires the
-   real payment source and the app's subscription.
-3. **Ledger page has no live transport** (fixture-only). Owner: a `web/`
-   task, T4.8.
+   in `cmd/memento`. Owner: **T8.7b** (live payment events).
+3. **Ledger page had no live transport** (fixture-only). **Closed by T4.8**:
+   `/ledger?t=` reads live and labels the source; without a token the demo
+   story replays, labelled.
 4. **Seller belief never reaches recall**, and agent keys are refused on
-   ledger reads, so no agent turn can mention the dispute. Owner: T9.9's
-   surface alignment, or a layer recall extension.
-5. **`record_feedback` duplicates a purchase in the belief.** The seeded
-   arc's one copy plus this run's two feedback calls left `ev_51c2d8` three
-   times on `blf_2b9d60` and lifted it Claimed → Building. Owner: T8.5l (feedback idempotency).
-6. **Correction id reused after a restart.** The restored `corr_000001` was
-   overwritten by the next mint because the id sequence is not restored with
-   the journal. Owner: a layer task (T8.7b).
-7. **Reference agent skipped recall** on the recorded feedback turn (and on
-   one correction attempt), so recall-first is not every turn. Owner: T9.9.
-8. **Both apps render their own source comments** as visible text, and the
-   belief page prints its standing-correction empty-state sentence twice.
-   Owner: a presentation task under `web/` and `merchant/`, T4.8.
-9. **`explain_belief` lists a correction twice.** The live answer for
-   `blf_8f2c41` carries seven corrections for five ids: `corr_000001` and
-   `corr_3b7e52` each appear twice. `restoreStanding` and `LoadSeed` both add
-   the seeded correction to the correction order, and a reused id is appended
-   a second time; the read does not de-duplicate. Owner: a layer task
-   (T8.7b).
-10. **Step 2's Channel3 candidate is not live.** The reference agent has no
-    product-search tool, so no Channel3 call exists and the candidate SKU
-    appears only in the step-4 capture. Owner: T9.9 (agent tool surface) or a
-    new task the orchestrator opens.
+   ledger reads, so no agent turn can mention the dispute. Owner: **T9.24**
+   (a live path for the dispute).
+5. **`record_feedback` duplicated a purchase in the belief.** **Closed by
+   T8.5l**: a repeat answers the feedback on record without minting, appending
+   or moving the status.
+6. **Correction id reused after a restart.** **Closed by T8.5m**: the mint
+   sequence resumes past every restored id.
+7. **Reference agent skipped recall** on the recorded feedback turn. **Closed
+   by T9.9's retry rule and T9.22's recall-before-catalog sequencing**; T9.23
+   proves the live turn.
+8. **Both apps rendered their own source comments** as visible text, and the
+   belief page printed its standing-correction sentence twice. **Closed by the
+   P4 header guard and T4.6**; the served page shows it after its next deploy.
+9. **`explain_belief` listed a correction twice.** **Closed by T8.5m**: each
+   correction is served once.
+10. **Step 2's Channel3 candidate.** T9.20 made the catalog live; the recorded
+    turn named the returned SKU. T9.22 sequences recall before the search and
+    excludes the returned SKUs; **T9.23** owns the redeploy and the re-record,
+    and T9.17 stays in review until a fresh candidate is named.
