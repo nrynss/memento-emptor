@@ -34,6 +34,16 @@ verification and possible reuse. To remove it:
 
     ast agent delete --name pilot-baseline --confirm pilot-baseline
 
+The `deployment` field in every run file reads `memento-agent`: the frozen
+record builder (`record.go`, `NewRunFile`) writes that constant, so the
+field is a fixed label and not a record of what answered. The provenance is
+the trace spans in each file — `invoke_agent Pilot Baseline` on the ten
+graded runs, `invoke_agent Memento Agent` on the discarded pair — so the
+field must not be read as saying the reference agent drove the graded turns.
+The builder is frozen (`bench/FROZEN.md` pins `record.go`) and the ten run
+files are published output, so the field stays as written; this note is the
+record of what it means.
+
 No shopper, harness, grader, or seed file was touched. Frozen fixtures are
 read-only inputs to this task.
 
@@ -94,7 +104,7 @@ discrimination the shoppers were built to test: damage is not fit, a parcel
 that never arrived is not fit, a changed mind counts toward nothing, two
 fresh too-small returns outweigh a stale fits-well note, a vague answer
 counts toward nothing. Only the size-changed cites resolve to fit rows
-(2/2); the other six prose cites resolve to statement, kept, seller, or
+(2/2); the other seven prose cites resolve to statement, kept, seller, or
 changed-mind rows (0 supported) — correct non-fit handling, but every one
 of them needed the human mapping step. Nothing here looks like a leak: the
 prompts carry no answer material (verified for both arms; the harness test
@@ -115,9 +125,9 @@ shopper is added or changed in this task, for three reasons:
    freeze-level set decision, and set edits live outside this task's owns.
 3. The lead is visible elsewhere already: tokens (arm 2 runs 216-288
    words/turn against arm 1's 83-99; a belief-compact arm 3 should undercut
-   raw history substantially) and citations (7 of 9 arm-2 cites need human
-   prose-mapping and resolve to non-fit rows; arm 3 cites belief and
-   evidence ids mechanically).
+   raw history substantially) and citations (all 9 arm-2 cites need human
+   prose-mapping, and 7 of the 9 resolve to non-fit rows; arm 3 cites belief
+   and evidence ids mechanically).
 
 Hardening candidates for the freeze, if it wants headroom on right-size
 or wrong-cause: histories long enough that the signal drowns in noise

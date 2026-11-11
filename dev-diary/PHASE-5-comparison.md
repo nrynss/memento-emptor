@@ -60,6 +60,8 @@ Arms 1 and 2 only, before any arm 3 run, to find out what a fair baseline does. 
 
 Worker notes (in-review): `bench/pilot/` carries the extraction rule (`pilot.go`, the T5.4 freeze input), the live driver (`cmd/drive`) and grader (`cmd/grade`), ten graded runs + scores, and the pilot record (`README.md` with the spend table). Arm 1: 0/5. Arm 2: 5/5 right-size, 0 wrong-cause — no shopper changes (thin n=1 signal; the baseline reasoned correctly; the lead is recorded as tokens + cites instead), with concrete hardening candidates for the freeze. Headline finding: the reference agent cannot drive the arms — its shopper_01 default contaminated 2/2 turns through it (kept as discarded evidence) — so the pilot measured through a neutral same-model instrument (`bench/pilot/agent/`, deployment left Running). No harness, grader, seed, or fixture file touched.
 
+Review (P5 E2E, round 1). The ten graded rows re-derive from the committed run files: recommended sizes, right-size, supported/cited, words and cost all match the table, and the ten trace costs sum to $0.016383, the pilot-attributable total to $0.085383. Two record defects found. (1) Low, fixed: the results paragraph said the size-changed pair left "the other six prose cites" and the no-hardening note said "7 of 9 arm-2 cites need human prose-mapping and resolve to non-fit rows"; the run files carry nine human-mapped cites, two of them supported, so seven resolve to non-fit rows and all nine needed the mapping step. Both sentences now state that. (2) Low, fixed by documenting it: every run file's `deployment` field reads `memento-agent`, even on the ten graded runs, because the frozen builder (`record.go`, `NewRunFile`) writes that constant. The provenance is the trace spans — `invoke_agent Pilot Baseline` on the graded ten, `invoke_agent Memento Agent` on the discarded pair — and `bench/pilot/README.md` now states what the field is and is not. No count changes.
+
 ---
 
 ### T5.4: Freeze ★
@@ -142,6 +144,8 @@ Arm 2 scored a perfect 15/15 on the current set by correct causal algebra over c
 
 Worker notes (in-review): `seed/seed.go` gains four builders under the same GoldenSeed 7, appended after the existing six so every existing transaction id is byte-identical (proven: `git status` shows no modification to existing history files). New shoppers: `cmp-noisy-small` (13 rows over 30 days, three too-small in M buried in changed-mind/vague/fraud/damage/lost-parcel/kept/fits-well noise, answer L), `cmp-noisy-large` (13 rows over 28 days, three too-large in M amid seller-fault/kept-colour/vague noise plus another brand's fits-well, answer S), `cmp-brands-steady` (candidate Brand Q kept M + fits-well M with nothing against it while Brand P runs small twice, answer M), `cmp-brands-split` (candidate Brand R runs large twice while Brand T runs small once beside a kept M, answer S). `TestHardenedShoppersAreFair` pins event-time order + session extent, 10-row/3-fit/0.3-coverage on the noisy pair, per-brand single-direction fit evidence on the multi-brand pair, and never-fit on every non-fit classified row. A throwaway perfect-reasoner check through the frozen grader (deleted before commit) scored all four right with 0 wrong-cause and decisive answers. FROZEN.md manifest amended 21 to 25 rows (4 new histories, re-pinned answers + seed.go) with a plain amendment note; `bench/freeze_check.sh` count 21 to 25 (owns-boundary, see report); `bench/grader/grader_test.go` shape pin 5 to 9 (owns-boundary, see report). `./tools/check.sh` green, freeze-check green, $0 spend.
 
+Review (P5 E2E, round 1). The freeze amendment checks out: the four new history hashes are appended, `answers.json` and `seed.go` are re-pinned, and the five original history rows keep the hashes they had before this commit (the `bench/FROZEN.md` diff at `3aeb829`). The two edits outside the task's `owns` — `bench/freeze_check.sh`'s row count 21 to 25 and `bench/grader/grader_test.go`'s hidden-answer shape pin 5 to 9 — are both correct against the amended manifest (25 rows in the block, nine answers, the count pin fails a 26-row edit). Finding: Low, owner: orchestrator. Both were disclosed in these notes rather than claimed silently, but rule 2 wants an owns extension or a follow-up task on the record; propose recording the extension beside T5.7, or minting a task that owns `bench/freeze_check.sh` and `bench/grader/grader_test.go` so a later manifest change has an owner.
+
 ---
 
 ### T5.8: Re-run on the hardened set
@@ -152,11 +156,13 @@ size:       M · frontier
 owns:       bench/runs/
 status:     done
 ```
-Re-run all three arms on the hardened shoppers only (repeat count per freeze), with the real `recall_forphurchase` + pending shape for arm 3, neutral instrument, cumulative $5 cap, publish-everything rule.
+Re-run all three arms on the hardened shoppers only (repeat count per freeze), with the real `recall_for_purchase` + pending shape for arm 3, neutral instrument, cumulative $5 cap, publish-everything rule.
 
 **Done when:** every hardened-shopper run is committed, complete, and verified against the amended freeze.
 
 Worker notes (in-review): 12/12 turns committed under `bench/runs/t58/` (4 hardened shoppers x 3 arms x 1) plus `scores.json` from the frozen grade command; freeze check green before the first turn and after the last. Driver `bench/runs/cmd/t58/` (run-record scaffolding only, T5.5 shape; cumulative cap counts prior T5.5 committed spend). Counts: arm 1 right-size 0/4 (clean refusals), arm 2 4/4 with 0 wrong-cause, arm 3 2/4 (both noisy-shopper Venerable beliefs recommend; both multi-brand Candidate beliefs refuse) with 0 wrong-cause. Spend $0.038 this task, ~$0.20 cumulative incl. pilot + T5.5, of $5.00. Full table, spend ledger and deviations in the task report. The two arm-3 run files that carry a belief, `t58-a3-noisy-large-r1.json` and `t58-a3-noisy-small-r1.json`, record its subject as `Kind`/`ID`/`Name`, because the driver marshals the served contract value directly and `domain.Subject` had no JSON tags when the runs were made; T7.6 added the tags, and those files stay as recorded rather than being rewritten to the tagged shape (T7.7: `bench/README.md`, "The round-1 recordings predate the subject tags").
+
+Review (P5 E2E, round 1). The 12 scores re-derive from the committed run files: the frozen grade command reproduces `bench/runs/t58/scores.json` byte for byte, and the counts above hold (arm 1 0/4, arm 2 4/4, arm 3 2/4, 0 wrong-cause, $0.038118 trace cost). One claim does not: in both multi-brand cells the served response is `"beliefs": []` with guidance "No recommendation yet: too little evidence" (`t58-a3-brands-split-r1.json`, `t58-a3-brands-steady-r1.json`), so no Candidate belief was served or refused — `recall_for_purchase` serves Candidate standing (`internal/api/server/recall.go`), so a Candidate belief would have shown in the response. The seeded history does hold two Brand R fit returns, so a belief should have existed; why recall served none is not in the record, because the t58 files carry the response but no settle note. `bench/README.md` gains a "Hardened set" section with the counts and this limit, and the "not built" hardening sentence there is gone. Finding: Medium, owner: a new `T5.8b` (owning `bench/runs/`) to re-run the two multi-brand arm-3 cells with the settle note and pre/post recall recorded, so the belief's standing at recall time is in the record; until then the record says the refusal happened and does not claim a cause.
 
 ---
 
@@ -174,12 +180,24 @@ Every shopper, every arm, one correction turn: after the arm's first recommendat
 
 Worker notes (in-review): 27/27 turns committed under `bench/runs/t59/` (one per cell, first turns reused byte-for-byte from the committed T5.5 r1 / T5.8 r1 files, never re-run) plus `t59-scores.json` from the new grade mode over the frozen grader; no frozen file touched, freeze check green, gate green. Driver `bench/runs/cmd/t59/` (drive + grade modes, T5.8 shape; uniform rule: effective-L → "Actually I take M now", everything else → "Actually I take L now", documented per run). Counts: corrections honoured 9/9 in every arm (27/27), wrong-cause 0 everywhere — corrections do not discriminate the arms; arm 2 honours corrections just as well as arm 3, stated plainly. The arms differ in mechanism, not outcome: arm 3 recorded a real `record_correction` in only 2/9 cells (the noisy pair, Venerable beliefs kept with standing + evidence intact, contradicted with the override beside them, correction-basis guidance — asserted in code per turn); in 7/9 cells recall served no belief so no `record_correction` call exists on the agent-visible surface and none was made (recorded per run; the correction travelled in conversation text only, like arm 1). One frozen-check false positive overruled with a recorded machine-verifiable exception (a3-noisy-large quotes its own live `corr_000001` from its prompt memory block). Spend: see handoff report (4 orphaned traces from platform stalls disclosed, all honoured, none graded). No new input files, so the freeze manifest gains no rows. The two arm-3 run files that carry a belief, `t59-a3-noisy-large.json` and `t59-a3-noisy-small.json`, record its subject as `Kind`/`ID`/`Name` for the same reason as T5.8's pair: the driver marshals the served contract value directly, and `domain.Subject` had no JSON tags when the runs were made. T7.7 leaves round 1 as frozen history and records the decision with its reason in `bench/README.md`; a re-run of this driver now emits `kind`/`id`/`name` and differs from those files in exactly that key casing.
 
+Review (P5 E2E, round 1). Re-derived from the committed files: 27 rows, `correction_honoured` true on all 27 (9 of 9 per arm), `wrong_cause` 0, `correction_recorded` true on exactly the two noisy arm-3 cells and false with `no_belief_reason` on the other seven, and every t59 first turn byte-identical to its `source_run_id` in prompt, reply and trace cost. The overruled contamination hit checks out mechanically: the only hit, `corr_`, appears three times in that turn's own second prompt, so it is a self-quote and not another shopper's memory. `bench/README.md`'s Corrections section now states it, so the one graded turn carrying `contaminated: true` is no longer left to the task report alone. The t59 driver's `secondPromptArm3` comment claimed "the same transcript tail as the other arms"; it now states the one wording that differs ("the layer memory above"), so behaviour and comment agree.
+
 ---
 
 ## Exit Criteria
 
-- [ ] The harness and grader work on fixtures (T5.1, T5.2).
-- [ ] The baseline was piloted before any arm 3 run (T5.3).
-- [ ] The set was frozen (T5.4).
-- [ ] All arms ran and are published (T5.5).
-- [ ] Results reported as counts, with limits (T5.6).
+- [x] The harness and grader work on fixtures (T5.1, T5.2).
+- [x] The baseline was piloted before any arm 3 run (T5.3).
+- [x] The set was frozen (T5.4).
+- [x] All arms ran and are published (T5.5).
+- [x] Results reported as counts, with limits (T5.6).
+
+Ticked by the P5 E2E review. The harness and grader tests are green in the
+gate (`bench/harness`, `bench/grader`), and both grader rules that carry a
+measure were mutation-checked (the fit-feedback branch and the wrong-cause
+exclusion each fail a named test when removed). The pilot's twelve run files
+name arms 1 and 2 only, and the freeze commit `b3bb59c` is an ancestor of the
+first arm-3 commit `8a34cd2`. `bench/freeze_check.sh` verifies the 25 rows and
+fails on a one-byte tamper (checked, restored). All three scores files
+reproduce byte for byte from the committed run files with the frozen grader
+(45 + 12 + 27 rows), and every count in `bench/README.md` re-derives from them.

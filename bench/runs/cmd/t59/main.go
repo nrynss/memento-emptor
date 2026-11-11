@@ -1655,7 +1655,10 @@ func secondPromptPlain(firstPrompt, firstReply, corrText string) string {
 
 // secondPromptArm3 builds the arm-3 correction message: the frozen base
 // section plus the memory block rendered from the post-correction recall
-// served live, then the same transcript tail as the other arms.
+// served live, then the same correction and re-ask tail as the other arms.
+// The tail differs in one wording: the quoted line names the rebuilt layer
+// memory ("in reply to the layer memory above") where arms 1 and 2 say "in
+// reply to the above", because their memory block is the reused first prompt.
 func secondPromptArm3(history seed.History, post arm3Memory, firstReply, corrText string) string {
 	brandID, _, err := brandForRecall(history)
 	if err != nil {

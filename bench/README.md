@@ -14,6 +14,10 @@ No arm read the hidden answers. The grader (`bench/grader/`) scored each run
 against them after the fact. No hidden-answer rationale text is quoted
 anywhere in this document — only the already-published right/wrong tallies.
 
+The hardened set (see "Hardened set" below) adds four shoppers and one live
+turn per cell; its counts carry the same limit and are never folded into the
+15-turn figures in this document.
+
 ## Round 1, relabelled
 
 The round 1 arm this document called "raw history" is **Memento evidence
@@ -187,6 +191,43 @@ run files carry `prompt_words` + `reply_words` for the same turn. The ~5x
 live-BPE factor from the freeze record applies equally to all arms, so
 cross-arm token comparisons hold on the frozen basis.
 
+## Hardened set (T5.7, T5.8)
+
+T5.7 added four shoppers to separate the arms where the frozen five could
+not: two long, noisy histories (`cmp-noisy-small`, hidden answer L;
+`cmp-noisy-large`, hidden answer S) and two multi-brand histories
+(`cmp-brands-steady`, answer M; `cmp-brands-split`, answer S). T5.8 ran one
+live turn per shopper per arm on them, 12 turns, all committed under
+`bench/runs/t58/` with scores in `bench/runs/t58/scores.json`. One turn per
+cell, so these are counts over four cells, not a rate.
+
+| Arm | Right size | Wrong-cause | Supported / cited | Tokens (words, 4 runs) |
+|---|---|---|---|---|
+| 1 — no memory | 0 of 4 | 0 | 0 of 0 | 349 |
+| 2 — Memento evidence without beliefs | 4 of 4 | 0 | 9 of 10 | 2221 |
+| 3 — Memento layer | 2 of 4 | 0 | 6 of 6 | 1157 |
+
+Arm 2 kept its lead: 4 of 4, and 9 of its 10 cites resolve to fit rows. Arm 1
+recommended nothing in any cell. Arm 3 recommended in the two noisy cells
+only, from an Earned/Venerable fit belief with three evidence rows. In both
+multi-brand cells the recall response served `"beliefs": []` with the
+guidance "No recommendation yet: too little evidence", and the reply declined
+because of it (`t58-a3-brands-split-r1.json`, `t58-a3-brands-steady-r1.json`).
+
+Those two arm-3 cells carry a limit the counts do not show. The split
+shopper's history holds two Brand R fit returns, which the recorded promotion
+table (`dev-diary/research/lambo.md`: Candidate at dependents from two other
+interactions) treats as enough to serve, yet the response came back empty.
+The steady shopper's Brand Q evidence is one fits-well feedback, which may sit
+below that bar by design. Why nothing was served is not in the record: the
+T5.8 run files carry the served response but no settle note, unlike T5.9's, so
+the belief's standing at recall time cannot be read back. The phase record's
+summary said "Candidate beliefs refuse"; the files do not show that state —
+`recall_for_purchase` serves Candidate standing
+(`internal/api/server/recall.go`), so a Candidate belief would have appeared
+in the response. What the two cells prove is that arm 3 refused when recall
+served nothing; what they do not prove is anything about cross-brand evidence.
+
 ## Corrections
 
 T5.9 added one correction turn to every cell after the T5.5 and T5.8 sweeps: 9
@@ -218,6 +259,15 @@ every correction, so corrections did not discriminate the arms: this round
 shows a stated preference is followed on the next turn, not that any arm
 handles corrections better.
 
+One graded turn tripped the frozen contamination check, which fires on any
+demo-shopper token: `t59-a3-noisy-large` quotes its own session's
+`corr_000001`, served in that turn's prompt memory block. Its score row
+carries `contaminated: true` and `contamination_overruled: true`, and the
+run is graded because the driver's overrule requires every hit to appear
+verbatim in the turn's own prompt — it does, three times — so the reply read
+this shopper's memory, not the demo shopper's. The run file records the hits
+and the note. No other turn in the 27 was flagged.
+
 ## What this does and does not prove
 
 Proves on these constructed cases: the refusal mechanism works as designed —
@@ -233,10 +283,11 @@ correction handling beyond one stated correction on the next turn (T5.9's 27
 turns are in Corrections; a correction to anything other than a size, one
 arriving before a recommendation, or one in a longer conversation, is
 unmeasured); citation quality at scale (arm-2 cites are mostly human-mapped
-prose, and 34 of 40 resolve to non-fit rows); behavior on long histories where
-signal drowns in noise or on multi-brand histories (recorded as hardening
-candidates in the freeze, not built); anything about cost beyond the recorded
-trace spend.
+prose, and 34 of 40 resolve to non-fit rows); behavior on long noisy
+histories or on multi-brand histories beyond the four T5.7 shoppers and one
+turn per cell (see "Hardened set"), whose two multi-brand arm-3 cells served
+no belief and so show a refusal, not cross-brand cut matching; anything about
+cost beyond the recorded trace spend.
 
 ## Candidate lead numbers (the user picks one — none is chosen here)
 
@@ -274,3 +325,10 @@ for (arm, shop) in sorted(by):
 Frozen hashes still verify via `bench/freeze_check.sh` (run from
 `./tools/check.sh`); the 45 run files it does not cover are the T5.5-published
 measurement this document reports.
+
+The hardened set and the correction round keep their own scores files,
+`bench/runs/t58/scores.json` and `bench/runs/t59/t59-scores.json`, with the
+correction and belief columns added, so the snippet above covers the 45-turn
+figures only. Both reproduce offline: the t58 set through the frozen grade
+command against a copy of the directory, the t59 set through the t59 driver's
+own grade mode (`-mode grade`), which reads no key and spends nothing.
