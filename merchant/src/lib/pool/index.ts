@@ -28,6 +28,7 @@ export type {
 	DirectionCountsView,
 	FitDirection,
 	PoolCountsView,
+	PoolPrecedenceView,
 	PoolStatus,
 	PoolView,
 	ProductFitRequest,

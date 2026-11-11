@@ -8,6 +8,7 @@ import type {
 	DirectionCountsView,
 	FitDirection,
 	PoolCountsView,
+	PoolPrecedenceView,
 	PoolStatus,
 	PoolView,
 	ProductFitResponse,
@@ -119,9 +120,29 @@ function decodeCounts(value: unknown, what: string): PoolCountsView {
 	};
 }
 
+/** Decodes the pool precedence: required on the wire, null on product_fit. */
+function decodePoolPrecedence(value: unknown): PoolPrecedenceView | null {
+	if (value === null || value === undefined) return null;
+	if (!isRecord(value)) fail('pool precedence');
+	const step = value['step'];
+	const overriddenBy = value['overridden_by'];
+	const steps: readonly string[] = ['correction', 'own_evidence', 'pool', 'statement', 'none'];
+	if (typeof step !== 'string' || !steps.includes(step)) fail('pool precedence step');
+	if (typeof value['overridden'] !== 'boolean') fail('pool precedence flag');
+	if (overriddenBy !== null && (typeof overriddenBy !== 'string' || !steps.includes(overriddenBy))) {
+		fail('pool precedence winner');
+	}
+	return {
+		step: step as PoolPrecedenceView['step'],
+		overridden: value['overridden'] as boolean,
+		overridden_by: overriddenBy as PoolPrecedenceView['overridden_by']
+	};
+}
+
 /** Decodes one pooled product-fit belief: counts, never identities. */
 export function decodePool(value: unknown): PoolView {
 	if (!isRecord(value)) fail('pool');
+	if (!('precedence' in value)) fail('pool precedence');
 	const direction = value['direction'];
 	if (direction !== null && (typeof direction !== 'string' || !isFitDirection(direction))) {
 		fail('pool direction');
@@ -134,7 +155,8 @@ export function decodePool(value: unknown): PoolView {
 		counts: decodeCounts(value['counts'], 'counts'),
 		seeded: decodeCounts(value['seeded'], 'seeded'),
 		live: decodeCounts(value['live'], 'live'),
-		recent: decodeCounts(value['recent'], 'recent')
+		recent: decodeCounts(value['recent'], 'recent'),
+		precedence: decodePoolPrecedence(value['precedence'])
 	};
 }
 

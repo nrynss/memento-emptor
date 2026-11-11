@@ -269,6 +269,27 @@ Three things the next agent should not have to rediscover:
 
 ---
 
+### T9.3f: Merchant reads the tightened contract
+```yaml
+requires:   [T7.4]
+fixture-ok: yes
+size:       S · mid
+owns:       merchant/
+status:     in-review
+```
+T7.4 requires the pivot pool `precedence`, but merchant's `decodePool` dropped it, so the decoded Earned demo oxford no longer equalled the frozen snapshot. Carry the required pool `precedence` through `decode.ts` + `types.ts` the way T9.2b did for web. One-test fix; no contract change.
+
+**Done when:** the failing snapshot test passes; the gate passes.
+
+**Notes (worker).** `PoolView` gains `precedence: PoolPrecedenceView | null` (required, null on `product_fit`), with the new `PoolPrecedenceView` mirroring web's `web/src/lib/ledger/pool.ts` step union; `decodePool` requires the key and `decodePoolPrecedence` returns null for the null wire value while rejecting a misshapen one. `makeRow` in `fixture.ts` takes `Omit<PoolView, 'precedence'>` and injects `precedence: null`, so the five hand-built rows round-trip through the decoder unchanged. `index.ts` re-exports the new type. The snapshot test passes unmodified, and merchant is green (8 files, 45 tests, svelte-check, eslint).
+
+Two things the next agent should not have to rediscover:
+
+- The merchant `precedence` decoder deliberately matches web's semantics (missing key fails, null decodes to null) rather than the old merchant behaviour of silently dropping the field; a future non-null pool precedence decodes without further changes.
+- `makeRow` round-trips every hand-built row through `decodeProductFitResponse`, so any future required pool field needs no new fixture edits beyond the `Omit` line — but the decoded row must still satisfy `decidePool`'s re-decision check in `pool.test.ts`.
+
+---
+
 ### T9.7: The demo, after the pivot ★
 ```yaml
 requires:   [T9.2, T9.3d, T9.5, T9.6]

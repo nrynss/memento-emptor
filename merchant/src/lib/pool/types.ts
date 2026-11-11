@@ -63,6 +63,16 @@ export interface PoolCountsView {
 }
 
 /**
+ * Which precedence step a pool came from, and whether a stronger step won.
+ * On a product_fit read the pool stands alone, so it is always null.
+ */
+export interface PoolPrecedenceView {
+	step: 'correction' | 'own_evidence' | 'pool' | 'statement' | 'none';
+	overridden: boolean;
+	overridden_by: 'correction' | 'own_evidence' | 'pool' | 'statement' | 'none' | null;
+}
+
+/**
  * The pooled product-fit belief for one product line and one size: its
  * label, the direction it rates, and the settled counts behind it. It
  * carries no shopper identity, no row and no free text.
@@ -76,6 +86,7 @@ export interface PoolView {
 	seeded: PoolCountsView;
 	live: PoolCountsView;
 	recent: PoolCountsView;
+	precedence: PoolPrecedenceView | null;
 }
 
 /** Asks for the pooled fit of one product line and size. */

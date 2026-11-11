@@ -27,8 +27,8 @@ function zeroCounts(): ProductFitResponse['pool']['counts'] {
 }
 
 /** One hand-built fixture row: the served status matches the rule's decide. */
-function makeRow(pool: PoolView): ProductFitResponse {
-	return decodeProductFitResponse({ pool });
+function makeRow(pool: Omit<PoolView, 'precedence'>): ProductFitResponse {
+	return decodeProductFitResponse({ pool: { ...pool, precedence: null } });
 }
 
 /** The L size of the demo oxford: Building, rating large. */
