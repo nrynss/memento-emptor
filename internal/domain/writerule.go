@@ -68,7 +68,10 @@ var ErrUnknownSignal = errors.New("domain: unknown signal")
 
 // WriteFor maps each signal to its write operation. Statements never
 // promote: only a classified outcome or feedback tied to a transaction
-// is a structural write.
+// is a structural write. The shopper's correction is a structural write
+// so it can declare against the belief, and the writer cites it there,
+// never in depends_on: it overrides, but it adds no evidence and
+// promotes nothing.
 func WriteFor(s Signal) (WriteOp, error) {
 	switch s {
 	case SignalClassifiedOutcome, SignalFitFeedback, SignalCorrection:

@@ -1,6 +1,7 @@
 package contract
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -438,6 +439,116 @@ func TestExamplesMatchGoTypes(t *testing.T) {
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(target); err != nil {
 			t.Errorf("%s does not match its Go type: %v", name, err)
+		}
+	}
+}
+
+// wireSubjectKeys renames the frozen domain.Subject's Go field names to the
+// wire's lowercase kind, id and name. The subject type carries no JSON tags
+// and contracts freeze at the end of P1, so this is the one key-name
+// difference the gate forgives: the served layer normalises it in
+// marshalResponse, and the replay's comparison normalises it too. Every
+// other difference a marshal introduces fails the build.
+func wireSubjectKeys(node any) {
+	switch current := node.(type) {
+	case map[string]any:
+		for key, value := range current {
+			if key == "subject" {
+				if obj, ok := value.(map[string]any); ok {
+					for _, field := range []string{"Kind", "ID", "Name"} {
+						if value, present := obj[field]; present {
+							delete(obj, field)
+							obj[strings.ToLower(field)] = value
+						}
+					}
+				}
+			}
+			wireSubjectKeys(value)
+		}
+	case []any:
+		for _, value := range current {
+			wireSubjectKeys(value)
+		}
+	}
+}
+
+// TestExamplesMarshalBackToSchema closes the gate's other direction: it
+// unmarshals every example into its Go wire type, marshals it back, and
+// validates the result against the same schema. Unmarshalling alone cannot
+// see a field that serialises under another key or disappears; this can,
+// except for the frozen subject keys, which are normalised first.
+func TestExamplesMarshalBackToSchema(t *testing.T) {
+	dir := apiDir(t)
+	validator := &schemaValidator{dir: dir, cache: map[string]any{}}
+	for _, name := range exampleFiles(t, dir) {
+		target, ok := goValueFor(name)
+		if !ok {
+			t.Errorf("%s: no Go wire type", name)
+			continue
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, name))
+		if err != nil {
+			t.Errorf("read %s: %v", name, err)
+			continue
+		}
+		decoder := json.NewDecoder(bytes.NewReader(raw))
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(target); err != nil {
+			t.Errorf("%s does not match its Go type: %v", name, err)
+			continue
+		}
+		encoded, err := json.Marshal(target)
+		if err != nil {
+			t.Errorf("%s does not marshal: %v", name, err)
+			continue
+		}
+		var value any
+		if err := json.Unmarshal(encoded, &value); err != nil {
+			t.Errorf("%s marshaled to invalid JSON: %v", name, err)
+			continue
+		}
+		wireSubjectKeys(value)
+		schemaName, ok := schemaForExample(name)
+		if !ok {
+			t.Errorf("%s: cannot map example to schema", name)
+			continue
+		}
+		schema := loadJSON(t, filepath.Join(dir, schemaName))
+		if failures := validator.validate(schema, value, "$"); len(failures) > 0 {
+			t.Errorf("%s marshals to a shape %s rejects:\n  %s", name, schemaName, strings.Join(failures, "\n  "))
+		}
+	}
+}
+
+// TestEveryToolHasExamples pins the surface's mutual coverage: every frozen
+// tool has at least one request example and one response example in
+// testdata/api, not only the two schema files TestToolsFrozen checks. A
+// descriptor whose examples were dropped would otherwise pass.
+func TestEveryToolHasExamples(t *testing.T) {
+	dir := apiDir(t)
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("read %s: %v", dir, err)
+	}
+	names := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			names = append(names, entry.Name())
+		}
+	}
+	for _, tool := range Tools() {
+		for _, schema := range []string{tool.RequestSchema, tool.ResponseSchema} {
+			base := strings.TrimSuffix(schema, ".schema.json")
+			found := false
+			for _, name := range names {
+				if strings.HasPrefix(name, base+".example") {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("tool %q has no example for %s", tool.Name, base)
+			}
 		}
 	}
 }

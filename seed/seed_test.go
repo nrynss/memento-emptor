@@ -60,6 +60,56 @@ func TestGoldenFixturesMatchTheGenerator(t *testing.T) {
 		t.Errorf("hidden answers fixture does not match Generate(%d); rerun with UPDATE_SEED_FIXTURES=1", GoldenSeed)
 	}
 }
+
+// compareDirs fails unless two directories hold the same file names with
+// byte-identical contents.
+func compareDirs(t *testing.T, got, want string) {
+	t.Helper()
+	gotEntries, err := os.ReadDir(got)
+	if err != nil {
+		t.Fatalf("read %s: %v", got, err)
+	}
+	wantEntries, err := os.ReadDir(want)
+	if err != nil {
+		t.Fatalf("read %s: %v", want, err)
+	}
+	if len(gotEntries) != len(wantEntries) {
+		t.Fatalf("%s holds %d files, %s holds %d", got, len(gotEntries), want, len(wantEntries))
+	}
+	for i, entry := range wantEntries {
+		if gotEntries[i].Name() != entry.Name() {
+			t.Fatalf("%s names %q where %s names %q", got, gotEntries[i].Name(), want, entry.Name())
+		}
+		gotRaw, err := os.ReadFile(filepath.Join(got, entry.Name()))
+		if err != nil {
+			t.Fatalf("read %s/%s: %v", got, entry.Name(), err)
+		}
+		wantRaw, err := os.ReadFile(filepath.Join(want, entry.Name()))
+		if err != nil {
+			t.Fatalf("read %s/%s: %v", want, entry.Name(), err)
+		}
+		if !bytes.Equal(gotRaw, wantRaw) {
+			t.Errorf("%s/%s differs byte-for-byte from %s/%s", got, entry.Name(), want, entry.Name())
+		}
+	}
+}
+
+// TestWriteReproducesGoldenFixtures proves the writer, not only the
+// encoder: two generations into fresh directories are byte-identical to
+// each other and to the committed fixtures, with the same file names.
+func TestWriteReproducesGoldenFixtures(t *testing.T) {
+	first, second := t.TempDir(), t.TempDir()
+	for _, dir := range []string{first, second} {
+		if err := Write(context.Background(), filepath.Join(dir, "histories"), filepath.Join(dir, "hidden"), GoldenSeed); err != nil {
+			t.Fatalf("write golden bundle to %s: %v", dir, err)
+		}
+	}
+	compareDirs(t, filepath.Join(first, "histories"), historiesDir)
+	compareDirs(t, filepath.Join(first, "hidden"), hiddenDir)
+	compareDirs(t, filepath.Join(second, "histories"), filepath.Join(first, "histories"))
+	compareDirs(t, filepath.Join(second, "hidden"), filepath.Join(first, "hidden"))
+}
+
 func TestGenerateIsDeterministic(t *testing.T) {
 	first, second := Generate(GoldenSeed), Generate(GoldenSeed)
 	a, _, err := marshalBundle(first)

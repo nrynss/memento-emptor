@@ -45,6 +45,14 @@ owns:       internal/api/contract/, docs/interface.md
 status:     done
 ```
 
+Final names and schemas for the proposed surface in product.md: `recall_for_purchase`, `record_correction`, `pending_questions`, `record_reason`, `record_feedback`, `explain_belief`. Served over MCP, so that any agent on PayPal's toolkit can call them, and shaped so that T0.8's findings on Astropods work.
+
+The contract `recall_for_purchase` must honour: beliefs that apply, each with its status and evidence, and any correction that overrides them, marked so that an agent cannot read the belief without seeing the override. The ledger's read endpoints are defined here too.
+
+`docs/interface.md` is written for the audience, a developer building on PayPal's Agent Toolkit: what to call, when, and what comes back.
+
+**Done when:** every call has a schema, an example request and an example response in `testdata/api/`; the document's examples validate against the schemas in the gate.
+
 Notes (T1.2, in-review): `internal/api/contract/` holds the frozen wire
 types, the nine MCP tool descriptors, and the gate test: a focused schema
 checker proving every example in `testdata/api/` validates, every example
@@ -54,13 +62,12 @@ twenty examples cover the six layer calls and three ledger reads on one
 consistent shopper state. Recall carries both the ledger status and the
 underlying standing with the warning inline, plus the correction twice.
 Full gate result in the report.
-Final names and schemas for the proposed surface in product.md: `recall_for_purchase`, `record_correction`, `pending_questions`, `record_reason`, `record_feedback`, `explain_belief`. Served over MCP, so that any agent on PayPal's toolkit can call them, and shaped so that T0.8's findings on Astropods work.
 
-The contract `recall_for_purchase` must honour: beliefs that apply, each with its status and evidence, and any correction that overrides them, marked so that an agent cannot read the belief without seeing the override. The ledger's read endpoints are defined here too.
-
-`docs/interface.md` is written for the audience, a developer building on PayPal's Agent Toolkit: what to call, when, and what comes back.
-
-**Done when:** every call has a schema, an example request and an example response in `testdata/api/`; the document's examples validate against the schemas in the gate.
+Superseded by the pivot (T7.1, T7.4), which the phase-7 notes carry: the
+frozen surface is now eleven tools (eight layer calls and three ledger
+reads), 23 schema files and 33 examples. `product_fit` and `set_pooling`
+are part of it, the pool and per-item `precedence` are required, and the
+document's blocks are byte-pinned.
 
 ---
 

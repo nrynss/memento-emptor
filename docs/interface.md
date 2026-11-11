@@ -22,13 +22,15 @@ reads. Discover them with `tools/list`; call them with `tools/call`.
 Shopper calls are scoped to one shopper by `shopper_id`. Sessions isolate
 shoppers, so one shopper's beliefs never leak into another's recall.
 
-Reads (`recall_for_purchase`, `explain_belief`, `product_fit`, the three
-`ledger_*` reads) take no trace id. Writes (`record_correction`,
-`record_reason`, `record_feedback`, `set_pooling`) take an optional
-`trace_id`: pass the host trace for the turn, so per-trace review can show
-which turn recorded what. The response echoes it back. The reference host
-records feedback per trace and attaches traces of interest as dataset
-items; the trace id is the join between a write and the turn that made it.
+Reads (`explain_belief`, `product_fit`, the three
+`ledger_*` reads) take no trace id. `recall_for_purchase` is a read and
+accepts one: pass the turn's trace with it, so the trace shows recall ran
+before the recommendation. Writes (`record_correction`, `record_reason`,
+`record_feedback`, `set_pooling`) take an optional `trace_id`: pass the
+host trace for the turn, so per-trace review can show which turn recorded
+what. The response echoes it back. The reference host records feedback
+per trace and attaches traces of interest as dataset items; the trace id
+is the join between a write and the turn that made it.
 
 `product_fit` is the merchant's read. It is the only pooled read the
 merchant app is given, and it carries no shopper identity, no purchase row
@@ -677,6 +679,13 @@ carries `contradicts_belief_id` and the belief carries `contradicted_by`,
 exactly like a correction recorded against an existing belief. A second
 matching belief does not re-declare it. The belief is never deleted.
 
+If a matching belief already exists when you send the correction without
+`contradicts_belief_id`, the layer declares the correction against that
+belief at once: read the response's `belief_id` and `contradicted` rather
+than assuming the standing shape. When two beliefs share the subject, the
+strongest one (most evidence, then earliest, then smallest id) is the one
+declared against, chosen deterministically rather than by map order.
+
 ## product_fit
 
 The merchant's read, and the only one it is given. For one product line
@@ -901,6 +910,18 @@ too-small returns of the last 90 days:
   }
 }
 ```
+
+## set_pooling
+
+Call it when the shopper asks to be left out of the pool, or to opt back
+in. Pooling is opt-out: a shopper's classified outcomes count toward the
+pool unless they say no. Opting out stops new fit rows for that shopper
+and removes the rows already written; the response says how many. Opting
+back in removes none. The choice is recorded in the shopper's own memory,
+so it reaches every agent that plugs into the same layer.
+
+Request. Opting out:
+
 ```json validate=set_pooling.request.example
 {
   "shopper_id": "shopper_01",
@@ -931,9 +952,8 @@ Opting back in:
 }
 ```
 
-The choice is recorded in the shopper's own memory, so it reaches every
-agent that plugs into the same layer. A correction is about the shopper,
-not the product, and never enters the pool.
+A correction is about the shopper, not the product, and never enters the
+pool.
 
 ## pending_questions
 
@@ -1518,7 +1538,8 @@ How a signal is written:
 
 | Signal | Write | Promotes |
 |---|---|---|
-| Classified return or dispute, fit feedback, correction | record_action | yes |
+| Classified return or dispute, fit feedback | record_action | yes |
+| The shopper's correction | record_action, citing the belief in `against` only | never: it overrides, it adds no evidence |
 | General statement | derive | never |
 | Kept past the window, no feedback | observe | never |
 
