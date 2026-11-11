@@ -188,6 +188,20 @@ describe("the 30-turn cap", () => {
     assert.equal(decideChatTurn({ messages: [userTurn("last")] }, budget).kind, "exhausted");
   });
 
+  it("refuses a malformed body as invalid even when the budget is spent", () => {
+    const budget = createTurnBudget();
+    for (let i = 0; i < MAX_TURNS; i += 1) {
+      assert.equal(decideChatTurn({ messages: [userTurn(`turn ${i}`)] }, budget).kind, "turn");
+    }
+
+    // The order is the guard: shape first, budget second, so a malformed body
+    // is reported as malformed and never borrows the cap's refusal.
+    const malformed = decideChatTurn({ messages: [assistantTurn("reply")] }, budget);
+    assert.equal(malformed.kind, "invalid");
+    assert.match(malformed.error, /last message must be from the user/);
+    assert.equal(budget.used(), MAX_TURNS, "a malformed body costs no turn, spent or not");
+  });
+
   it("keeps budgets independent, so a fresh container starts full", () => {
     const first = createTurnBudget();
     for (let i = 0; i < MAX_TURNS; i += 1) first.take();
