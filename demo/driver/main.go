@@ -583,10 +583,32 @@ func main() {
 	if err != nil {
 		fail(err)
 	}
-	if len(recall.Beliefs) != 0 || recall.Guidance.Basis != contract.GuidanceNone {
-		fail(fmt.Errorf("one return earns nothing, recall serves %d beliefs", len(recall.Beliefs)))
+	// One return is thin evidence, and recall never withholds it: the
+	// belief comes back with its Claimed label, its one row and the
+	// own-evidence step that decides, so the agent shows the shopper how
+	// sure the layer is instead of being told nothing.
+	if len(recall.Beliefs) != 1 {
+		fail(fmt.Errorf("one return serves %d beliefs, want the 1 thin fit belief", len(recall.Beliefs)))
 	}
-	say("recall after one return: no belief, no guidance (vote 1 of 3)")
+	thin := recall.Beliefs[0]
+	if thin.Status != domain.StatusClaimed || thin.Standing != domain.GraphNone {
+		fail(fmt.Errorf("one return reads %q/%q, want Claimed/None: thin evidence is labelled, not withheld",
+			thin.Status, thin.Standing))
+	}
+	if len(thin.Evidence) != 1 {
+		fail(fmt.Errorf("one return carries %d evidence rows, want its one", len(thin.Evidence)))
+	}
+	if thin.Evidence[0].Reason == nil || thin.Evidence[0].Reason.Category != domain.CategoryFitTooSmall {
+		fail(fmt.Errorf("one return's row reads %+v, want the too-small return", thin.Evidence[0].Reason))
+	}
+	if thin.Precedence == nil || thin.Precedence.Step != contract.GuidanceOwnEvidence || thin.Precedence.Overridden {
+		fail(fmt.Errorf("one return precedence %+v, want the deciding own-evidence step", thin.Precedence))
+	}
+	if recall.Guidance.Basis != contract.GuidanceOwnEvidence || recall.Guidance.Text != "Take size L for Brand X" {
+		fail(fmt.Errorf("one-return guidance %+v, want own evidence toward size L", recall.Guidance))
+	}
+	say("recall after one return: %s/%s, 1 row, guidance %q (vote 1 of 3)",
+		thin.Status, thin.Standing, recall.Guidance.Text)
 	answer("WH-2EV-02", "the sleeves are way too short and I can't button it")
 	third := answer("WH-2EV-03", "sleeves too short in M")
 	if !third.Accepted || third.Category != domain.CategoryFitTooSmall {
@@ -883,10 +905,18 @@ func main() {
 	if err != nil {
 		fail(err)
 	}
-	if len(final.Beliefs) != 1 || final.Beliefs[0].BeliefID != sizingID {
-		fail(fmt.Errorf("feedback grew a rival belief"))
+	if len(final.Beliefs) != 2 || final.Beliefs[0].BeliefID != sizingID {
+		fail(fmt.Errorf("final recall serves %d beliefs, want the sizing belief first and the fits-well feedback beside it",
+			len(final.Beliefs)))
 	}
-	say("STEP 4 DONE: fits-well feedback tied to the live purchase; recall still serves the earned sizing belief")
+	// The feedback grew a belief with one row. Recall serves it with its
+	// label rather than holding it back, ranked after the sizing belief.
+	rival := final.Beliefs[1]
+	if rival.Status != domain.StatusClaimed || len(rival.Evidence) != 1 {
+		fail(fmt.Errorf("fits-well belief reads %q with %d rows, want Claimed with its one: thin evidence is served",
+			rival.Status, len(rival.Evidence)))
+	}
+	say("STEP 4 DONE: fits-well feedback tied to the live purchase; recall serves the earned sizing belief and the Claimed fits-well one beside it")
 
 	say("=== step 5 (live): the never-arrived dispute counts seller-only ===")
 	d6, err := findDelivery(deliveries, "t13b-demo-006", "CUSTOMER.DISPUTE.CREATED")

@@ -832,11 +832,19 @@ requires:   [T8.5i]
 fixture-ok: yes
 size:       XS · mid
 owns:       demo/driver/
-status:     claimed:t85t-demo-driver
+status:     in-review
 ```
 `demo/driver/main.go` pins the old withholding at its one-return step ("one return earns nothing…") and its final recall ("feedback grew a rival belief"), so it would fail against the served layer after T8.5i. Update the driver's assertions to the served thin belief, and keep `demo/run.py`'s evidence expectations consistent.
 
 **Done when:** the demo driver's one-return and final-recall steps assert the served shape; the gate passes.
+
+**Notes (in-review).** The one-return step now asserts the served shape T8.5i pinned: exactly one belief, Claimed/None (a label, never a gate), its one evidence row carrying the too-small reason, the `own_evidence` precedence step deciding and not overridden, and the guidance the driver's no-pool wiring produces — basis `own_evidence`, text "Take size L for Brand X". Its transcript line states the label and the sentence instead of "no belief, no guidance". The final recall after the fits-well feedback asserts two beliefs: the earned sizing belief first by its id, and the feedback's belief beside it, Claimed with its one row, ranked after the three-return belief. The old "feedback grew a rival belief" failure is gone.
+
+`demo/run.py` already reads the served shape: it selects beliefs by id (`blf_8f2c41`, `blf_2b9d60`, `blf_1a5e09`) and records every served belief's precedence, so a thin belief beside them is recorded rather than tripping a count assertion. It needed no change, which is as well because it sits outside this task's `owns`.
+
+No live call was made (the driver needs the hub binary, the deployment URL and keys). Proof without one: a temporary in-package test in `demo/driver/`, deleted before the commit, built the driver's service wiring on the fakes (no pool, the recording classifier and graph) and ran the new assertions verbatim — one return reads Claimed/None with 1 row and guidance "Take size L for Brand X"; the final recall serves the sizing belief then the Claimed fits-well belief with 1 row, guidance "Take size M for Brand X". The one-return line prints status and guidance but no belief id: that id is the sizing id, redacted only after the third answer, so printing it earlier would put it in the transcript unscrubbed.
+
+Gate green after `npm ci` in `web/` and `merchant/`, ending `OK all checks passed`. Spend $0.00: no live call, no key.
 
 ---
 
