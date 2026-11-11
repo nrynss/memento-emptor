@@ -910,11 +910,23 @@ requires:   [T8.2b]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/fitindex/
-status:     claimed:t82c-transcript
+status:     in-review
 ```
 The P8 review found T8.2b's step-3 transcript line (`version=3001794233529 state=refunded settled=false`) cannot come from the committed driver: it prints a form `docSource.String` never emits, and a refunded document at the reason-classified rank, which no refund write can carry. The three versions the notes rest on do re-derive; only provenance is wrong. Re-run the driver so the transcript is real, or record the correction in the handoff if a run is not worth the churn.
 
 **Done when:** a real transcript (or an honest correction of the note) is recorded; test indices are erased; spend recorded.
+
+**Notes (in-review).** Re-ran the committed driver unchanged — `source tools/env.sh`, then `bash tests/live/fitindex/run.sh` — against the live deployment. The full verbatim transcript is this task's handoff-log entry, and the git-ignored `tests/live/fitindex/out/transcript.txt`. Everything T8.2b's notes claim holds on the real output: `captured` at `1001794233521`; `refunded` at `2001794233529` with both times and no settlement; the replay before the reason printing the unchanged row at `2001794233529` — the disputed line reads in full `version=2001794233529 state=refunded settled=false kind=- reason=- direction=- verdict=- contested=false seeded=false captured_at=2026-11-09T14:12:01Z refunded_at=2026-11-09T14:12:09Z settled_at=- line=brand-x-001/shirts/regular size=M`; `reason_classified` at `3001794234729` settled by `return_reason`/`fit_too_small`/`too_small`; the retried refund and capture fit writes and the restarted writer all leaving that row; the direct older write answered `409 version_conflict_engine_exception: [<txn hash>]: version conflict, current version [3001794234729] is higher than the one provided [1001794233521]`; and one document for the purchase, one for the shopper line, one in the index. The `t82b-` listing was `[]` before the run and `[]` after it; `DELETE /t82b-fit-rows` answered `200 {"acknowledged":true}`; the driver's cleanup check, `run.sh`'s empty-prefix check and its leak check all passed. Spend: $0 model (the answer and its category are recorded, no classifier call), one kilobyte-scale index on the existing project.
+
+The review's finding undercounted the drift: the old block was not this driver's output at any commit. `tests/live/fitindex/main.go` has one commit and has never been edited since, so the block could not have been stale output either — it was written by hand around the driver's steps. Four of its `doc` lines use the short `version=… state=… settled=…` form that `docSource.String` never prints (steps 3, 5, 6 and 7); step 1 said `pending question filed` where the driver prints `pending question=false` (a capture files no question); step 8 dropped the conflict's `[<txn hash>]: version conflict,` prefix and its `the one provided`; step 9 said `docs for the line` where the driver prints `docs for the shopper line`; the `== states and versions` block was missing; and the two spend lines were reworded. Only step 3's version is wrong as a value: `3001794233529` is the reason-classified rank carrying the refund's time, which no refund write can produce. Every version T8.2b's notes rest on re-derives, so the substance stood and only the transcript is replaced.
+
+Three things the next agent should not have to rediscover:
+
+- A pasted transcript is not evidence. Re-run instead: the driver is unchanged, `run.sh` tees to `out/`, and the whole run is one index and a handful of writes.
+- The step-1 delivery answer prints `pending question=false`, not a filed question: the refund is what files it. A transcript line claiming otherwise is a hand-written one, and this is the cheapest way to spot the rest.
+- The `409`'s reason carries the transaction hash in brackets before the versions, so a transcript that shows only the versions did not come from the index's answer.
+
+The dev-diary report's transcript is the handoff log entry; it is not committed here.
 
 ---
 
