@@ -26,13 +26,14 @@ var ErrPoolUnavailable = errors.New("server: pool index unavailable")
 // belief is unrepresentable without its override: when one applies and no
 // correction carries it, assembly fails instead of serving the belief
 // alone. A present pool rides with a consulted lookup; an absent pool rides
-// with whatever the lookup says — none when the pool is unwired or the
-// request names no full line, consulted when the wired pool answered empty
-// (Claimed), unavailable when the index could not be reached — so a
+// with whatever the lookup says — unavailable when the pool is unwired,
+// the request names no full line, or the index could not be reached,
+// consulted when the wired pool answered empty (Claimed) — so a
 // full-line recall on an empty line serves the consulted lookup instead of
-// failing. Every handler builds recall through here, so no code path can
-// return the belief without the correction beside it, or a pool without
-// saying whether it was consulted.
+// failing. The pool and the lookup are always present: an absent pool is
+// null, never a missing key. Every handler builds recall through here, so
+// no code path can return the belief without the correction beside it, or
+// a pool without saying whether it was consulted.
 func assembleRecall(shopper string, beliefs []contract.BeliefView, poolView *contract.PoolView, lookup contract.PoolLookup, overriding *contract.CorrectionView, guidance contract.GuidanceView, pending int, trace *string) (contract.RecallResponse, error) {
 	for _, belief := range beliefs {
 		if belief.Precedence == nil {
@@ -124,9 +125,13 @@ func beliefStep(view contract.BeliefView) contract.GuidanceBasis {
 // overridingCorrection returns the correction recall must honour first:
 // the latest correction declared against a served belief; else the
 // latest named standing matching the brand, whose belief has not been
-// written yet; else the latest unscoped standing, which applies to every
+// written yet; else a declared correction whose belief has not been
+// rewritten yet (the restart window), honoured by its paired subject the
+// same way; else the latest unscoped standing, which applies to every
 // brand until one is known. Specificity wins over recency: a correction
-// naming this brand beats a newer correction naming none.
+// naming this brand beats a newer correction naming none. A declared
+// correction naming a belief this recall does not serve applies to
+// another recall, never this one.
 func overridingCorrection(st *shopperState, served []contract.BeliefView, brandID string) *contract.CorrectionView {
 	servedIDs := map[string]bool{}
 	for _, view := range served {
@@ -140,12 +145,25 @@ func overridingCorrection(st *shopperState, served []contract.BeliefView, brandI
 			continue
 		}
 		class := 3
-		switch {
-		case rec.view.ContradictsBeliefID != "" && servedIDs[rec.view.ContradictsBeliefID]:
+		switch cited := rec.view.ContradictsBeliefID; {
+		case cited != "" && servedIDs[cited]:
 			class = 0
-		case rec.view.ContradictsBeliefID == "" && brandID != "" && journalSubject(st, rec.view.Text).ID == brandID:
+		case cited != "":
+			if _, ok := st.beliefs[cited]; ok {
+				continue
+			}
+			subject := viewSubject(st, rec)
+			switch {
+			case brandID != "" && subject.Kind == domain.SubjectBrand && subject.ID == brandID:
+				class = 1
+			case subject == (domain.Subject{}):
+				class = 2
+			default:
+				continue
+			}
+		case brandID != "" && journalSubject(st, rec.view.Text).ID == brandID:
 			class = 1
-		case rec.view.ContradictsBeliefID == "" && isUnscoped(st, rec.view.Text):
+		case isUnscoped(st, rec.view.Text):
 			class = 2
 		default:
 			continue
@@ -159,6 +177,19 @@ func overridingCorrection(st *shopperState, served []contract.BeliefView, brandI
 	}
 	out := best.view
 	return &out
+}
+
+// viewSubject returns the subject one correction view was declared
+// against: the paired journal entry's subject when the pairing exists,
+// else the journal entry's subject for the correction's words, or the
+// zero subject when no entry covers it (unscoped). The pairing is exact
+// where the words alone are ambiguous: the same words about two subjects
+// each keep their own.
+func viewSubject(st *shopperState, rec *correctionRecord) domain.Subject {
+	if link, ok := st.pairing[rec.view.CorrectionID]; ok {
+		return link.Subject
+	}
+	return journalSubject(st, rec.view.Text)
 }
 
 // journalSubject returns the journal entry's subject for one correction
@@ -242,19 +273,19 @@ func poolQuery(req contract.RecallRequest, usual domain.UsualSize) (domain.Produ
 	return domain.ProductLine{Brand: req.BrandID, Category: req.Category, FitHandle: req.FitHandle}, size, true
 }
 
-// lookupPool reads the pooled product fit for one recall. A missing pool
-// index, or a request without a full line and size, consults nothing and
-// reports neither field, so the frozen base shape is untouched. Any index
-// error answers unavailable: recall carries on without the pool and never
-// pretends an empty one. A Claimed pool says nothing and is consulted but
-// absent.
+// lookupPool reads the pooled product fit for one recall. Without a wired
+// pool index, or without a full line and size to read, there is nothing
+// to consult: the lookup reads unavailable and recall carries on without
+// the pool, never pretending an empty one. Any index error answers
+// unavailable the same way: recall never refuses for the pool's sake. A
+// Claimed pool says nothing and is consulted but absent.
 func (s *Service) lookupPool(ctx context.Context, req contract.RecallRequest, usual domain.UsualSize) (*contract.PoolView, contract.PoolLookup) {
 	if s.pool == nil {
-		return nil, ""
+		return nil, contract.PoolUnavailable
 	}
 	line, size, ok := poolQuery(req, usual)
 	if !ok {
-		return nil, ""
+		return nil, contract.PoolUnavailable
 	}
 	fit, err := s.pool.Fit(ctx, line, size)
 	if err != nil {

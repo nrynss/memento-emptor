@@ -15,7 +15,8 @@ import (
 )
 
 // testSnapshot builds one snapshot with a pooling choice, a declared
-// correction, a named standing and an unscoped standing.
+// correction paired with its journal entry, a named standing and an
+// unscoped standing.
 func testSnapshot() Snapshot {
 	at := time.Date(2026, 11, 9, 10, 12, 0, 0, time.UTC)
 	subject := domain.Subject{Kind: domain.SubjectBrand, ID: "brand-x-001", Name: "Brand X"}
@@ -28,12 +29,16 @@ func testSnapshot() Snapshot {
 		Journal: []memory.Correction{
 			{Text: "Use M in this line", Subject: subject, Line: domain.ProductLine{Brand: "brand-x-001", Category: "shirts", FitHandle: "regular"}, Size: "M", RecordedAt: at},
 		},
+		Links: []ViewLink{
+			{CorrectionID: "corr_000001", Text: "I've lost weight, use M", Subject: subject, Size: "M"},
+		},
 	}
 }
 
 // proveRoundTrip saves and loads one snapshot through a store and proves
-// every field survives: the pooling choice, the views and the journal
-// with its subject, line, size and time.
+// every field survives: the pooling choice, the views, the journal with
+// its subject, line, size and time, and the view links that pair declared
+// views with their journal entries.
 func proveRoundTrip(t *testing.T, store Store) {
 	t.Helper()
 	ctx := context.Background()
@@ -56,6 +61,9 @@ func proveRoundTrip(t *testing.T, store Store) {
 	}
 	if !reflect.DeepEqual(got.Journal, want.Journal) {
 		t.Errorf("journal differs:\nactual:   %+v\nwant: %+v", got.Journal, want.Journal)
+	}
+	if !reflect.DeepEqual(got.Links, want.Links) {
+		t.Errorf("links differ:\nactual:   %+v\nwant: %+v", got.Links, want.Links)
 	}
 }
 

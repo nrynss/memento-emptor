@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/nrynss/memento-emptor/internal/api/contract"
+	"github.com/nrynss/memento-emptor/internal/domain"
 	"github.com/nrynss/memento-emptor/internal/memory"
 )
 
@@ -35,7 +36,10 @@ const snapshotVersion = 1
 // choice, the correction views recall serves, and the undeclared journal
 // entries a later belief may declare against. Beliefs, evidence and the
 // graph session are not in it: they are rebuilt from new writes, and the
-// journal's standings are re-declared then.
+// journal's standings are re-declared then. Links pairs each declared view
+// with the journal entry it was declared against, so a rebuild re-links
+// exactly: the same words about two subjects stay attached to their own
+// beliefs instead of collapsing onto the first belief rebuilt.
 type Snapshot struct {
 	// Version is the file layout version.
 	Version int `json:"version"`
@@ -50,6 +54,41 @@ type Snapshot struct {
 	// Journal holds the undeclared standing corrections, oldest first.
 	// Every entry stands on its own: none carries an against declaration.
 	Journal []memory.Correction `json:"journal"`
+	// Links pairs each declared correction view with the journal entry
+	// it was declared against, by the entry's words, subject, line and
+	// size. A view whose belief has not been rewritten yet keeps its
+	// pairing, so recall can still honour it by subject in the meantime.
+	// Absent for snapshots written before the pairing existed, which
+	// re-link by words alone as before.
+	Links []ViewLink `json:"links"`
+}
+
+// ViewLink is one declared correction view's pairing: the view and the
+// journal entry it was declared against, keyed by the entry's words,
+// subject, line and size. The entry key is stable across a restart —
+// beliefs get fresh ids, but the words and the subject do not change —
+// so the rewritten belief that re-declares the entry re-links exactly
+// this view, even when another view carries the same words about
+// another subject.
+type ViewLink struct {
+	// CorrectionID identifies the declared correction view.
+	CorrectionID string `json:"correction_id"`
+	// Text is the journal entry's words.
+	Text string `json:"text"`
+	// Subject is the brand or seller the journal entry is about.
+	Subject domain.Subject `json:"subject"`
+	// Line is the product line the journal entry names, or the zero line
+	// when it names none.
+	Line domain.ProductLine `json:"line"`
+	// Size is the size the journal entry names, or empty.
+	Size string `json:"size"`
+}
+
+// LinkKey reports whether a journal entry is the one a view link names:
+// the same words about the same subject, line and size.
+func LinkKey(link ViewLink, entry memory.Correction) bool {
+	return link.Text == entry.Text && link.Subject == entry.Subject &&
+		link.Line == entry.Line && link.Size == entry.Size
 }
 
 // Store persists one snapshot per shopper. It is safe for concurrent use.

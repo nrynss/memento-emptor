@@ -196,15 +196,13 @@ func compareExample(t *testing.T, svc *Service, tool, reqFile, respFile string, 
 		delete(wantMap, field)
 	}
 	if tool == "recall_for_purchase" {
-		// The frozen base fixture predates the pivot: T7.1 kept it in
-		// the pre-pool shape, and requiring the pool fields is T7.4's
-		// call. The served layer emits them now, and serves the
-		// shopper's general statement beside the contradicted belief,
-		// so the comparison strips them here and asserts them
-		// separately instead.
+		// The seeded recall serves the shopper's general statement beside
+		// the contradicted sizing belief; the base fixture carries only
+		// the sizing belief. The comparison filters the statement here
+		// and pins the served shape separately, while the pool, the pool
+		// lookup and every precedence step compare byte-exact against
+		// the tightened fixture.
 		assertRecallPivot(t, actualMap)
-		delete(actualMap, "pool")
-		delete(actualMap, "pool_lookup")
 		if beliefs, ok := actualMap["beliefs"].([]any); ok {
 			kept := beliefs[:0]
 			for _, belief := range beliefs {
@@ -212,7 +210,6 @@ func compareExample(t *testing.T, svc *Service, tool, reqFile, respFile string, 
 				if !ok {
 					continue
 				}
-				delete(view, "precedence")
 				if view["belief_id"] == "blf_77c310" {
 					continue
 				}
@@ -226,12 +223,12 @@ func compareExample(t *testing.T, svc *Service, tool, reqFile, respFile string, 
 	}
 }
 
-// assertRecallPivot asserts the pivot fields the served recall carries
-// beside the frozen base shape: every belief names its precedence step,
-// with the overridden beliefs pointing at the correction that won. The
-// seeded recall serves the contradicted sizing belief and the shopper's
-// general statement, both overridden by the correction; the pool is
-// absent because no pool index is wired.
+// assertRecallPivot pins the pivot fields the served recall carries
+// beside the frozen base shape: the pool is null with an unavailable
+// lookup, because no pool index is wired, and every belief names its
+// precedence step, with the overridden beliefs pointing at the correction
+// that won. The seeded recall serves the contradicted sizing belief and
+// the shopper's general statement, both overridden by the correction.
 func assertRecallPivot(t *testing.T, actual map[string]any) {
 	t.Helper()
 	beliefs, ok := actual["beliefs"].([]any)
@@ -264,11 +261,11 @@ func assertRecallPivot(t *testing.T, actual map[string]any) {
 	if !ok || statement["step"] != "statement" || statement["overridden"] != true || statement["overridden_by"] != "correction" {
 		t.Fatalf("statement precedence %+v, want statement overridden by correction", statement)
 	}
-	if _, ok := actual["pool"]; ok {
-		t.Fatalf("recall without a wired pool carries a pool object")
+	if pool, ok := actual["pool"]; !ok || pool != nil {
+		t.Fatalf("recall without a wired pool carries %v, want an explicit null pool", actual["pool"])
 	}
-	if _, ok := actual["pool_lookup"]; ok {
-		t.Fatalf("recall without a wired pool carries a pool lookup")
+	if lookup, _ := actual["pool_lookup"].(string); lookup != "unavailable" {
+		t.Fatalf("recall without a wired pool carries lookup %q, want unavailable", actual["pool_lookup"])
 	}
 }
 

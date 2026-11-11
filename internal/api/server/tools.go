@@ -267,8 +267,9 @@ func (s *Service) newBelief(ctx context.Context, st *shopperState, kind domain.B
 // pool has something to say, and any correction that overrides them. The
 // correction ships both at the top level and inline, with the guidance
 // pointing at it, so an agent cannot recommend from the belief alone.
-// Recall never refuses: thin evidence comes back labelled thin, and an
-// unreachable pool leaves the pool fields out rather than an empty pool.
+// Recall never refuses: thin evidence comes back labelled thin, and a
+// pool with nothing to say leaves a null pool with an unavailable lookup
+// rather than an empty pool.
 func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contract.RecallResponse, error) {
 	if strings.TrimSpace(req.ShopperID) == "" {
 		return contract.RecallResponse{}, fmt.Errorf("server: recall: %w", ErrMissingShopper)
@@ -323,7 +324,7 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 	var guidance contract.GuidanceView
 	switch outcome.Winner {
 	case contract.GuidanceCorrection:
-		guidance = guidanceForCorrection(*overriding, correctionBrand(st, overriding), correctionBelief(overriding))
+		guidance = guidanceForCorrection(*overriding, correctionBrand(st, overriding), correctionBelief(st, overriding))
 	case contract.GuidanceOwnEvidence:
 		guidance = guidanceForOwnEvidence(strongestOwn(served), poolView != nil && outcome.Overridden[contract.GuidancePool] == contract.GuidanceOwnEvidence)
 	case contract.GuidancePool:
@@ -338,20 +339,30 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 
 // correctionBrand names the subject a correction was recorded about: the
 // contradicted belief's subject for a declared correction, the journal
-// entry's subject for a named standing, and empty for an unscoped one.
+// entry's subject for a named standing, and empty for an unscoped one. A
+// declared correction whose belief has not been rewritten yet reports its
+// paired subject, so the guidance still names the brand.
 func correctionBrand(st *shopperState, correction *contract.CorrectionView) string {
 	if correction.ContradictsBeliefID != "" {
 		if belief, ok := st.beliefs[correction.ContradictsBeliefID]; ok {
 			return belief.subject.Name
+		}
+		if link, ok := st.pairing[correction.CorrectionID]; ok && strings.TrimSpace(link.Subject.Name) != "" {
+			return link.Subject.Name
 		}
 	}
 	return string(journalSubject(st, correction.Text).Name)
 }
 
 // correctionBelief identifies the belief a correction contradicts, or nil
-// while the correction stands on its own.
-func correctionBelief(correction *contract.CorrectionView) *string {
+// while the correction stands on its own — including the restart window
+// where the cited belief has not been rewritten yet. The guidance then
+// recommends from the correction alone instead of pointing at a stale id.
+func correctionBelief(st *shopperState, correction *contract.CorrectionView) *string {
 	if correction.ContradictsBeliefID == "" {
+		return nil
+	}
+	if _, ok := st.beliefs[correction.ContradictsBeliefID]; !ok {
 		return nil
 	}
 	id := correction.ContradictsBeliefID
@@ -485,14 +496,33 @@ func (s *Service) recordStanding(ctx context.Context, st *shopperState, req cont
 			return contract.RecordCorrectionResponse{}, fmt.Errorf("server: record standing correction: %w", err)
 		}
 		// A matching belief may already exist: the agent recorded the
-		// correction without naming it. Declare the standing against
-		// every match now, so the warning renders at once.
+		// correction without naming it. Declare the standing against one
+		// match, so the warning renders at once. The match is the
+		// strongest belief — most evidence, then earliest, then smallest
+		// id — so two beliefs on one subject cite deterministically
+		// instead of by map order, and a later rival keeps its own
+		// standing: the entry declares only once.
+		matches := []*beliefRecord{}
 		for _, belief := range st.beliefs {
-			if !memory.SameSubject(entry, memoryBelief(belief)) {
-				continue
+			if memory.SameSubject(entry, memoryBelief(belief)) {
+				matches = append(matches, belief)
 			}
+		}
+		sort.Slice(matches, func(i, j int) bool {
+			if len(matches[i].evIDs) != len(matches[j].evIDs) {
+				return len(matches[i].evIDs) > len(matches[j].evIDs)
+			}
+			if !matches[i].createdAt.Equal(matches[j].createdAt) {
+				return matches[i].createdAt.Before(matches[j].createdAt)
+			}
+			return matches[i].id < matches[j].id
+		})
+		for _, belief := range matches {
 			if _, err := st.journal.Declare(ctx, s.graph, memoryBelief(belief)); err != nil {
 				return contract.RecordCorrectionResponse{}, fmt.Errorf("server: declare standing correction: %w", err)
+			}
+			if rec.view.ContradictsBeliefID != "" {
+				continue
 			}
 			rec.view.ContradictsBeliefID = belief.id
 			rec.at = now

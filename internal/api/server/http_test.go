@@ -110,12 +110,11 @@ func TestHTTPTransport(t *testing.T) {
 		if err := json.Unmarshal([]byte(res.Result.Content[0].Text), &actual); err != nil {
 			t.Fatalf("parse recall result: %v", err)
 		}
-		// The frozen base fixture predates the pivot; the served recall
-		// emits the pool and precedence fields T7.4 will require, and
-		// serves the usual-size statement beside the sizing belief.
-		// Strip them for this comparison: server_test pins their values.
-		delete(actual, "pool")
-		delete(actual, "pool_lookup")
+		// The base fixture carries the tightened shape: a null pool with
+		// an unavailable lookup and every belief's precedence step. The
+		// served recall carries the shopper's general statement beside
+		// the sizing belief; filter the statement here, as server_test
+		// pins it, and compare everything else byte-exact.
 		if beliefs, ok := actual["beliefs"].([]any); ok {
 			kept := beliefs[:0]
 			for _, belief := range beliefs {
@@ -123,7 +122,6 @@ func TestHTTPTransport(t *testing.T) {
 				if !ok {
 					continue
 				}
-				delete(view, "precedence")
 				if view["belief_id"] == "blf_77c310" {
 					continue
 				}

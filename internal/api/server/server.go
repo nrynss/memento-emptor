@@ -222,6 +222,12 @@ type shopperState struct {
 	writer      *fitindex.Writer
 	pooling     atomic.Bool
 	lastBrand   domain.Subject
+	// pairing links each declared correction view to the journal entry
+	// it was declared against, by the entry's words, subject, line and
+	// size. The belief id is not the link: a restart mints fresh ids, but
+	// the words and the subject survive, so the rewritten belief that
+	// re-declares the entry re-links exactly its own views.
+	pairing map[string]standing.ViewLink
 }
 
 // streakKey scopes one opposite-direction run to the beliefs it could
@@ -355,6 +361,7 @@ func (s *Service) state(ctx context.Context, shopper string) (*shopperState, err
 			seq:         map[string]int{},
 			streaks:     map[streakKey]*domain.OppositeStreak{},
 			journal:     &memory.StandingCorrections{},
+			pairing:     map[string]standing.ViewLink{},
 		}
 		st.pooling.Store(true)
 		if s.deps.FitRows != nil && s.keyer != nil && s.lines != nil {

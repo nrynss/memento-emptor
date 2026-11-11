@@ -400,11 +400,21 @@ requires:   [T8.5c, T7.4]
 fixture-ok: yes
 size:       M · mid
 owns:       internal/api/server/, internal/standing/
-status:     claimed:t85d-harden
+status:     in-review
 ```
 T8.5c's re-link works for the direct and standing paths, but the review proved three edge defects live in `internal/api/server/`: same-words/two-subjects cross-link on divergent rebuild (recall hard-fails `ErrOverrideMissing` — the refusal this layer exists to eliminate); silent declared views with no rewritten belief; same-subject two-belief collapse. Persist the view↔entry pairing (or equivalent) so a rebuild re-links exactly. In the same task, update the served-side comparison against T7.4's tightened fixtures (the two failing subtests the T7.4 review pinned).
 
 **Done when:** the three edge cases are tested (including the throwaway reproduction: same words, fit belief + seller belief, divergent rebuild — both views stay attached to their own beliefs and no recall hard-fails); the server comparison passes against the tightened fixtures; the gate passes.
+
+**Notes (in-review).** All in `owns`, fixture only, no contract or schema change.
+
+- Pairing: `internal/standing` gains `Snapshot.Links` with one `ViewLink` per declared view (correction id plus the journal entry's words, subject, line and size; file layout stays version 1, additive). The server keeps the pairing per shopper, persists it with the views, and restores it with them.
+- Re-link: `backfillDeclaration` links a rewritten belief only to the views paired to the entry that just declared it, so the same words about two subjects never cross-link however the rebuild reorders the mints. Views from before the pairing fall back to the old words match. `persistStanding` pairs each declared view with its live journal entry (or a cover over the cited belief's subject for a direct correction) and refuses to re-pair a view to a belief whose subject the pairing does not name — a stale id reused for an unrelated belief no longer corrupts the journal or the pairing.
+- Dangling window: a restored declared view whose belief is not rewritten yet is honoured by its paired subject like a named standing, so the correction keeps its force across the restart instead of going silent; the guidance recommends from the correction alone with no stale belief id.
+- Determinism: a standing recorded while two beliefs share one subject declares against exactly one — most evidence, then earliest, then smallest id — instead of citing by map order while the entry declares elsewhere.
+- Tightened comparison: the served layer now reports `pool_lookup: unavailable` (with a null pool) whenever no pool index is wired or no full line is read, which is what the unwired base fixture pins; `server_test.go` and `http_test.go` no longer strip `pool`, `pool_lookup` or `precedence` and compare byte-exact (the usual-size statement filter stays, pinned by `assertRecallPivot`).
+- Three tests in `pivot_test.go`: same words over a fit and a seller belief with a divergent id-swapping rebuild (both views stay attached, recall and the seller explain succeed); a declared view deciding with nothing rewritten (correction basis, no belief); a standing over three same-subject beliefs citing the strongest. Each fails with its fix neutered (cross-link, silent none-guidance, weakest citation).
+- Finding (not a cut, outside `owns`): 6 web vitest failures (`api.test.ts` 3, `pool.test.ts` 2, `precedence.test.ts` 1) expect the pre-tightened shapes (null precedence, no pool precedence) and fail identically on the base commit without this change — T7.4's web-side fallout, owned by whoever owns `web/`. Every Go package passes, including with `-race`; `gofmt` and `go vet` are clean.
 
 ---
 

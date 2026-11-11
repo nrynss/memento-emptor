@@ -958,3 +958,234 @@ func TestStandingDeclaredRelinksAfterRestart(t *testing.T) {
 		t.Fatalf("correction still cites %q: re-linked by id coincidence, want the rewritten belief", beliefID)
 	}
 }
+
+// shopperBeliefKinds maps each belief id in one shopper's partition to
+// its kind. The caller must not hold the service lock.
+func shopperBeliefKinds(t *testing.T, svc *Service, shopper string) map[string]domain.BeliefKind {
+	t.Helper()
+	svc.mu.Lock()
+	defer svc.mu.Unlock()
+	st, ok := svc.shoppers[shopper]
+	if !ok {
+		t.Fatalf("no partition for %q", shopper)
+	}
+	out := map[string]domain.BeliefKind{}
+	for id, rec := range st.beliefs {
+		out[id] = rec.kind
+	}
+	return out
+}
+
+// shopperCitations maps each correction id in one shopper's partition to
+// the belief id it contradicts. The caller must not hold the service
+// lock.
+func shopperCitations(t *testing.T, svc *Service, shopper string) map[string]string {
+	t.Helper()
+	svc.mu.Lock()
+	defer svc.mu.Unlock()
+	st, ok := svc.shoppers[shopper]
+	if !ok {
+		t.Fatalf("no partition for %q", shopper)
+	}
+	out := map[string]string{}
+	for id, rec := range st.corrections {
+		out[id] = rec.view.ContradictsBeliefID
+	}
+	return out
+}
+
+// TestSameWordsTwoSubjectsSurviveDivergentRebuild is the throwaway
+// reproduction the T8.5c review proved by hand: the same words declared
+// against two subjects — a fit belief and a seller belief — must stay
+// attached to their own beliefs across a divergent rebuild, with no
+// recall hard-failing ErrOverrideMissing. The rebuild reuses ids across
+// subjects (the dispute first takes the fit belief's old id), so a
+// re-link by words alone collapses both views onto the first-rebuilt
+// belief; the persisted view-to-entry pairing re-links each view by its
+// own entry instead.
+func TestSameWordsTwoSubjectsSurviveDivergentRebuild(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	svc, _ := pivotHarness(t, nil, nil, dir)
+	shopper := "two_subject_shopper"
+	fitID := earnSmallBelief(t, svc, shopper)
+	if _, err := svc.IngestWebhook(ctx, shopper, "WH-2EV-04"); err != nil {
+		t.Fatalf("ingest dispute: %v", err)
+	}
+	sellerID := ""
+	for id, kind := range shopperBeliefKinds(t, svc, shopper) {
+		if kind == domain.BeliefKindSeller {
+			sellerID = id
+		}
+	}
+	if sellerID == "" {
+		t.Fatal("no seller belief after the dispute")
+	}
+	const words = "I've lost weight, use M"
+	if _, err := svc.RecordCorrection(ctx, contract.RecordCorrectionRequest{
+		ShopperID: shopper, Text: words, ContradictsBeliefID: fitID,
+	}); err != nil {
+		t.Fatalf("record fit correction: %v", err)
+	}
+	if _, err := svc.RecordCorrection(ctx, contract.RecordCorrectionRequest{
+		ShopperID: shopper, Text: words, ContradictsBeliefID: sellerID,
+	}); err != nil {
+		t.Fatalf("record seller correction: %v", err)
+	}
+	before := shopperCitations(t, svc, shopper)
+	if len(before) != 2 {
+		t.Fatalf("two same-words corrections hold %d views, want 2", len(before))
+	}
+	seen := map[string]bool{}
+	for _, cited := range before {
+		if cited != fitID && cited != sellerID {
+			t.Fatalf("a view cites %q, want the fit or the seller belief", cited)
+		}
+		seen[cited] = true
+	}
+	if len(seen) != 2 {
+		t.Fatalf("both views cite %v, want one per belief", before)
+	}
+	restarted := restartDiverged(t, dir, shopper)
+	after := shopperCitations(t, restarted, shopper)
+	if len(after) != 2 {
+		t.Fatalf("rebuilt corrections hold %d views, want 2", len(after))
+	}
+	restarted.mu.Lock()
+	rst := restarted.shoppers[shopper]
+	for view, cited := range after {
+		link, ok := rst.pairing[view]
+		if !ok {
+			restarted.mu.Unlock()
+			t.Fatalf("view %q lost its entry pairing across the restart", view)
+		}
+		belief, ok := rst.beliefs[cited]
+		if !ok {
+			restarted.mu.Unlock()
+			t.Fatalf("view %q cites %q, which names no rebuilt belief", view, cited)
+		}
+		if belief.subject.ID != link.Subject.ID || belief.subject.Kind != link.Subject.Kind {
+			restarted.mu.Unlock()
+			t.Fatalf("view %q paired to %q %q cites %q %q: cross-linked across subjects",
+				view, link.Subject.Kind, link.Subject.ID, belief.subject.Kind, belief.subject.ID)
+		}
+	}
+	byKind := map[domain.BeliefKind]string{}
+	for view, cited := range after {
+		byKind[rst.beliefs[cited].kind] = view
+	}
+	restarted.mu.Unlock()
+	if len(byKind) != 2 {
+		t.Fatalf("both rebuilt views cite the same kind: %v", after)
+	}
+	cited := assertCorrectionDecides(t, restarted, shopper)
+	kinds := shopperBeliefKinds(t, restarted, shopper)
+	if kinds[cited] != domain.BeliefKindFit {
+		t.Fatalf("the deciding correction cites %q of kind %q, want the rewritten fit belief", cited, kinds[cited])
+	}
+	sellerCited := ""
+	for belief, kind := range kinds {
+		if kind == domain.BeliefKindSeller {
+			sellerCited = belief
+		}
+	}
+	explained, err := restarted.ExplainBelief(ctx, contract.ExplainBeliefRequest{ShopperID: shopper, BeliefID: sellerCited})
+	if err != nil {
+		t.Fatalf("explain the rewritten seller belief: %v", err)
+	}
+	if !explained.Belief.Contradicted || explained.Belief.ContradictedBy == nil ||
+		explained.Belief.ContradictedBy.ContradictsBeliefID != sellerCited {
+		t.Fatalf("the seller belief carries no warning from its own view: %+v", explained.Belief.ContradictedBy)
+	}
+}
+
+// TestDeclaredViewWithoutRewrittenBeliefStillDecides proves a restored
+// declared view is never silent: in the restart-before-redelivery window
+// the cited belief id matches nothing, yet recall still honours the
+// correction by its paired subject instead of dropping it until the
+// belief is rewritten. The guidance recommends from the correction alone,
+// pointing at no stale belief id.
+func TestDeclaredViewWithoutRewrittenBeliefStillDecides(t *testing.T) {
+	ctx := context.Background()
+	dir := t.TempDir()
+	svc, _ := pivotHarness(t, nil, nil, dir)
+	shopper := "dangling_shopper"
+	beliefID := earnSmallBelief(t, svc, shopper)
+	if _, err := svc.RecordCorrection(ctx, contract.RecordCorrectionRequest{
+		ShopperID: shopper, Text: "I've lost weight, use M", ContradictsBeliefID: beliefID,
+	}); err != nil {
+		t.Fatalf("record declared correction: %v", err)
+	}
+	if got := assertCorrectionDecides(t, svc, shopper); got != beliefID {
+		t.Fatalf("correction cites %q before the restart, want %q", got, beliefID)
+	}
+	restarted, _ := pivotHarness(t, nil, nil, dir)
+	recall, err := restarted.Recall(ctx, contract.RecallRequest{
+		ShopperID: shopper, BrandID: "brand-x-001",
+		Category: "shirts", FitHandle: "regular", SizeConsidered: "M",
+	})
+	if err != nil {
+		t.Fatalf("recall with no rewritten belief: %v", err)
+	}
+	if len(recall.Beliefs) != 0 {
+		t.Fatalf("recall serves %d beliefs with nothing rewritten, want none", len(recall.Beliefs))
+	}
+	if recall.OverridingCorrection == nil || recall.Guidance.Basis != contract.GuidanceCorrection {
+		t.Fatalf("the dangling correction does not decide: %+v", recall.Guidance)
+	}
+	if recall.OverridingCorrection.ContradictsBeliefID != beliefID {
+		t.Fatalf("the dangling view cites %q, want the stale %q preserved", recall.OverridingCorrection.ContradictsBeliefID, beliefID)
+	}
+	if recall.Guidance.BeliefID != nil {
+		t.Fatalf("the dangling guidance points at belief %q, want the correction alone", *recall.Guidance.BeliefID)
+	}
+	if want := "Take size M for Brand X"; recall.Guidance.Text != want {
+		t.Fatalf("dangling guidance text %q, want %q", recall.Guidance.Text, want)
+	}
+	if recall.Pool != nil || recall.PoolLookup != contract.PoolUnavailable {
+		t.Fatalf("dangling recall carries pool %+v/%q, want null/unavailable", recall.Pool, recall.PoolLookup)
+	}
+}
+
+// TestSameSubjectTwoBeliefsCiteStrongest proves the deterministic half of
+// the same-subject collapse: a standing recorded while two fit beliefs
+// share one subject declares against exactly one of them — the strongest,
+// most evidence first — instead of citing by map order while the entry
+// declares elsewhere. Any other split hard-fails the next recall with
+// ErrOverrideMissing; this one keeps both readings representable.
+func TestSameSubjectTwoBeliefsCiteStrongest(t *testing.T) {
+	ctx := context.Background()
+	svc := seededService(t)
+	shopper := "shopper_01"
+	if _, err := svc.Recall(ctx, contract.RecallRequest{ShopperID: shopper, BrandID: "brand-x-001"}); err != nil {
+		t.Fatalf("first recall: %v", err)
+	}
+	standing, err := svc.RecordCorrection(ctx, contract.RecordCorrectionRequest{
+		ShopperID: shopper, Text: "I've lost weight, use M",
+	})
+	if err != nil {
+		t.Fatalf("record standing correction: %v", err)
+	}
+	if standing.BeliefID != "blf_8f2c41" {
+		t.Fatalf("standing declares against %q, want the strongest fit belief blf_8f2c41", standing.BeliefID)
+	}
+	svc.mu.Lock()
+	st := svc.shoppers[shopper]
+	declared := 0
+	for _, entry := range st.journal.Standing() {
+		if entry.Against != "" {
+			declared++
+		}
+	}
+	svc.mu.Unlock()
+	if declared != 1 {
+		t.Fatalf("the standing declared %d entries, want exactly the one match", declared)
+	}
+	recall, err := svc.Recall(ctx, contract.RecallRequest{ShopperID: shopper, BrandID: "brand-x-001"})
+	if err != nil {
+		t.Fatalf("recall after the standing: %v", err)
+	}
+	if recall.OverridingCorrection == nil || recall.Guidance.Basis != contract.GuidanceCorrection {
+		t.Fatalf("the standing correction does not decide: %+v", recall.Guidance)
+	}
+}

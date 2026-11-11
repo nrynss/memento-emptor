@@ -13,13 +13,14 @@ import (
 )
 
 // restoreStanding loads one shopper's durable state into a fresh
-// partition: the pooling choice, the correction views recall serves, and
+// partition: the pooling choice, the correction views recall serves, the
+// view links that pair declared views with their journal entries, and
 // the journal entries a later belief may declare against. The journal
 // entries are re-recorded as standings, so the graph holds their notes
 // again; declared views keep their stale belief ids until a rewritten
-// belief declares the matching entry and re-links them by content match.
+// belief re-declares the paired entry and re-links them by entry match.
 // A shopper with no snapshot starts from the defaults: pooling on, no
-// corrections, an empty journal.
+// corrections, an empty journal, no pairing.
 func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper string) error {
 	snap, found, err := s.standing.Load(ctx, shopper)
 	if err != nil {
@@ -39,6 +40,9 @@ func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper
 		}
 		st.corrections[view.CorrectionID] = &correctionRecord{view: view, at: at}
 	}
+	for _, link := range snap.Links {
+		st.pairing[link.CorrectionID] = link
+	}
 	for _, entry := range snap.Journal {
 		standing := entry
 		standing.Against = ""
@@ -50,14 +54,22 @@ func (s *Service) restoreStanding(ctx context.Context, st *shopperState, shopper
 }
 
 // persistStanding saves one shopper's durable state after a mutation: the
-// pooling choice, the correction views, and the journal entries a later
-// belief may declare against. Declared entries are saved as standings (with
-// no against): the restart forgot the beliefs they were declared against,
+// pooling choice, the correction views, the journal entries a later
+// belief may declare against, and the links pairing each declared view
+// with its entry. Declared entries are saved as standings (with no
+// against): the restart forgot the beliefs they were declared against,
 // so they wait for the rewritten belief to declare them again. A declared
 // view with no journal entry — a correction recorded straight against its
 // belief — gains a synthesized cover entry from the live belief's subject,
 // or it could never re-link after a restart. Entries are deduplicated by
-// their words and subject, so a cover never doubles a journal entry.
+// their words and subject, so a cover never doubles a journal entry. Each
+// declared view is paired with the entry it was declared against — the
+// journal entry carrying the same words against the cited belief's
+// content, or the cover when the correction never journalled — so a
+// rebuild re-links exactly: the same words about two subjects stay
+// attached to their own beliefs. A declared view whose belief is gone
+// (the restart-before-redelivery window) keeps its existing pairing, so
+// recall can still honour it by subject in the meantime.
 func (s *Service) persistStanding(ctx context.Context, st *shopperState, shopper string) error {
 	views := make([]contract.CorrectionView, 0, len(st.corrOrder))
 	for _, id := range st.corrOrder {
@@ -78,21 +90,67 @@ func (s *Service) persistStanding(ctx context.Context, st *shopperState, shopper
 			continue
 		}
 		belief, ok := st.beliefs[rec.view.ContradictsBeliefID]
-		if !ok || journalCoversTextSubject(journal, rec.view.Text, belief.subject) {
+		if !ok {
 			continue
 		}
-		journal = append(journal, memory.Correction{
-			Text:       rec.view.Text,
-			Subject:    belief.subject,
-			Size:       lastSize(rec.view.Text),
-			RecordedAt: rec.at,
-		})
+		if link, paired := st.pairing[id]; paired && (link.Subject.Kind != belief.subject.Kind || link.Subject.ID != belief.subject.ID) {
+			// The citation is stale and its id has been reused for an
+			// unrelated belief: the rewritten belief has not declared
+			// the paired entry yet. Pairing the view to the stranger
+			// and covering it would corrupt the journal, so the view
+			// keeps its pairing until its own entry declares.
+			continue
+		}
+		if !journalCoversTextSubject(journal, rec.view.Text, belief.subject) {
+			journal = append(journal, memory.Correction{
+				Text:       rec.view.Text,
+				Subject:    belief.subject,
+				Size:       lastSize(rec.view.Text),
+				RecordedAt: rec.at,
+			})
+		}
+		pairDeclared(st, id, rec.view.Text, belief)
 	}
-	snap := standing.Snapshot{Pooling: st.pooling.Load(), Corrections: views, Journal: journal}
+	links := make([]standing.ViewLink, 0, len(st.pairing))
+	for _, id := range st.corrOrder {
+		if link, ok := st.pairing[id]; ok {
+			links = append(links, link)
+		}
+	}
+	snap := standing.Snapshot{Pooling: st.pooling.Load(), Corrections: views, Journal: journal, Links: links}
 	if err := s.standing.Save(ctx, shopper, snap); err != nil {
 		return fmt.Errorf("server: persist standing for %q: %w", shopper, err)
 	}
 	return nil
+}
+
+// pairDeclared pairs one declared view with the journal entry it was
+// declared against: the entry carrying the same words against the cited
+// belief's content, or a cover over the cited belief's subject when the
+// correction never journalled (a correction recorded straight against its
+// belief). The cover key matches the synthesized cover entry persist
+// appends beside it, so the pairing survives the round trip. The pairing
+// is what the rebuild re-links by, so two views carrying the same words
+// about different subjects never cross-link.
+func pairDeclared(st *shopperState, id, text string, belief *beliefRecord) {
+	for _, entry := range st.journal.Standing() {
+		if entry.Against == belief.content && entry.Text == text {
+			st.pairing[id] = standing.ViewLink{
+				CorrectionID: id,
+				Text:         entry.Text,
+				Subject:      entry.Subject,
+				Line:         entry.Line,
+				Size:         entry.Size,
+			}
+			return
+		}
+	}
+	st.pairing[id] = standing.ViewLink{
+		CorrectionID: id,
+		Text:         text,
+		Subject:      belief.subject,
+		Size:         lastSize(text),
+	}
 }
 
 // journalCoversTextSubject reports whether any journal entry — standing or
@@ -144,14 +202,14 @@ func memoryBelief(rec *beliefRecord) memory.Belief {
 }
 
 // backfillDeclaration links the correction views to a declaration the
-// journal just made: every journal entry declared against the belief's
-// content names the belief in the matching view, the belief is touched,
-// and its timeline gains the correction row. A restored declared view
-// whose belief id matches nothing is re-linked here by content match on
-// the correction's words: the journal entry declares against the rewritten
-// belief, and the stale view follows it instead of losing all force. A
-// view naming a belief the layer still holds is left alone. The caller
-// holds the lock.
+// journal just made. A paired view follows only its own entry: the entry
+// that just declared against the rewritten belief re-links exactly the
+// views paired to it, so the same words declared against two subjects
+// stay attached to their own beliefs however the rebuild reorders the
+// mints. A view from before the pairing existed falls back to the old
+// words match, leaving alone a citation the journal still explains. The
+// belief is touched, and its timeline gains the correction row. The
+// caller holds the lock.
 func (s *Service) backfillDeclaration(st *shopperState, belief *beliefRecord, now time.Time) {
 	for _, entry := range st.journal.Standing() {
 		if entry.Against != belief.content {
@@ -159,20 +217,26 @@ func (s *Service) backfillDeclaration(st *shopperState, belief *beliefRecord, no
 		}
 		for _, id := range st.corrOrder {
 			rec := st.corrections[id]
-			if rec == nil || rec.view.Text != entry.Text {
+			if rec == nil {
 				continue
 			}
-			if rec.view.ContradictsBeliefID != "" {
-				// A view naming a belief the layer still holds is left
-				// alone when its citation is explained: a journal entry
-				// with the same words about that belief's subject means
-				// the citation came from this entry's lineage. A stale id
-				// — or an id the restart reused for an unrelated belief
-				// of another subject — is re-linked by content match on
-				// the correction's words instead of losing all force.
-				if cited, ok := st.beliefs[rec.view.ContradictsBeliefID]; ok &&
-					journalCoversTextSubject(st.journal.Standing(), rec.view.Text, cited.subject) {
+			if link, paired := st.pairing[id]; paired {
+				if !standing.LinkKey(link, entry) {
 					continue
+				}
+			} else {
+				if rec.view.Text != entry.Text {
+					continue
+				}
+				if rec.view.ContradictsBeliefID != "" {
+					// A view naming a belief the layer still holds is left
+					// alone when its citation is explained: a journal entry
+					// with the same words about that belief's subject means
+					// the citation came from this entry's lineage.
+					if cited, ok := st.beliefs[rec.view.ContradictsBeliefID]; ok &&
+						journalCoversTextSubject(st.journal.Standing(), rec.view.Text, cited.subject) {
+						continue
+					}
 				}
 			}
 			rec.view.ContradictsBeliefID = belief.id
