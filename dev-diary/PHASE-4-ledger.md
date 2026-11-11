@@ -144,7 +144,7 @@ The T9.7 run found the deployed ledger page is a fixture replay: its live number
 requires:   [T4.6]
 fixture-ok: yes
 size:       XS · mid
-owns:       web/src/lib/contest/state.ts
+owns:       web/src/lib/contest/state.ts, web/src/lib/contest/state.test.ts, web/src/routes/belief/
 status:     claimed:t49-contest-state
 ```
 `createFixtureContestState` calls `createFixtureCorrectionTransport()` with no argument, so a caller passing a non-demo shopper gets a state whose requests name that shopper against a demo-shopper transport: every correction fails with "fixture correction knows only one shopper". It is latent (the belief page constructs its state directly; the ledger passes the demo shopper) and fails closed, but the helper is wrong. Pass the shopper through, and replace the page's duplicate wiring with the helper if that simplifies it.
