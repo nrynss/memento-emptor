@@ -159,11 +159,29 @@ requires:   [T1.1b]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/ingest/, testdata/paypal/
-status:     claimed:t11c-live-dispute
+status:     in-review
 ```
 T1.1b made served ingest store an unknown dispute code instead of failing, but `tests/live/ingest`'s source read still returns the `CategoryForDispute` error, so a live run on an unrecognised code aborts where the served path now stores it. No recorded sandbox dispute carries `MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED` either, so the new mapping's spelling is documented, not observed. Align the driver with the served path and record one sandbox dispute with that code if the sandbox can produce one; if it cannot, record that limit.
 
 **Done when:** the live driver stores an unknown code the way served ingest does; the not-as-described mapping is either observed in a recording or its absence is recorded; the gate passes.
+
+Notes (T1.1c, in-review): `tests/live/ingest/main.go` maps the dispute read's
+code the way served ingest does: `ErrUnknownDisputeCode` yields `CategoryNone`
+with the code kept as the reason's text, so the read no longer aborts on a code
+outside the frozen table. The row assertions now derive the expected category
+and counts from the live case's own code instead of assuming non-arrival; a
+case carrying no code asserts the row carries no reason. The live run re-read
+the T1.3b refund and non-arrival dispute, verified both signatures live, and
+printed the code-to-category line. The not-as-described spelling stays
+unobserved: `POST /v1/customer/disputes` with that reason refuses a full item
+shape on `TRANSACTION_NOT_ELIGIBLE` (recorded in
+`testdata/paypal/dispute-create-not-as-described-not-eligible.json`), the
+reason-only shape fails schema before eligibility is reached
+(`MISSING_ISSUE_TYPE`), and naming the capture as `seller_transaction_id`
+returns 500 `INTERNAL_SERVER_ERROR`. `probe_not_as_described.py` reproduces
+the probe. The shopper-side resolution-center filing is the path that produced
+the demo's non-arrival case and is a new sandbox record, so this task did not
+file one. Spend: sandbox calls only, $0; no new sandbox records.
 
 ---
 

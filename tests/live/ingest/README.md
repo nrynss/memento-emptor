@@ -14,9 +14,14 @@ gate's `go test -race` finds no tests and `go vet` sees only `main.go`.
 - The refund becomes one evidence row per order line item with a nil
   reason that counts toward nothing, plus a pending question; the
   order join follows the live `refund -> capture -> order` up links.
-- The dispute becomes one row per item with the reason the frozen
-  table maps `MERCHANDISE_OR_SERVICE_NOT_RECEIVED` to (`not_arrived`,
-  confidence 1.0), counting toward the seller.
+- The dispute becomes one row per item whose reason is the live case's
+  own code mapped through the frozen table, at confidence 1.0, counting
+  toward whatever that category counts toward. For the current
+  non-arrival case that is `not_arrived` and the seller.
+- A code the table does not name is stored the way served ingest stores
+  it: the code stays as the reason's text, the category is `none`, and
+  the row counts toward nothing. The driver no longer aborts the read
+  on such a code.
 - Redelivering either event returns the stored rows with `Duplicate`
   set and writes nothing new.
 
@@ -52,6 +57,39 @@ On any 401 or throttle: stop and report, do not retry in a loop. A
 missing delivery (the test endpoint expires idle tokens) is also a
 stop-and-report: the resend path that replaces it is a new decision,
 not a quiet fix.
+
+## The unobserved not-as-described code
+
+T1.1b mapped `MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED` to
+`damaged_or_defective`, but no recorded sandbox dispute carries the
+code: the demo's live case is a non-arrival. The mapping's spelling
+therefore rests on the API's documented reason enum, and the driver
+verifies whatever code the live case carries rather than assuming one.
+
+The sandbox cannot produce a not-as-described case through the API.
+`probe_not_as_described.py` asks for one on an existing captured,
+unrefunded, undisputed transaction:
+
+```sh
+source tools/env.sh
+python3 tests/live/ingest/probe_not_as_described.py
+```
+
+Three request shapes were tried, all refused:
+
+| Shape | Response |
+|---|---|
+| reason only | 400, `details[].issue` = `MISSING_ISSUE_TYPE`: the item array is required before eligibility is looked at |
+| reason plus one `items[]` entry | 400, `details[].issue` = `TRANSACTION_NOT_ELIGIBLE`; recorded in `testdata/paypal/dispute-create-not-as-described-not-eligible.json` |
+| the capture as `seller_transaction_id` | 500 `INTERNAL_SERVER_ERROR` with no details |
+
+This matches the T0.4 finding for the non-arrival reason: seller-side
+dispute creation through `POST /v1/customer/disputes` is gated beyond a
+completed capture, so the reason enum is validated as a value but no
+case is created. A not-as-described case is filed the way the demo's
+non-arrival case was, as the shopper in the sandbox resolution center
+(the click path in `tests/live/seed/dispute.py` starts it). That is a
+new sandbox record, not a read, so this task did not file one.
 
 ## Placeholders
 

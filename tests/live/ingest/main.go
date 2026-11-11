@@ -23,6 +23,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -98,6 +99,21 @@ func (d *delivery) resource() map[string]any {
 		return nil
 	}
 	return body.Resource
+}
+
+// disputeCategory maps a dispute code to its category the way served
+// ingest does: a code the frozen table does not name stores with no
+// classified reason instead of failing the read, so the delivery is
+// stored and counts toward nothing. Any other mapping error is returned.
+func disputeCategory(code domain.DisputeCode) (domain.Category, error) {
+	category, err := domain.CategoryForDispute(code)
+	if errors.Is(err, domain.ErrUnknownDisputeCode) {
+		return domain.CategoryNone, nil
+	}
+	if err != nil {
+		return domain.CategoryNone, err
+	}
+	return category, nil
 }
 
 // client is a minimal sandbox REST client.
@@ -580,7 +596,9 @@ func (s *liveSource) GetRefund(ctx context.Context, refundID string) (fakes.Refu
 	return record, nil
 }
 
-// GetDispute returns the dispute read with its reason code mapped.
+// GetDispute returns the dispute read with its reason code mapped. A
+// code the frozen table does not name keeps its spelling on the row and
+// carries no category, exactly as served ingest stores it.
 func (s *liveSource) GetDispute(ctx context.Context, disputeID string) (fakes.DisputeRecord, error) {
 	if record, ok := s.disputes[disputeID]; ok {
 		return record, nil
@@ -590,7 +608,7 @@ func (s *liveSource) GetDispute(ctx context.Context, disputeID string) (fakes.Di
 		return fakes.DisputeRecord{}, err
 	}
 	code := domain.DisputeCode(str(got, "reason"))
-	category, err := domain.CategoryForDispute(code)
+	category, err := disputeCategory(code)
 	if err != nil {
 		return fakes.DisputeRecord{}, err
 	}
@@ -809,12 +827,23 @@ func main() {
 	if len(disputeResult.Rows) == 0 {
 		fail(fmt.Errorf("live: dispute produced no rows"))
 	}
+	// The dispute's own code decides the row's reason, through the same
+	// mapping served ingest uses: a code outside the frozen table keeps
+	// its spelling, carries no category, and counts toward nothing.
+	disputeCode := domain.DisputeCode(str(deliveries[disputePick.id].resource(), "reason"))
+	disputeWant, err := disputeCategory(disputeCode)
+	if err != nil {
+		fail(fmt.Errorf("live: map dispute code %q: %w", disputeCode, err))
+	}
 	for _, row := range disputeResult.Rows {
-		if row.Reason == nil || row.Reason.Category != domain.CategoryNotArrived {
+		switch {
+		case disputeCode == "" && row.Reason != nil:
+			fail(fmt.Errorf("live: dispute row carries a reason for a case with no code"))
+		case disputeCode != "" && (row.Reason == nil || row.Reason.Category != disputeWant || row.Reason.Text != string(disputeCode)):
 			fail(fmt.Errorf("live: dispute row has wrong reason"))
 		}
-		if row.CountsToward() != domain.BeliefKindSeller {
-			fail(fmt.Errorf("live: dispute row counts toward %q, want seller", row.CountsToward()))
+		if row.CountsToward() != disputeWant.CountsToward() {
+			fail(fmt.Errorf("live: dispute row counts toward %q, want %q", row.CountsToward(), disputeWant.CountsToward()))
 		}
 	}
 	if !disputeRepeat.Duplicate || len(disputeRepeat.Rows) != len(disputeResult.Rows) {
@@ -858,6 +887,12 @@ func main() {
 		refundResult.Pending.Outcome.AmountMinor, refundResult.Pending.Outcome.Currency)
 	t.say("refund redelivery: duplicate, same %d row(s)", len(refundRepeat.Rows))
 	t.say("dispute rows: %d", len(disputeResult.Rows))
+	disputeCounts := string(disputeWant.CountsToward())
+	if disputeCounts == "" {
+		disputeCounts = "none"
+	}
+	t.say("dispute reason code %q maps to category %q (counts toward %s)",
+		disputeCode, disputeWant, disputeCounts)
 	for _, row := range disputeResult.Rows {
 		t.say("  %s", rowLine(row))
 	}
