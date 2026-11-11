@@ -37,7 +37,9 @@ The Node major is the whole frontend pin: neither `web/package.json` nor
 `merchant/package.json` declares an `engines` field, so nothing but the
 base image and CI's `setup-node` decides which Node builds the app. Both
 `web-build` stages, the demo image's and the merchant image's, run the
-same `npm ci` and `npm run build` as the gate, on the same major.
+same `npm ci` and `npm run build` as CI, on the same major. The
+gate itself runs `npm ci --dry-run`, which checks the lockfile resolves
+without installing.
 
 ## Provision (operator, after this lands on main)
 
