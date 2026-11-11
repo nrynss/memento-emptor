@@ -640,7 +640,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, internal/memory/
-status:     not-started
+status:     claimed:t85l-feedback
 ```
 The T9.7 live run found `record_feedback` is not idempotent per purchase in the shopper's belief: repeated feedback appended the same capture's evidence (`ev_51c2d8`) three times to `blf_2b9d60` and lifted it Claimed → Building, while the pool row stayed one. A retried or duplicated feedback delivery must not multiply that purchase's evidence or move the belief's status.
 
