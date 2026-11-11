@@ -927,11 +927,101 @@ requires:   [T8.5j]
 fixture-ok: no
 size:       XS · mid
 owns:       tests/live/precedence/
-status:     claimed:t85q-live
+status:     in-review
 ```
 T8.5j's Done-when says a live run still passes after the harness marks its seeded statement. The offline check proves the mark path up to the served belief, but only a live run proves the seeded statement reaches `Recall` on the real hub. Run `tests/live/precedence/run.sh` once with the keys loaded, paste the transcript (redacted), and record the spend. Budget: under $0.20 of embedding spend (the fixture embedder spends $0).
 
 **Done when:** the live run passes with the mark assertion active; the transcript is recorded; test indices are erased and spend recorded.
+
+**Notes (in-review).** One live run of the committed driver, unchanged, with the keys loaded:
+
+```sh
+source tools/env.sh
+LAMBO_BIN=/tmp/opencode/t85q-lambo/lambo OUT=tests/live/precedence/out bash tests/live/precedence/run.sh
+```
+
+The binary was the v0.10.1 release asset, downloaded and checked against its published `.sha256` (`b04eeab4…`), the same asset `deploy/Dockerfile` fetches and verifies. The cargo build at `~/work/lambo/target/release/lambo` also reports `lambo 0.10.1` but hashes `a1b4da7f…`, so it is not that asset; the run used the verified one. Deployment: the T0.12 Elastic project, with the test-prefixed recall indices `t85b-*` and the fit index `t85b-fit-rows`; the hub runs store-only (T8.1c), so no deployed recall index is read or written. Embedder: fixture, in-process vectors, no embedding endpoint called. Classifier: recording replay, no model call. The statement step ran with T8.5j's mark assertion active and passed all of its checks.
+
+The transcript, verbatim except the loopback address and port (shown as `<loopback>`) and the runner's last line, which names the local `out/` path:
+
+```
+T8.5b live layer: recall never refuses, and says which step decided
+hub binary: lambo 0.10.1
+deployment: <deployment> (elastic, T0.12's project)
+embedder: fixture (in-process vectors; no embedding endpoint called)
+classifier: recording replay (no model call)
+budget: under $0.20 of embedding spend; test sessions and indices removed afterwards
+
+== 0. the test namespaces are clean
+-- prefix listing before: GET /_cat/indices/t85b-* -> []
+
+-- hub up: addr=<loopback> (T8.1 shape, recall prefix t85b-)
+
+== 1. the test fit index
+-- create: PUT /t85b-fit-rows with the recorded mapping -> ok
+-- seeded pool population: 10 rows on brand-x-001/shirts/regular size M (8 small, 1 large, 1 fits-well)
+
+== 2. one case first, then its cost
+-- standing correction corr_000001 recorded with no belief: Claimed, uncontradicted
+-- correction decides: guidance "Take size M for Brand X"
+-- spend after one case: $0.00 of embedding spend (fixture embedder: vectors in process); elastic is test-prefixed churn only
+-- under the $0.20 budget; continuing with the other steps
+
+== 3. the cross-session correction holds
+-- fresh hub MCP session to the same shopper session: same correction corr_000001 still decides
+-- rebuilt layer over the same standing dir: standing corr_000001 re-recorded, still decides
+
+== 4. the pool decides for a new shopper
+-- pool decides: Earned small, seeded 10 live 0, guidance "Size up to L for brand-x-001: 8 of the 10 fit-classified settled purchases at size M came back too small, against 1 too large."
+
+== 5. own evidence beats a disagreeing pool
+-- reason WH-2EV-01 "it swims on me, far too big": category=fit_too_large conf=1.00 accepted
+-- reason WH-2EV-02 "it swims on me, far too big": category=fit_too_large conf=1.00 accepted
+-- reason WH-2EV-03 "it swims on me, far too big": category=fit_too_large conf=1.00 accepted
+-- three too-large returns: belief blf_000001 Claimed/None, guidance "Take size S for Brand X: your own 3 returns say it runs large, ahead of the pool."
+-- the Earned-small pool rides along overridden: seeded 10 live 3
+
+== 6. a general statement decides with nothing else
+-- statement decides: guidance "Take size M for Brand S: the shopper's usual size.", belief seed_stmt_001 seeded=true
+
+== 7. nothing decides, and recall still answers
+-- nothing decides: GuidanceNone, no refusal: "No memory applies yet: no correction, no fit evidence, no pool and no general statement. Ask the shopper which size they usually take."
+
+-- probe: the consulted-but-empty pool serves
+-- full-line recall on the empty line serves the empty pool: pool null, lookup "consulted", guidance "No memory applies yet: no correction, no fit evidence, no pool and no general statement. Ask the shopper which size they usually take."
+
+== 8. the declared view re-links across a restart and a divergent rebuild
+-- reason WH-2EV-01 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted
+-- reason WH-2EV-02 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted
+-- reason WH-2EV-03 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted
+-- before restart: correction corr_000001 declared against belief blf_000001, guidance "Take size M for Brand X"
+-- after restart: the declared view corr_000001 keeps its force by its paired subject; guidance "Take size M for Brand X"
+-- reason WH-2EV-01 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted
+-- reason WH-2EV-02 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted
+-- reason WH-2EV-03 "too tight in the shoulders": category=fit_too_small conf=1.00 accepted
+-- after divergent rebuild: correction corr_000001 re-linked from stale belief blf_000001 to rewritten belief blf_000003; guidance "Take size M for Brand X"
+
+model spend: $0.00 (no model call: every answer replays a labelled recording)
+elastic: test-prefixed index churn only (one hub prefix, one fit index); deleted below
+
+-- hub stopped (one SIGTERM, then waited, so the write-behind log drains)
+
+-- cleanup: deleted 3 index(es) under t85b-
+-- prefix listing after: GET /_cat/indices/t85b-* -> []
+-- run dir removed (store, configs, standing dir, child logs); nothing keyed survives locally
+
+PASS T8.5b live layer: every step decided, both re-link tripwires pin the fix, the namespace erased
+--- cleanup check: the t85b- prefix is empty ---
+[]
+prefix t85b- is empty
+--- leak check: no key or deployment location entered tests/live/precedence ---
+```
+
+The mark assertion is the `seeded=true` on `seed_stmt_001`: the recall served exactly one belief, the seeded statement, carrying the mark `LoadSeed` copied from the row. The pool's seeded/live split (`10`/`0`, and `10`/`3` beside the shopper's own writes) is the same rule on the other seeded rows. The one-return tripwire is not in this driver: it lives in `tests/live/layer` (T8.5u), which this task neither ran nor owns; the own-evidence shopper here serves its Claimed three-return belief, and the pool rides along overridden.
+
+Cleanup: the driver deleted the 3 `t85b-*` indices, its after listing and `run.sh`'s independent listing are both `[]`, and the run dir (store, configs, standing dir, child logs) was removed. `run.sh`'s leak check over `tests/live/precedence/` excluding `out/` found no key or deployment location. The transcript is the git-ignored `tests/live/precedence/out/transcript.txt`; this note carries the redacted excerpt.
+
+Spend: $0.00 embedding (fixture embedder, no endpoint called) and $0.00 model (recording replay), against the $0.20 budget. Elastic use was test-prefixed index churn only — three `t85b-*` indices created, written and deleted on the existing T0.12 project, no new billable resource. Render, PayPal, Channel3, Jev and the discount credits were untouched.
 
 ---
 
