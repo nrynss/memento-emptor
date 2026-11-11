@@ -66,6 +66,48 @@ Editable rows: a shopper's edit goes through `record_correction`, so it follows 
 
 ---
 
+### T4.5: The contest route (High)
+```yaml
+requires:   [T4.4, T9.2]
+fixture-ok: yes
+size:       S · mid
+owns:       web/src/routes/ledger/, web/src/lib/ledger/, web/src/lib/contest/
+status:     claimed:t45-contest-route
+```
+The P4 review found the contest path has no route: `/ledger` is read-only, `/belief` renders only the standing editor, and no route passes a belief id to the declared contest editor. `contestEditColumnDefs` is never used and the built ledger has no "Contest" string. A shopper cannot contest a belief in the app, so T4.4's exit criterion is unmet. Add the contest column to the ledger, open the editor per row with a unique form id, let the existing state apply the layer's answer, and link `/ledger` to `/belief` (which should honour a belief query parameter). Correct T9.2's task line that says the ledger shows precedence/pool/opt-out when only `/belief` does.
+
+**Done when:** a shopper can open the contest editor from the ledger for a belief row, submit a correction, and see the layer's answer with the belief and its evidence kept; a component test covers the flow; the ledger and belief pages link both ways; the gate passes.
+
+---
+
+### T4.6: One shopper at a time on the belief page (Medium)
+```yaml
+requires:   [T9.2]
+fixture-ok: yes
+size:       S · mid
+owns:       web/src/routes/belief/, web/src/lib/ledger/pooling.ts, web/src/lib/contest/fixture.ts
+status:     not-started
+```
+The P4 review found the pivot's pooling and standing fixtures are built with the recall case's shopper but answer only the demo shopper: a `shopper_02` pooling call returns `shopper_01`'s answer (`{answered: 'shopper_01', removed: 3}`), a `shopper_02` standing correction throws, and `PoolingToggle` keeps its opening choice without a key, so switching cases leaves the previous shopper's result on screen. Make each fixture answer the shopper it was built for (reject a mismatch), reset the toggle when the case changes, and make the frozen standing request and fixture agree.
+
+**Done when:** every pooling and standing fixture answers only its own shopper and rejects another; switching the case remounts the toggle; the frozen example and the fixture agree; a test covers a cross-shopper rejection; the gate passes.
+
+---
+
+### T4.7: Plain language in the why cards (Low)
+```yaml
+requires:   [T4.3]
+fixture-ok: yes
+size:       XS · mid
+owns:       web/src/lib/why/
+status:     not-started
+```
+The P4 review found the why cards print the raw reason category (`fit_too_small`) above the shopper's words, and the trace note promises a "live mode" the fixture-only ledger does not have.
+
+**Done when:** the cards show the shopper's words first with the category named in plain language (or omitted), the note describes what exists, and the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] The ledger reads through a typed client (T4.1).
