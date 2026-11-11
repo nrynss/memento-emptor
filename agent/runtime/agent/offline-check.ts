@@ -31,6 +31,7 @@ import {
   CodeBadLimit,
   CodeCatalogBadResponse,
   CodeCatalogUnconfigured,
+  CodeCatalogUnreachable,
   CodeEmptyQuery,
   CodeInvalidWant,
   type CatalogTransport,
@@ -1005,6 +1006,22 @@ try {
 check(
   "a deployment without a catalog key fails loudly",
   catalogUnconfigured instanceof CatalogError && catalogUnconfigured.code === CodeCatalogUnconfigured,
+);
+// A catalog that never answers is a reported failure too. The port is the
+// lowest one and nothing listens there, so the refusal is local and
+// immediate: no key, no network and no second of waiting.
+let catalogUnreachable: unknown;
+try {
+  await httpCatalogTransport({ url: "http://127.0.0.1:1/v1", key: "offline-check-key" }).search(
+    "mens oxford",
+    1,
+  );
+} catch (cause) {
+  catalogUnreachable = cause;
+}
+check(
+  "a catalog that cannot be reached is a reported failure, never an empty shelf",
+  catalogUnreachable instanceof CatalogError && catalogUnreachable.code === CodeCatalogUnreachable,
 );
 
 stub.stop(true);
