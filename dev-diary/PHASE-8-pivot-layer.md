@@ -837,11 +837,13 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/
-status:     claimed:t85r-poolstep
+status:     in-review
 ```
 The P7 review found `tools.go` sets `presence.Pool` from the pool view alone, so a Building pool with no leading direction wins precedence step 3 and `guidanceForPool` reads "no direction" as "runs large": four distinct fits-well shoppers with no returns and a shopper with no history produce "Size down to S for brand-x-001: 0 of the 4 fit-classified settled purchases at size M came back too large, against 0 too small." A level Building pool (2/2) takes the same path. product.md says the pool decides only when it says the product runs off-size.
 
 **Done when:** a pool with no direction never decides a recommendation (the next step decides, or the pool rides as context without a size); both counts (0/4 and 2/2) are regression cases; the guidance text cannot read a missing direction as a direction; the gate passes.
+
+**Notes (in-review).** `lookupPool` now yields a `*poolStep` only when the pool read names a direction: a Claimed pool, a Building pool with the directions level, and a Building pool whose only fit outcomes are fits-well are still consulted but yield no step. That step is the single source of both the pool's presence in precedence and its guidance: presence is `step != nil`, the served view rides in `step.view`, and `guidanceForPool` now takes the direction as an argument and answers with the nothing-applies guidance when it is none, so no path can read a missing direction as "runs large". `internal/api/server/pool_step_test.go` pins the four served shapes (four fits-well shoppers with no returns, a level 2/2 pool, a Building small pool that still sizes up to L, and a statement-only shopper whose statement decides), the own-evidence case whose guidance no longer says "ahead of the pool" when the pool names nothing, and the guidance builder's guard directly. No fixture changed: every frozen recall example either carries a direction (Earned small) or no pool at all, so `TestInterfaceDocExamples` stayed byte-exact. One thing the next agent should not have to rediscover: `product_fit` still serves a Building pool with `direction: null`, and that is intended — the merchant read reports the counts; only recall's precedence step requires a direction. The `precedence` package's own `Presence` doc is unchanged, since the gate belongs at the server's call site and no shared type moved.
 
 ---
 

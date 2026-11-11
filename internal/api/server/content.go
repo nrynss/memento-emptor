@@ -189,18 +189,25 @@ func evidenceCount(n int) string {
 
 // guidanceForPool tells the agent what to recommend from the pooled
 // product fit, adjusted from the shopper's usual size: up when the pool
-// says the product runs small, down when it runs large. The counts ride
-// along, so the agent cites the pool instead of the shopper.
-func guidanceForPool(view contract.PoolView, brand string) contract.GuidanceView {
+// says the product runs small, down when it runs large. direction is the
+// direction the pool named when recall took its step: a direction that
+// names neither way has no size to recommend, so it guides nothing rather
+// than reading the gap as large. The counts ride along, so the agent
+// cites the pool instead of the shopper.
+func guidanceForPool(view contract.PoolView, direction domain.FitDirection, brand string) contract.GuidanceView {
 	size := view.Size
-	direction := domain.FitDirectionNone
-	if view.Direction != nil {
-		direction = *view.Direction
-	}
 	small := view.Counts.Returns.TooSmall + view.Counts.Feedback.TooSmall
 	large := view.Counts.Returns.TooLarge + view.Counts.Feedback.TooLarge
 	fit := small + large + view.Counts.Feedback.FitsWell
-	up := direction == domain.FitDirectionSmall
+	var up bool
+	switch direction {
+	case domain.FitDirectionSmall:
+		up = true
+	case domain.FitDirectionLarge:
+		up = false
+	default:
+		return noGuidance()
+	}
 	recommend := neighbourSize(size, up)
 	verb, blamed, excused := "up to", "too small", "too large"
 	if !up {

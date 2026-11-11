@@ -284,13 +284,28 @@ func poolQuery(req contract.RecallRequest, usual domain.UsualSize) (domain.Produ
 	return domain.ProductLine{Brand: req.BrandID, Category: req.Category, FitHandle: req.FitHandle}, size, true
 }
 
+// poolStep is one recall's pool contribution: the view recall serves and
+// the direction the pool names. Only a pool that names a direction has a
+// step, because a step adjusts the recommendation and only an off-size
+// direction can adjust it: a Claimed pool, a Building pool with the two
+// directions level, and a Building pool whose only fit outcomes are
+// fits-well all name none, so they take no step and guide no size.
+type poolStep struct {
+	// view is the pooled product fit as recall serves it.
+	view contract.PoolView
+	// direction is the direction the pool rates, small or large.
+	direction domain.FitDirection
+}
+
 // lookupPool reads the pooled product fit for one recall. Without a wired
 // pool index, or without a full line and size to read, there is nothing
 // to consult: the lookup reads unavailable and recall carries on without
 // the pool, never pretending an empty one. Any index error answers
 // unavailable the same way: recall never refuses for the pool's sake. A
-// Claimed pool says nothing and is consulted but absent.
-func (s *Service) lookupPool(ctx context.Context, req contract.RecallRequest, usual domain.UsualSize) (*contract.PoolView, contract.PoolLookup) {
+// pool that names no direction says nothing about how the size runs off,
+// so it is consulted but yields no step: recall's pool precedence rung
+// applies only when the pool says the product runs off-size.
+func (s *Service) lookupPool(ctx context.Context, req contract.RecallRequest, usual domain.UsualSize) (*poolStep, contract.PoolLookup) {
 	if s.pool == nil {
 		return nil, contract.PoolUnavailable
 	}
@@ -302,11 +317,10 @@ func (s *Service) lookupPool(ctx context.Context, req contract.RecallRequest, us
 	if err != nil {
 		return nil, contract.PoolUnavailable
 	}
-	if fit.Verdict.Status == domain.StatusClaimed {
+	if fit.Verdict.Status == domain.StatusClaimed || fit.Verdict.Direction == domain.FitDirectionNone {
 		return nil, contract.PoolConsulted
 	}
-	view := poolViewOf(fit)
-	return &view, contract.PoolConsulted
+	return &poolStep{view: poolViewOf(fit), direction: fit.Verdict.Direction}, contract.PoolConsulted
 }
 
 // poolViewOf maps one pool read to its wire form. The precedence step is

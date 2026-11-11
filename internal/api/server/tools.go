@@ -268,8 +268,8 @@ func (s *Service) newBelief(ctx context.Context, st *shopperState, kind domain.B
 // correction ships both at the top level and inline, with the guidance
 // pointing at it, so an agent cannot recommend from the belief alone.
 // Recall never refuses: thin evidence comes back labelled thin, and a
-// pool with nothing to say leaves a null pool with an unavailable lookup
-// rather than an empty pool.
+// pool that counts nothing or names no direction comes back as a null
+// pool with a consulted lookup rather than an empty pool.
 func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contract.RecallResponse, error) {
 	if strings.TrimSpace(req.ShopperID) == "" {
 		return contract.RecallResponse{}, fmt.Errorf("server: recall: %w", ErrMissingShopper)
@@ -294,11 +294,11 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 	}
 	served := recallBeliefs(views, req.BrandID)
 	usual := usualSize(st, served)
-	poolView, lookup := s.lookupPool(ctx, req, usual)
+	pooled, lookup := s.lookupPool(ctx, req, usual)
 	overriding := overridingCorrection(st, served, req.BrandID)
 	presence := precedence.Presence{
 		Correction: overriding != nil,
-		Pool:       poolView != nil,
+		Pool:       pooled != nil,
 	}
 	for _, view := range served {
 		if beliefStep(view) == contract.GuidanceOwnEvidence {
@@ -313,9 +313,9 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 		view := precedence.View(step, outcome.Winner)
 		served[i].Precedence = &view
 	}
-	if poolView != nil {
+	if pooled != nil {
 		view := precedence.View(contract.GuidancePool, outcome.Winner)
-		poolView.Precedence = &view
+		pooled.view.Precedence = &view
 	}
 	name := brandName(st, req.BrandID)
 	if strings.TrimSpace(req.BrandID) != "" && name == "" {
@@ -326,15 +326,24 @@ func (s *Service) Recall(ctx context.Context, req contract.RecallRequest) (contr
 	case contract.GuidanceCorrection:
 		guidance = guidanceForCorrection(*overriding, correctionBrand(st, overriding), correctionBelief(st, overriding))
 	case contract.GuidanceOwnEvidence:
-		guidance = guidanceForOwnEvidence(strongestOwn(served), poolView != nil && outcome.Overridden[contract.GuidancePool] == contract.GuidanceOwnEvidence)
+		guidance = guidanceForOwnEvidence(strongestOwn(served), pooled != nil && outcome.Overridden[contract.GuidancePool] == contract.GuidanceOwnEvidence)
 	case contract.GuidancePool:
-		guidance = guidanceForPool(*poolView, name)
+		guidance = guidanceForPool(pooled.view, pooled.direction, name)
 	case contract.GuidanceStatement:
 		guidance = guidanceForStatement(strongestStatement(served))
 	default:
 		guidance = noGuidance()
 	}
-	return assembleRecall(req.ShopperID, served, poolView, lookup, overriding, guidance, len(st.pending), traceOf(req.TraceID))
+	return assembleRecall(req.ShopperID, served, recalledPool(pooled), lookup, overriding, guidance, len(st.pending), traceOf(req.TraceID))
+}
+
+// recalledPool returns the pool view recall serves: the step's view when
+// the pool names a direction, and nil when it has nothing to say.
+func recalledPool(step *poolStep) *contract.PoolView {
+	if step == nil {
+		return nil
+	}
+	return &step.view
 }
 
 // correctionBrand names the subject a correction was recorded about: the
