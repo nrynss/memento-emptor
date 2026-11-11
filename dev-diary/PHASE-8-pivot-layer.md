@@ -314,7 +314,7 @@ Wire the pivot into the served layer. `recall_for_purchase` reads the shopper's 
 
 **Notes (in-review).** `internal/precedence/` is the pure order: `Decide` over presence (correction, own evidence, pool, statement), the winner plus which present steps ride overridden, with the table test covering every step deciding, every disagreeing pair, the three-way case and the unreachable pool. `internal/standing/` is the layer-owned journal store: one file per shopper with the pooling choice, the correction views and the undeclared journal entries, written atomically after every mutation and restored when the partition is created.
 
-The served layer serves the pivot when the pivot half is wired (pool index, fit index, identity salt, line resolver, standing directory); with them absent it keeps the pre-pool shape, so the frozen base fixtures still describe it. Recall serves fit beliefs at Candidate and above plus general statements, resolves the usual size from kept and fits-well tallies with the statement as fallback, consults the pool at the usual size or the size under consideration, and marks every item with its step. Any index error answers unavailable and never an empty pool. `record_correction` with no belief id records a standing: named under the most recent brand context and journalled, declared against an existing match at once and against a later match when the belief is written; unscoped while the layer knows no brand, applied spanning every brand and never declared. Every belief write goes through `EnsureBeliefDeclaring`. `product_fit` maps the reader's counts with both index spellings of the non-fit reasons folded; `set_pooling` records the choice in the shopper's own memory, calls `Forget` with the session's full line list, and retries an incomplete delete before it reports not done. The deployed webhook route reads the raw body bounded, resolves the shopper from the custom id and passes `ingest.Delivery` to the shopper's service. `/calls` stays agent-only and honours the guard's `X-Memento-Shopper` header; the MCP decoder takes one object with unknown fields rejected. `memento key issue` mints one caller key with `auth.IssueKey`, printing the token once. The nine-tools comments were already eleven on main (sweep d0f71f3), so nothing here renamed them.
+The served layer serves the pivot when the pivot half is wired (pool index, fit index, identity salt, line resolver, standing directory); with them absent it keeps the pre-pool shape, so the frozen base fixtures still describe it. Recall serves fit beliefs at Candidate and above plus general statements (superseded by T8.5i: every fit belief for the brand is served, at any standing, so a lone return arrives labelled Claimed), resolves the usual size from kept and fits-well tallies with the statement as fallback, consults the pool at the usual size or the size under consideration, and marks every item with its step. Any index error answers unavailable and never an empty pool. `record_correction` with no belief id records a standing: named under the most recent brand context and journalled, declared against an existing match at once and against a later match when the belief is written; unscoped while the layer knows no brand, applied spanning every brand and never declared. Every belief write goes through `EnsureBeliefDeclaring`. `product_fit` maps the reader's counts with both index spellings of the non-fit reasons folded; `set_pooling` records the choice in the shopper's own memory, calls `Forget` with the session's full line list, and retries an incomplete delete before it reports not done. The deployed webhook route reads the raw body bounded, resolves the shopper from the custom id and passes `ingest.Delivery` to the shopper's service. `/calls` stays agent-only and honours the guard's `X-Memento-Shopper` header; the MCP decoder takes one object with unknown fields rejected. `memento key issue` mints one caller key with `auth.IssueKey`, printing the token once. The nine-tools comments were already eleven on main (sweep d0f71f3), so nothing here renamed them.
 
 Decisions the next agent should not have to re-make:
 
@@ -598,7 +598,7 @@ requires:   [T8.5]
 fixture-ok: yes
 size:       S · mid
 owns:       internal/api/server/, tests/live/layer/
-status:     in-review
+status:     done
 ```
 The P2 review found `internal/api/server/recall.go` serves Venerable/Candidate fit beliefs and evidenceless statements but drops a fit belief with one return (`GraphNone`, one evidence), with a comment saying "recall never withholds, but one return is a question, not an answer" — which is withholding. `product.md` says it never refuses, thin evidence comes back labelled thin, status is a label never a gate, and own evidence counts at any status. The T8.5 handoff recorded this and assigned it to T7.4, which could not reach this package and never mentioned it, so the finding is now owned here. Round 2's arm 4 relies on thin evidence being served.
 
@@ -851,6 +851,20 @@ status:     not-started
 T8.5i flipped `tests/live/layer`'s one-return tripwire but did not run it; only a live run proves the served thin belief and its guidance end to end. Run it once with the keys loaded, record the redacted transcript and the spend (the fixture embedder spends $0), and erase the test indices.
 
 **Done when:** the live layer run passes with the thin-evidence assertion active; the transcript is recorded; indices erased and spend recorded.
+
+---
+
+### T8.5v: The own-evidence sentence tells the truth about the evidence
+```yaml
+requires:   [T8.5i]
+fixture-ok: yes
+size:       XS · mid
+owns:       internal/api/server/
+status:     not-started
+```
+The T8.5i review found `guidanceForOwnEvidence` defaults the direction clause to "runs small" unless the belief's value reads large, and `poolDisagrees` means "a pool is present and own evidence overrode it", not "the pool recommends a different size". A lone fits-well return is served (T8.5i) with the sentence "Take size M for Brand X: your own one return says it runs small, ahead of the pool." — the size is right but the sentence misstates the evidence and self-contradicts, and the "ahead of the pool" clause fires when the pool merely agrees. Make the clause derive from the belief's own value (fits-well, too small, too large) and say whether the pool agrees, is overridden, or is absent.
+
+**Done when:** a fits-well own-evidence recall names fits-well and does not say "runs small"; a pool that agrees is not called overridden; the existing own-evidence texts for too-small/too-large are unchanged where correct; tests pin all three; the gate passes.
 
 ---
 

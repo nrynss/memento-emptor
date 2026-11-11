@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 22 / 31 | In progress (T8.5i, T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5s, T8.7b) |
+| P8 | 23 / 34 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.7b) |
 | P9 | 21 / 27 | In progress (T9.11, T9.14, T9.15, T9.17, T9.19, T9.20) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5i: Recall serves thin evidence (done)
+
+**What exists.** `recallBeliefs` no longer gates on standing: every fit belief for the requested brand is served, so a lone return arrives as `Claimed`/`None` with its one evidence row, its `own_evidence` precedence step, and the pool beside it marked overridden. The correction rule is untouched. The seed already carried the case (`blf_2b9d60`, a one-row fits-well belief), and `assertRecallPivot` now pins it; `baseRecallBeliefs` is the single filter both fixture comparisons use. The now-reachable one-return guidance sentence was ungrammatical and is fixed; two- and three-return texts are byte-identical.
+
+**What surprised.** The thin belief was in the frozen fixtures all along, withheld from every seeded recall. The guidance still has a wording defect (a fits-well belief is called "runs small", and "ahead of the pool" fires when the pool agrees) → **T8.5v**. The demo driver asserts the old withholding → **T8.5t**; the live layer tripwire is flipped but unrun → **T8.5u**.
+
+**The next agent should not have to work out.** T8.5's own "Candidate and above" rule and "lone return stays on the ledger" advice are marked superseded in the phase notes.
 
 ### T9.14: The relay's status mapping is tested (done)
 
