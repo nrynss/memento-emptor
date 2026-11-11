@@ -358,10 +358,15 @@ type RecallRequest struct {
 	// LineName is the product line under consideration, when known.
 	LineName string `json:"line_name,omitempty"`
 	// Category is the product category slug under consideration, when
-	// known. With the brand and the fit handle it names the product line
-	// the pool is keyed by.
+	// known. With the brand it names the product line the pool is read
+	// for: the layer resolves the fit handle from its own population when
+	// exactly one line matches the pair.
 	Category string `json:"category,omitempty"`
-	// FitHandle is the candidate line's cut, when known.
+	// FitHandle is the candidate line's cut, when known. When it is
+	// passed it names the line outright; when it is absent the layer
+	// resolves it from the population's one line matching the brand and
+	// category, and a missing or ambiguous line leaves the pool
+	// unconsulted.
 	FitHandle string `json:"fit_handle,omitempty"`
 	// SKU is the candidate variant under consideration, when known.
 	SKU string `json:"sku,omitempty"`
@@ -648,9 +653,12 @@ const (
 	// not.
 	PoolConsulted PoolLookup = "consulted"
 	// PoolUnavailable means nothing could be consulted: no pool index is
-	// wired, the request named no full line and size, or the index could
-	// not be reached. Recall carries on without it and never pretends an
-	// empty pool.
+	// wired, the request named no line and size, no single product line
+	// matches the request's brand and category, or the index could not be
+	// reached. A request that names a brand and category but no fit handle
+	// takes the one line the population seeds for them, and a missing or
+	// ambiguous line is answered unavailable rather than guessed. Recall
+	// carries on without it and never pretends an empty pool.
 	PoolUnavailable PoolLookup = "unavailable"
 )
 

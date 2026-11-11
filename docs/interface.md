@@ -69,13 +69,15 @@ request ids. The layer only remembers what happened to the money.
 ## recall_for_purchase
 
 Call it before recommending. Brand scopes the recall; line, category, fit
-handle, SKU and the leaned-toward size narrow it when known. The brand,
-the category and the fit handle together name the product line the pool
-is keyed by, so pass them when the candidate is known. It returns the
-shopper's own beliefs, the pooled product fit when the pool has something
-to say, and any correction that overrides them. **It never refuses**:
-thin evidence comes back labelled thin, and an empty answer says so
-plainly.
+handle, SKU and the leaned-toward size narrow it when known. The brand and
+the category name the product line the pool is read for; pass the fit
+handle too when the candidate's cut is known, and the layer resolves it
+from its own population when exactly one line matches the brand and
+category. A missing or ambiguous line answers `pool_lookup: unavailable`
+instead of a guessed pool. It returns the shopper's own beliefs, the
+pooled product fit when the pool has something to say, and any correction
+that overrides them. **It never refuses**: thin evidence comes back
+labelled thin, and an empty answer says so plainly.
 
 Request:
 
@@ -91,9 +93,10 @@ Request:
 ```
 
 `category` and `fit_handle` are optional and omitted above; pass them when
-the candidate is known, because the pool is keyed by the brand, category
-and fit handle together. `line_name` and `sku` narrow the shopper's own
-beliefs; they do not name a pool line on their own.
+the candidate is known. The brand and the category name the pool line,
+with the fit handle resolved from the population when exactly one line
+matches them. `line_name` and `sku` narrow the shopper's own beliefs; they
+do not name a pool line on their own.
 
 Response. The belief says size L, Earned over three documented returns,
 but the shopper's correction says M — so the status reads Out of true
@@ -256,8 +259,12 @@ the best thing the layer knows.
 `pool_lookup` says whether the pool was consulted: `consulted` when the
 index answered, with `pool` null when it had nothing to say; `unavailable`
 when nothing could be consulted — no index is wired, the request named no
-full line and size, or the index could not be reached. Recall carries on
-without a pool and never pretends an empty one.
+line and size, no single product line matches the request's brand and
+category, or the index could not be reached. A request that names a brand
+and category but no fit handle takes the one line the population seeds for
+them, and a missing or ambiguous line answers unavailable rather than a
+guessed pool. Recall carries on without a pool and never pretends an empty
+one.
 
 ### Where the general statement comes from
 
