@@ -21,7 +21,7 @@ driver is a main program, run once by hand.
 | correction after a layer restart | undeclared standing re-recorded, still decides |
 | own evidence (three too-large returns) | belief beats the disagreeing Earned-small pool, which rides along overridden with the `ahead of the pool` text |
 | pool (new shopper, seeded Earned-small line) | `GuidancePool`, exact counts and seeded split, exact guidance text |
-| statement (seeded general statement only) | `GuidanceStatement`, the usual-size text |
+| statement (seeded general statement only) | `GuidanceStatement`, the usual-size text, one served belief `seed_stmt_001` carrying the seeded mark |
 | nothing (fresh shopper, lineless recall) | `GuidanceNone`, never a refusal |
 | probe: consulted-but-empty pool | serves the frozen `example-none` shape: null pool, consulted lookup, `GuidanceNone` |
 | declared view across a restart and a divergent rebuild | the correction decides by the subject its entry names after the restart, re-links to the rewritten belief after the rebuild, and no recall refuses |
