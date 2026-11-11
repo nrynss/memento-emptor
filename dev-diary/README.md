@@ -161,7 +161,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 |---|---|---|
 | P0 | 12 / 12 | Done |
 | P1 | 8 / 8 | Done |
-| P2 | 15 / 16 | In progress (T2.3c) |
+| P2 | 17 / 18 | In progress (T2.3c) |
 | P3 | 6 / 6 | Done |
 | P4 | 8 / 10 | In progress (T4.9, T4.10) |
 | P5 | 10 / 11 | In progress (T5.8b) |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T2.5b: Keel pin and seller subject (done)
+
+**What exists.** The redundant `internal/version/pin.go` blank import is gone; `go mod why` resolves Keel through `internal/api/server` and `internal/auth`, and `go mod tidy -diff` keeps the requirement while pruning 27 `go.sum` module-only lines. The seller-subject decision is recorded in `docs/architecture.md`: dispute records do carry the payment account (`seller.merchant_id`/`payee`/`payer`), but that is one account for the whole layer, so the belief keys to the brand (`seller-for-{brand}`); the marketplace condition that would change it is stated. The `content.go` comment says the same. Review mutation-checked that restoring `pin.go` changed nothing and that altering the derivation fails the recorded graph content.
+
+**What surprised.** The task text's premise ("dispute records carry no seller id") was false; they carry an account, not a per-brand seller. Every committed merchant id is the same redaction placeholder, so the "one account" sameness rests on the live reads.
+
+**The next agent should not have to work out.** `go.sum`'s 27 unused module-only lines are harmless; nothing owns `go.mod`/`go.sum` tidy.
 
 ### T1.1d: One unknown-code rule (done, P1 closed)
 
@@ -1361,7 +1369,7 @@ Full issue text lives on GitHub. When the fixes release, the follow-up here is: 
 
 **What exists.** An Apache-2.0 licence, a Go module on Keel `v0.9.0` with `internal/version`, and a Svelte 5 SvelteKit app under `web/` on Chaaya `0.6.0`. `tools/check.sh` runs gofmt, `go vet`, `go test -race`, a two-way lockfile check, svelte-check, eslint, vitest and the web build. CI runs the same gate. `tools/env.sh` exports the seven code-read variables from the keyring, leaves a preset variable alone, and names a missing key without printing a value. `AGENTS.md` carries the developer rules, the gate, and every key's `secret-tool lookup` command. `dev-diary/research/README.md` sets the evidence and recording rules.
 
-**What surprised.** The licence is Apache-2.0, by the user's decision, not MIT. The task's `owns` line named only `web/package.json`, so it was widened to `web/` to cover the app the task writes. An independent review found the web test step vacuous and the Go filter too broad. The web app now carries a real test, the gate checks the lockfile in both directions, and the Go filter drops only `web/node_modules`. `go mod tidy` keeps the Keel requirement because `internal/version/pin.go` carries a `tools`-tagged blank import.
+**What surprised.** The licence is Apache-2.0, by the user's decision, not MIT. The task's `owns` line named only `web/package.json`, so it was widened to `web/` to cover the app the task writes. An independent review found the web test step vacuous and the Go filter too broad. The web app now carries a real test, the gate checks the lockfile in both directions, and the Go filter drops only `web/node_modules`. `go mod tidy` keeps the Keel requirement because `internal/api/server` and `internal/auth` import `keel/wire` for real (T2.5b later deleted the redundant `internal/version/pin.go` blank import).
 
 **The next agent should know.** The web app builds static with a `200.html` fallback, and T1.1 can change the adapter. CI runs green on `main`: the first push ran the gate and passed. The workflow's `checkout`, `setup-go` and `setup-node` actions still target Node 20 and GitHub forces them onto Node 24, which warns but does not fail.
 

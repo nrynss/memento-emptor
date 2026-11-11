@@ -448,8 +448,8 @@ Findings, with severity and owner:
 requires:   [T2.5]
 fixture-ok: yes
 size:       XS · mid
-owns:       internal/version/, internal/domain/, docs/architecture.md
-status:     in-review
+owns:       internal/version/, internal/domain/, internal/api/server/, docs/architecture.md
+status:     done
 ```
 `internal/version/pin.go`'s blank Keel import is redundant (the server and auth import `keel/wire` for real) and its comment ("until the first package imports Keel for real") is now false. Seller subjects are `seller-for-{brand}` because dispute records carry no seller id; decide the seller-id source or record the derivation as the decision.
 
