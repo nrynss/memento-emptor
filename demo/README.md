@@ -210,8 +210,8 @@ T9.23's re-record; gap 4 is decided by T9.24 as a read-only demonstration. Gaps
    the demo story still replays, labelled. The run-6 screens are that replay
    and stay labelled as such. Closed by T4.8.
 4. **The seller belief never reaches recall**, and the agent key is refused
-   on ledger reads, so no agent turn can mention the dispute; the live
-   reads prove sizing is untouched. **Decided by T9.24**: that is the
+   on ledger reads, so no agent turn can reach the dispute by reading; the
+   live reads prove sizing is untouched. **Decided by T9.24**: that is the
    design, so the step is a read-only demonstration rather than an agent
    turn — recall is the recommendation surface and serves the fit belief and
    the pool, while seller evidence is not a recommendation.

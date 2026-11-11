@@ -18,8 +18,10 @@ import (
 // and the pool, and the seller belief is absent by design: recall is the
 // recommendation surface, seller evidence is not a recommendation, and
 // serving it there would put a non-fit belief in the agent's
-// recommendation path. No agent turn can mention the dispute, which is why
-// the step is recorded as a read-only demonstration rather than a turn.
+// recommendation path. No agent turn can reach the dispute by reading:
+// recall does not serve its id, and the ledger reads that name it are
+// shopper-only. That is why the step is recorded as a read-only
+// demonstration rather than a turn.
 func TestDisputeReachesLedgerAndExplainNeverRecall(t *testing.T) {
 	ctx := context.Background()
 	svc, _ := pivotHarness(t, &fakePoolIndex{result: earnedSmallPool()}, &fakeFitIndex{}, "")

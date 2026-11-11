@@ -69,7 +69,7 @@ Fixed since this run: 3, 5, 6, 8 and 9 are closed in the tree (8 also on the
 served page after its next deploy); 7 is covered by T9.22's sequencing rule,
 proved by T9.23's re-record; 10's catalog tool is live (T9.20) and its
 candidate gap is T9.22/T9.23. 4 is decided by T9.24 as a read-only
-demonstration. Open: 1 and 2.
+demonstration. Open: 1, 2 and 10.
 
 1. **Day-one shopper recall refused** (401, `shopper_02`). Owner: **T9.15**
    (second shopper key); the demo cannot change a Render secret.
@@ -81,10 +81,10 @@ demonstration. Open: 1 and 2.
    `/ledger?t=` reads live and labels the source; without a token the demo
    story replays, labelled.
 4. **Seller belief never reaches recall**, and agent keys are refused on
-   ledger reads, so no agent turn can mention the dispute. **Decided by
-   T9.24**: that is the design, so step 5 is a read-only demonstration
-   rather than an agent turn — recall serves the fit belief and the pool, and
-   seller evidence is not a recommendation.
+   ledger reads, so no agent turn can reach the dispute by reading.
+   **Decided by T9.24**: that is the design, so step 5 is a read-only
+   demonstration rather than an agent turn — recall serves the fit belief
+   and the pool, and seller evidence is not a recommendation.
 5. **`record_feedback` duplicated a purchase in the belief.** **Closed by
    T8.5l**: a repeat answers the feedback on record without minting, appending
    or moving the status.
