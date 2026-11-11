@@ -19,9 +19,10 @@
  * beyond the cap message is memory-only; the production filesystem is
  * read-only, so nothing here writes to disk.
  *
- * Every /api/chat answer's status and body come from status.ts (400 invalid,
- * 429 exhausted, 502 relay failure), which relay.test.ts pins; a literal
- * status in this file is the drift that test refuses.
+ * Every /api/chat refusal or failure answer's status and body come from
+ * status.ts (400 invalid, 429 exhausted, 502 relay failure), which
+ * relay.test.ts pins; a literal status handed to json() is the drift that
+ * test refuses.
  */
 
 import { Agent } from "@mastra/core/agent";
