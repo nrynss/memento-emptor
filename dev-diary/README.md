@@ -168,7 +168,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 23 / 34 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.7b) |
-| P9 | 25 / 29 | In progress (T9.15, T9.17, T9.20, T9.21) |
+| P9 | 26 / 29 | In progress (T9.15, T9.17, T9.20) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
 ---
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T9.21: The agent packages are type-checked (done)
+
+**What exists.** Inside `check_agent`'s bun/modules guard, the gate now runs each package's own `tsc --noEmit -p tsconfig.json` after its offline check, so a type error fails the run; a missing `tsc` fails loudly rather than skipping. Both packages are green today; `typescript` was already a pinned devDependency, so no dependency or network was added. Review proved the failure paths (a string assigned to a number fails the gate; a renamed `tsc` fails it) and corrected two note claims: the skip is the guard's own (the frontend's fallback differs), and a missing binary reports "No such file or directory", not "command not found".
+
+**What surprised.** The gate's `go vet` failed spuriously twice because the shared Go build cache was being clobbered by concurrent worktrees; a private `GOCACHE` was green, and `go clean -cache` fixed the shared one.
+
+**The next agent should not have to work out.** The skip line names the offline check and the reason, not the typecheck; both steps are covered by the same guard.
 
 ### T4.8: The ledger reads live (done)
 
