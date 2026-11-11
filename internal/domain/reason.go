@@ -101,8 +101,8 @@ var ErrUnknownDisputeCode = errors.New("domain: unknown dispute code")
 // CategoryForDispute maps a dispute code to its reason category. Codes
 // outside the table are an error and count toward nothing: no code path
 // may turn a dispute into a belief without a matching reason. A caller
-// that must keep the outcome stores it with no classified reason instead
-// of dropping it.
+// that must keep the outcome takes StoredCategoryForDispute, which stores
+// it with no classified reason instead of dropping it.
 //
 // The not-as-described code files under the damage category: the goods
 // arrived and were wrong, which is the seller signal damage already
