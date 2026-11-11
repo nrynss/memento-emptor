@@ -690,6 +690,34 @@ The T1.1b review found an unknown-code dispute is stored, is kept in the ledger 
 
 ---
 
+### T8.5o: A second feedback with different words
+```yaml
+requires:   [T8.5l]
+fixture-ok: yes
+size:       S · mid
+owns:       internal/api/server/
+status:     not-started
+```
+A repeat feedback whose new words read as a different verdict (another fit verdict, `changed_mind`, or a seller verdict) is answered with the recorded one and `accepted: true`, silently dropping the new words; `record_feedback` cannot record `damaged_or_defective`/`not_arrived` at all. The same shape: an `unclear`/`changed_mind` first delivery marks no row, so every resend mints a fresh `fb_` id. Decide and implement: refuse the conflicting repeat honestly, record it as a second distinct feedback, or widen the tool — the response shape is frozen, so this is the orchestrator's call.
+
+**Done when:** a repeat with different words gets a decided, honest answer (not a silent drop); an `unclear` first delivery is idempotent on resend; tests pin both; the gate passes.
+
+---
+
+### T8.5p: Decide the seeded mark on the live-origin ledger rows
+```yaml
+requires:   [T8.5h]
+fixture-ok: yes
+size:       XS · mid
+owns:       testdata/api/, dev-diary/PHASE-8-pivot-layer.md
+status:     not-started
+```
+The T8.5h review note says the boot seed "marks every row it carries", but `blf_2b9d60`/`ev_51c2d8` and `blf_1a5e09`/`ev_9d4c22` are `seeded: false` in the frozen ledger fixtures, and `LoadSeed` copies the mark. Decide whether those live-origin rows should be marked (rule 7 says seeded means marked) or whether `seeded: false` is the deliberate record of their origin, correct the fixtures and the note accordingly, and keep the doc pin byte-exact.
+
+**Done when:** the mark on every frozen ledger row is the recorded decision, the T8.5h note matches, and the gate passes.
+
+---
+
 ## Exit Criteria
 
 - [x] One Lambo process serves every shopper, live (T8.1, T8.1b).
