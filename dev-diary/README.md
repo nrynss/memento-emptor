@@ -167,7 +167,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P5 | 10 / 11 | In progress (T5.8b) |
 | P6 | 1 / 8 | T6.2, T6.8 open; T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
-| P8 | 23 / 34 | In progress (T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.7b) |
+| P8 | 24 / 35 | In progress (T8.2c, T8.5k, T8.5n, T8.5o, T8.5p, T8.5q, T8.5r, T8.5s, T8.5t, T8.5u, T8.5v, T8.5x, T8.7b) |
 | P9 | 27 / 31 | In progress (T9.15, T9.17, T9.20, T9.23, T9.24) |
 | P10 | 4 / 7 | In progress (T10.4, T10.5, T10.6) |
 
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T8.5w: Two corrected beliefs for one brand (done)
+
+**What exists.** `assembleRecall` no longer requires every contradicted belief's inline correction to be the single top-level one: each contradicted belief must carry its own inline correction citing it, and the top-level override must be one of them. The High (rival birth + one correction per belief made every recall for that brand fail with `ErrOverrideMissing`) is reproduced in `two_corrections_test.go` and pinned at the assembler boundary in `invariant_test.go`. No JSON shape, schema or fixture changed — `BeliefView.ContradictedBy` was already per belief — only doc comments now say the top-level correction is the newer when two apply. Rule 4 holds: both beliefs stay contradicted on the ledger; a second recall is stable. Review added the citation check, pinned per-belief precedence, and documented the equal-time tie-break (later recorded wins).
+
+**What surprised.** The P8 review expected a contract change; the assembler's equality check was the whole defect. Two corrections with different sizes now return both honestly rather than refusing, and nothing reconciles the shopper's own contradiction.
+
+**The next agent should not have to work out.** A response list is never needed; the inline field exists. Equal timestamps resolve by insertion order.
 
 ### T4.9: The fixture contest state uses its shopper (done)
 
