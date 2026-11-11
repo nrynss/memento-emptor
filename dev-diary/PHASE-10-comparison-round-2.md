@@ -108,7 +108,7 @@ requires:   [T10.3, T10.6, T9.5, T9.6]
 fixture-ok: no
 size:       M · frontier
 owns:       bench/round2/runs/
-status:     not-started
+status:     claimed:t104-run
 ```
 Every shopper through every arm, two repeats (the freeze's two, not the three this text carried before it), plus the cross-session and cross-agent correction turns for case 4 (agent B is T9.5's agent for arms 3 and 4; for arms 1 and 2 it is the same instrument with no shared conversation). Arm 4 uses the live layer and the frozen population. Per-run token and spend caps as in P5. Budget: $5.00 cumulative. Run one cell first and check its cost.
 
