@@ -113,9 +113,10 @@ model.
 
 Round 2 is a separate run with its own frozen inputs; none of it is folded into
 round 1 above. The full record is
-[bench/round2/README.md](../../../../bench/round2/README.md). Every count below
-links to a committed file under `bench/round2/runs/`: the scores, the summary,
-the seed log, the recall comparison, or the run file it came from.
+[bench/round2/README.md](https://github.com/nrynss/memento-emptor/blob/main/bench/round2/README.md).
+Every count below links its committed file under `bench/round2/runs/` in the
+repository: the scores, the summary, the seed log, the recall comparison, or the
+run file it came from.
 
 - **Eight shoppers, two per case**, each built to separate the arms for a stated
   reason. A case measures only what its two histories carry.
@@ -361,27 +362,27 @@ The exact counts are linked, and each candidate carries its limit.
    extraction's size is a property of the generated record shape, and the model
    and instrument are single.
 
-[scores]: ../../../../bench/round2/runs/r2-scores.json
-[summary]: ../../../../bench/round2/runs/r2-summary.json
-[run-note]: ../../../../bench/round2/runs/RUN-NOTE.md
-[seed-log]: ../../../../bench/round2/runs/r2-seed-log.json
-[recall-compare]: ../../../../bench/round2/runs/r2-recall-compare.json
-[corrections]: ../../../../bench/round2/runs/r2-corrections.json
-[run-a1-new-plain]: ../../../../bench/round2/runs/r2-a1-new-plain-r1-first.json
-[run-a1-corr]: ../../../../bench/round2/runs/r2-a1-corr-belief-r1-correction.json
-[run-a2-crowd-plain]: ../../../../bench/round2/runs/r2-a2-crowd-plain-r1-first.json
-[run-a2-crowd-rival]: ../../../../bench/round2/runs/r2-a2-crowd-rival-r1-first.json
-[run-a2-corr-correction]: ../../../../bench/round2/runs/r2-a2-corr-standing-r1-correction.json
-[run-a2-corr-next]: ../../../../bench/round2/runs/r2-a2-corr-standing-r1-next-session.json
-[run-a3-new-plain]: ../../../../bench/round2/runs/r2-a3-new-plain-r1-first.json
-[run-a3-noisy-up-r1]: ../../../../bench/round2/runs/r2-a3-noisy-up-r1-first.json
-[run-a3-noisy-up-r2]: ../../../../bench/round2/runs/r2-a3-noisy-up-r2-first.json
-[run-a3-crowd-rival]: ../../../../bench/round2/runs/r2-a3-crowd-rival-r1-first.json
-[run-a3-crowd-plain]: ../../../../bench/round2/runs/r2-a3-crowd-plain-r1-first.json
-[run-a4-crowd-rival-r1]: ../../../../bench/round2/runs/r2-a4-crowd-rival-r1-first.json
-[run-a4-crowd-rival-r2]: ../../../../bench/round2/runs/r2-a4-crowd-rival-r2-first.json
-[run-a4-crowd-plain]: ../../../../bench/round2/runs/r2-a4-crowd-plain-r1-first.json
-[run-a4-new-plain-r1]: ../../../../bench/round2/runs/r2-a4-new-plain-r1-first.json
-[run-a4-new-plain-r2]: ../../../../bench/round2/runs/r2-a4-new-plain-r2-first.json
-[run-a4-new-otherbrand-r1]: ../../../../bench/round2/runs/r2-a4-new-otherbrand-r1-first.json
-[run-a4-corr-belief-r2]: ../../../../bench/round2/runs/r2-a4-corr-belief-r2-first.json
+[scores]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-scores.json
+[summary]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-summary.json
+[run-note]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/RUN-NOTE.md
+[seed-log]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-seed-log.json
+[recall-compare]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-recall-compare.json
+[corrections]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-corrections.json
+[run-a1-new-plain]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a1-new-plain-r1-first.json
+[run-a1-corr]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a1-corr-belief-r1-correction.json
+[run-a2-crowd-plain]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a2-crowd-plain-r1-first.json
+[run-a2-crowd-rival]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a2-crowd-rival-r1-first.json
+[run-a2-corr-correction]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a2-corr-standing-r1-correction.json
+[run-a2-corr-next]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a2-corr-standing-r1-next-session.json
+[run-a3-new-plain]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a3-new-plain-r1-first.json
+[run-a3-noisy-up-r1]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a3-noisy-up-r1-first.json
+[run-a3-noisy-up-r2]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a3-noisy-up-r2-first.json
+[run-a3-crowd-rival]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a3-crowd-rival-r1-first.json
+[run-a3-crowd-plain]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a3-crowd-plain-r1-first.json
+[run-a4-crowd-rival-r1]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a4-crowd-rival-r1-first.json
+[run-a4-crowd-rival-r2]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a4-crowd-rival-r2-first.json
+[run-a4-crowd-plain]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a4-crowd-plain-r1-first.json
+[run-a4-new-plain-r1]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a4-new-plain-r1-first.json
+[run-a4-new-plain-r2]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a4-new-plain-r2-first.json
+[run-a4-new-otherbrand-r1]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a4-new-otherbrand-r1-first.json
+[run-a4-corr-belief-r2]: https://github.com/nrynss/memento-emptor/blob/main/bench/round2/runs/r2-a4-corr-belief-r2-first.json

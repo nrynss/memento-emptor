@@ -28,6 +28,10 @@ their source H1 so Starlight's frontmatter title is the only page heading, and
 adds a generated-page note. The copies are git-ignored: `docs/` is the only
 source, and the site cannot drift from it.
 
+The comparison page links every count to its committed file through the
+repository's `main` branch URL, not through a relative path: a relative path
+resolves in a checkout, not on the deployed static site.
+
 The site is not wired into `tools/check.sh`; that file is owned by another task.
 Run its build separately, as above.
 
