@@ -320,7 +320,7 @@
 <section class="judges-section" data-sponsors aria-labelledby="sponsors-heading">
 	<h2 id="sponsors-heading">Sponsors: how we used them, and our feedback</h2>
 	<p class="lede">
-		Five sponsor tools carry the build. Each entry says what it does in Memento Emptor, then what we
+		Six sponsor tools carry the build. Each entry says what it does in Memento Emptor, then what we
 		ran into, from the research records the build was planned on.
 	</p>
 	<ul class="judges-facts judges-sponsors">
@@ -379,6 +379,30 @@
 				</p>
 			</div>
 		</li>
+		<li data-claim data-sponsor="elastic">
+			<span class="judges-tag">Elastic</span>
+			<div>
+				<p>
+					<strong>Used for: the pool.</strong> The fit index holds one structured row per settled
+					purchase, with a salted per-line shopper hash and no identity or free text. Aggregations
+					by line, size, reason and direction, with exact distinct-shopper counts, decide the pool's
+					status: this is what gets a new shopper right on day one. The merchant app reads it
+					through <code>product_fit</code>. Elastic's jina-embeddings-v3 endpoint also embeds Lambo's
+					memory.
+				</p>
+				<p>
+					<strong>Feedback.</strong> Serverless refuses external versioning on the partial
+					<code>_update</code>, so each row is a whole-document write with
+					<code>external_gte</code>. A cold first connection took about 6.9 s against about 236 ms
+					warm, so recall keeps a warm connection and a 20 s timeout. The project is a Vector
+					Database project with an active licence, not a trial, which the trial-status endpoint did
+					not make obvious.
+					<a href={repositoryFile('dev-diary/research/elastic-fit.md')} rel="external"
+						>research/elastic-fit.md</a
+					>.
+				</p>
+			</div>
+		</li>
 		<li data-claim data-sponsor="astropods">
 			<span class="judges-tag">Astropods</span>
 			<div>
@@ -423,8 +447,7 @@
 		</li>
 	</ul>
 	<p class="lede">
-		Also built on: Lambo for graph memory per shopper, Elastic for the pooled fit index, and Jev
-		via OpenRouter to classify reasons.
+		Also built on: Lambo for graph memory per shopper, and Jev via OpenRouter to classify reasons.
 	</p>
 </section>
 

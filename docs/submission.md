@@ -40,7 +40,7 @@ The layer never moves money. Orders, approval and double-buy protection stay in 
 
 ## Built with
 
-Every tool used in the build is below. The sponsor prizes named in [product.md](../product.md) are PayPal + AI, AG Grid, Channel3 and Render. The form's sponsor selection is confirmed at submission.
+Every tool used in the build is below. The sponsor tools selected on the form are AG Grid, Astropods, Channel3, Elastic and Render, alongside the required PayPal and AI.
 
 **PayPal.** The evidence source and the action. The Agent Toolkit's orders tools make the approved sandbox purchase with idempotent request ids. Webhooks deliver captures, refunds and disputes. The layer verifies every delivery before it stores anything. PayPal is sandbox only.
 

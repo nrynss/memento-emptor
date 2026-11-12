@@ -3,7 +3,7 @@ title: Sponsors
 description: "The sponsor tools Memento Emptor is built on, what each one does in the build, and our feedback from using them."
 ---
 
-Five sponsor tools carry the build. Each section says what the tool does in
+Six sponsor tools carry the build. Each section says what the tool does in
 Memento Emptor, then what we ran into while building on it. The feedback comes
 from the research records the build was planned on, linked under each one.
 
@@ -76,6 +76,34 @@ Research: [`dev-diary/research/ag-grid.md`](https://github.com/nrynss/memento-em
 
 Research: [`dev-diary/research/channel3.md`](https://github.com/nrynss/memento-emptor/blob/main/dev-diary/research/channel3.md).
 
+## Elastic
+
+**What it does here: the pool.**
+
+- The pooled fit index, `fit-rows`, holds one structured row per settled
+  purchase. A row carries a salted per-line shopper hash and never a shopper's
+  identity, free text or order detail.
+- Aggregations by product line, size, reason category and direction, with exact
+  distinct-shopper counts (`cardinality`), decide whether a line is Building or
+  Earned. This is what gets a new shopper right on day one.
+- The merchant app reads the same index through `product_fit`, never directly.
+- Elastic's jina-embeddings-v3 inference endpoint also embeds Lambo's memory.
+
+**Feedback.**
+
+- Serverless refuses external versioning on the partial `_update` API, so each
+  row is a whole-document write with `version_type=external_gte`, versioned by
+  the purchase's state.
+- A cold first connection from our services took about 6.9 s, against about
+  236 ms warm, so recall keeps a warm connection and a 20 s timeout.
+- The project is a Vector Database project with an active licence, not a trial.
+  The trial-status endpoint answers 410 in serverless mode, which did not make
+  that obvious.
+- Serverless runs vector indices with source vectors excluded, which changed how
+  Lambo could re-score results.
+
+Research: [`dev-diary/research/elastic-fit.md`](https://github.com/nrynss/memento-emptor/blob/main/dev-diary/research/elastic-fit.md) and [`dev-diary/research/elastic.md`](https://github.com/nrynss/memento-emptor/blob/main/dev-diary/research/elastic.md).
+
 ## Astropods
 
 **What it does here: the agents, and the proof they behaved.**
@@ -129,5 +157,4 @@ Research: [`dev-diary/research/hosting.md`](https://github.com/nrynss/memento-em
 ## Also built on
 
 - **Lambo**: graph memory, one session per shopper.
-- **Elastic**: the pooled fit index.
 - **Jev via OpenRouter**: the reason classifier.
