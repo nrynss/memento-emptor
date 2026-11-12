@@ -165,7 +165,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P3 | 8 / 8 | Done |
 | P4 | 11 / 11 | Done |
 | P5 | 11 / 11 | Done |
-| P6 | 4 / 9 | T6.4–T6.7 the user's; T6.9 front page not started |
+| P6 | 5 / 9 | T6.4–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
 | P9 | 32 / 32 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T6.9: The front page and the way around (done)
+
+**What exists.** The demo's `/` leads with "Right on day one for a new shopper". It gives the new-to-brand count, the limits beside it, and one line on what the layer is. Then it links the judges' page first, the ledger with the seeded mark, the belief view, the merchant app, the repository and the round-2 record. Every page carries a navigation bar: Judges, Ledger, Belief and Merchant. The footer is `product.md`'s opening line. `front-page.test.ts` pins the copy, the links and the guards.
+
+**What surprised.** The worker proved the change in `web/` only and never ran the full gate. It is green at landing. At phone width the header could not fit the brand, four links and the theme button on one row. The review wrapped the navigation onto its own row below 40rem.
+
+**The next agent should not have to work out.** The front page goes live on the next push to `main`, which auto-deploys the demo. That push is the user's call.
 
 ### T6.3: README and submission text (done)
 
