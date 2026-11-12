@@ -153,6 +153,19 @@ Lambo holds the shopper. Elastic holds the pool. Each shopper is one Lambo sessi
 
 The reference agent and the second agent live under `agent/`. They run on Astropods. The merchant app lives under `merchant/`. The ledger app lives under `web/`. The builder docs site lives under `docs-site/`.
 
+## Sponsors we built on
+
+Four sponsor tools carry the build. Each row says what it does here and what we ran into. The full write-up is in [docs-site/src/content/docs/sponsors.md](docs-site/src/content/docs/sponsors.md), and the evidence is in each tool's research file.
+
+| Sponsor | What it does here | Our feedback |
+|---|---|---|
+| **PayPal** | The evidence and the action. Verified webhooks bring in captures, refunds and disputes with no agent involved. Dispute reason codes become classified reasons. The Agent Toolkit's orders tools make the approved sandbox purchase with idempotent request ids. | The webhook event simulator answered 404 on both sandbox hosts, so we drove real events. No API showed a sandbox merchant's home currency. Manual resend worked; we never observed an automatic retry. A refund carries no reason, which is the gap this layer fills. A reason field on refunds would help every agent. [research](dev-diary/research/paypal.md) |
+| **AG Grid** | Both data screens: the shopper's evidence ledger and the merchant app's returns by line, size and reason. Community 36.3.0, light and dark. | About 1.2 MB minified (340 KB gzip), so the ledger loads it lazily. v36 themes use `adoptedStyleSheets`, which jsdom lacks, so theme tests stay structural. Tests must wait for `firstDataRendered`. [research](dev-diary/research/ag-grid.md) |
+| **Channel3** | Real products and buy links for the reference agent. Per-SKU fit labels tell the layer when a new shirt shares a cut with returned ones. | Fit vocabulary is per category (`top-fit`, `footwear-cut`), and SKUs in one line can carry different fit labels, so comparison is per SKU. A normalised cut field would help. [research](dev-diary/research/channel3.md) |
+| **Render** | The hosted demo: one Docker service for the edge, layer, ledger and Lambo hub on a disk, a second for the merchant app, and the public PayPal webhook endpoint. Pushes to `main` deploy automatically. | An env var change does not redeploy on its own. A disk-backed service has no zero-downtime deploy, so each deploy briefly drops webhooks; PayPal's resend and event-id idempotency cover it. [research](dev-diary/research/hosting.md) |
+
+Also built on: Lambo (graph memory per shopper), Elastic (the pooled fit index), Jev via OpenRouter (the reason classifier) and Astropods (both agents and their traces).
+
 ## The comparison
 
 We ran two rounds. Both report counts, never percentages. Both state their limits first. We wrote the shoppers and the hidden answers, so each shows the mechanism on constructed cases, not real-world accuracy.
