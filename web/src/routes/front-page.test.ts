@@ -2,14 +2,20 @@
 // the headline the project chose, states the one count behind it with the
 // limits beside them, and links every surface. Nothing here may make a live
 // read, so a fetch spy stays untouched, and the copy carries no percentage,
-// no verdict, no "earned" and no promise about the future.
+// no verdict, no "earned" and no promise about the future. The layout is
+// mounted too: its navigation bar reaches every route from every page, and
+// it keeps the theme toggle and the footer tagline.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 // @ts-expect-error: deep client entry ships no types; same signature as 'svelte'.
 import { mount, tick, unmount } from '../../node_modules/svelte/src/index-client.js';
 import { resolve } from '$app/paths';
+// The layout's theme store reads window.matchMedia, which jsdom lacks.
+import '$lib/ledger/test-setup';
 import { SEEDED_MARK_LABEL, SEEDED_MARK_TOOLTIP } from '$lib/ledger/rows';
+import { tagline } from '$lib/product';
 import FrontPage from './+page.svelte';
+import Layout from './+layout.svelte';
 import pageSource from './+page.svelte?raw';
 
 const fetchSpy = vi.fn(() => Promise.resolve(new Response('{}')));
@@ -30,6 +36,17 @@ async function render(): Promise<HTMLElement> {
 	const host = document.createElement('div');
 	document.body.appendChild(host);
 	mounted.push({ comp: mount(FrontPage, { target: host }), host });
+	await tick();
+	return host;
+}
+
+async function renderLayout(): Promise<HTMLElement> {
+	vi.stubGlobal('fetch', fetchSpy);
+	const host = document.createElement('div');
+	document.body.appendChild(host);
+	// The layout renders its page through the children snippet; an empty
+	// function stands in for the page body here.
+	mounted.push({ comp: mount(Layout, { target: host, props: { children: () => {} } }), host });
 	await tick();
 	return host;
 }
@@ -135,5 +152,47 @@ describe('the front page', () => {
 		expect(pageSource).not.toMatch(/\S+@\S+/);
 		expect(pageSource).not.toMatch(/\b\d{1,3}(?:\.\d{1,3}){3}\b/);
 		expect(pageSource).not.toMatch(/\/home\//);
+	});
+});
+
+describe('the navigation bar in the layout', () => {
+	it('reaches every route, keeps the theme toggle and the footer tagline', async () => {
+		const host = await renderLayout();
+
+		const nav = host.querySelector('nav.shell-nav');
+		expect(nav).not.toBeNull();
+
+		const brand = host.querySelector('a.shell-brand');
+		expect(brand?.getAttribute('href')).toBe(resolve('/'));
+		expect(brand?.textContent?.trim()).not.toBe('');
+
+		const byText = new Map(
+			[...nav!.querySelectorAll('a')].map((link) => [link.textContent?.trim(), link])
+		);
+		const internal: [string, string][] = [
+			['Judges', resolve('/judges')],
+			['Ledger', resolve('/ledger')],
+			['Belief', resolve('/belief')]
+		];
+		for (const [text, href] of internal) {
+			expect(byText.get(text), text).toBeDefined();
+			expect(byText.get(text)!.getAttribute('href')).toBe(href);
+		}
+
+		const merchant = byText.get('Merchant');
+		expect(merchant).toBeDefined();
+		expect(merchant!.getAttribute('href')).toBe('https://memento-merchant.onrender.com');
+		expect(merchant!.getAttribute('rel')).toBe('external');
+
+		const toggle = host.querySelector('header button[type="button"]');
+		expect(toggle).not.toBeNull();
+		expect(toggle!.textContent?.trim()).not.toBe('');
+
+		expect(host.querySelector('footer')?.textContent?.trim()).toBe(tagline);
+	});
+
+	it('makes no live read when the layout mounts', async () => {
+		await renderLayout();
+		expect(fetchSpy).not.toHaveBeenCalled();
 	});
 });
