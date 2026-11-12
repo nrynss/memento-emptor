@@ -157,6 +157,8 @@ Limits: no external URL was clicked, since the repository is private until T6.5 
 
 One finding, Low, owner: orchestrator. Nothing in the gate builds `docs-site/`, so a broken docs build lands green; wiring it in is an owns extension for `tools/check.sh` plus the matching install in `.github/workflows/ci.yml`, which the site README states without naming an owner.
 
+**Gate wiring (review finding, fixed in place).** The gate did not build `docs-site/`, so a broken docs build could land green. `tools/check.sh` now runs `npm ci --dry-run` and `npm run build` there after the merchant build, and `.github/workflows/ci.yml` installs it; the task's owns line was widened for both files.
+
 ## Exit Criteria
 
 - [ ] Public demo running, and survives a restart (T6.1).
