@@ -84,6 +84,21 @@ describe('the judges page', () => {
 		}
 	});
 
+	it('names each sponsor with its use, feedback and evidence', async () => {
+		const host = await render();
+		const section = host.querySelector('[data-sponsors]');
+		expect(section).not.toBeNull();
+		const sponsors = [...section!.querySelectorAll('[data-sponsor]')].map((el) =>
+			el.getAttribute('data-sponsor')
+		);
+		expect(sponsors).toEqual(['paypal', 'ag-grid', 'channel3', 'render']);
+		for (const entry of section!.querySelectorAll('[data-sponsor]')) {
+			expect(entry.textContent).toContain('Used for');
+			expect(entry.textContent).toContain('Feedback');
+			expect(entry.querySelector('a[href*="dev-diary/research/"]')).not.toBeNull();
+		}
+	});
+
 	it('marks every seeded link with the ledger mark and states the notice', async () => {
 		const host = await render();
 		const seededLinks = [...host.querySelectorAll('a[data-seeded-link]')];

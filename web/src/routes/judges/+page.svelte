@@ -317,6 +317,93 @@
 	</ol>
 </section>
 
+<section class="judges-section" data-sponsors aria-labelledby="sponsors-heading">
+	<h2 id="sponsors-heading">Sponsors: how we used them, and our feedback</h2>
+	<p class="lede">
+		Four sponsor tools carry the build. Each entry says what it does in Memento Emptor, then what we
+		ran into, from the research records the build was planned on.
+	</p>
+	<ul class="judges-facts judges-sponsors">
+		<li data-claim data-sponsor="paypal">
+			<span class="judges-tag">PayPal</span>
+			<div>
+				<p>
+					<strong>Used for: the evidence and the action.</strong> Webhooks for captures, refunds and
+					disputes reach the layer with no agent involved, and each delivery is verified with PayPal
+					before anything is stored. Dispute reason codes become classified reasons. The Agent
+					Toolkit's orders tools make the approved sandbox purchase with idempotent request ids.
+					Sandbox only.
+				</p>
+				<p>
+					<strong>Feedback.</strong> The webhook event simulator answered 404 on both sandbox hosts,
+					so we drove real events instead. No API we had showed a sandbox merchant's home currency,
+					so a currency refusal cost us a replacement account. We saw manual resend work but never
+					observed an automatic retry. And a refund carries no reason: that gap is the reason this
+					layer exists, and a reason field on refunds would help every agent.
+					<a href={repositoryFile('dev-diary/research/paypal.md')} rel="external">research/paypal.md</a>.
+				</p>
+			</div>
+		</li>
+		<li data-claim data-sponsor="ag-grid">
+			<span class="judges-tag">AG Grid</span>
+			<div>
+				<p>
+					<strong>Used for: both data screens.</strong> The shopper's evidence ledger (beliefs, the
+					evidence behind each, status, the seeded mark, contest) and the merchant app's returns by
+					product line, size and reason. Community 36.3.0, themed for light and dark.
+				</p>
+				<p>
+					<strong>Feedback.</strong> The bundle is about 1.2 MB minified (340 KB gzip), so the ledger
+					loads the grid lazily. Version 36 themes apply through <code>adoptedStyleSheets</code>,
+					which jsdom lacks, so theme tests stay structural. Tests have to wait for
+					<code>firstDataRendered</code>, and a zero-width container renders one column.
+					<a href={repositoryFile('dev-diary/research/ag-grid.md')} rel="external">research/ag-grid.md</a>.
+				</p>
+			</div>
+		</li>
+		<li data-claim data-sponsor="channel3">
+			<span class="judges-tag">Channel3</span>
+			<div>
+				<p>
+					<strong>Used for: real products.</strong> The reference agent finds candidate products and
+					variants from real retailers, with buy links. Per-SKU fit labels let the layer tell that a
+					new shirt shares a cut with the ones the shopper returned. The size itself comes from
+					recall, not a size chart.
+				</p>
+				<p>
+					<strong>Feedback.</strong> Fit vocabulary is per category (<code>top-fit</code> for shirts,
+					<code>footwear-cut</code> for shoes), and two SKUs in one product line can carry different
+					fit labels, so comparison has to be per SKU. A normalised cut field across categories would
+					help.
+					<a href={repositoryFile('dev-diary/research/channel3.md')} rel="external">research/channel3.md</a>.
+				</p>
+			</div>
+		</li>
+		<li data-claim data-sponsor="render">
+			<span class="judges-tag">Render</span>
+			<div>
+				<p>
+					<strong>Used for: hosting.</strong> One Docker web service runs the edge, the layer, the
+					ledger app and the Lambo memory hub on a persistent disk. The merchant app is a second
+					service. Render also hosts the public PayPal webhook endpoint, and pushes to
+					<code>main</code> deploy automatically.
+				</p>
+				<p>
+					<strong>Feedback.</strong> An environment variable change does not redeploy on its own,
+					so a new key sat behind the old instance until a manual deploy. A disk-backed service runs
+					one instance with no zero-downtime deploy, so each deploy briefly drops webhooks. PayPal's
+					resend and event-id idempotency cover it.
+					<a href={repositoryFile('dev-diary/research/hosting.md')} rel="external">research/hosting.md</a>.
+				</p>
+			</div>
+		</li>
+	</ul>
+	<p class="lede">
+		Also built on: Lambo for graph memory per shopper, Elastic for the pooled fit index, Jev via
+		OpenRouter to classify reasons, and Astropods for both agents and their traces.
+	</p>
+</section>
+
 <section class="judges-section" aria-labelledby="simulated-heading">
 	<h2 id="simulated-heading">What is simulated and seeded</h2>
 	<ul class="judges-facts">
@@ -796,6 +883,10 @@
 
 	.judges-facts p {
 		margin: 0.35rem 0 0;
+	}
+
+	.judges-sponsors p + p {
+		margin-top: 0.75rem;
 	}
 
 	.judges-round2 {

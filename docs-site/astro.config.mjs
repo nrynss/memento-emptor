@@ -8,7 +8,7 @@ export default defineConfig({
     starlight({
       title: 'Memento Emptor',
       description:
-        'Builder documentation for a memory layer that turns classified payment outcomes into earned beliefs for shopping agents.',
+        'Builder documentation for Memento Emptor, middleware a merchant runs beside its PayPal app to give shopping agents memory of why purchases came back.',
       social: [
         {
           icon: 'github',
@@ -22,6 +22,7 @@ export default defineConfig({
         { label: 'Architecture', slug: 'architecture' },
         { label: 'The demo and evidence', slug: 'demo-and-evidence' },
         { label: 'The comparison', slug: 'comparison' },
+        { label: 'Sponsors', slug: 'sponsors' },
         { label: 'Submission summary', slug: 'submission-summary' },
       ],
     }),
