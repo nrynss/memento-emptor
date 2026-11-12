@@ -194,7 +194,7 @@ requires:   [T6.2]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/+page.svelte, web/src/routes/+layout.svelte, web/src/routes/front-page.test.ts, web/src/lib/product.ts, web/src/lib/product.test.ts
-status:     not-started
+status:     claimed:qoder
 ```
 The hosted demo's `/` is still the scaffold's placeholder: two paragraphs from before the pivot and no link to anything. The ledger, the belief view and the judges' page can only be reached by typing their URL. The merchant app is a separate service. This page is the first thing a judge opens. T6.2's handoff flagged that `/` does not link `/judges`. This task closes that.
 
