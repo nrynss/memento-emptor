@@ -65,4 +65,16 @@
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
+
+	@media (max-width: 40rem) {
+		.shell-header {
+			flex-wrap: wrap;
+		}
+
+		.shell-nav {
+			order: 3;
+			flex-basis: 100%;
+			margin-left: 0;
+		}
+	}
 </style>

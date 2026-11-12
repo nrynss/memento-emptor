@@ -227,6 +227,15 @@ The copy says nothing the pivot retired. No belief is "earned" before it is serv
 
 **The next agent should know.** `resolve()` renders relative hrefs like `./judges` in the prerendered HTML. That is the existing convention, and it resolves under the SPA fallback. `app.css` is untouched. The page and the layout style themselves with scoped style blocks. The push to `main` that deploys this front page stays the user's call.
 
+**Review (orchestrator, before landing).** The two earlier review commits pin the navigation bar in `front-page.test.ts` and pin the footer tagline verbatim against `product.md`'s opening line. The worker had not run the full gate. It is green at the review tip `f8dda39`.
+
+The copy matches the brief:
+- the count and the limits match `product.md` and `bench/round2/README.md`
+- the internal links go through `resolve()`, and the three external links carry `rel="external"`
+- no percentage, no "earned", no verdict and no live read
+
+I looked at the built page in a browser at desktop and phone width. On desktop it renders as intended. At 375 px the header was squeezed onto one row and the theme button wrapped to three lines. That was one fix, inside `owns`: below 40rem the header wraps and the navigation takes its own row, scoped in `+layout.svelte`. `app.css` is untouched. At 375 px the scroll width now equals the viewport. The build is green, and the gate is re-run green with the fix.
+
 ## Exit Criteria
 
 - [ ] Public demo running, and survives a restart (T6.1).
