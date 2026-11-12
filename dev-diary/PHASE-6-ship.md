@@ -64,11 +64,21 @@ requires:   [T6.1, T9.6, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · frontier
 owns:       README.md, docs/submission.md
-status:     claimed:qoder
+status:     in-review
 ```
 The README is written for a developer on PayPal's Agent Toolkit, opening with the description line in product.md. It follows product.md's "How it is consumed": a seller or platform runs the layer beside its PayPal app. It covers how to plug in (keys included), setup a judge can follow, the architecture, and what is simulated and seeded. `docs/submission.md` drafts the form's text: the description; each tool and how it was used; what changed in Lambo during the hackathon, since it is an existing dependency. The README closes with where the product could go next: a network across sellers, as product.md describes it, clearly marked as not built.
 
 **Done when:** a clean clone follows the setup steps to a running system; every sponsor tool's use is described from what was built.
+
+**Handoff (T6.3).**
+
+**What exists.** `README.md`, the builder's guide, and `docs/submission.md`, the Devpost form draft. The README opens with product.md's description line and leads with the chosen headline, "right on day one for a new shopper", with its limits and the portability supporting point. It covers who runs it, the evidence model, plugging in (eleven MCP tools, Bearer auth, the turn pattern), running it (hosted demo, clean-clone gate, local fixture-embedder hub, keys), the architecture, both comparison rounds, what is simulated and seeded, and the network-across-sellers direction marked not built. The submission drafts the tagline, about, how it works, built-with (each tool's use), the Lambo change account, simulated and seeded, try-it, a video placeholder, next, and the licence. Both follow the writing rules: no semicolons or em dashes, simple present, short sentences.
+
+**Proof.** `npm ci` in `web`, `merchant` and `docs-site`, then `./tools/check.sh`: green. Freeze 25 and 116 rows, pincheck 18 declarations, the Go race tests, and all three web builds pass. The two bun agent offline checks skip with their documented message, since their `node_modules` are absent. The hosted demo is the no-setup running system. The local hub run is documented in `deploy/README.md` and needs the pinned Lambo release binary, so it was not re-run here; the gate proves the build and test path.
+
+**What surprised.** The licence disagrees with the brief. `LICENSE` is Apache License 2.0, but T6.5's brief says "the MIT licence visible in the About section". The README and the submission state Apache 2.0 to match the actual file. This is a finding owned by T6.5: reconcile the two before going public, either by changing `LICENSE` to MIT or by correcting the brief. It is the user's legal choice, so T6.3 did not touch `LICENSE`.
+
+**The next agent should know.** T6.4 fills the video link in `docs/submission.md`; the placeholder names it. The docs-site task's resume steps in this phase file fill `submission-summary.md` from these two files; invent nothing. The Lambo account is #236, #237 and #238 fixed by PR #239 in v0.10.1, with #241 open; no Lambo code is written in this repository.
 
 ---
 
