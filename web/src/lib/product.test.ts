@@ -7,7 +7,8 @@ describe('product copy', () => {
 	});
 
 	it('states the promise in one line', () => {
-		expect(tagline).toContain('shopping agents');
+		expect(tagline).toContain('what happened to the money');
+		expect(tagline).toContain('every other shopper');
 		expect(tagline).not.toContain('\n');
 	});
 });

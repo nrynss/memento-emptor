@@ -194,7 +194,7 @@ requires:   [T6.2]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/+page.svelte, web/src/routes/+layout.svelte, web/src/routes/front-page.test.ts, web/src/lib/product.ts, web/src/lib/product.test.ts
-status:     claimed:qoder
+status:     in-review
 ```
 The hosted demo's `/` is still the scaffold's placeholder: two paragraphs from before the pivot and no link to anything. The ledger, the belief view and the judges' page can only be reached by typing their URL. The merchant app is a separate service. This page is the first thing a judge opens. T6.2's handoff flagged that `/` does not link `/judges`. This task closes that.
 
@@ -216,6 +216,16 @@ The copy says nothing the pivot retired. No belief is "earned" before it is serv
 - `front-page.test.ts` pins the headline, the count, the limits sentence, each link, and the guards: no percentage, no "earned", no verdict.
 - `./tools/check.sh` passes.
 - A push to `main` auto-deploys the demo (`autoDeploy: true` in `deploy/render.yaml`). That push is the user's call. The worker reports the built preview, not the live site.
+
+**Handoff (T6.9).**
+
+**What exists.** `/` now leads with the chosen headline, "Right on day one for a new shopper". Under it stands the one round-2 count: on the new-to-brand case arm 4 is 3/4 by the committed scores and 4/4 by hand, and every other arm is 0/4. The limits sit beside the count in product.md's words. The case is constructed so the pool is the only input holding the answer. Two shoppers share one product line. The pool is the seeded population and not live traffic. It shows the mechanism and not real-world accuracy. One line says what the layer is. A "way in" section links every surface. Judges come first, then the ledger with the seeded mark and its tooltip from `$lib/ledger/rows`, the belief view, the merchant app, the repository and the round-2 comparison. The layout carries a nav bar on every page: the brand to `/`, then Judges, Ledger, Belief and Merchant (external). The theme toggle is untouched. The footer tagline is product.md's opening line, held in `product.ts` and pinned by its test.
+
+**Proof.** In `web/`, `npm run check`, `npm run lint`, `npm run test` and `npm run build` all exit 0. 28 test files and 249 tests pass, including the new `front-page.test.ts` and the still-green `judges-page.test.ts`. The build prerenders `/`, `/judges`, `/ledger` and `/belief` plus the `200.html` fallback. `npm run preview` serves all four with status 200, and `/` carries the headline and every link. The three external URLs answer 200. The test pins the headline, the count, the limits sentence, each link's href and `rel`, and the seeded mark. It also pins the guards: no percent sign, no "percent" in the source, no verdict words, no "earned", no future promise, no live read, and no credential or private path in the source. `./tools/check.sh` was not run here. The orchestrator runs the full gate.
+
+**What surprised.** The brief's mount import path `../../../node_modules/svelte/src/index-client.js` is the judges test's depth. `front-page.test.ts` sits one level up in `src/routes/`, so it imports `../../node_modules/...`. Rendered text also wraps across source lines, so two limits assertions match with `\s+` instead of a literal space.
+
+**The next agent should know.** `resolve()` renders relative hrefs like `./judges` in the prerendered HTML. That is the existing convention, and it resolves under the SPA fallback. `app.css` is untouched. The page and the layout style themselves with scoped style blocks. The push to `main` that deploys this front page stays the user's call.
 
 ## Exit Criteria
 

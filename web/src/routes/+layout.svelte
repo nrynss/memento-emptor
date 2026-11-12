@@ -20,11 +20,19 @@
 	function toggle(): void {
 		theme.set(theme.resolved === 'dark' ? 'light' : 'dark');
 	}
+
+	const merchantApp = 'https://memento-merchant.onrender.com';
 </script>
 
 <div class="shell">
 	<header class="shell-header">
 		<a class="shell-brand" href={resolve('/')}>{productName}</a>
+		<nav class="shell-nav" aria-label="Main">
+			<a href={resolve('/judges')}>Judges</a>
+			<a href={resolve('/ledger')}>Ledger</a>
+			<a href={resolve('/belief')}>Belief</a>
+			<a href={merchantApp} rel="external">Merchant</a>
+		</nav>
 		<button type="button" onclick={toggle}>{label}</button>
 	</header>
 
@@ -36,3 +44,25 @@
 		{tagline}
 	</footer>
 </div>
+
+<style>
+	.shell-nav {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.35rem 1rem;
+		margin-left: auto;
+	}
+
+	.shell-nav a {
+		color: var(--dim);
+		font-size: 0.9375rem;
+		text-decoration: none;
+	}
+
+	.shell-nav a:hover {
+		color: var(--text);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+</style>
