@@ -185,6 +185,14 @@ Newest first. What exists, what surprised, and what the next agent should not ha
 
 **The next agent should not have to work out.** The demo auto-deploys on a push to `main`, so pushing is what puts the page live, and that is the user's call. The old copy says beliefs are "earned", which the pivot retired: status is a label, never a gate.
 
+### The repository is public, and the history scan is clean (T6.5, user's to close)
+
+**What exists.** The repository is public at `github.com/nrynss/memento-emptor`, with Apache 2.0 detected from `LICENSE`. The scan read every blob in 764 commits. All eleven keys the code reads, the two sandbox passwords and the merchant email appear zero times. The only email in content is the GitHub noreply address. Home paths appear zero times. The only IPs are `127.0.0.1` and `0.0.0.0`.
+
+**What surprised.** The sandbox shopper email appears once in history, in commit `32f3218`. `6417c20` scrubbed it from the fixtures, so HEAD is clean. The blob stays reachable through that commit. It is a sandbox login, which `product.md` treats as safe to publish, so the switch went ahead.
+
+**The next agent should not have to work out.** T6.5 still requires T6.3, and no root `README.md` exists, so an anonymous visitor sees the file list. The licence is Apache 2.0, settled from `LICENSE` in `ab2622c`. Purging the one historical address needs a history rewrite, and that changes every hash.
+
 ### T6.2: The judges' page states the chosen headline (done)
 
 **What exists.** The round-2 section leads with "right on day one for a new shopper". It carries the counts the pick rests on. Arm 4 is 3/4 by the committed scores and 4/4 by hand. Each other arm is 0/4. The limits sit beside it, as `product.md` records them. Candidate 2 leaves the list and the other three stay as candidates. The test asserts the chosen block, refuses the old wording, and keeps both guards.
