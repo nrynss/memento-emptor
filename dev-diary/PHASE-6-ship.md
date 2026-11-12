@@ -64,7 +64,7 @@ requires:   [T6.1, T9.6, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · frontier
 owns:       README.md, docs/submission.md
-status:     user: T6.3 is the user's
+status:     claimed:qoder
 ```
 The README is written for a developer on PayPal's Agent Toolkit, opening with the description line in product.md. It follows product.md's "How it is consumed": a seller or platform runs the layer beside its PayPal app. It covers how to plug in (keys included), setup a judge can follow, the architecture, and what is simulated and seeded. `docs/submission.md` drafts the form's text: the description; each tool and how it was used; what changed in Lambo during the hackathon, since it is an existing dependency. The README closes with where the product could go next: a network across sellers, as product.md describes it, clearly marked as not built.
 
