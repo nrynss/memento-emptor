@@ -99,7 +99,24 @@ The gate runs the freeze checks, the toolchain pin check, gofmt, vet, the Go tes
 
 ### Run the layer locally
 
-A local run needs no key. The fixture embedder computes vectors in process. Build the image's Go binaries, point `start.sh` at a local app tree, and boot:
+A local run needs no key. The fixture embedder computes vectors in process. It needs the app tree the image builds: the three Go binaries, the pinned Lambo release binary, the web build and the test data. Run the clean-clone steps above first, so `web/build` exists. Then assemble the tree:
+
+```sh
+APP=/tmp/memento-local/app
+mkdir -p "$APP/bin" "$APP/testdata/seed"
+CGO_ENABLED=0 go build -trimpath -o "$APP/bin/memento" ./cmd/memento
+CGO_ENABLED=0 go build -trimpath -o "$APP/bin/edge" ./deploy/edge
+CGO_ENABLED=0 go build -trimpath -o "$APP/bin/seed" ./deploy/seed
+REL=https://github.com/nrynss/lambo/releases/download/v0.10.1/lambo-0.10.1-linux-x86_64
+curl -fsSL -o "$APP/bin/lambo" "$REL"
+echo "$(curl -fsSL "$REL.sha256" | cut -d' ' -f1)  $APP/bin/lambo" | sha256sum -c -
+chmod +x "$APP/bin/lambo"
+cp -r web/build "$APP/web"
+cp -r testdata/api testdata/jev "$APP/testdata/"
+cp -r testdata/seed/population "$APP/testdata/seed/"
+```
+
+Then boot:
 
 ```sh
 APP_DIR=/tmp/memento-local/app LAMBO_DATA_DIR=/tmp/memento-local/data \
@@ -109,7 +126,7 @@ APP_DIR=/tmp/memento-local/app LAMBO_DATA_DIR=/tmp/memento-local/data \
   bash deploy/start.sh
 ```
 
-The salt names the shopper sessions. Any 64-hex value works for a local run. The edge answers `/healthz` and serves the app. The full runbook, including the Docker image and the seeded arc, is in [deploy/README.md](deploy/README.md).
+The salt names the shopper sessions. Any 64-hex value works for a local run. The edge answers `/healthz` on port 18081 and serves the app at `/`. The MCP endpoint answers 401 until a caller sends a key, as on the hosted demo. The full runbook, including the Docker image and the seeded arc, is in [deploy/README.md](deploy/README.md).
 
 ### Keys for a live run
 

@@ -80,6 +80,21 @@ The README is written for a developer on PayPal's Agent Toolkit, opening with th
 
 **The next agent should know.** T6.4 fills the video link in `docs/submission.md`; the placeholder names it. The docs-site task's resume steps in this phase file fill `submission-summary.md` from these two files; invent nothing. The Lambo account is #236, #237 and #238 fixed by PR #239 in v0.10.1, with #241 open; no Lambo code is written in this repository.
 
+**Review (fresh eyes).** I checked the claims against the committed records and code, and against Lambo's issue tracker. These all match:
+- Round 1's 15/15 and 0/15 true recommendations, and wrong-cause errors at 0 in 45 runs.
+- Round 2's 112 turns, the committed and hand-read first-turn counts, wrong-cause errors at 0 in all 112, and the spend.
+- The eleven tools: eight agent calls and three ledger reads.
+- Lambo #236, #237 and #238 fixed by PR #239 in v0.10.1.
+- AG Grid Community 36.3.0, the store-only hub, and Apache 2.0.
+
+I ran a clean clone of the task tip. `npm ci` in `web`, `merchant` and `docs-site`, then `./tools/check.sh`, is green. The two bun agent checks skip with their documented message.
+
+Two fixes, both inside `owns`:
+1. **The local run could not be followed from a clean clone.** The block, run exactly as written, exits 127 on `app/bin/memento: No such file or directory`. The README said to build the binaries and assemble an app tree but gave no command for either. The README now carries the assembly the Dockerfile does: three `go build`s, the pinned Lambo v0.10.1 binary with its sha256 check, the web build and the test data. It then states what a running system answers. Run exactly as written from the clean clone, the corrected block boots: `/healthz` 200, `/` 200, and the MCP endpoint 401 without a key.
+2. **Lambo #241 is not open.** PR #242 closed it, released in Lambo v0.11.0. The submission now says so. It also says the deploy still pins v0.10.1 and restarts the reader when the list of demo shoppers changes, which is still accurate. Moving the pin to v0.11.0 is a separate decision and is not taken here.
+
+The licence finding in the handoff is closed: on `main`, T6.5's text now names Apache 2.0, the licence already in `LICENSE`. No key, account detail or private path is in either file. The Render URLs and the Lambo release URL are public.
+
 ---
 
 ### T6.4: The video ★

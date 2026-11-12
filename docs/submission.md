@@ -74,7 +74,9 @@ Three were fixed upstream in PR #239, released as v0.10.1:
 - **#237**: no calibration row for the Elastic-native embedder. v0.10.1 adds a measured jina-v3 row.
 - **#238**: the recall tier dropped the timeout source from its error. v0.10.1 keeps it.
 
-The deploy pins v0.10.1, verified by sha256. It adopts the native Elastic embedder with the new timeout knobs. One issue stays open: #241, the ledger reader's session allowlist is fixed at startup. We work within it and restart the reader when the list changes.
+The deploy pins v0.10.1, verified by sha256. It adopts the native Elastic embedder with the new timeout knobs.
+
+One more was found by this project and fixed upstream after the pin. **#241**: the ledger reader's session allowlist was fixed at startup, so a shopper created later could not be read. PR #242 fixed it in v0.11.0, with reads by session prefix. The deploy still pins v0.10.1. It works within the old limit and restarts the reader when the list of demo shoppers changes.
 
 ## What is simulated and seeded
 
