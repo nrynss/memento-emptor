@@ -34,7 +34,7 @@ requires:   [T4.3, T6.1, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · mid
 owns:       web/src/routes/judges/
-status:     in-review
+status:     done
 ```
 The first screen is a "For judges: start here" table: the demo, the evidence ledger, the merchant app, the traces, both comparison rounds, and the seeded rows clearly marked. Test credentials for the sandbox, if a judge needs them, are safe to publish and are sandbox-only.
 
@@ -54,7 +54,7 @@ Fixes, all inside `web/src/routes/judges/` and this block. (1) The file comment 
 
 Limits: link re-verification is still the one open Done-when, waiting on T6.1's first green deploy and T6.5; this review made no network call, so every external URL is read from the committed docs and not clicked. The traces row still links the console rather than a deployment page, and `/` still does not link `/judges`, both as the handoff notes say. No finding is left open.
 
-**Headline, after the user's decision (`af9e862`).** `product.md` names the judges' page as one of the three surfaces that lead with the pick, so the round-2 section now states it. `[data-round2-chosen]` carries the headline, the counts it rests on (arm 4 3/4 by the committed scores and 4/4 by hand, 0/4 for each other arm), the limits `product.md` records (the case is constructed, two shoppers share one line, the pool is the seeded population), and three links, `product.md` included. Candidate 2 left the candidate list, so the other three stay as `[data-round2-candidate]`. The test moved with it: it asserts the chosen block and its links, refuses the old "none is chosen here" and "the user picks" wording, keeps the no-percentage and no-verdict guards (the pick is stated as counts and limits, never as a comparative claim), and expects three candidates. `./tools/check.sh` green at this tip, web 27 files / 241 tests; the build still writes `judges.html`. `bench/round2/README.md` is untouched: it keeps its four candidates as the frozen T10.5 record. A clean-browser link check stays open on T6.5.
+**Headline, after the decision (`af9e862`).** `product.md` says the judges' page leads with the pick. The round-2 section now does. `[data-round2-chosen]` carries the headline, its counts and its limits. Arm 4 is 3/4 by the committed scores and 4/4 by hand. Each other arm is 0/4. Three links follow, `product.md` among them. Candidate 2 leaves the list and the other three stay as candidates. The test asserts the chosen block and refuses the old wording. It keeps the no-percentage and no-verdict guards. `./tools/check.sh` is green, web 241 tests. The links point at `main` and go live with T6.5.
 
 ---
 
@@ -134,7 +134,7 @@ requires:   [T6.3]
 fixture-ok: yes
 size:       S · mid
 owns:       docs-site/, tools/check.sh, .github/workflows/ci.yml
-status:     in-review
+status:     done
 ```
 An Astro Starlight site publishing the builder documentation: what the layer is, the interface reference from `docs/interface.md`, the architecture from `docs/architecture.md`, the submission summary, and links to the demo, ledger, and repo. Separate from the ledger web app; static build.
 
@@ -161,7 +161,7 @@ One finding, Low, owner: orchestrator. Nothing in the gate builds `docs-site/`, 
 
 **Gate wiring (review finding, fixed in place).** The gate did not build `docs-site/`, so a broken docs build could land green. `tools/check.sh` now runs `npm ci --dry-run` and `npm run build` there after the merchant build, and `.github/workflows/ci.yml` installs it; the task's owns line was widened for both files.
 
-**Headline (after the decision, `af9e862`).** The comparison page said "None is chosen here", which the user's decision made false. `comparison.md` now opens that section with the pick and the counts it rests on, states the limits beside it, links `product.md` as the decision and `bench/round2/README.md` as the frozen record, and keeps the other three under "The other three candidates" as measured results. No count changed and no evidence link moved. The resume items below are unchanged and are dependencies, not defects: `submission-summary.md` needs T6.3, there is no docs-site deployment, and the front page's repository link needs T6.5. `./tools/check.sh` green.
+**Headline (after the decision, `af9e862`).** The comparison page said "None is chosen here". The decision made that false. `comparison.md` now opens the section with the pick, its counts and its limits. It links `product.md` as the decision. It names `bench/round2/README.md` as the frozen record. The other three sit under their own heading. No count or evidence link moved. The remaining work is T6.3's. `./tools/check.sh` is green.
 
 ## Exit Criteria
 

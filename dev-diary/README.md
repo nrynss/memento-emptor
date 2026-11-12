@@ -165,7 +165,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P3 | 8 / 8 | Done |
 | P4 | 11 / 11 | Done |
 | P5 | 11 / 11 | Done |
-| P6 | 1 / 8 | T6.2 and T6.8 in review (staged); T6.3–T6.7 the user's |
+| P6 | 3 / 8 | T6.3–T6.7 the user's |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
 | P9 | 32 / 32 | Done |
@@ -177,11 +177,27 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
 
+### T6.2: The judges' page states the chosen headline (done)
+
+**What exists.** The round-2 section leads with "right on day one for a new shopper". It carries the counts the pick rests on. Arm 4 is 3/4 by the committed scores and 4/4 by hand. Each other arm is 0/4. The limits sit beside it, as `product.md` records them. Candidate 2 leaves the list and the other three stay as candidates. The test asserts the chosen block, refuses the old wording, and keeps both guards.
+
+**What surprised.** The page's own guard bans `leads` and `proves` inside the round-2 section. So the pick reads as counts and limits, never as a comparative claim.
+
+**The next agent should not have to work out.** `bench/round2/README.md` stays frozen with four unchosen candidates. The page's links point at `main` and resolve once T6.5 makes the repository public.
+
+### T6.8: The docs site states the chosen headline (done)
+
+**What exists.** `comparison.md` opens its round-2 section with the pick, the counts and the limits. It links `product.md` as the decision and the round-2 record as frozen output. The other three sit under their own heading. No count or evidence link moved.
+
+**What surprised.** The site had copied the judges' page's claim that none was chosen. One decision made two published pages wrong.
+
+**The next agent should not have to work out.** The remaining work is T6.3's. `submission-summary.md` fills from the final README. The repository link resolves after T6.5. No docs-site deployment exists.
+
 ### Headline decided after T10.5 (user)
 
 **What exists.** The headline is **right on day one for a new shopper**, round 2's candidate 2. `product.md` records it under Open decisions with the counts it rests on and the limits that go beside it. The P10 exit criteria are ticked.
 
-**What the next agent should not have to work out.** `bench/round2/README.md` keeps its four candidates unchosen. That record is frozen T10.5 output and is not edited for the pick. T6.2's page still lists "Headline candidates (the user picks one — none is chosen here)", and its test pins that heading. T6.2 owns `web/src/routes/judges/` and is in review, so the update goes back to it: lead the round-2 section with the pick and its limits, keep the other three as supporting results, and change the test to match. T6.3 (README) and T6.4 (video) lead with the same line. Portability, the correction reaching the next session and another agent at 4/4 and 4/4, is the supporting point.
+**What the next agent should not have to work out.** `bench/round2/README.md` keeps its four candidates unchosen. That record is frozen T10.5 output and is not edited for the pick. T6.2's page now leads the round-2 section with the pick and its limits. The other three stay as supporting results and the test moved with the page. T6.3 (README) and T6.4 (video) lead with the same line. Portability, the correction reaching the next session and another agent at 4/4 and 4/4, is the supporting point.
 
 ### T5.8b: The two multi-brand cells are re-run and explained (done)
 
