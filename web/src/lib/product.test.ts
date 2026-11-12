@@ -7,8 +7,10 @@ describe('product copy', () => {
 	});
 
 	it('states the promise in one line', () => {
-		expect(tagline).toContain('what happened to the money');
-		expect(tagline).toContain('every other shopper');
+		// product.md's opening line, verbatim.
+		expect(tagline).toBe(
+			"PayPal tells your agent what happened to the money. Memento Emptor tells it why, and what every other shopper's returns already taught."
+		);
 		expect(tagline).not.toContain('\n');
 	});
 });
