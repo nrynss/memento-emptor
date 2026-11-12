@@ -320,7 +320,7 @@
 <section class="judges-section" data-sponsors aria-labelledby="sponsors-heading">
 	<h2 id="sponsors-heading">Sponsors: how we used them, and our feedback</h2>
 	<p class="lede">
-		Four sponsor tools carry the build. Each entry says what it does in Memento Emptor, then what we
+		Five sponsor tools carry the build. Each entry says what it does in Memento Emptor, then what we
 		ran into, from the research records the build was planned on.
 	</p>
 	<ul class="judges-facts judges-sponsors">
@@ -379,6 +379,30 @@
 				</p>
 			</div>
 		</li>
+		<li data-claim data-sponsor="astropods">
+			<span class="judges-tag">Astropods</span>
+			<div>
+				<p>
+					<strong>Used for: the agents, and the proof they behaved.</strong> Both shopping agents
+					run as Astropods deployments: the reference agent, and a second agent with its own prompt.
+					Model calls go through the platform gateway with no personal model key. Every turn's trace
+					shows its tool spans, which is the independent proof an agent recalled before recommending
+					and honoured the correction. Evaluators score traces, and traces of interest become
+					dataset items.
+				</p>
+				<p>
+					<strong>Feedback.</strong> <code>ast agent restart --component</code> rejected both the
+					component and workload names, so we redeployed instead. A deployed spec must declare
+					<code>agent.interfaces.messaging</code>, or the chat host returns 404 behind a sign-in
+					redirect that looks healthy to anonymous checks. A no-login page needs the console's
+					Public switch, since the CLI's access options keep sign-in. Scripted messaging calls need
+					a browser user agent to pass the bot check.
+					<a href={repositoryFile('dev-diary/research/astropods.md')} rel="external"
+						>research/astropods.md</a
+					>.
+				</p>
+			</div>
+		</li>
 		<li data-claim data-sponsor="render">
 			<span class="judges-tag">Render</span>
 			<div>
@@ -399,8 +423,8 @@
 		</li>
 	</ul>
 	<p class="lede">
-		Also built on: Lambo for graph memory per shopper, Elastic for the pooled fit index, Jev via
-		OpenRouter to classify reasons, and Astropods for both agents and their traces.
+		Also built on: Lambo for graph memory per shopper, Elastic for the pooled fit index, and Jev
+		via OpenRouter to classify reasons.
 	</p>
 </section>
 

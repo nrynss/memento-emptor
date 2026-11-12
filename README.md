@@ -155,16 +155,17 @@ The reference agent and the second agent live under `agent/`. They run on Astrop
 
 ## Sponsors we built on
 
-Four sponsor tools carry the build. Each row says what it does here and what we ran into. The full write-up is in [docs-site/src/content/docs/sponsors.md](docs-site/src/content/docs/sponsors.md), and the evidence is in each tool's research file.
+Five sponsor tools carry the build. Each row says what it does here and what we ran into. The full write-up is in [docs-site/src/content/docs/sponsors.md](docs-site/src/content/docs/sponsors.md), and the evidence is in each tool's research file.
 
 | Sponsor | What it does here | Our feedback |
 |---|---|---|
 | **PayPal** | The evidence and the action. Verified webhooks bring in captures, refunds and disputes with no agent involved. Dispute reason codes become classified reasons. The Agent Toolkit's orders tools make the approved sandbox purchase with idempotent request ids. | The webhook event simulator answered 404 on both sandbox hosts, so we drove real events. No API showed a sandbox merchant's home currency. Manual resend worked; we never observed an automatic retry. A refund carries no reason, which is the gap this layer fills. A reason field on refunds would help every agent. [research](dev-diary/research/paypal.md) |
 | **AG Grid** | Both data screens: the shopper's evidence ledger and the merchant app's returns by line, size and reason. Community 36.3.0, light and dark. | About 1.2 MB minified (340 KB gzip), so the ledger loads it lazily. v36 themes use `adoptedStyleSheets`, which jsdom lacks, so theme tests stay structural. Tests must wait for `firstDataRendered`. [research](dev-diary/research/ag-grid.md) |
 | **Channel3** | Real products and buy links for the reference agent. Per-SKU fit labels tell the layer when a new shirt shares a cut with returned ones. | Fit vocabulary is per category (`top-fit`, `footwear-cut`), and SKUs in one line can carry different fit labels, so comparison is per SKU. A normalised cut field would help. [research](dev-diary/research/channel3.md) |
+| **Astropods** | Runs both shopping agents, the reference agent and a second agent with its own prompt, as deployments. Model calls go through the platform gateway with no personal model key. Every turn's trace shows its tool spans, the independent proof an agent recalled before recommending and honoured the correction. Evaluators score traces, and traces of interest become dataset items. | `ast agent restart --component` rejected both the component and workload names, so we redeployed instead. A deployed spec must declare `agent.interfaces.messaging`, or the chat host 404s behind a sign-in that looks healthy to anonymous checks. A no-login page needs the console's Public switch; the CLI's access options keep sign-in. Scripted messaging calls need a browser user agent to pass the bot check. [research](dev-diary/research/astropods.md) |
 | **Render** | The hosted demo: one Docker service for the edge, layer, ledger and Lambo hub on a disk, a second for the merchant app, and the public PayPal webhook endpoint. Pushes to `main` deploy automatically. | An env var change does not redeploy on its own. A disk-backed service has no zero-downtime deploy, so each deploy briefly drops webhooks; PayPal's resend and event-id idempotency cover it. [research](dev-diary/research/hosting.md) |
 
-Also built on: Lambo (graph memory per shopper), Elastic (the pooled fit index), Jev via OpenRouter (the reason classifier) and Astropods (both agents and their traces).
+Also built on: Lambo (graph memory per shopper), Elastic (the pooled fit index) and Jev via OpenRouter (the reason classifier).
 
 ## The comparison
 

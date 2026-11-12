@@ -91,7 +91,7 @@ describe('the judges page', () => {
 		const sponsors = [...section!.querySelectorAll('[data-sponsor]')].map((el) =>
 			el.getAttribute('data-sponsor')
 		);
-		expect(sponsors).toEqual(['paypal', 'ag-grid', 'channel3', 'render']);
+		expect(sponsors).toEqual(['paypal', 'ag-grid', 'channel3', 'astropods', 'render']);
 		for (const entry of section!.querySelectorAll('[data-sponsor]')) {
 			expect(entry.textContent).toContain('Used for');
 			expect(entry.textContent).toContain('Feedback');

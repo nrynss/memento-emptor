@@ -3,7 +3,7 @@ title: Sponsors
 description: "The sponsor tools Memento Emptor is built on, what each one does in the build, and our feedback from using them."
 ---
 
-Four sponsor tools carry the build. Each section says what the tool does in
+Five sponsor tools carry the build. Each section says what the tool does in
 Memento Emptor, then what we ran into while building on it. The feedback comes
 from the research records the build was planned on, linked under each one.
 
@@ -76,6 +76,36 @@ Research: [`dev-diary/research/ag-grid.md`](https://github.com/nrynss/memento-em
 
 Research: [`dev-diary/research/channel3.md`](https://github.com/nrynss/memento-emptor/blob/main/dev-diary/research/channel3.md).
 
+## Astropods
+
+**What it does here: the agents, and the proof they behaved.**
+
+- Both shopping agents run as Astropods deployments: the reference agent, and a
+  second agent with its own prompt that never saw the first conversation.
+- Model calls go through the platform gateway, so no personal model key is
+  needed. The agent key and the Channel3 key arrive from the platform secret
+  store by reference.
+- Every turn's trace shows its tool spans. That is the independent proof an
+  agent called `recall_for_purchase` before recommending, and honoured a
+  correction it did not see made.
+- Evaluators score traces, a human review is saved per trace, and traces of
+  interest become dataset items.
+
+**Feedback.**
+
+- `ast agent restart --component` demanded a component and then rejected both
+  the component name and the full workload name, so we redeployed instead.
+- A deployed spec must declare `agent.interfaces.messaging`. Without it the
+  chat host had no web sidecar and returned 404 behind a sign-in redirect that
+  looked healthy to anonymous checks.
+- A no-login page needs the console's Public switch. The CLI's access options
+  offer signed-in users only.
+- Scripted calls through the messaging proxy need a browser user agent to pass
+  the edge's bot check.
+- The free tier's signup credit covered the whole build.
+
+Research: [`dev-diary/research/astropods.md`](https://github.com/nrynss/memento-emptor/blob/main/dev-diary/research/astropods.md).
+
 ## Render
 
 **What it does here: hosting.**
@@ -101,4 +131,3 @@ Research: [`dev-diary/research/hosting.md`](https://github.com/nrynss/memento-em
 - **Lambo**: graph memory, one session per shopper.
 - **Elastic**: the pooled fit index.
 - **Jev via OpenRouter**: the reason classifier.
-- **Astropods**: both agents and their traces.
