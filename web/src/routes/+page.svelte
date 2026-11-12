@@ -10,6 +10,7 @@
 	const merchantApp = 'https://memento-merchant.onrender.com';
 	const repository = 'https://github.com/nrynss/memento-emptor';
 	const round2Readme = `${repository}/blob/main/bench/round2/README.md`;
+	const docs = 'https://nrynss.github.io/memento-emptor/';
 </script>
 
 <svelte:head>
@@ -63,6 +64,10 @@
 		<li>
 			<a href={merchantApp} rel="external" data-link-merchant>The merchant app</a>
 			<span>The seller's read-only view of why a product line comes back.</span>
+		</li>
+		<li>
+			<a href={docs} rel="external" data-link-docs>The docs</a>
+			<span>The builder docs: what the layer is, the interface, the architecture and the sponsors.</span>
 		</li>
 		<li>
 			<a href={repository} rel="external" data-link-repository>The repository</a>

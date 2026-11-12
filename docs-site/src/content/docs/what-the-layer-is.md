@@ -172,5 +172,5 @@ perfect before its returns arrive.
 - **Keep prose out of the evidence graph.** Beliefs are short and keyed; the
   layer journals the evidence documents per shopper.
 
-The [interface reference](/interface/) says what to call, when, and what comes
-back. The [architecture page](/architecture/) says how the pieces fit.
+The [interface reference](../interface/) says what to call, when, and what comes
+back. The [architecture page](../architecture/) says how the pieces fit.

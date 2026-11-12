@@ -1,39 +1,44 @@
 ---
 title: Submission summary
-description: "Placeholder for the submission text. Nothing on this page is written yet."
+description: "Memento Emptor in one page: what it is, what it shows, where to try it, and what it is built on."
 ---
 
-:::caution[Placeholder, not a submission]
-This page is deliberately empty of submission text. It is waiting for **T6.3
-(README and submission text)**, the repository README and `docs/submission.md`.
-Nothing here is invented or paraphrased in advance.
-:::
+Memento Emptor is middleware a merchant runs beside its PayPal app. PayPal's
+refunds, disputes and captures flow in through verified webhooks. Any shopping
+agent the merchant runs calls it over MCP before it recommends. It learns why
+each purchase came back, so agents stop repeating what the shopper already paid
+for. The layer never moves money.
 
-When T6.3 lands, this page will carry, from those documents and from what was
-actually built:
+## What it shows
 
-- The short description of the project, opening from the product description.
-- Who it is for: a developer building a shopping agent on PayPal's Agent Toolkit,
-  and the seller or platform that runs one layer beside its PayPal app.
-- Each tool and how it was used — PayPal, the evidence graph, the fit index, the
-  reason classifier, the catalog, the agent host, the ledger and the merchant
-  app — with the sponsor names the submission form asks for.
-- What changed in the existing dependency during the hackathon.
-- What is simulated and what is seeded, stated plainly.
-- The final links: the live demo, the evidence ledger, the merchant app, the
-  repository, and the video.
-- Where the product could go next, with a network across sellers marked as not
-  built.
+- **A payment outcome is not a cause.** The outcome, the item and the reason are
+  kept apart. Only a matching reason moves a belief.
+- **Recall never refuses.** It answers in a fixed order: the shopper's own
+  correction, their own fit evidence, fit pooled across shoppers, then what they
+  said in general. Every answer cites its evidence.
+- **The shopper's correction wins at once**, and a second agent that never saw
+  the conversation honours it.
+- **Right on day one for a new shopper.** In round 2's new-to-brand case, only
+  the full layer got the size right: 3 of 4 by the committed scores and 4 of 4 by
+  hand, against 0 of 4 for every other setup. We built that case and the pool is
+  seeded, so it shows the mechanism, not real-world accuracy. See
+  [the comparison](../comparison/).
 
-## What this page is waiting for
+## Try it
 
-| Dependency | What it supplies |
-|---|---|
-| **T6.3** (the user's) | The repository README and `docs/submission.md`: the description, setup, architecture, each tool's use, and what is simulated and seeded |
-| **T6.4** (the user's) | The public video link, under three minutes |
-| **T6.5** (the user's) | The repository made public, with the licence visible in the About section |
+- The hosted demo and judges' start page:
+  [memento-emptor.onrender.com/judges](https://memento-emptor.onrender.com/judges)
+- The merchant app:
+  [memento-merchant.onrender.com](https://memento-merchant.onrender.com)
+- The code, with setup steps a judge can follow:
+  [github.com/nrynss/memento-emptor](https://github.com/nrynss/memento-emptor)
 
-Until then, the [interface reference](/interface/), the
-[architecture page](/architecture/), and [the demo and evidence](/demo-and-evidence/)
-describe the built system from its own documents. None of them is submission
-text, and this page does not pretend to be.
+## Built on
+
+PayPal (sandbox, Agent Toolkit, webhooks) and AI (Jev for reasons, Claude
+Sonnet for the agents), with the sponsor tools AG Grid, Channel3, Elastic,
+Astropods and Render. See [Sponsors](../sponsors/) for how each was used, and
+our feedback.
+
+The full form text is in
+[`docs/submission.md`](https://github.com/nrynss/memento-emptor/blob/main/docs/submission.md).

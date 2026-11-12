@@ -107,4 +107,4 @@ all.
 - `demo/evidence/step2-catalog/` — the catalog turns, with their ordering,
   searches, credit use and the candidate each named.
 - `bench/` — the comparison harness and its committed runs; see
-  [The comparison](/comparison/).
+  [The comparison](../comparison/).

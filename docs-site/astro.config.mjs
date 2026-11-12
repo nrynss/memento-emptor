@@ -4,6 +4,9 @@ import starlight from '@astrojs/starlight';
 // The site is a static build, separate from the ledger web app. It has no
 // server and reads nothing at build time beyond the repository's own files.
 export default defineConfig({
+  // Served by GitHub Pages at https://nrynss.github.io/memento-emptor/.
+  site: 'https://nrynss.github.io',
+  base: '/memento-emptor',
   integrations: [
     starlight({
       title: 'Memento Emptor',

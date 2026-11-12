@@ -102,6 +102,7 @@ describe('the front page', () => {
 
 		const external: [string, string][] = [
 			['[data-link-merchant]', 'https://memento-merchant.onrender.com'],
+			['[data-link-docs]', 'https://nrynss.github.io/memento-emptor/'],
 			['[data-link-repository]', 'https://github.com/nrynss/memento-emptor'],
 			[
 				'[data-link-comparison]',
