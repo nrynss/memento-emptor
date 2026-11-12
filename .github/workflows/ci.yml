@@ -46,6 +46,10 @@ jobs:
         run: npm ci
         working-directory: merchant
 
+      - name: Install docs-site dependencies
+        run: npm ci
+        working-directory: docs-site
+
       - name: Install shopper frontend dependencies
         run: bun install --frozen-lockfile
         working-directory: agent/frontend

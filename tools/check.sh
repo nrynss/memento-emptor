@@ -103,6 +103,18 @@ check_frontend() {
 check_frontend web
 check_frontend merchant
 
+# --- docs-site: the builder documentation site (T6.8) ---
+# A separate static app with its own lockfile and no lint or unit tests of its
+# own; its build is what can break, so the gate builds it. The generated pages
+# come from docs/ through scripts/sync-docs.mjs, so a doc edit is covered here
+# without a second copy to keep in step.
+echo "-- docs-site build"
+cd docs-site
+[ -d node_modules ] || fail "docs-site deps" "docs-site/node_modules is missing; run npm ci in docs-site"
+run_frontend "docs-site lockfile" npm ci --dry-run
+run_frontend "docs-site build" npm run build
+cd ..
+
 # --- agent/frontend: the public shopper page (T9.12) ---
 # The relay's request validation and its 30-turn anonymous spend cap live in
 # agent/frontend/server/relay.ts, which imports nothing, so its tests run on

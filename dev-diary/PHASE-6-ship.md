@@ -131,7 +131,7 @@ After the deadline, submissions are locked. Don't edit the repository, video or 
 requires:   [T6.3]
 fixture-ok: yes
 size:       S · mid
-owns:       docs-site/
+owns:       docs-site/, tools/check.sh, .github/workflows/ci.yml
 status:     in-review
 ```
 An Astro Starlight site publishing the builder documentation: what the layer is, the interface reference from `docs/interface.md`, the architecture from `docs/architecture.md`, the submission summary, and links to the demo, ledger, and repo. Separate from the ledger web app; static build.
