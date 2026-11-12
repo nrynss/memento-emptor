@@ -163,6 +163,35 @@ One finding, Low, owner: orchestrator. Nothing in the gate builds `docs-site/`, 
 
 **Headline (after the decision, `af9e862`).** The comparison page said "None is chosen here". The decision made that false. `comparison.md` now opens the section with the pick, its counts and its limits. It links `product.md` as the decision. It names `bench/round2/README.md` as the frozen record. The other three sit under their own heading. No count or evidence link moved. The remaining work is T6.3's. `./tools/check.sh` is green.
 
+### T6.9: The front page and the way around ★
+```yaml
+requires:   [T6.2]
+fixture-ok: yes
+size:       S · mid
+owns:       web/src/routes/+page.svelte, web/src/routes/+layout.svelte, web/src/routes/front-page.test.ts, web/src/lib/product.ts, web/src/lib/product.test.ts
+status:     not-started
+```
+The hosted demo's `/` is still the scaffold's placeholder: two paragraphs from before the pivot and no link to anything. The ledger, the belief view and the judges' page can only be reached by typing their URL. The merchant app is a separate service. This page is the first thing a judge opens. T6.2's handoff flagged that `/` does not link `/judges`. This task closes that.
+
+The front page leads with the headline in `product.md`: right on day one for a new shopper. Under it go one count from round 2: on the new-to-brand case arm 4 is 3/4 by the committed scores and 4/4 by hand, and every other arm is 0/4. The limits go beside the count, in `product.md`'s words. One line follows saying what the layer is: a memory layer that tells a shopping agent why a purchase came back, and what every other shopper's returns already taught. Then a short way in, one line per surface, each linked:
+- **For judges: start here** (`/judges`), first and most prominent.
+- **The evidence ledger** (`/ledger`), with the seeded mark explained in its words from `$lib/ledger/rows`.
+- **The belief view** (`/belief`).
+- **The merchant app** (its public URL as committed in `deploy/merchant/`).
+- **The repository** and **the comparison** (`bench/round2/README.md` on `main`).
+
+The layout gains a navigation bar on every page: the brand to `/`, then Judges, Ledger, Belief and Merchant. It keeps the theme toggle. The footer's tagline moves to the pivot wording in `product.md`'s opening line. `product.ts` holds that copy, and its test pins it.
+
+The copy says nothing the pivot retired. No belief is "earned" before it is served, because status is a label and never a gate. No percentages, no verdict, and no promise of real-world accuracy, the same guards T6.2's test keeps. The seeded population is called seeded. Internal links go through `resolve()`, and external ones carry `rel="external"` as T6.2 found the lint rule wants. The page imports no transport and makes no live read.
+
+**Done when:**
+- `/` leads with the chosen headline, its count and its limits.
+- `/` links every surface above, and each link resolves in a built preview (`npm run build`, then the edge's SPA fallback, the way `/ledger` and `/judges` are served).
+- Every page shows the navigation bar, and the bar reaches every route.
+- `front-page.test.ts` pins the headline, the count, the limits sentence, each link, and the guards: no percentage, no "earned", no verdict.
+- `./tools/check.sh` passes.
+- A push to `main` auto-deploys the demo (`autoDeploy: true` in `deploy/render.yaml`). That push is the user's call. The worker reports the built preview, not the live site.
+
 ## Exit Criteria
 
 - [ ] Public demo running, and survives a restart (T6.1).
@@ -172,3 +201,4 @@ One finding, Low, owner: orchestrator. Nothing in the gate builds `docs-site/`, 
 - [ ] Submitted (T6.6).
 - [ ] Kept running until winners are announced (T6.7).
 - [ ] Builder docs site live (T6.8).
+- [ ] The hosted demo's front page leads with the headline and links every surface (T6.9).

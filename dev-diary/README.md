@@ -165,7 +165,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P3 | 8 / 8 | Done |
 | P4 | 11 / 11 | Done |
 | P5 | 11 / 11 | Done |
-| P6 | 3 / 8 | T6.3–T6.7 the user's |
+| P6 | 3 / 9 | T6.3–T6.7 the user's; T6.9 front page not started |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
 | P9 | 32 / 32 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T6.9 opened: the front page (user)
+
+**What exists.** The hosted demo's `/` is the scaffold placeholder from the first commit. It has two paragraphs from before the pivot and no link. The layout has no navigation, so the ledger, the belief view and the judges' page are reachable only by URL. T6.9 owns the root page, the layout and the product copy. The page leads with the chosen headline and links every surface, and the layout gets a navigation bar.
+
+**What surprised.** No task ever owned `web/src/routes/+page.svelte` or the layout. T6.2's worker flagged that `/` did not link `/judges` and asked for exactly this task, and it was never opened.
+
+**The next agent should not have to work out.** The demo auto-deploys on a push to `main`, so pushing is what puts the page live, and that is the user's call. The old copy says beliefs are "earned", which the pivot retired: status is a label, never a gate.
 
 ### T6.2: The judges' page states the chosen headline (done)
 
