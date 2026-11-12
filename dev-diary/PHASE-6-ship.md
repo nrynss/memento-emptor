@@ -64,7 +64,7 @@ requires:   [T6.1, T9.6, T9.3d, T10.5]
 fixture-ok: yes
 size:       S · frontier
 owns:       README.md, docs/submission.md
-status:     in-review
+status:     done
 ```
 The README is written for a developer on PayPal's Agent Toolkit, opening with the description line in product.md. It follows product.md's "How it is consumed": a seller or platform runs the layer beside its PayPal app. It covers how to plug in (keys included), setup a judge can follow, the architecture, and what is simulated and seeded. `docs/submission.md` drafts the form's text: the description; each tool and how it was used; what changed in Lambo during the hackathon, since it is an existing dependency. The README closes with where the product could go next: a network across sellers, as product.md describes it, clearly marked as not built.
 
@@ -220,7 +220,7 @@ The copy says nothing the pivot retired. No belief is "earned" before it is serv
 ## Exit Criteria
 
 - [ ] Public demo running, and survives a restart (T6.1).
-- [ ] Judges' page and README complete (T6.2, T6.3).
+- [x] Judges' page and README complete (T6.2, T6.3).
 - [ ] Video public (T6.4).
 - [ ] Repository public with a visible licence (T6.5).
 - [ ] Submitted (T6.6).

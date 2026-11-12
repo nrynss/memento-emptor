@@ -165,7 +165,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P3 | 8 / 8 | Done |
 | P4 | 11 / 11 | Done |
 | P5 | 11 / 11 | Done |
-| P6 | 3 / 9 | T6.3–T6.7 the user's; T6.9 front page not started |
+| P6 | 4 / 9 | T6.4–T6.7 the user's; T6.9 front page not started |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
 | P9 | 32 / 32 | Done |
@@ -176,6 +176,14 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### T6.3: README and submission text (done)
+
+**What exists.** `README.md` is the builder's guide. It opens with the chosen headline and its limits, then covers how the layer is consumed, the evidence model, plugging in, running it, the architecture, both comparison rounds, what is simulated and seeded, and the network across sellers marked not built. `docs/submission.md` is the Devpost form's text. It covers each tool's use and the Lambo account: #236, #237 and #238 fixed in v0.10.1, and #241 fixed in v0.11.0 after the pin. A clean clone builds and passes the gate. It also boots locally with no key: `/healthz` 200, `/` 200, and MCP 401 without a key.
+
+**What surprised.** The local run as first written could not be followed, because the README never said how to build the app tree. The review added the assembly and re-ran it exactly as written. The worker also took Lambo #241 to be open, but v0.11.0 had already fixed it.
+
+**The next agent should not have to work out.** T6.4 fills the video link in `docs/submission.md`. The deploy pins Lambo v0.10.1. Moving to v0.11.0 would let the ledger reader pick up shoppers created after boot without a restart, but that is a deploy change of its own and is not opened here.
 
 ### T6.9 opened: the front page (user)
 
