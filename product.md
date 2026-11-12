@@ -14,7 +14,7 @@ Preferences built only from what people *say* are weak. Payment outcomes alone e
 
 **Pivot (decided 10 Nov).** The comparison (T5.5 to T5.9) showed which half of the original design works. The arm called "raw history" was handed rows the layer had already classified, with reasons, signal strength and write kind, and it scored 15 of 15 and 4 of 4 with no wrong-cause errors. The arm that gated on Earned belief refused instead and scored 0 of 15. So the evidence pipeline works and the per-shopper belief gate, on its own, costs right answers. The product keeps the pipeline, turns the gate into a label, and adds the one thing a single shopper's history cannot have: what other shoppers' classified returns say about the same product.
 
-**Memento Emptor is a memory layer, not an agent** (decided 9 Nov). Any shopping agent plugs into it. Evidence arrives from PayPal; the agent asks what applies before it recommends, and reports what the shopper says. One reference shopping agent exists to demonstrate it.
+**Memento Emptor is middleware: a memory layer, not an agent** (decided 9 Nov; shown as middleware a merchant plugs in beside its PayPal app, decided 12 Nov). Any shopping agent plugs into it. Evidence arrives from PayPal; the agent asks what applies before it recommends, and reports what the shopper says. One reference shopping agent exists to demonstrate it.
 
 **It is for developers building shopping agents on PayPal's Agent Toolkit** (decided 9 Nov). PayPal already knows what happened after every purchase; Memento Emptor turns that into memory for any agent built on the toolkit. The developer adopts it. The shopper benefits, and is the face of the demo.
 

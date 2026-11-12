@@ -16,7 +16,7 @@
 	<title>{productName}</title>
 	<meta
 		name="description"
-		content="A memory layer that tells a shopping agent why a purchase came back, and what every other shopper's returns already taught."
+		content="Middleware for PayPal merchants: a memory layer that tells a shopping agent why a purchase came back, and what every other shopper's returns already taught."
 	/>
 </svelte:head>
 
@@ -37,7 +37,8 @@
 </p>
 
 <p class="lede" data-what>
-	{productName} is a memory layer that tells a shopping agent why a purchase came back, and what
+	{productName} is middleware a merchant runs beside its PayPal app: a memory layer that tells a
+	shopping agent why a purchase came back, and what
 	every other shopper's returns already taught.
 </p>
 

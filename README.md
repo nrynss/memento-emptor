@@ -16,7 +16,7 @@ A correction also travels. It reaches the next session and another agent at 4 of
 
 ## What it is
 
-Memento Emptor is a memory layer for shopping agents. It is not an agent. Any agent built on PayPal's Agent Toolkit plugs into it.
+Memento Emptor is middleware: a memory layer a merchant runs beside its PayPal app. PayPal's refunds, disputes and captures go in. Any shopping agent the merchant runs calls it over MCP before it recommends. It is not an agent. Any agent built on PayPal's Agent Toolkit plugs into it.
 
 Shopping agents start each session with no memory. They repeat mistakes the shopper already paid for. Three returned size-M shirts from a brand that runs small mean nothing to the next session.
 

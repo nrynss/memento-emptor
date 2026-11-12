@@ -3,7 +3,8 @@ title: What the layer is
 description: "A builder's introduction to Memento Emptor: the problem, the evidence model, the two levels of memory, precedence, and the limits."
 ---
 
-Memento Emptor is a memory layer for shopping agents. It is not an agent, a
+Memento Emptor is middleware: a memory layer for shopping agents that a
+merchant runs beside its PayPal app. It is not an agent, a
 storefront, or a payment processor. Any agent built on PayPal's Agent Toolkit
 can call it over MCP, and one reference agent exists to demonstrate it.
 

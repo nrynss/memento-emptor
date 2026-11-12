@@ -36,7 +36,7 @@
 
 <h1>For judges: start here</h1>
 <p class="lede" data-claim>
-	Memento Emptor is a memory layer for shopping agents. A payment outcome is not a cause: the
+	Memento Emptor is middleware: a memory layer a merchant runs beside its PayPal app, for the merchant's shopping agents. A payment outcome is not a cause: the
 	layer keeps the outcome, the item and the reason apart, so a parcel that never arrived never
 	changes a size recommendation. This page is the shortest path through what is built, what to
 	open first, and what is simulated.

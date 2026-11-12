@@ -10,7 +10,7 @@ PayPal tells your agent what happened to the money. Memento Emptor tells it why,
 
 ## About the project
 
-Memento Emptor is a memory layer for shopping agents. It is not an agent. Any agent built on PayPal's Agent Toolkit plugs into it.
+Memento Emptor is middleware: a memory layer a merchant runs beside its PayPal app. PayPal's refunds, disputes and captures go in. Any shopping agent the merchant runs calls it over MCP before it recommends. It is not an agent. Any agent built on PayPal's Agent Toolkit plugs into it.
 
 Shopping agents start each session with no memory. They repeat mistakes the shopper already paid for. A refund alone explains nothing. It says the money came back, not why.
 

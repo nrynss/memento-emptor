@@ -1,7 +1,10 @@
 # The demo, after the pivot
 
-Product.md's demo (steps 0-7) against the hosted services. One shopper,
-one layer, two agents and two read-only apps. The run record is
+Memento Emptor is middleware: a memory layer a merchant runs beside its
+PayPal app. PayPal's events go in, and the merchant's shopping agents
+call it before they recommend. This demo shows that integration end to
+end: product.md's demo (steps 0-7) against the hosted services. One
+shopper, one layer, two agents and two read-only apps. The run record is
 [`RUN-6.md`](RUN-6.md) and its evidence is in [`evidence/run-6/`](evidence/run-6/).
 
 ## What runs where

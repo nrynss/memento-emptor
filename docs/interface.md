@@ -1,6 +1,7 @@
 # Interface
 
-Memento Emptor is a memory layer for shopping agents, not an agent. Your
+Memento Emptor is middleware: a memory layer for shopping agents that a
+merchant runs beside its PayPal app, not an agent. Your
 agent plugs into it: evidence arrives from the payment side without your
 agent doing anything, your agent asks what applies before it recommends,
 and it reports what the shopper says. This document is written for a
