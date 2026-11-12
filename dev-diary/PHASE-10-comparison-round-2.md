@@ -196,6 +196,6 @@ FROZEN: section 3's two affected rows, section 4's table and its blanket "no sho
 
 - [x] Arm 2 gets exactly what the Agent Toolkit returns, and nothing the layer made (T10.1).
 - [x] Round 1 is relabelled honestly (T10.2).
-- [ ] Four fair cases frozen before any arm 3 or 4 run (T10.3).
-- [ ] Every run published and graded (T10.4).
-- [ ] Results as counts, the headline picked by the user (T10.5).
+- [x] Four fair cases frozen before any arm 3 or 4 run (T10.3).
+- [x] Every run published and graded (T10.4).
+- [x] Results as counts, the headline picked by the user (T10.5): right on day one.

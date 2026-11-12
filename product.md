@@ -304,4 +304,7 @@ Assumptions this spec rests on, checked before anything is built on them.
 
 ## Open decisions (pivot, 10 Nov)
 
-- **The headline.** "Right on day one for a new shopper" (the pool), or "the same memory across every agent" (portability). The comparison decides which one holds up; the video leads with that one.
+- ~~**The headline.** "Right on day one for a new shopper" (the pool), or "the same memory across every agent" (portability). The comparison decides which one holds up; the video leads with that one.~~ Decided by the user after T10.5: **right on day one for a new shopper.** It is round 2's candidate 2 in `bench/round2/README.md`. The video, the judges' page and the README lead with it.
+  - **What it rests on.** Only the full layer got the new-to-brand case right. The committed scores give 3/4, and a hand reading gives 4/4. Memento shopper-only scored 0/4 and PayPal history 0/4. No memory refused all four.
+  - **The limits stated beside it.** The case is constructed so that the pool is the only input holding the answer. Two shoppers share one product line. The pool is the seeded population, not live traffic. So it shows the mechanism, not real-world accuracy.
+  - **Portability is the supporting point, not the lead.** A correction carries to the next session and to another agent in both Memento arms: 4/4 and 4/4.

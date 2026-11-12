@@ -177,6 +177,12 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
 
+### Headline decided after T10.5 (user)
+
+**What exists.** The headline is **right on day one for a new shopper**, round 2's candidate 2. `product.md` records it under Open decisions with the counts it rests on and the limits that go beside it. The P10 exit criteria are ticked.
+
+**What the next agent should not have to work out.** `bench/round2/README.md` keeps its four candidates unchosen. That record is frozen T10.5 output and is not edited for the pick. T6.2's page still lists "Headline candidates (the user picks one — none is chosen here)", and its test pins that heading. T6.2 owns `web/src/routes/judges/` and is in review, so the update goes back to it: lead the round-2 section with the pick and its limits, keep the other three as supporting results, and change the test to match. T6.3 (README) and T6.4 (video) lead with the same line. Portability, the correction reaching the next session and another agent at 4/4 and 4/4, is the supporting point.
+
 ### T5.8b: The two multi-brand cells are re-run and explained (done)
 
 **What exists.** `bench/runs/t58b/` holds the two re-run cells in the frozen run schema with the settle note and a pre/post recall probe (belief id, value, status, standing, evidence count, both full responses), plus `scores.json`; the t58 driver owns `-run-prefix` and `-recall-probe`, and tests pin the probe record and the unchanged default shape. The split cell's frozen extractor read M from the returned-item sentence, so the frozen human override records S with its reason; the steady cell needed none. Spend $0.008697 within the $0.40 budget. `bench/README.md` now records the two layer changes the round-1 records predate.
