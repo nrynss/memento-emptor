@@ -26,6 +26,8 @@ for. The layer never moves money.
 
 ## Try it
 
+- The demo video (2:55):
+  [youtube.com/watch?v=N31hivEIdrc](https://www.youtube.com/watch?v=N31hivEIdrc)
 - The hosted demo and judges' start page:
   [memento-emptor.onrender.com/judges](https://memento-emptor.onrender.com/judges)
 - The merchant app:

@@ -4,6 +4,8 @@
 
 *Memento emptor*: "remember, buyer". *Caveat agens*: "let the agent beware".
 
+**Watch** [the demo video](https://www.youtube.com/watch?v=N31hivEIdrc) (2:55) · **Read** [the docs](https://nrynss.github.io/memento-emptor/) · **Try** [the hosted demo](https://memento-emptor.onrender.com/judges)
+
 ## Right on day one for a new shopper
 
 A shopper new to a brand gets a guess from most agents. Memento Emptor answers from the pool. Other buyers' classified returns already say the shirt runs small. The agent sizes up and cites the counts.

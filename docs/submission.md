@@ -98,7 +98,9 @@ A judge can also build from a clean clone. The README has the steps: `npm ci` in
 
 ## Video
 
-Pending T6.4. The video is public, under 3 minutes, and shows the project working end to end. Its link goes here when it exists.
+[https://www.youtube.com/watch?v=N31hivEIdrc](https://www.youtube.com/watch?v=N31hivEIdrc), 2:55. It shows the project working end to end: the problem, the middleware, recall, the correction carrying to a second agent, the new-to-brand result, both screens and the sponsors.
+
+The docs site is at [https://nrynss.github.io/memento-emptor/](https://nrynss.github.io/memento-emptor/).
 
 ## Where it could go next
 

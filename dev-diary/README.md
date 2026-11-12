@@ -165,7 +165,7 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 | P3 | 8 / 8 | Done |
 | P4 | 11 / 11 | Done |
 | P5 | 11 / 11 | Done |
-| P6 | 5 / 9 | T6.4–T6.7 the user's |
+| P6 | 9 / 9 | Done |
 | P7 | 7 / 7 | Done |
 | P8 | 37 / 37 | Done |
 | P9 | 32 / 32 | Done |
@@ -176,6 +176,12 @@ Every task here ships. A task that turns out to be blocked becomes a finding, no
 ## Handoff Log
 
 Newest first. What exists, what surprised, and what the next agent should not have to work out again.
+
+### P6 closed: submitted (user)
+
+**What exists.** The project is submitted. The video is public at `https://www.youtube.com/watch?v=N31hivEIdrc` (2:55, under the 3-minute rule). The repository is public under Apache 2.0. The builder docs are live on GitHub Pages at `https://nrynss.github.io/memento-emptor/`, published by `.github/workflows/docs.yml`. The README, the judges' page and `docs/submission.md` link the video, the docs and the hosted demo. The sponsor sections (PayPal, AG Grid, Channel3, Elastic, Astropods, Render) carry each tool's use and our feedback. Every task in P0 to P10 is done.
+
+**The next agent should not have to work out.** The hackathon rules say not to edit the repository, the video or linked materials after the deadline until winners are announced, and to keep the demo, credentials and credits active until then. T6.7 is closed as a task, but keeping the Render services, the Astropods agents and the Elastic project running is still the standing duty until winners are announced.
 
 ### T6.9: The front page and the way around (done)
 

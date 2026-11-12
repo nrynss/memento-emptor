@@ -41,10 +41,12 @@ describe('the judges page', () => {
 		expect(table).not.toBeNull();
 
 		const rows = [...table!.querySelectorAll('tbody tr')];
-		expect(rows).toHaveLength(8);
+		expect(rows).toHaveLength(10);
 
 		const labels = rows.map((row) => row.querySelector('th')?.textContent?.trim() ?? '');
 		for (const required of [
+			'Video',
+			'Docs',
 			'Hosted demo',
 			'Evidence ledger',
 			'Why view',

@@ -72,6 +72,30 @@
 				</tr>
 			</thead>
 			<tbody>
+				<tr data-row="video">
+					<th scope="row">Video</th>
+					<td>
+						<a href="https://www.youtube.com/watch?v=N31hivEIdrc" rel="external">Watch the demo video</a>
+					</td>
+					<td>
+						Under three minutes: the problem, the middleware, recall, the correction carried to a
+						second agent, the new-to-brand result, both screens and the sponsors.
+					</td>
+					<td><a href={repositoryFile('demo/RUN-6.md')} rel="external">demo/RUN-6.md</a></td>
+				</tr>
+
+				<tr data-row="docs">
+					<th scope="row">Docs</th>
+					<td>
+						<a href="https://nrynss.github.io/memento-emptor/" rel="external">Read the builder docs</a>
+					</td>
+					<td>
+						What the layer is, the interface reference, the architecture, the comparison and the
+						sponsors.
+					</td>
+					<td><a href={repositoryFile('docs-site/README.md')} rel="external">docs-site/README.md</a></td>
+				</tr>
+
 				<tr data-row="demo">
 					<th scope="row">Hosted demo</th>
 					<td>

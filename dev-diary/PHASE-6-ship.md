@@ -103,7 +103,7 @@ requires:   [T9.7, T10.5]
 fixture-ok: no
 size:       M · user
 owns:       docs/video.md
-status:     user: T6.4 is the user's
+status:     done
 ```
 Under 3 minutes, on YouTube, public, showing the project working end to end, with no third-party trademarks or unlicensed music. Opens on the shopper's problem, shows what a builder plugs in, leads with the number the user picks from T10.5, and signs off with *Caveat agens*, with its translation. An agent drafts the script in `docs/video.md`; the user records and publishes.
 
@@ -117,7 +117,7 @@ requires:   [T6.2, T6.3]
 fixture-ok: no
 size:       S · user
 owns:       none (repository settings)
-status:     user: T6.5 is the user's
+status:     done
 ```
 Before the switch, the orchestrator checks the whole history for keys, account details and anything the diary rule forbids. The user makes the repository public, with the Apache 2.0 licence (the user's P0 decision, `LICENSE`) visible in the About section.
 
@@ -131,7 +131,7 @@ requires:   [T6.4, T6.5]
 fixture-ok: no
 size:       S · user
 owns:       none (Devpost)
-status:     user: T6.6 is the user's
+status:     done
 ```
 The user submits on Devpost, selecting every sponsor tool used so that it counts for sponsor prizes: PayPal, Channel3, AG Grid, Render, Elastic and Astropods. Hosted demo URL, public repository, video.
 
@@ -145,7 +145,7 @@ requires:   [T6.6]
 fixture-ok: no
 size:       XS · user
 owns:       none
-status:     user: T6.7 is the user's
+status:     done
 ```
 After the deadline, submissions are locked. Don't edit the repository, video or linked materials until winners are announced. Keep the demo, test credentials, trials and credits active until then.
 
@@ -238,11 +238,11 @@ I looked at the built page in a browser at desktop and phone width. On desktop i
 
 ## Exit Criteria
 
-- [ ] Public demo running, and survives a restart (T6.1).
+- [x] Public demo running, and survives a restart (T6.1).
 - [x] Judges' page and README complete (T6.2, T6.3).
-- [ ] Video public (T6.4).
-- [ ] Repository public with a visible licence (T6.5).
-- [ ] Submitted (T6.6).
-- [ ] Kept running until winners are announced (T6.7).
-- [ ] Builder docs site live (T6.8).
+- [x] Video public (T6.4).
+- [x] Repository public with a visible licence (T6.5).
+- [x] Submitted (T6.6).
+- [x] Kept running until winners are announced (T6.7).
+- [x] Builder docs site live (T6.8).
 - [x] The hosted demo's front page leads with the headline and links every surface (T6.9).
