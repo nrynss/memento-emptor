@@ -319,11 +319,29 @@ turns respectively; both are shown so a reader can see the difference.
 contradiction marks, and which of the rival's returns the belief carries, while
 the answers and the deciding precedence step agree.
 
-### Headline candidates
+### The headline: right on day one for a new shopper
 
-:::note[These are candidates, not a chosen result]
-None is chosen here. Each is a candidate the project can use; the user picks one.
-The exact counts are linked, and each candidate carries its limit.
+The project's headline is **right on day one for a new shopper**. The pool answers
+the new-to-brand case that no shopper's history can:
+[3/4 by the committed scores][scores] ([4/4 by hand][run-a4-new-plain-r1]),
+against [0/4 for Memento shopper-only][scores],
+[0/4 for PayPal history][scores] and [four refusals for no memory][scores].
+Correction carrying to the next session and to another agent,
+[4/4 and 4/4][scores] in both Memento arms, is the supporting point.
+
+What it does not show: case 1 is constructed so the pool is the only input that
+holds the answer, two shoppers share one product line, and the pool is the
+seeded population rather than live traffic. It shows the mechanism, not
+real-world accuracy. The decision and its limits are recorded in
+[product.md](https://github.com/nrynss/memento-emptor/blob/main/product.md), and
+`bench/round2/README.md` keeps its four candidates as the frozen record of the
+run.
+
+### The other three candidates
+
+:::note[These are measured results, not a second choice]
+Each stays a candidate the project could use. The exact counts are linked, and
+each carries its limit.
 :::
 
 1. **The correction crosses sessions and agents for both Memento arms:
@@ -336,14 +354,7 @@ The exact counts are linked, and each candidate carries its limit.
    the deployed second agent would, or that a correction to anything but size
    travels (arm 2's 2/4 is a coincidence: it repeats its own M, right for one
    shopper and wrong for the other).
-2. **The pool answers the new-to-brand case that no shopper's history can:
-   [3/4 by the committed scores][scores] ([4/4 by hand][run-a4-new-plain-r1]),
-   against [0/4 for Memento shopper-only][scores],
-   [0/4 for PayPal history][scores] and [four refusals for no memory][scores].**
-   Case 1 is built so the pool is the only input that holds the answer. Does not
-   prove the pool is right in general: two shoppers on one line, and the pool is
-   the seeded population rather than live traffic.
-3. **Own evidence beats a wrong crowd in both Memento arms:
+2. **Own evidence beats a wrong crowd in both Memento arms:
    [4/4 + 4/4 by hand][run-a3-crowd-rival] ([4/4 + 2/4 committed][scores]),
    where the pool alone points the other way and is wrong.** The runs are the
    two repeats of [r2-a3-crowd-rival][run-a3-crowd-rival],
@@ -355,7 +366,7 @@ The exact counts are linked, and each candidate carries its limit.
    answer is L and wrong. Does not prove the rival-birth threshold on other
    histories: one shopper depends on it, and the pool's "wrong" is constructed,
    not observed.
-4. **PayPal history costs [2.9 times what Memento full costs][summary] and
+3. **PayPal history costs [2.9 times what Memento full costs][summary] and
    answers [4 of 16 first turns against 12 of 16][scores].** The same files give
    [28197 words against 11263][scores]. Proves the input size difference is not
    free in this comparison. Does not prove a general cost ratio: the

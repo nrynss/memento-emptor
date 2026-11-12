@@ -2,8 +2,9 @@
 	// The judges' page: a static guide, never a live read. Every row and every
 	// walkthrough step names the page or the committed record behind it, so a
 	// claim here is one link from its evidence. Round 2 reports T10.5's
-	// committed counts, with the hand reading kept beside them and labelled
-	// as a reading, never substituted for the measurement.
+	// committed counts with the hand reading kept beside them and labelled as a
+	// reading, never substituted for the measurement, and it states the headline
+	// the project chose with the limits that go beside it.
 	//
 	// The repository links are absolute because this page is served from the
 	// demo deployment, not from GitHub. They name the public repository and no
@@ -600,21 +601,29 @@
 		<a href={round2Recall} rel="external">r2-recall-compare.json</a>.
 	</p>
 
-	<h3>Headline candidates (the user picks one — none is chosen here)</h3>
+	<h3>Headline: right on day one for a new shopper</h3>
+	<p data-claim data-round2-chosen>
+		This project's headline is <strong>right on day one for a new shopper</strong>: the pool
+		answers the new-to-brand case that no shopper's history can. Arm 4 is 3/4 by the committed
+		scores and 4/4 by hand, against 0/4 for Memento shopper-only, 0/4 for PayPal history and 0/4
+		for no memory. Stated beside it, the limits: the case is constructed so the pool is the only
+		input holding the answer, two shoppers share one product line, and the pool is the seeded
+		population rather than live traffic. It shows the mechanism, not real-world accuracy.
+		Correction carrying to the next session and to another agent, 4/4 and 4/4 in both Memento
+		arms, is the supporting point.
+		<a href={round2Run('r2-a4-new-plain-r1-first.json')} rel="external"
+			>r2-a4-new-plain-r1-first.json</a
+		>,
+		<a href={round2Scores} rel="external">r2-scores.json</a>,
+		<a href={repositoryFile('product.md')} rel="external">product.md</a>.
+	</p>
+
+	<h3>The other three candidates</h3>
 	<ol class="judges-candidates">
 		<li data-round2-candidate data-claim>
 			<strong>The correction crosses sessions and agents for both Memento arms.</strong> 4/4 in
 			the next session and 4/4 for another agent, against 2/4 and 2/4 for PayPal history and 0/4
 			and 0/4 for no memory.
-			<a href={round2Scores} rel="external">r2-scores.json</a>.
-		</li>
-		<li data-round2-candidate data-claim>
-			<strong>The pool answers the new-to-brand case that no shopper's history can.</strong> Arm 4
-			3/4 by the committed scores and 4/4 by hand, against 0/4 for Memento shopper-only, 0/4 for
-			PayPal history and 0/4 for no memory.
-			<a href={round2Run('r2-a4-new-plain-r1-first.json')} rel="external"
-				>r2-a4-new-plain-r1-first.json</a
-			>,
 			<a href={round2Scores} rel="external">r2-scores.json</a>.
 		</li>
 		<li data-round2-candidate data-claim>

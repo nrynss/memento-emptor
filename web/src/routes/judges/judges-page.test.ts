@@ -1,9 +1,9 @@
 // The judges' page under a real mount. The page is a static guide: the table
 // renders every place to start, every link is an anchor with an href, every
 // claim carries a link to its evidence, the seeded links carry the ledger's
-// own mark, and the round-2 section reports the committed counts with no
-// verdict and no percentage. Nothing here may make a live read, so a fetch
-// spy stays untouched.
+// own mark, and the round-2 section reports the committed counts, states the
+// headline the project chose with its limits, and claims no percentage.
+// Nothing here may make a live read, so a fetch spy stays untouched.
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 // @ts-expect-error: deep client entry ships no types; same signature as 'svelte'.
@@ -100,7 +100,7 @@ describe('the judges page', () => {
 		expect(host.querySelectorAll('[data-simulated-mark]').length).toBeGreaterThanOrEqual(1);
 	});
 
-	it('reports the round-2 counts without choosing a headline', async () => {
+	it('reports the round-2 counts and states the chosen headline with its limits', async () => {
 		const host = await render();
 		const round2 = host.querySelector('[data-round2]');
 		expect(round2).not.toBeNull();
@@ -111,20 +111,34 @@ describe('the judges page', () => {
 		expect(text).toContain('12/16');
 		expect(text).toContain('16/16');
 		expect(text).toContain('$0.789309');
-		expect(text).toContain('Headline candidates');
-		expect(text).toContain('the user picks');
-		expect(text).toContain('none is chosen here');
+		expect(text).toContain('right on day one for a new shopper');
+		expect(text).not.toContain('none is chosen here');
+		expect(text).not.toContain('the user picks');
 
-		// Counts, never percentages; and the page states no verdict and picks
-		// no headline for the user.
+		// Counts, never percentages; and the page states no comparative verdict
+		// about the arms beyond the counts themselves.
 		expect(text).not.toMatch(/%/);
 		expect(text).not.toMatch(
 			/\b(?:better|worse|wins?|winning|ahead|leads?|proves?|matches?|percent|rate|best|winner|selected)\b/i
 		);
 		expect(text).not.toMatch(/\b(?:will|soon|coming|expected|future)\b/i);
 
+		// The headline is stated once, with the counts it rests on, the limits
+		// that go beside it, and a link to its evidence.
+		const chosen = round2!.querySelector('[data-round2-chosen]');
+		expect(chosen).not.toBeNull();
+		const chosenText = chosen!.textContent ?? '';
+		expect(chosenText).toContain('right on day one for a new shopper');
+		expect(chosenText).toContain('3/4');
+		expect(chosenText).toContain('4/4');
+		expect(chosenText).toContain('0/4');
+		expect(chosenText).toContain('constructed');
+		expect(chosenText).toContain('seeded');
+		expect(chosen!.querySelectorAll('a[href]').length).toBeGreaterThanOrEqual(2);
+
+		// The other three stay as measured candidates.
 		const candidates = [...round2!.querySelectorAll('[data-round2-candidate]')];
-		expect(candidates).toHaveLength(4);
+		expect(candidates).toHaveLength(3);
 		for (const candidate of candidates) {
 			expect(candidate.querySelector('a[href]')).not.toBeNull();
 		}
