@@ -94,7 +94,7 @@ size:       S · user
 owns:       none (repository settings)
 status:     user: T6.5 is the user's
 ```
-Before the switch, the orchestrator checks the whole history for keys, account details and anything the diary rule forbids. The user makes the repository public, with the MIT licence visible in the About section.
+Before the switch, the orchestrator checks the whole history for keys, account details and anything the diary rule forbids. The user makes the repository public, with the Apache 2.0 licence (the user's P0 decision, `LICENSE`) visible in the About section.
 
 **Done when:** the repository is public, and the scan's result is in the handoff log.
 
